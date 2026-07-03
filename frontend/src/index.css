@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    /* V3 Enterprise Design System */
+    --color-primary: #97ff00; /* Electric Lime Accent */
+    --color-primary-end: #6cd400; 
+    --color-secondary: #3b82f6; /* Royal Blue */
+    --color-success: #10b981; /* Emerald */
+    --color-warning: #f59e0b; /* Amber */
+    --color-error: #ef4444; /* Ruby */
+    --color-info: #06b6d4; /* Cyan */
+    
+    --color-glass: rgba(255,255,255,0.04);
+    --color-border: rgba(255,255,255,0.08);
+    
+    --text-primary: rgba(255,255,255,0.96);
+    --text-secondary: rgba(255,255,255,0.68);
+    --text-muted: rgba(255,255,255,0.45);
+
+    --radius-sm: 8px;
+    --radius-md: 14px;
+    --radius-lg: 26px;
+
+    --font-family: 'Inter', sans-serif;
+  }
+
+  body {
+    font-family: var(--font-family);
+    @apply text-slate-800 bg-[#f8fafc];
+  }
+}
+
+/* Premium Scrollbar (V3) - Hidden by default, gradient on hover */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+  background: transparent;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 10px;
+}
+*:hover::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.4);
+}
+*:hover::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(148,163,184,0.6), rgba(148,163,184,0.8));
+}
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.animate-shimmer {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Animated Floating Blobs for the Background */
+@keyframes blob1 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(30px, -50px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes blob2 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(-50px, 30px) scale(0.9); }
+  66% { transform: translate(20px, -20px) scale(1.1); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+@keyframes blob3 {
+  0% { transform: translate(0px, 0px) scale(1); }
+  33% { transform: translate(20px, 20px) scale(1.1); }
+  66% { transform: translate(-40px, -30px) scale(0.85); }
+  100% { transform: translate(0px, 0px) scale(1); }
+}
+
+.animate-blob1 { animation: blob1 25s infinite ease-in-out; }
+.animate-blob2 { animation: blob2 32s infinite ease-in-out; }
+.animate-blob3 { animation: blob3 38s infinite ease-in-out; }
+
+/* 5-second shine sweep on active items */
+@keyframes sweep {
+  0% { left: -100%; opacity: 0; }
+  2% { opacity: 0.5; }
+  10% { left: 100%; opacity: 0; }
+  100% { left: 100%; opacity: 0; }
+}
+.animate-sweep {
+  animation: sweep 5s infinite;
+}

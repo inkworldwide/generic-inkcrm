@@ -1,0 +1,177 @@
+import { Router, Request, Response } from 'express';
+import DashboardLayout from '../models/DashboardLayout';
+import ModuleDefinition from '../models/ModuleDefinition';
+import CustomRecord from '../models/CustomRecord';
+import Activity from '../models/Activity';
+import { authenticate } from '../middleware/authMiddleware';
+import { requireTenant } from '../middleware/tenantMiddleware';
+
+const router = Router();
+
+router.use(authenticate);
+router.use(requireTenant);
+
+// 1. Get Dashboard Layout for User
+router.get('/layout', async (req: Request, res: Response): Promise<void> => {
+  try {
+    // Attempt to locate a user-specific dashboard layout
+    let layout = await DashboardLayout.findOne({
+      organizationId: req.organizationId,
+      userId: req.user?.id
+    });
+
+    // Fallback: locate the organization's default dashboard layout
+    if (!layout) {
+      layout = await DashboardLayout.findOne({
+        organizationId: req.organizationId,
+        isDefault: true
+      });
+    }
+
+    res.status(200).json(layout || { widgets: [] });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to retrieve dashboard configuration.' });
+  }
+});
+
+// 2. Save/Update Dashboard Layout
+router.put('/layout', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { widgets } = req.body;
+
+    let layout = await DashboardLayout.findOne({
+      organizationId: req.organizationId,
+      userId: req.user?.id
+    });
+
+    if (layout) {
+      layout.widgets = widgets;
+      await layout.save();
+    } else {
+      layout = await DashboardLayout.create({
+        organizationId: req.organizationId,
+        userId: req.user?.id,
+        name: 'My Dashboard',
+        widgets
+      });
+    }
+
+    res.status(200).json(layout);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update dashboard widgets.' });
+  }
+});
+
+// 3. Fetch Real-time Metadata KPI Counts
+router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId;
+    
+    // Find Lead and Deal Module Definitions
+    const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
+    const dealModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'deals' });
+
+    const statusCounts: Record<string, number> = {};
+    const pipelineData: Record<string, number> = {
+      'Prospecting': 0,
+      'Qualification': 0,
+      'Proposal': 0,
+      'Negotiation': 0,
+      'Closed Won': 0,
+      'Closed Lost': 0
+    };
+
+    let dealStatus = { open: 0, won: 0, lost: 0, pending: 0 };
+    let todayFollowupsCount = 0;
+    let todayFollowupsList: any[] = [];
+
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    if (leadModule) {
+      // 1. Group leads count by status
+      const leadAgg = await CustomRecord.aggregate([
+        { $match: { organizationId: orgId, moduleId: leadModule._id } },
+        { $group: { _id: '$data.status', count: { $sum: 1 } } }
+      ]);
+      
+      leadAgg.forEach(item => {
+        if (item._id) {
+          statusCounts[item._id.toString().toUpperCase()] = item.count;
+        }
+      });
+
+      // 2. Count today's followups
+      const followUpQuery = {
+        organizationId: orgId,
+        moduleId: leadModule._id,
+        $or: [
+          { 'data.followUpDate': { $gte: startOfToday, $lte: endOfToday } },
+          { 'data.followUpDate': { $regex: '^' + startOfToday.toISOString().split('T')[0] } } // string matching fallback
+        ]
+      };
+      
+      todayFollowupsCount = await CustomRecord.countDocuments(followUpQuery);
+      todayFollowupsList = await CustomRecord.find(followUpQuery).limit(5);
+    }
+
+    if (dealModule) {
+      // 3. sum amount grouped by stage for Pipeline
+      const dealAgg = await CustomRecord.aggregate([
+        { $match: { organizationId: orgId, moduleId: dealModule._id } },
+        { $group: { _id: '$data.stage', total: { $sum: { $toDouble: '$data.amount' } } } }
+      ]);
+
+      dealAgg.forEach(item => {
+        if (item._id && pipelineData[item._id] !== undefined) {
+          pipelineData[item._id] = item.total;
+        }
+      });
+
+      // 4. Count Deal Statuses
+      const deals = await CustomRecord.find({ organizationId: orgId, moduleId: dealModule._id });
+      deals.forEach(deal => {
+        const stage = deal.data?.get('stage');
+        if (stage === 'Closed Won') {
+          dealStatus.won++;
+        } else if (stage === 'Closed Lost') {
+          dealStatus.lost++;
+        } else if (stage === 'Negotiation' || stage === 'Proposal') {
+          dealStatus.pending++;
+          dealStatus.open++;
+        } else {
+          dealStatus.open++;
+        }
+      });
+    }
+
+    // 5. Total leads count
+    let totalLeads = 0;
+    if (leadModule) {
+      totalLeads = await CustomRecord.countDocuments({ organizationId: orgId, moduleId: leadModule._id });
+    }
+
+    // 6. Fetch recent activity logs across all records
+    const recentActivities = await Activity.find({ organizationId: orgId })
+      .populate('userId', 'firstName lastName')
+      .sort({ createdAt: -1 })
+      .limit(10);
+
+    res.status(200).json({
+      statusCounts,
+      pipelineData,
+      dealStatus,
+      todayFollowupsCount,
+      todayFollowupsList,
+      totalLeads,
+      recentActivities
+    });
+  } catch (error) {
+    console.error('Metrics Error:', error);
+    res.status(500).json({ error: 'Failed to retrieve dashboard KPI metrics.' });
+  }
+});
+
+export default router;

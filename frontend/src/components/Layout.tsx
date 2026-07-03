@@ -1,0 +1,256 @@
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import api from '../services/api';
+import { useModuleStore } from '../store/moduleStore';
+import { useAuthStore } from '../store/authStore';
+import loginLogo from '../assets/login-logo.png';
+import * as Icons from 'lucide-react';
+import {
+  SidebarItem,
+  SidebarAccordion,
+  SidebarGroup,
+  SidebarSearch,
+  SidebarProfile,
+  cn
+} from './layout/SidebarComponents';
+
+// Dynamic Icon resolver (Required by Dashboard and ModuleView)
+export const DynamicIcon = ({ name, className = 'w-5 h-5' }: { name: string; className?: string }) => {
+  const IconComponent = (Icons as any)[name] || Icons.FileText;
+  return <IconComponent className={className} />;
+};
+
+interface LayoutProps {
+  children: React.ReactNode;
+}
+
+export default function Layout({ children }: LayoutProps) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
+  const { fetchModules } = useModuleStore();
+  const { user } = useAuthStore();
+
+  const { data: leadsData } = useQuery({
+    queryKey: ['sidebar-leads'],
+    queryFn: async () => {
+      try {
+        const res = await api.get('/records/leads', { params: { limit: 100 } });
+        return res.data;
+      } catch (err) {
+        return { records: [] };
+      }
+    },
+    refetchInterval: 5000
+  });
+
+  useEffect(() => {
+    fetchModules();
+    
+    // Global keyboard shortcut for search
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        // focus search input logic
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  return (
+    <div className="min-h-screen relative overflow-hidden bg-[#f1f5f9] dark:bg-[#0f1115] text-slate-800 dark:text-white selection:bg-lime-500/30 selection:text-lime-200">
+      
+      {/* Animated Background Blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full animate-blob1" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-blob2" />
+        <div className="absolute top-[30%] right-[20%] w-[30%] h-[30%] bg-lime-500/10 blur-[100px] rounded-full animate-blob3" />
+        
+        {/* Subtle noise texture */}
+        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
+      </div>
+
+      <div className="relative z-10 flex h-screen p-2 sm:p-5 gap-5">
+        
+        {/* Mobile Backdrop */}
+        <AnimatePresence>
+          {sidebarOpen && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSidebarOpen(false)}
+              className="fixed inset-0 bg-[#0f1115]/60 backdrop-blur-md z-40 lg:hidden"
+            />
+          )}
+        </AnimatePresence>
+
+        {/* Floating Sidebar */}
+        <aside className={cn(
+          "fixed inset-y-2 sm:inset-y-5 left-2 sm:left-5 z-50 lg:relative lg:inset-0",
+          "flex-shrink-0 w-[290px] rounded-[26px] bg-[#0f172a] dark:bg-[#0f1115]/95 border border-[#1e293b] shadow-[0_4px_30px_rgba(0,0,0,0.15)] flex flex-col transition-transform duration-300",
+          sidebarOpen ? "translate-x-0" : "-translate-x-[120%]",
+          "lg:translate-x-0"
+        )}>
+          
+          {/* Logo Area */}
+          <div className="p-6 pb-2">
+            <div className="flex items-center gap-4 p-3 rounded-[18px] bg-white/[0.05] border border-white/[0.08] shadow-[0_10px_40px_rgba(255,170,0,0.15)] relative overflow-hidden group hover:shadow-[0_15px_50px_rgba(255,170,0,0.25)] transition-all duration-500">
+              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="relative w-12 h-12 rounded-[14px] bg-white flex items-center justify-center p-1 shadow-md">
+                <img src={loginLogo} alt="Ink CRM" className="w-full h-full object-contain" style={{ imageRendering: 'crisp-edges' }} />
+              </div>
+              <div className="flex flex-col">
+                <h1 className="text-[28px] font-[800] tracking-tight bg-gradient-to-r from-orange-400 to-amber-300 text-transparent bg-clip-text leading-none">
+                  INK CRM
+                </h1>
+                <span className="text-[11px] font-semibold tracking-[4px] text-white/55 mt-1 uppercase">
+                  Customer Relations
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto custom-scrollbar py-4 px-2 mt-2">
+            <div className="space-y-1 px-3 mt-4">
+              {/* 1. Create Lead */}
+              <SidebarItem to="/modules/leads/new" label="CREATE LEAD" icon={Icons.UserPlus} colorClass="text-emerald-400" />
+              
+              {/* 2. Dashboard */}
+              <SidebarItem to="/" label="DASHBOARD" icon={Icons.LayoutDashboard} colorClass="text-blue-400" />
+
+              {/* 3. Campaign */}
+              <SidebarAccordion label="CAMPAIGN" icon={Icons.Megaphone} colorClass="text-orange-400">
+                <SidebarItem to="/modules/campaigns" label="Campaign" icon={Icons.Target} colorClass="text-orange-400" indent />
+                <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent />
+              </SidebarAccordion>
+
+              {/* 4. Process */}
+              <SidebarAccordion label="PROCESS" icon={Icons.GitMerge} colorClass="text-indigo-400" defaultOpen={true}>
+                <SidebarItem to="/modules/leads" label="All Leads" icon={Icons.Layers} colorClass="text-indigo-400" indent badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} />
+                {(() => {
+                  const statusCategories = [
+                    { label: 'New', icon: Icons.Sparkles, color: 'text-indigo-400' },
+                    { label: 'Hot', icon: Icons.Flame, color: 'text-red-400' },
+                    { label: 'Warm', icon: Icons.Sun, color: 'text-amber-400' },
+                    { label: 'Cedil Pending', icon: Icons.FileWarning, color: 'text-pink-400' },
+                    { label: 'Document Pending', icon: Icons.FileText, color: 'text-teal-400' },
+                    { label: 'Approval Pending', icon: Icons.Clock, color: 'text-orange-400' },
+                    { label: 'Approved', icon: Icons.CheckCircle, color: 'text-green-400' },
+                    { label: 'Disbursed', icon: Icons.Banknote, color: 'text-lime-400' },
+                    { label: 'Rejected', icon: Icons.XOctagon, color: 'text-rose-400' },
+                    { label: 'Followup', icon: Icons.PhoneCall, color: 'text-sky-400' },
+                    { label: 'Dropped', icon: Icons.ArrowDownCircle, color: 'text-red-400' },
+                    { label: 'Pending', icon: Icons.Hourglass, color: 'text-yellow-400' },
+                  ];
+                  const records = leadsData?.records || [];
+                  return statusCategories.map((cat) => {
+                    const count = records.filter((r: any) =>
+                      (r.data?.status || '').toLowerCase() === cat.label.toLowerCase()
+                    ).length;
+                    return (
+                      <SidebarItem
+                        key={cat.label}
+                        to={`/modules/leads?status=${encodeURIComponent(cat.label)}`}
+                        label={cat.label}
+                        icon={cat.icon}
+                        colorClass={cat.color}
+                        indent
+                        badge={count}
+                      />
+                    );
+                  });
+                })()}
+              </SidebarAccordion>
+
+              {/* 5. Security */}
+              <SidebarItem to="/settings?tab=security" label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400" />
+
+              {/* 6. Setting */}
+              <SidebarAccordion label="SETTING" icon={Icons.Settings} colorClass="text-amber-400">
+                <SidebarItem to="/settings?tab=company" label="Company Setting" icon={Icons.Building2} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=role" label="Role" icon={Icons.Shield} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=department" label="Department" icon={Icons.Network} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=product" label="Product" icon={Icons.Package} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=bankmaster" label="Bank Master" icon={Icons.Landmark} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=bankingpartner" label="Banking Partner" icon={Icons.Briefcase} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=users" label="Users" icon={Icons.Users} colorClass="text-amber-400" indent />
+                <SidebarItem to="/settings?tab=status" label="Status" icon={Icons.Tag} colorClass="text-amber-400" indent />
+              </SidebarAccordion>
+            </div>
+          </div>
+
+          <SidebarProfile />
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 rounded-[26px] bg-white shadow-[0_0_40px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col relative border border-white/20">
+          
+          {/* Dashboard Header */}
+          <header className="h-[70px] sm:h-[80px] bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-2 sm:gap-3 mb-1">
+                <button 
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-1.5 -ml-1.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                >
+                  <Icons.Menu className="w-5 h-5" />
+                </button>
+                <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
+                  <Icons.Home className="w-3 h-3 hidden sm:block" />
+                  <span className="hidden sm:block">/</span>
+                  <span>Dashboard</span>
+                </div>
+              </div>
+              <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                Overview
+                <span className="px-2 py-0.5 rounded-full bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
+              </h2>
+            </div>
+
+            <div className="flex items-center gap-5">
+              <div className="flex items-center gap-2 bg-slate-100/80 rounded-full p-1 border border-slate-200/50 shadow-inner">
+                <button className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-white shadow-sm transition-all">
+                  <Icons.Moon className="w-4 h-4" />
+                </button>
+                <button className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-white shadow-sm transition-all relative">
+                  <Icons.Bell className="w-4 h-4" />
+                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+                </button>
+              </div>
+
+              <div className="h-8 w-px bg-slate-200"></div>
+
+              <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full pr-4 transition-colors border border-transparent hover:border-slate-200">
+                <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                  {user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || 'AD' : 'AD'}
+                </div>
+                <div className="hidden sm:block text-left">
+                  <p className="text-sm font-semibold text-slate-700 leading-none">{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User' : 'Admin User'}</p>
+                  <p className="text-[10px] text-slate-400 font-medium mt-1">{user?.email || 'ink@crm.com'}</p>
+                </div>
+                <Icons.ChevronDown className="w-4 h-4 text-slate-400 ml-2" />
+              </div>
+            </div>
+          </header>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.25, ease: "easeOut" }}
+              className="flex-1 overflow-auto bg-[#f8fafc] text-slate-800"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
+        </main>
+      </div>
+    </div>
+  );
+}

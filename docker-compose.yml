@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: inkcrm-mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - inkcrm-network
+
+  backend:
+    build: ./backend
+    container_name: inkcrm-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - PORT=5000
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongodb:27017/inkcrm
+      - JWT_SECRET=super_secret_jwt_access_token_key_12345
+      - JWT_REFRESH_SECRET=super_secret_jwt_refresh_token_key_54321
+      - ALLOWED_ORIGINS=http://localhost,http://localhost:5173
+    depends_on:
+      - mongodb
+    networks:
+      - inkcrm-network
+
+  frontend:
+    build: ./frontend
+    container_name: inkcrm-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+    networks:
+      - inkcrm-network
+
+volumes:
+  mongo-data:
+
+networks:
+  inkcrm-network:
+    driver: bridge
