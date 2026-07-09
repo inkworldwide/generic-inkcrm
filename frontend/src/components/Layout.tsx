@@ -180,6 +180,9 @@ export default function Layout({ children }: LayoutProps) {
                 <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent />
                 <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent />
               </SidebarAccordion>
+
+              {/* 7. Users Management */}
+              <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-500" />
             </div>
           </div>
 

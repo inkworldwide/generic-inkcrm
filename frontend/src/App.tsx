@@ -14,6 +14,7 @@ import RecordForm from './pages/RecordForm';
 import Settings from './pages/Settings';
 import AccessPrivilege from './pages/AccessPrivilege';
 import LeadTransfer from './pages/LeadTransfer';
+import UsersManagement from './pages/UsersManagement';
 import WorkflowsList from './pages/WorkflowsList';
 import ReportsList from './pages/ReportsList';
 import ReportDetails from './pages/ReportDetails';
@@ -135,6 +136,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <LeadTransfer />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/users-management"
+          element={
+            <ProtectedRoute>
+              <UsersManagement />
             </ProtectedRoute>
           }
         />
