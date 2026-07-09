@@ -40,6 +40,9 @@ export interface IUser extends Document {
   failedLoginAttempts: number;
   lastFailedLoginAt?: Date;
   userCode?: string; // Captured unique partner/user code (e.g. PTR--20260709080516)
+  skipFace: boolean; // Bypass biometric face recognition check
+  skipLocation: boolean; // Bypass proximity location check
+  isActive: boolean; // Account status: enabled (true) or disabled (false)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,7 +89,11 @@ const UserSchema = new Schema<IUser>(
     failedLoginAttempts: { type: Number, default: 0 },
     lastFailedLoginAt: { type: Date },
     // Partner code
-    userCode: { type: String, trim: true }
+    userCode: { type: String, trim: true },
+    // Toggles for bypassing face recognition, location verification, and status
+    skipFace: { type: Boolean, default: false },
+    skipLocation: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true }
   },
   { timestamps: true }
 );

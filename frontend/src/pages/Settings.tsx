@@ -5,6 +5,7 @@ import { useModuleStore, FieldDefinition } from '../store/moduleStore';
 import api from '../services/api';
 import * as Icons from 'lucide-react';
 import FaceEnrollment from '../components/FaceEnrollment';
+import { useAuthStore } from '../store/authStore';
 
 const PRESET_COLORS = [
   { name: 'Indigo', rgb: '79 70 229', hex: '#4F46E5' },
@@ -18,6 +19,7 @@ const PRESET_COLORS = [
 const FONTS = ['Inter', 'Outfit', 'Roboto'];
 
 export default function Settings() {
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
@@ -102,6 +104,19 @@ export default function Settings() {
     { id: 'status', label: 'Status', icon: Icons.Tag },
   ];
 
+  const currentUserRole = roles.find(r => r._id === user?.roleId);
+  const isSuperAdmin = currentUserRole?.name === 'Super Admin';
+
+  const visibleTabs = SETTINGS_TABS.filter(tab => {
+    if (tab.id === 'users' || tab.id === 'role' || tab.id === 'security') {
+      return isSuperAdmin;
+    }
+    return true;
+  });
+
+  const isTabRestricted = ['users', 'role', 'security'].includes(currentTab);
+  const hasLoadedRoles = roles.length > 0;
+  const accessDenied = isTabRestricted && hasLoadedRoles && !isSuperAdmin;
   const tabToApiPath: Record<string, string> = {
     department: 'departments',
     product: 'products',
@@ -408,6 +423,25 @@ export default function Settings() {
     }
   };
 
+  const handleToggleUserSetting = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
+    try {
+      await api.put(`/auth/users/${userId}`, { [field]: !currentValue });
+      loadSettingsData();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to update user setting.');
+    }
+  };
+
+  const handleUserRoleChange = async (userId: string, newRoleId: string) => {
+    try {
+      await api.put(`/auth/users/${userId}`, { roleId: newRoleId });
+      alert('Role updated successfully.');
+      loadSettingsData();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to update user role.');
+    }
+  };
+
   // Dynamic Module Record Handlers
   const activeModuleDef = modules.find(m => m.apiPath === tabToApiPath[currentTab]);
 
@@ -496,6 +530,36 @@ export default function Settings() {
     );
   }
 
+  if (accessDenied) {
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+            Settings
+          </h1>
+        </div>
+
+        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center max-w-xl mx-auto space-y-4">
+          <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto text-rose-500">
+            <Icons.ShieldAlert className="w-8 h-8" />
+          </div>
+          <h2 className="text-xl font-bold text-slate-800">Access Denied</h2>
+          <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
+            Only the system's main <strong>Super Admin</strong> is permitted to access the Users, Roles, and Security settings.
+          </p>
+          <button
+            onClick={() => navigate('/settings?tab=company')}
+            style={{ backgroundColor: 'rgb(var(--color-primary))' }}
+            className="text-white px-6 py-2.5 rounded-xl font-semibold text-sm inline-flex items-center gap-2 hover:brightness-105 transition-all shadow-md"
+          >
+            <Icons.ArrowLeft className="w-4 h-4" />
+            Back to Company Settings
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <div>
@@ -507,7 +571,7 @@ export default function Settings() {
       {/* Settings Tabs */}
       <div className="flex overflow-x-auto border-b border-slate-200 hide-scrollbar pb-px">
         <div className="flex gap-6 min-w-max px-1">
-          {SETTINGS_TABS.map(tab => {
+          {visibleTabs.map(tab => {
             const Icon = tab.icon;
             const isActive = currentTab === tab.id;
             return (
@@ -812,38 +876,160 @@ export default function Settings() {
             }} className="btn-primary-premium flex items-center gap-2">
               <Icons.Plus className="w-4 h-4" /> Add User
             </button>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm text-left border-collapse">
+          </div>          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="table-header-premium">
-                  <th className="py-2.5 px-4">Name</th>
-                  <th className="py-2.5 px-4">Email</th>
-                  <th className="py-2.5 px-4">Role</th>
-                  <th className="py-2.5 px-4 text-center w-36">Actions</th>
+                <tr className="border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider h-10">
+                  <th className="py-2 px-4">Employee</th>
+                  <th className="py-2 px-4">ID</th>
+                  <th className="py-2 px-4 text-center">Skip Face</th>
+                  <th className="py-2 px-4 text-center">Skip Location</th>
+                  <th className="py-2 px-4 text-center">Account Status</th>
+                  <th className="py-2 px-4">Role</th>
+                  <th className="py-2 px-4 text-center w-40">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-150">
+              <tbody className="divide-y divide-slate-100">
                 {users.map(u => (
-                  <tr key={u._id} className="hover:bg-slate-50/50 transition-colors h-11">
-                    <td className="px-4 py-2 font-semibold text-slate-700">{u.firstName} {u.lastName}</td>
-                    <td className="px-4 py-2 text-slate-900 font-semibold">{u.email}</td>
+                  <tr key={u._id} className="hover:bg-slate-50/50 transition-colors h-14">
+                    {/* Employee Profile Card */}
+                    <td className="px-4 py-2 font-semibold text-slate-700">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 uppercase text-sm select-none">
+                          {u.firstName ? u.firstName[0] : (u.email ? u.email[0] : 'U')}
+                        </div>
+                        <div className="text-left">
+                          <div className="font-bold text-slate-800 text-sm leading-tight">{u.firstName} {u.lastName}</div>
+                          <div className="text-xs text-slate-400 font-normal mt-0.5">{u.email} • {u.roleId?.name || 'No Role'}</div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Unique ID / Code */}
                     <td className="px-4 py-2">
-                      <span className="bg-slate-100 text-xs px-2 py-1 rounded-xl font-bold text-slate-800 border border-slate-200">
-                        {u.roleId?.name || 'No Role'}
+                      <span className="font-mono text-xs font-semibold bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-slate-600">
+                        {u.userCode || 'N/A'}
                       </span>
                     </td>
-                    <td className="px-4 py-2 text-center flex justify-center gap-3">
-                      <button onClick={() => handleEditUser(u)} className="btn-edit-premium" title="Edit User"><Icons.SquarePen className="w-4 h-4" /></button>
-                      <button onClick={() => handleDeleteUser(u._id)} className="btn-delete-premium" title="Remove User"><Icons.Trash className="w-4 h-4" /></button>
+
+                    {/* Skip Face Toggle */}
+                    <td className="px-4 py-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleUserSetting(u._id, 'skipFace', u.skipFace || false)}
+                        className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          u.skipFace ? 'bg-emerald-500' : 'bg-slate-200'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            u.skipFace ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </td>
+
+                    {/* Skip Location Toggle */}
+                    <td className="px-4 py-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => handleToggleUserSetting(u._id, 'skipLocation', u.skipLocation || false)}
+                        className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          u.skipLocation ? 'bg-emerald-500' : 'bg-slate-200'
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                            u.skipLocation ? 'translate-x-5' : 'translate-x-0'
+                          }`}
+                        />
+                      </button>
+                    </td>
+
+                    {/* Account Status Enable/Disable Toggle */}
+                    <td className="px-4 py-2 text-center">
+                      <div className="flex flex-col items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleUserSetting(u._id, 'isActive', u.isActive !== false)}
+                          className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            u.isActive !== false ? 'bg-indigo-600' : 'bg-slate-200'
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              u.isActive !== false ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                        <span className={`text-[8px] font-bold ${u.isActive !== false ? 'text-indigo-650' : 'text-slate-400'}`}>
+                          {u.isActive !== false ? 'ENABLED' : 'DISABLED'}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Dropdown Role Selector */}
+                    <td className="px-4 py-2">
+                      <select
+                        value={u.roleId?._id || ''}
+                        onChange={(e) => handleUserRoleChange(u._id, e.target.value)}
+                        className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                      >
+                        {roles.map((r) => (
+                          <option key={r._id} value={r._id}>
+                            {r.name}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+
+                    {/* Action Buttons */}
+                    <td className="px-4 py-2 text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleEditUser(u)}
+                          className="p-1 rounded hover:bg-slate-100 text-slate-500 hover:text-indigo-600 transition-colors"
+                          title="Edit User"
+                        >
+                          <Icons.Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors"
+                          title="Schedule"
+                        >
+                          <Icons.Calendar className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors"
+                          title="Settings"
+                        >
+                          <Icons.Settings className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          className="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors"
+                          title="Keys"
+                        >
+                          <Icons.Key className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteUser(u._id)}
+                          className="p-1 rounded hover:bg-rose-50 text-slate-450 hover:text-rose-600 transition-colors"
+                          title="Remove User"
+                        >
+                          <Icons.Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-
           {/* User Add/Edit Modal */}
           {userModalOpen && (
             <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">

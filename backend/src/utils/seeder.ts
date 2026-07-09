@@ -141,6 +141,14 @@ async function seed() {
     permissions: createPermissions(['students', 'courses'])
   });
 
+  const teacherRole = await Role.create({
+    organizationId: schoolOrg._id,
+    name: 'Teacher',
+    description: 'Faculty members',
+    isSystem: false,
+    permissions: createPermissions(['students', 'courses'])
+  });
+
   // Hospital Roles
   const hospitalAdminRole = await Role.create({
     organizationId: hospitalOrg._id,
@@ -184,6 +192,63 @@ async function seed() {
     passwordHash,
     isVerified: true,
     twoFactor: { enabled: false }
+  });
+
+  // Seed standard Teachers matching user screenshot
+  await User.create({
+    organizationId: schoolOrg._id,
+    roleId: teacherRole._id,
+    firstName: 'Teacher',
+    lastName: 'Suma',
+    email: 'suma@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'TCH-SUMA',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: schoolOrg._id,
+    roleId: teacherRole._id,
+    firstName: 'Priya',
+    lastName: 'Sharma',
+    email: 'priya@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'TCH-PRIYA',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: schoolOrg._id,
+    roleId: teacherRole._id,
+    firstName: 'Sunita',
+    lastName: 'Devi',
+    email: 'sunita@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'TCH-SUNITA',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: schoolOrg._id,
+    roleId: teacherRole._id,
+    firstName: 'Ankit',
+    lastName: 'Verma',
+    email: 'ankit@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'TCH-ANKIT',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
   });
 
   const hospitalAdmin = await User.create({

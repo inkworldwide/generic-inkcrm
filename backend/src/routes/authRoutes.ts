@@ -177,18 +177,21 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       res.status(400).json({ error: 'Email and password are required.' });
       return;
     }
-
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      // Generic message — do not reveal account existence
       res.status(401).json({ error: 'Invalid email or password.' });
+      return;
+    }
+
+    // ── Check account status ──────────────────────────────────────────────────
+    if (user.isActive === false) {
+      res.status(403).json({ error: 'Login denied: Your account has been disabled. Please contact your administrator.' });
       return;
     }
 
     // ── Step 1: Password verification ────────────────────────────────────────
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
-      // Audit: track consecutive failures
       user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
       user.lastFailedLoginAt = new Date();
       await user.save();
@@ -207,9 +210,8 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     const hasRegisteredLocation = user.registrationLocation?.latitude !== undefined && 
                                   user.registrationLocation?.longitude !== undefined;
 
-    if (hasRegisteredLocation) {
+    if (hasRegisteredLocation && !user.skipLocation) {
       if (typeof latitude !== 'number' || typeof longitude !== 'number') {
-        // Location is required but not provided yet — return challenge
         res.status(200).json({
           locationRequired: true,
           message: 'Location verification is required for this account.'
@@ -245,7 +247,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     await user.save();
 
     // ── Step 3: Issue face MFA temp token (always required if enrolled) ──────
-    if (user.faceRecognition?.enabled && user.faceRecognition.encryptedEmbedding) {
+    if (user.faceRecognition?.enabled && user.faceRecognition.encryptedEmbedding && !user.skipFace) {
       let isMock = false;
       try {
         const storedString = decrypt(user.faceRecognition.encryptedEmbedding);
@@ -786,10 +788,16 @@ router.get('/users', authenticate, async (req: Request, res: Response): Promise<
     res.status(500).json({ error: 'Failed to retrieve users.' });
   }
 });
-
-// 9. Add User
+// 9. Add User (Super Admin only)
 router.post('/users', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
+    const requester = await User.findById((req as any).user.id).populate('roleId');
+    const requesterRole = (requester?.roleId as any)?.name;
+    if (requesterRole !== 'Super Admin') {
+      res.status(403).json({ error: 'Access denied: Only Super Admin can create users.' });
+      return;
+    }
+
     const { email, password, firstName, lastName, roleId } = req.body;
     if (!email || !password || !firstName || !lastName || !roleId) {
       res.status(400).json({ error: 'All fields are required.' });
@@ -801,6 +809,19 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       res.status(400).json({ error: 'Email already registered.' });
       return;
     }
+
+    // Auto-generate userCode (matching ID column in screen, e.g. TCH-SUMA)
+    const selectedRole = await Role.findById(roleId);
+    let rolePrefix = 'USR';
+    if (selectedRole?.name === 'Teacher') {
+      rolePrefix = 'TCH';
+    } else if (selectedRole?.name === 'Super Admin') {
+      rolePrefix = 'ADM';
+    } else if (selectedRole?.name) {
+      rolePrefix = selectedRole.name.slice(0, 3).toUpperCase();
+    }
+    const cleanFirstName = firstName.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    const userCode = `${rolePrefix}-${cleanFirstName}`;
     
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = await User.create({
@@ -810,7 +831,11 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       lastName,
       email: email.toLowerCase(),
       passwordHash,
-      isVerified: true
+      isVerified: true,
+      userCode,
+      skipFace: false,
+      skipLocation: false,
+      isActive: true
     });
     
     res.status(201).json(newUser);
@@ -819,20 +844,43 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
   }
 });
 
-// 10. Update User
+// 10. Update User (Super Admin only)
 router.put('/users/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { firstName, lastName, roleId, email } = req.body;
+    const requester = await User.findById((req as any).user.id).populate('roleId');
+    const requesterRole = (requester?.roleId as any)?.name;
+    if (requesterRole !== 'Super Admin') {
+      res.status(403).json({ error: 'Access denied: Only Super Admin can modify users.' });
+      return;
+    }
+
+    const { firstName, lastName, roleId, email, skipFace, skipLocation, isActive } = req.body;
     const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
       return;
     }
     
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (roleId) user.roleId = roleId;
-    if (email) user.email = email.toLowerCase();
+    if (firstName !== undefined) user.firstName = firstName;
+    if (lastName !== undefined) user.lastName = lastName;
+    if (roleId !== undefined) {
+      user.roleId = roleId;
+      const selectedRole = await Role.findById(roleId);
+      let rolePrefix = 'USR';
+      if (selectedRole?.name === 'Teacher') {
+        rolePrefix = 'TCH';
+      } else if (selectedRole?.name === 'Super Admin') {
+        rolePrefix = 'ADM';
+      } else if (selectedRole?.name) {
+        rolePrefix = selectedRole.name.slice(0, 3).toUpperCase();
+      }
+      const cleanFirstName = (firstName || user.firstName).trim().toUpperCase().replace(/[^A-Z]/g, '');
+      user.userCode = `${rolePrefix}-${cleanFirstName}`;
+    }
+    if (email !== undefined) user.email = email.toLowerCase();
+    if (skipFace !== undefined) user.skipFace = skipFace;
+    if (skipLocation !== undefined) user.skipLocation = skipLocation;
+    if (isActive !== undefined) user.isActive = isActive;
     
     await user.save();
     res.status(200).json(user);
@@ -841,9 +889,16 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
   }
 });
 
-// 11. Delete User
+// 11. Delete User (Super Admin only)
 router.delete('/users/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
+    const requester = await User.findById((req as any).user.id).populate('roleId');
+    const requesterRole = (requester?.roleId as any)?.name;
+    if (requesterRole !== 'Super Admin') {
+      res.status(403).json({ error: 'Access denied: Only Super Admin can delete users.' });
+      return;
+    }
+
     const user = await User.findOneAndDelete({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
@@ -854,5 +909,4 @@ router.delete('/users/:id', authenticate, async (req: Request, res: Response): P
     res.status(500).json({ error: 'Failed to delete user.' });
   }
 });
-
 export default router;
