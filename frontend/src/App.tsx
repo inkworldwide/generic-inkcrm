@@ -12,6 +12,8 @@ import Dashboard from './pages/Dashboard';
 import ModuleView from './pages/ModuleView';
 import RecordForm from './pages/RecordForm';
 import Settings from './pages/Settings';
+import AccessPrivilege from './pages/AccessPrivilege';
+import LeadTransfer from './pages/LeadTransfer';
 import WorkflowsList from './pages/WorkflowsList';
 import ReportsList from './pages/ReportsList';
 import ReportDetails from './pages/ReportDetails';
@@ -117,6 +119,22 @@ export default function App() {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/access-privilege"
+          element={
+            <ProtectedRoute>
+              <AccessPrivilege />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lead-transfer"
+          element={
+            <ProtectedRoute>
+              <LeadTransfer />
             </ProtectedRoute>
           }
         />

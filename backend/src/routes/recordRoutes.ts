@@ -500,4 +500,61 @@ router.delete('/:apiPath/:id', async (req: Request, res: Response): Promise<void
   }
 });
 
+// Transfer leads between agents
+router.post('/transfer/leads', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { fromAgentId, fromAgentName, toAgentId, toAgentName } = req.body;
+
+    if (!fromAgentId || !toAgentId || !fromAgentName || !toAgentName) {
+      res.status(400).json({ error: 'fromAgentId, fromAgentName, toAgentId, and toAgentName are required.' });
+      return;
+    }
+
+    const moduleDef = await ModuleDefinition.findOne({
+      organizationId: req.organizationId,
+      apiPath: 'leads'
+    });
+
+    if (!moduleDef) {
+      res.status(404).json({ error: 'Leads module not found.' });
+      return;
+    }
+
+    // Update all leads matching the source agent's ID or name
+    const result = await CustomRecord.updateMany(
+      {
+        organizationId: req.organizationId,
+        moduleId: moduleDef._id,
+        $or: [
+          { 'data.assignedTo': fromAgentId },
+          { 'data.assignedTo': fromAgentName }
+        ]
+      },
+      {
+        $set: { 'data.assignedTo': toAgentName } // Store as full name for display compatibility
+      }
+    );
+
+    // Create Audit Log
+    await AuditLog.create({
+      organizationId: req.organizationId,
+      userId: new mongoose.Types.ObjectId(req.user?.id),
+      action: 'leads.transfer',
+      resource: 'leads',
+      details: {
+        fromAgentId,
+        fromAgentName,
+        toAgentId,
+        toAgentName,
+        modifiedCount: result.modifiedCount
+      }
+    });
+
+    res.status(200).json({ message: 'Leads transferred successfully.', modifiedCount: result.modifiedCount });
+  } catch (error: any) {
+    console.error('Failed to transfer leads:', error);
+    res.status(500).json({ error: 'Failed to transfer leads.' });
+  }
+});
+
 export default router;

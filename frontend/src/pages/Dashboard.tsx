@@ -368,9 +368,14 @@ export default function Dashboard() {
       </div>
 
       {/* 4. TODAY'S FOLLOWUP LEADS DETAILS */}
-      <div className="bg-white border-t-[3px] border-amber-500 rounded shadow-md mt-10">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-xl font-light text-slate-500">Today's Followup Leads Details</h2>
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        {/* Indigo top accent bar */}
+        <div className="h-[3px] bg-indigo-600 w-full" />
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
+            <Icons.CalendarClock className="w-4 h-4 text-indigo-600" />
+            Today's Followup Leads
+          </h2>
         </div>
         
         <div className="p-4 sm:p-6 overflow-x-auto">
@@ -382,8 +387,8 @@ export default function Dashboard() {
             metricsData.todayFollowupsList.map((rec: any, idx: number) => {
               const leadNo = rec._id.slice(-6).toUpperCase();
               return (
-                <div key={rec._id} className="border border-slate-200 rounded p-5 bg-white relative mb-6 last:mb-0">
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-green-500" />
+                <div key={rec._id} className="bg-white border border-slate-200 rounded-2xl p-5 relative mb-4 last:mb-0 overflow-hidden">
+                  <div className="absolute top-0 left-0 right-0 h-[3px] bg-indigo-600" />
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 text-sm mt-2">
                     <div className="space-y-4">
@@ -423,10 +428,10 @@ export default function Dashboard() {
                       <span className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm">Followup From</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">WA Chat</button>
-                      <button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">Call</button>
-                      <button className="bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">Upload File</button>
-                      <Link to={`/modules/leads/${rec._id}`} className="bg-[#06b6d4] hover:bg-[#0891b2] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">Edit</Link>
+                      <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">WA Chat</button>
+                      <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Call</button>
+                      <button className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Upload File</button>
+                      <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Edit</Link>
                     </div>
                   </div>
                 </div>
@@ -437,7 +442,7 @@ export default function Dashboard() {
       </div>
 
       {/* 5. SALES PIPELINE FUNNEL */}
-      <div className="bg-white border border-slate-200/60 rounded-3xl p-7 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm hover:shadow-md transition-shadow">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-indigo-50 rounded-lg">

@@ -100,3 +100,37 @@
 .animate-sweep {
   animation: sweep 5s infinite;
 }
+
+/* Premium Design System Utilities */
+.card-premium {
+  @apply bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl shadow-sm p-4 space-y-4;
+}
+
+.btn-primary-premium {
+  @apply px-6 py-2 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg transition-all shadow-sm shadow-indigo-600/10 disabled:opacity-50 disabled:pointer-events-none;
+}
+
+.btn-secondary-premium {
+  @apply px-5 py-2 text-sm font-semibold bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition-all;
+}
+
+.btn-edit-premium {
+  @apply p-1.5 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 text-sky-600 border border-sky-200/50 rounded-lg transition-all disabled:opacity-50;
+}
+
+.btn-delete-premium {
+  @apply p-1.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 border border-rose-200/50 rounded-lg transition-all disabled:opacity-50;
+}
+
+.status-active-premium {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-200/60;
+}
+
+.status-inactive-premium {
+  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border bg-slate-50 text-slate-500 border-slate-200;
+}
+
+.table-header-premium {
+  @apply bg-slate-50 text-slate-700 font-bold border-b border-slate-200;
+}
+

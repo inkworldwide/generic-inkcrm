@@ -615,7 +615,7 @@ export default function ModuleView() {
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-t-xl" />
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[800px] text-left text-sm text-slate-600 dark:text-slate-350">
-                      <thead className="bg-[#f3f4f6] dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-slate-800 dark:text-white font-bold text-xs uppercase tracking-wider">
+                      <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">
                         <tr>
                           <th className="px-6 py-4">Campaign Name</th>
                           <th className="px-6 py-4">Created Date</th>
@@ -745,11 +745,11 @@ export default function ModuleView() {
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <button className="bg-[#65a30d] hover:bg-[#4d7c0f] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">WA Chat</button>
-                          <button className="bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">Call</button>
-                          <button className="bg-[#ef4444] hover:bg-[#dc2626] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">Upload File</button>
-                          <Link to={`/modules/leads/${rec._id}`} className="bg-[#06b6d4] hover:bg-[#0891b2] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">Edit</Link>
-                          <button className="bg-[#f97316] hover:bg-[#ea580c] text-white text-xs font-semibold px-4 py-2 rounded transition-colors shadow-sm">History</button>
+                          <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">WA Chat</button>
+                          <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Call</button>
+                          <button className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Upload File</button>
+                          <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Edit</Link>
+                          <button className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">History</button>
                         </div>
                       </div>
                     </div>

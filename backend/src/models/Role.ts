@@ -24,6 +24,7 @@ export interface IRole extends Document {
     fields: IFieldPermission[];
     menus: string[]; // Allowed navigation menu identifiers
   };
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,6 +35,7 @@ const RoleSchema = new Schema<IRole>(
     name: { type: String, required: true, trim: true },
     description: { type: String },
     isSystem: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
     permissions: {
       modules: [
         {

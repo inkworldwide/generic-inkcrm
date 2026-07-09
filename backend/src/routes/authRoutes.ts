@@ -434,20 +434,76 @@ router.get('/roles', authenticate, async (req: Request, res: Response): Promise<
   }
 });
 
-// 10. Update tenant role permissions (Authenticated)
+// 10. Update tenant role permissions and/or name/status (Authenticated)
 router.put('/roles/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { permissions } = req.body;
+    const { name, permissions, isActive } = req.body;
     const role = await Role.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!role) {
       res.status(404).json({ error: 'Role not found.' });
       return;
     }
-    role.permissions.modules = permissions;
+    if (name) role.name = name;
+    if (permissions) role.permissions.modules = permissions;
+    if (typeof isActive === 'boolean') role.isActive = isActive;
     await role.save();
-    res.status(200).json({ message: 'Role permissions updated successfully.', role });
+    res.status(200).json({ message: 'Role updated successfully.', role });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to update role permissions.' });
+    res.status(500).json({ error: 'Failed to update role.' });
+  }
+});
+
+// 10b. Create tenant role (Authenticated)
+router.post('/roles', authenticate, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name, isActive } = req.body;
+    if (!name) {
+      res.status(400).json({ error: 'Role name is required.' });
+      return;
+    }
+    
+    // Seed default permissions for all modules
+    const modules = await ModuleDefinition.find({ organizationId: req.organizationId });
+    const modulePermissions = modules.map(m => ({
+      moduleName: m.name,
+      create: true,
+      read: 'all' as const,
+      update: 'all' as const
+    }));
+
+    const newRole = await Role.create({
+      organizationId: req.organizationId,
+      name,
+      description: `Custom role ${name}`,
+      permissions: {
+        modules: modulePermissions
+      },
+      isSystem: false,
+      isActive: typeof isActive === 'boolean' ? isActive : true
+    });
+
+    res.status(201).json(newRole);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to create role.' });
+  }
+});
+
+// 10c. Delete tenant role (Authenticated)
+router.delete('/roles/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const role = await Role.findOne({ _id: req.params.id, organizationId: req.organizationId });
+    if (!role) {
+      res.status(404).json({ error: 'Role not found.' });
+      return;
+    }
+    if (role.isSystem) {
+      res.status(400).json({ error: 'System roles cannot be deleted.' });
+      return;
+    }
+    await Role.findByIdAndDelete(role._id);
+    res.status(200).json({ message: 'Role deleted successfully.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete role.' });
   }
 });
 

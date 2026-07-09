@@ -175,10 +175,10 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
   };
 
   return (
-    <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-8 shadow-sm space-y-6">
+    <div className="bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl p-4 shadow-sm space-y-4">
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-xl font-bold text-slate-800 dark:text-white flex items-center gap-2">
+          <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
             <ShieldCheck className="w-5 h-5 text-emerald-500" />
             {mode === 'signup' ? 'Mandatory Face Enrollment' : 'Biometric Security'}
           </h2>

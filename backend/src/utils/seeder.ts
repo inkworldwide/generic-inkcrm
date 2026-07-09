@@ -436,9 +436,8 @@ async function seed() {
     icon: 'Package',
     isSystem: true,
     fields: [
-      { name: 'name', label: 'Product Name', type: 'text', required: true, unique: true },
       { name: 'code', label: 'Product Code', type: 'text', required: true, unique: true },
-      { name: 'price', label: 'Unit Price', type: 'currency', required: true, unique: false }
+      { name: 'name', label: 'Product Name', type: 'text', required: true, unique: true }
     ],
     relationships: []
   });
@@ -467,8 +466,9 @@ async function seed() {
     icon: 'Briefcase',
     isSystem: true,
     fields: [
-      { name: 'partnerName', label: 'Partner Name', type: 'text', required: true, unique: true },
-      { name: 'bankName', label: 'Bank Name', type: 'text', required: true, unique: false }
+      { name: 'bank', label: 'Bank Name', type: 'text', required: true, unique: false },
+      { name: 'loanType', label: 'Loan Type', type: 'text', required: true, unique: false },
+      { name: 'psm', label: 'PSM', type: 'text', required: true, unique: false }
     ],
     relationships: []
   });
@@ -671,14 +671,14 @@ async function seed() {
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: productModule._id,
-    data: { name: 'Enterprise CRM Suite', code: 'CRM_ENT', price: 15000 },
+    data: { name: 'Enterprise CRM Suite', code: 'CRM_ENT' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: productModule._id,
-    data: { name: 'Cloud Integration API', code: 'API_CLOUD', price: 2500 },
+    data: { name: 'Cloud Integration API', code: 'API_CLOUD' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
@@ -686,14 +686,35 @@ async function seed() {
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'JP Morgan Chase', code: 'JPMC' },
+    data: { bankName: 'State Bank of India', code: 'SBI' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'Bank of America', code: 'BOFA' },
+    data: { bankName: 'HDFC Bank', code: 'HDFC' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'ICICI Bank', code: 'ICICI' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'Axis Bank', code: 'AXIS' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'IndusInd Bank', code: 'INDUSIND' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
@@ -701,7 +722,7 @@ async function seed() {
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankingPartnerModule._id,
-    data: { partnerName: 'Chase Commercial', bankName: 'JP Morgan Chase' },
+    data: { bank: 'State Bank of India, HDFC Bank', loanType: 'LOAN AGAINST PROPERTY LOAN', psm: 'Ink CRM' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });

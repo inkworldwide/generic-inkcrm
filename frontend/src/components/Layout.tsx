@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../services/api';
 import { useModuleStore } from '../store/moduleStore';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 import loginLogo from '../assets/login-logo.png';
 import * as Icons from 'lucide-react';
 import {
@@ -32,6 +33,14 @@ export default function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const { fetchModules } = useModuleStore();
   const { user } = useAuthStore();
+  const { branding, fetchBranding } = useThemeStore();
+
+  useEffect(() => {
+    if (!branding) {
+      const cachedSub = localStorage.getItem('tenantSubdomain') || 'sales';
+      fetchBranding(cachedSub);
+    }
+  }, [branding, fetchBranding]);
 
   const { data: leadsData } = useQuery({
     queryKey: ['sidebar-leads'],
@@ -100,16 +109,13 @@ export default function Layout({ children }: LayoutProps) {
           <div className="p-6 pb-2">
             <div className="flex items-center gap-4 p-3 rounded-[18px] bg-white/[0.05] border border-white/[0.08] shadow-[0_10px_40px_rgba(255,170,0,0.15)] relative overflow-hidden group hover:shadow-[0_15px_50px_rgba(255,170,0,0.25)] transition-all duration-500">
               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative w-12 h-12 rounded-[14px] bg-white flex items-center justify-center p-1 shadow-md">
-                <img src={loginLogo} alt="Ink CRM" className="w-full h-full object-contain" style={{ imageRendering: 'crisp-edges' }} />
+              <div className="relative w-12 h-12 rounded-[14px] bg-white flex items-center justify-center p-1 shadow-md flex-shrink-0">
+                <img src={branding?.logoUrl || loginLogo} alt="Ink CRM" className="w-full h-full object-contain" style={{ imageRendering: 'crisp-edges' }} />
               </div>
-              <div className="flex flex-col">
-                <h1 className="text-[28px] font-[800] tracking-tight bg-gradient-to-r from-orange-400 to-amber-300 text-transparent bg-clip-text leading-none">
-                  INK CRM
+              <div className="flex flex-col min-w-0">
+                <h1 className="text-lg sm:text-xl font-[800] tracking-tight bg-gradient-to-r from-orange-400 to-amber-300 text-transparent bg-clip-text leading-tight uppercase line-clamp-2 max-w-[170px]">
+                  {branding?.name || 'INK CRM'}
                 </h1>
-                <span className="text-[11px] font-semibold tracking-[4px] text-white/55 mt-1 uppercase">
-                  Customer Relations
-                </span>
               </div>
             </div>
           </div>
@@ -166,19 +172,13 @@ export default function Layout({ children }: LayoutProps) {
                 })()}
               </SidebarAccordion>
 
-              {/* 5. Security */}
-              <SidebarItem to="/settings?tab=security" label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400" />
+              {/* 5. Setting */}
+              <SidebarItem to="/settings" label="SETTING" icon={Icons.Settings} colorClass="text-amber-400" />
 
-              {/* 6. Setting */}
-              <SidebarAccordion label="SETTING" icon={Icons.Settings} colorClass="text-amber-400">
-                <SidebarItem to="/settings?tab=company" label="Company Setting" icon={Icons.Building2} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=role" label="Role" icon={Icons.Shield} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=department" label="Department" icon={Icons.Network} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=product" label="Product" icon={Icons.Package} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=bankmaster" label="Bank Master" icon={Icons.Landmark} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=bankingpartner" label="Banking Partner" icon={Icons.Briefcase} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=users" label="Users" icon={Icons.Users} colorClass="text-amber-400" indent />
-                <SidebarItem to="/settings?tab=status" label="Status" icon={Icons.Tag} colorClass="text-amber-400" indent />
+              {/* 6. Security */}
+              <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400">
+                <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent />
+                <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent />
               </SidebarAccordion>
             </div>
           </div>
@@ -244,11 +244,22 @@ export default function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="flex-1 overflow-auto bg-[#f8fafc] text-slate-800"
+              className="flex-1 overflow-auto p-4 sm:p-5 bg-[#f8fafc] text-slate-800"
             >
               {children}
             </motion.div>
           </AnimatePresence>
+
+          <footer className="h-14 bg-white border-t border-slate-200/60 flex items-center justify-between px-8 text-xs font-semibold text-slate-400 flex-shrink-0">
+            <div>
+              <span>© {new Date().getFullYear()} {branding?.name || 'INK CRM'}. All Rights Reserved.</span>
+            </div>
+            <div className="flex gap-4">
+              <a href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</a>
+              <span className="text-slate-200">|</span>
+              <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
+            </div>
+          </footer>
         </main>
       </div>
     </div>
