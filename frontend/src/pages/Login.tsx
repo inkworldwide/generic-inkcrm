@@ -9,6 +9,7 @@ import loginLogo from '../assets/login-logo.png';
 import FaceVerificationModal from '../components/FaceVerificationModal';
 import FaceEnrollment from '../components/FaceEnrollment';
 import LocationVerificationStep from '../components/LocationVerificationStep';
+import api from '../services/api';
 
 // ─── Step types ──────────────────────────────────────────────────────────────
 type LoginStep = 'credentials' | 'location' | 'face';
@@ -107,18 +108,44 @@ export default function Login() {
   const activeColorStyle = { color: 'rgb(var(--color-primary))' };
 
   // ─── LOGIN FLOW ─────────────────────────────────────────────────────────────
-
-  /** Step 1 → 2: Validate credentials form (no API call yet) */
-  const handleCredentialsSubmit = (e: React.FormEvent) => {
+  /** Step 1: Validate credentials with backend and check if location/face scan is needed */
+  const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
+
     if (!email.trim() || !password.trim()) {
       setError('Email and password are required.');
+      setLoading(false);
       return;
     }
-    setLoginStep('location');
-  };
 
+    try {
+      const res = await api.post('/auth/login', {
+        email: email.toLowerCase(),
+        password,
+        rememberMe
+      });
+
+      if (res.data.locationRequired) {
+        // Location verification is required for this user
+        setLoginStep('location');
+      } else if (res.data.mfaRequired && res.data.tempToken) {
+        // Direct transition to Face Scan MFA
+        setTempToken(res.data.tempToken);
+        setLoginStep('face');
+      } else if (res.data.token) {
+        // Successful password verification and no MFA/location required
+        setAuth(res.data.user, res.data.token, res.data.refreshToken);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        navigate('/');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Authentication failed. Please verify credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
   /** Step 2 → 3: LocationVerificationStep calls /auth/login and returns tempToken */
   const handleLocationSuccess = (token: string) => {
     setTempToken(token);

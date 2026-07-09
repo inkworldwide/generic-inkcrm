@@ -171,21 +171,15 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
     const { email, password, latitude, longitude, rememberMe } = req.body;
-
     // ── Step 0: Basic field validation ───────────────────────────────────────
     if (!email || !password) {
       res.status(400).json({ error: 'Email and password are required.' });
       return;
     }
 
-    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
-      res.status(400).json({ error: 'GPS location is required for authentication.' });
-      return;
-    }
-
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      // Generic message — do not reveal whether email exists
+      // Generic message — do not reveal account existence
       res.status(401).json({ error: 'Invalid email or password.' });
       return;
     }
@@ -208,13 +202,26 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       user.lastFailedLoginAt = undefined;
     }
 
-    // ── Step 2: Location verification (Haversine) ────────────────────────────
-    if (user.registrationLocation?.latitude !== undefined && user.registrationLocation?.longitude !== undefined) {
+    // ── Step 2: Location verification (Haversine) — conditional ──────────────
+    const hasRegisteredLocation = user.registrationLocation?.latitude !== undefined && 
+                                  user.registrationLocation?.longitude !== undefined;
+
+    if (hasRegisteredLocation) {
+      if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+        // Location is required but not provided yet — return challenge
+        res.status(200).json({
+          locationRequired: true,
+          message: 'Location verification is required for this account.'
+        });
+        return;
+      }
+
+      const regLoc = user.registrationLocation!;
       const distance = haversineDistance(
         latitude,
         longitude,
-        user.registrationLocation.latitude,
-        user.registrationLocation.longitude
+        regLoc.latitude,
+        regLoc.longitude
       );
 
       const allowedRadius = user.locationRadius || 100;
@@ -223,7 +230,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         console.warn(
           `[AUTH] Location mismatch for ${email}: distance=${distance.toFixed(1)}m, allowed=${allowedRadius}m at ${new Date().toISOString()}`
         );
-        await user.save(); // persist failedLoginAttempts reset
+        await user.save();
         res.status(403).json({
           error: `Login denied: You are not at the registered location. You are ${Math.round(distance)}m away (allowed: ${allowedRadius}m).`,
           code: 'LOCATION_MISMATCH',
