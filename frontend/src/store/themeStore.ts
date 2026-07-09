@@ -18,6 +18,33 @@ interface TenantBranding {
   loginBgUrl?: string;
   themeSettings: ThemeSettings;
   enabledModules: string[];
+
+  // Extended fields
+  companyCode?: string;
+  registrationId?: string;
+  startDate?: string;
+  endDate?: string;
+  companyDocUrl?: string;
+  phoneNumber?: string;
+  mobile?: string;
+  email?: string;
+  fax?: string;
+  website?: string;
+
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+
+  adminDetails?: {
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    password?: string;
+    financialYear?: string;
+    roleType?: string;
+  };
 }
 
 interface ThemeState {

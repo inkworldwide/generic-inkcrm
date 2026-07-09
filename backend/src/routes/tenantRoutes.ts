@@ -34,7 +34,23 @@ router.get('/branding', async (req: Request, res: Response): Promise<void> => {
       faviconUrl: organization.faviconUrl,
       loginBgUrl: organization.loginBgUrl,
       themeSettings: organization.themeSettings,
-      enabledModules: organization.enabledModules
+      enabledModules: organization.enabledModules,
+      companyCode: organization.companyCode,
+      registrationId: organization.registrationId,
+      startDate: organization.startDate,
+      endDate: organization.endDate,
+      companyDocUrl: organization.companyDocUrl,
+      phoneNumber: organization.phoneNumber,
+      mobile: organization.mobile,
+      email: organization.email,
+      fax: organization.fax,
+      website: organization.website,
+      address: organization.address,
+      city: organization.city,
+      state: organization.state,
+      country: organization.country,
+      postalCode: organization.postalCode,
+      adminDetails: organization.adminDetails
     });
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve branding profile.' });
@@ -44,7 +60,13 @@ router.get('/branding', async (req: Request, res: Response): Promise<void> => {
 // 2. Update branding settings (Authenticated - Admin Only)
 router.put('/branding', authenticate, requireTenant, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, themeSettings, logoUrl, faviconUrl, loginBgUrl } = req.body;
+    const {
+      name, themeSettings, logoUrl, faviconUrl, loginBgUrl,
+      companyCode, registrationId, startDate, endDate, companyDocUrl,
+      phoneNumber, mobile, email, fax, website,
+      address, city, state, country, postalCode,
+      adminDetails
+    } = req.body;
 
     const organization = await Organization.findById(req.organizationId);
     if (!organization) {
@@ -53,9 +75,33 @@ router.put('/branding', authenticate, requireTenant, async (req: Request, res: R
     }
 
     if (name) organization.name = name;
-    if (logoUrl) organization.logoUrl = logoUrl;
-    if (faviconUrl) organization.faviconUrl = faviconUrl;
-    if (loginBgUrl) organization.loginBgUrl = loginBgUrl;
+    if (logoUrl !== undefined) organization.logoUrl = logoUrl;
+    if (faviconUrl !== undefined) organization.faviconUrl = faviconUrl;
+    if (loginBgUrl !== undefined) organization.loginBgUrl = loginBgUrl;
+
+    if (companyCode !== undefined) organization.companyCode = companyCode;
+    if (registrationId !== undefined) organization.registrationId = registrationId;
+    if (startDate !== undefined) organization.startDate = startDate;
+    if (endDate !== undefined) organization.endDate = endDate;
+    if (companyDocUrl !== undefined) organization.companyDocUrl = companyDocUrl;
+    if (phoneNumber !== undefined) organization.phoneNumber = phoneNumber;
+    if (mobile !== undefined) organization.mobile = mobile;
+    if (email !== undefined) organization.email = email;
+    if (fax !== undefined) organization.fax = fax;
+    if (website !== undefined) organization.website = website;
+
+    if (address !== undefined) organization.address = address;
+    if (city !== undefined) organization.city = city;
+    if (state !== undefined) organization.state = state;
+    if (country !== undefined) organization.country = country;
+    if (postalCode !== undefined) organization.postalCode = postalCode;
+
+    if (adminDetails !== undefined) {
+      organization.adminDetails = {
+        ...organization.adminDetails,
+        ...adminDetails
+      };
+    }
 
     if (themeSettings) {
       organization.themeSettings = {
@@ -74,7 +120,23 @@ router.put('/branding', authenticate, requireTenant, async (req: Request, res: R
         logoUrl: organization.logoUrl,
         faviconUrl: organization.faviconUrl,
         loginBgUrl: organization.loginBgUrl,
-        themeSettings: organization.themeSettings
+        themeSettings: organization.themeSettings,
+        companyCode: organization.companyCode,
+        registrationId: organization.registrationId,
+        startDate: organization.startDate,
+        endDate: organization.endDate,
+        companyDocUrl: organization.companyDocUrl,
+        phoneNumber: organization.phoneNumber,
+        mobile: organization.mobile,
+        email: organization.email,
+        fax: organization.fax,
+        website: organization.website,
+        address: organization.address,
+        city: organization.city,
+        state: organization.state,
+        country: organization.country,
+        postalCode: organization.postalCode,
+        adminDetails: organization.adminDetails
       }
     });
   } catch (error) {

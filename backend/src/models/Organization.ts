@@ -13,7 +13,37 @@ export interface IOrganization extends Document {
     fontFamily: string;
     mode: 'light' | 'dark' | 'system';
   };
-  enabledModules: string[]; // List of system module paths enabled for the tenant
+  enabledModules: string[];
+
+  // Company Details
+  companyCode?: string;
+  registrationId?: string;
+  startDate?: string;
+  endDate?: string;
+  companyDocUrl?: string;
+  phoneNumber?: string;
+  mobile?: string;
+  email?: string;
+  fax?: string;
+  website?: string;
+
+  // Address
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+
+  // Admin details
+  adminDetails?: {
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    password?: string;
+    financialYear?: string;
+    roleType?: string;
+  };
+
   subscription: {
     plan: 'free' | 'growth' | 'enterprise';
     status: 'active' | 'suspended' | 'trial';
@@ -38,10 +68,40 @@ const OrganizationSchema = new Schema<IOrganization>(
       mode: { type: String, enum: ['light', 'dark', 'system'], default: 'light' }
     },
     enabledModules: [{ type: String }],
+    
+    // Company Details
+    companyCode: { type: String },
+    registrationId: { type: String },
+    startDate: { type: String },
+    endDate: { type: String },
+    companyDocUrl: { type: String },
+    phoneNumber: { type: String },
+    mobile: { type: String },
+    email: { type: String },
+    fax: { type: String },
+    website: { type: String },
+
+    // Address
+    address: { type: String },
+    city: { type: String },
+    state: { type: String },
+    country: { type: String },
+    postalCode: { type: String },
+
+    // Admin Details
+    adminDetails: {
+      firstName: { type: String },
+      lastName: { type: String },
+      username: { type: String },
+      password: { type: String },
+      financialYear: { type: String },
+      roleType: { type: String }
+    },
+
     subscription: {
       plan: { type: String, enum: ['free', 'growth', 'enterprise'], default: 'free' },
       status: { type: String, enum: ['active', 'suspended', 'trial'], default: 'trial' },
-      expiresAt: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) } // 30 days trial
+      expiresAt: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
     }
   },
   { timestamps: true }

@@ -35,6 +35,37 @@ export default function Settings() {
   const [fontFamily, setFontFamily] = useState('Inter');
   const [mode, setMode] = useState<'light' | 'dark' | 'system'>('light');
 
+  // Company Setting sub-tab active state
+  const [companySubTab, setCompanySubTab] = useState<'details' | 'address' | 'admin'>('details');
+
+  // Extended Company details state
+  const [companyCode, setCompanyCode] = useState('');
+  const [registrationId, setRegistrationId] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [companyDocUrl, setCompanyDocUrl] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [email, setEmail] = useState('');
+  const [fax, setFax] = useState('');
+  const [website, setWebsite] = useState('');
+
+  // Address state
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [companyState, setCompanyState] = useState('');
+  const [country, setCountry] = useState('India');
+  const [postalCode, setPostalCode] = useState('');
+
+  // Admin Details state
+  const [adminFirstName, setAdminFirstName] = useState('');
+  const [adminLastName, setAdminLastName] = useState('');
+  const [adminUsername, setAdminUsername] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminConfirmPassword, setAdminConfirmPassword] = useState('');
+  const [financialYear, setFinancialYear] = useState('');
+  const [roleType, setRoleType] = useState('');
+
   // RBAC permissions state
   const [roles, setRoles] = useState<any[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState('');
@@ -134,6 +165,34 @@ export default function Settings() {
       setSidebarBg(activeBranding.themeSettings.sidebarBg);
       setFontFamily(activeBranding.themeSettings.fontFamily);
       setMode(activeBranding.themeSettings.mode);
+
+      // Populate extended fields
+      setCompanyCode(activeBranding.companyCode || '');
+      setRegistrationId(activeBranding.registrationId || '');
+      setStartDate(activeBranding.startDate || '');
+      setEndDate(activeBranding.endDate || '');
+      setCompanyDocUrl(activeBranding.companyDocUrl || '');
+      setPhoneNumber(activeBranding.phoneNumber || '');
+      setMobile(activeBranding.mobile || '');
+      setEmail(activeBranding.email || '');
+      setFax(activeBranding.fax || '');
+      setWebsite(activeBranding.website || '');
+
+      setAddress(activeBranding.address || '');
+      setCity(activeBranding.city || '');
+      setCompanyState(activeBranding.state || '');
+      setCountry(activeBranding.country || 'India');
+      setPostalCode(activeBranding.postalCode || '');
+
+      if (activeBranding.adminDetails) {
+        setAdminFirstName(activeBranding.adminDetails.firstName || '');
+        setAdminLastName(activeBranding.adminDetails.lastName || '');
+        setAdminUsername(activeBranding.adminDetails.username || '');
+        setAdminPassword(activeBranding.adminDetails.password || '');
+        setAdminConfirmPassword(activeBranding.adminDetails.password || '');
+        setFinancialYear(activeBranding.adminDetails.financialYear || '');
+        setRoleType(activeBranding.adminDetails.roleType || '');
+      }
     }
 
     try {
@@ -253,13 +312,39 @@ export default function Settings() {
       await api.put('/tenants/branding', {
         name: companyName,
         logoUrl,
-        themeSettings
+        themeSettings,
+
+        companyCode,
+        registrationId,
+        startDate,
+        endDate,
+        companyDocUrl,
+        phoneNumber,
+        mobile,
+        email,
+        fax,
+        website,
+
+        address,
+        city,
+        state: companyState,
+        country,
+        postalCode,
+
+        adminDetails: {
+          firstName: adminFirstName,
+          lastName: adminLastName,
+          username: adminUsername,
+          password: adminPassword,
+          financialYear,
+          roleType
+        }
       });
 
       await fetchBranding();
-      alert('Workspace settings saved successfully.');
+      alert('Company settings saved successfully.');
     } catch (err) {
-      alert('Failed to save branding customizations.');
+      alert('Failed to save company settings.');
     } finally {
       setSaving(false);
     }
@@ -587,23 +672,249 @@ export default function Settings() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
         {/* Company Settings */}
-        <div className={`lg:col-span-6 card-premium ${currentTab === 'company' ? 'block' : 'hidden'}`}>
-          <h2 className="text-lg font-bold text-slate-800">Company Identity</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Name</label>
-              <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Logo URL</label>
-              <input type="text" value={logoUrl} onChange={(e) => setLogoUrl(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600 mb-2" />
-              <input type="file" onChange={handleLogoUpload} className="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer" />
-            </div>
-          </div>
-          <div className="flex justify-end pt-2">
-            <button onClick={handleSaveBranding} disabled={saving} className="btn-primary-premium">
-              {saving ? 'Saving...' : 'Save Configuration'}
+        <div className={`lg:col-span-12 card-premium p-0 overflow-hidden ${currentTab === 'company' ? 'block' : 'hidden'}`}>
+          {/* Sub-tabs Header */}
+          <div className="flex border-b border-slate-200">
+            <button
+              type="button"
+              onClick={() => setCompanySubTab('details')}
+              className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
+                companySubTab === 'details'
+                  ? 'bg-indigo-650 text-white shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
+              }`}
+            >
+              Company Details
+              {companySubTab === 'details' && (
+                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+              )}
             </button>
+            <button
+              type="button"
+              onClick={() => setCompanySubTab('address')}
+              className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
+                companySubTab === 'address'
+                  ? 'bg-indigo-650 text-white shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
+              }`}
+            >
+              Address
+              {companySubTab === 'address' && (
+                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setCompanySubTab('admin')}
+              className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
+                companySubTab === 'admin'
+                  ? 'bg-indigo-650 text-white shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+              }`}
+            >
+              Admin Details
+              {companySubTab === 'admin' && (
+                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+              )}
+            </button>
+          </div>
+
+          {/* Sub-tab Body */}
+          <div className="p-6 space-y-6">
+            
+            {/* 1. Company Details Panel */}
+            {companySubTab === 'details' && (
+              <div className="flex flex-col lg:flex-row gap-8 items-start">
+                {/* Logo Upload Box */}
+                <div className="flex flex-col items-center gap-3 bg-slate-50/50 p-5 border border-slate-150 rounded-2xl w-full lg:w-48 text-center shrink-0">
+                  <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-white flex items-center justify-center p-2 shadow-sm overflow-hidden select-none">
+                    {logoUrl ? (
+                      <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
+                    ) : (
+                      <Icons.Building2 className="w-12 h-12 text-slate-350" />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Logo Thumbnail</span>
+                  <label className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-650 cursor-pointer shadow-sm">
+                    {uploading ? 'Uploading...' : 'Choose file'}
+                    <input type="file" onChange={handleLogoUpload} className="hidden" disabled={uploading} />
+                  </label>
+                </div>
+
+                {/* Form Fields Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 flex-grow w-full">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Code *</label>
+                    <input type="text" value={companyCode} onChange={e => setCompanyCode(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="e.g. COMP01" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Name *</label>
+                    <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="e.g. New Frontline Bazaar" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Registration Id *</label>
+                    <input type="text" value={registrationId} onChange={e => setRegistrationId(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="e.g. 78658764873" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Start Date *</label>
+                    <input type="text" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="2/20/2018 12:00:00 AM" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company End Date *</label>
+                    <input type="text" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="3/23/2018 12:00:00 AM" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Upload Company Doc</label>
+                    <input type="file" onChange={async (e) => {
+                      if (!e.target.files || e.target.files.length === 0) return;
+                      const file = e.target.files[0];
+                      const formData = new FormData();
+                      formData.append('file', file);
+                      try {
+                        const res = await api.post('/documents/upload', formData, {
+                          headers: { 'Content-Type': 'multipart/form-data' }
+                        });
+                        setCompanyDocUrl(`http://localhost:5000${res.data.filePath}`);
+                        alert('Company document uploaded successfully.');
+                      } catch {
+                        alert('Failed to upload document.');
+                      }
+                    }} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-slate-200 px-3 py-1 bg-white rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Phone Number *</label>
+                    <input type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="65327642" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mobile *</label>
+                    <input type="text" value={mobile} onChange={e => setMobile(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="56326563649" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email *</label>
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="info@frontlinebazaar.com" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Upload Logo</label>
+                    <input type="file" onChange={handleLogoUpload} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-slate-200 px-3 py-1 bg-white rounded-xl" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Fax</label>
+                    <input type="text" value={fax} onChange={e => setFax(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="657676" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Website</label>
+                    <input type="text" value={website} onChange={e => setWebsite(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="https://frontlinebazaar.com/" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 2. Address Panel */}
+            {companySubTab === 'address' && (
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Address</label>
+                  <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Gangavati Karnataka" />
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">City</label>
+                    <input type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Ganagavati" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">State</label>
+                    <input type="text" value={companyState} onChange={e => setCompanyState(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Karnataka" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Country</label>
+                    <select value={country} onChange={e => setCountry(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                      <option value="">Select Country</option>
+                      <option value="India">India</option>
+                      <option value="United States">United States</option>
+                      <option value="United Kingdom">United Kingdom</option>
+                      <option value="Canada">Canada</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Postal Code</label>
+                    <input type="text" value={postalCode} onChange={e => setPostalCode(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="583231" />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 3. Admin Details Panel */}
+            {companySubTab === 'admin' && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">First Name</label>
+                    <input type="text" value={adminFirstName} onChange={e => setAdminFirstName(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="First Name" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Last Name</label>
+                    <input type="text" value={adminLastName} onChange={e => setAdminLastName(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Last Name" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">User Name</label>
+                    <input type="text" value={adminUsername} onChange={e => setAdminUsername(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="User Name" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                    <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="******" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Confirm Password</label>
+                    <input type="password" value={adminConfirmPassword} onChange={e => setAdminConfirmPassword(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Confirm Password" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Financial Year</label>
+                    <select value={financialYear} onChange={e => setFinancialYear(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                      <option value="">Select Financial Year</option>
+                      <option value="2025-2026">2025-2026</option>
+                      <option value="2026-2027">2026-2027</option>
+                      <option value="2027-2028">2027-2028</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Role Type *</label>
+                    <select value={roleType} onChange={e => setRoleType(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                      <option value="">Select Role Type</option>
+                      <option value="Super Admin">Super Admin</option>
+                      <option value="Admin">Admin</option>
+                      <option value="User">User</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Cancel & Update Buttons */}
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => loadSettingsData()}
+                className="px-5 py-2 rounded-xl text-sm font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveBranding}
+                disabled={saving}
+                className="px-5 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-sm flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Updating...
+                  </>
+                ) : (
+                  'Update'
+                )}
+              </button>
+            </div>
+
           </div>
         </div>
 
