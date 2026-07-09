@@ -98,7 +98,7 @@ export default function AccessPrivilege() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 flex items-center gap-2">
+          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 flex items-center gap-2">
             <Icons.ShieldCheck className="w-6 h-6 text-indigo-600" />
             Access Privilege
           </h1>

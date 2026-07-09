@@ -25,7 +25,7 @@ const generateUserCode = () => {
 };
 
 // ─── Step types ──────────────────────────────────────────────────────────────
-type LoginStep = 'credentials' | 'location' | 'face';
+type LoginStep = 'credentials' | 'location' | 'face' | 'onboarding-location' | 'onboarding-face';
 type RegStep = 'form' | 'location' | 'face';
 
 // ─── GPS capture for registration ────────────────────────────────────────────
@@ -89,6 +89,8 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [tempToken, setTempToken] = useState('');
+  // ── Onboarding state (for admin-created users) ──────────────────────────────
+  const { coords: onboardCoords, gpsError: onboardGpsError, gpsLoading: onboardGpsLoading, capture: captureOnboardGps } = useGpsCapture();
   // ── Registration: three-step state ─────────────────────────────────────────
   const [regStep, setRegStep] = useState<RegStep>('form');
   const [companyName, setCompanyName] = useState('');
@@ -147,7 +149,11 @@ export default function Login() {
         rememberMe
       });
 
-      if (res.data.locationRequired) {
+      if (res.data.onboardingRequired && res.data.tempToken) {
+        // User created by admin — needs location + face setup
+        setTempToken(res.data.tempToken);
+        setLoginStep('onboarding-location');
+      } else if (res.data.locationRequired) {
         // Location verification is required for this user
         setLoginStep('location');
       } else if (res.data.mfaRequired && res.data.tempToken) {
@@ -204,6 +210,45 @@ export default function Login() {
     setPassword('');
     setTempToken('');
     setError('');
+  };
+
+  // ─── ONBOARDING FLOW (admin-created users) ─────────────────────────────────
+  const handleOnboardLocationReady = () => {
+    if (onboardCoords) {
+      setLoginStep('onboarding-face');
+    }
+  };
+
+  const executeOnboarding = async (faceEmbedding: number[]) => {
+    if (!onboardCoords) {
+      setError('Location is missing. Please go back and allow location access.');
+      setLoginStep('onboarding-location');
+      return;
+    }
+    setError('');
+    setLoading(true);
+    try {
+      const res = await api.post('/auth/onboarding', {
+        tempToken,
+        latitude: onboardCoords.latitude,
+        longitude: onboardCoords.longitude,
+        faceEmbedding
+      });
+      if (res.data.token) {
+        alert('Successfully created your account.');
+        setAuth(res.data.user, res.data.token, res.data.refreshToken);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        if (res.data.user.subdomain) {
+          localStorage.setItem('tenantSubdomain', res.data.user.subdomain);
+        }
+        navigate('/');
+      }
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to complete account setup.');
+      setLoginStep('credentials');
+    } finally {
+      setLoading(false);
+    }
   };
 
   // ─── REGISTRATION FLOW ──────────────────────────────────────────────────────
@@ -518,24 +563,11 @@ export default function Login() {
 
                 <button
                   type="submit"
-                  style={activeBgStyle}
-                  className="w-full py-3 rounded-xl text-white font-semibold text-sm hover:brightness-105 active:brightness-95 transition-all shadow-lg shadow-indigo-600/10 mt-2 flex items-center justify-center gap-2"
+                  className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/20 mt-2 flex items-center justify-center gap-2"
                 >
-                  <span>Continue to Location Verify</span>
-                  <Icons.ChevronRight className="w-4 h-4" />
+                  <span>Login</span>
+                  <Icons.LogIn className="w-4 h-4" />
                 </button>
-
-                {/* Demo credentials note */}
-                <div className="mt-5 pt-5 border-t border-slate-100 text-xs text-slate-500 text-center space-y-1.5">
-                  <p className="font-bold text-slate-700">Demo Sandbox Credentials</p>
-                  <div className="bg-slate-50 border border-slate-150 p-2.5 rounded-xl space-y-1 font-mono text-[11px] text-slate-600">
-                    <div>Email: <span className="font-semibold text-indigo-600">ink@crm.com</span></div>
-                    <div>Password: <span className="font-semibold text-indigo-600">password123</span></div>
-                  </div>
-                  <p className="text-[10px] text-slate-400">
-                    Use these credentials to access the Sales workspace demo.
-                  </p>
-                </div>
               </motion.form>
             )}
 
@@ -556,6 +588,150 @@ export default function Login() {
               <div className="text-center py-8 text-slate-400 text-sm">
                 Preparing face verification...
               </div>
+            )}
+
+            {/* Onboarding Step 1 — Location Capture */}
+            {loginStep === 'onboarding-location' && (
+              <motion.div
+                key="onboard-location"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="space-y-6 text-center"
+              >
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-400 mb-2">
+                  <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                    <Icons.CheckCircle className="w-3.5 h-3.5" /> Credentials
+                  </span>
+                  <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                  <span className="flex items-center gap-1 text-indigo-600 font-semibold">
+                    <Icons.MapPin className="w-3.5 h-3.5" /> Location
+                  </span>
+                  <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                  <span className="text-slate-400">Face Enroll</span>
+                </div>
+
+                <div className="flex items-start gap-2.5 p-3 bg-amber-50 border border-amber-100 rounded-xl mb-2">
+                  <Icons.Info className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+                  <p className="text-[11px] text-amber-700 font-medium leading-relaxed text-left">
+                    Your account was created by an administrator. To activate it, you need to register your <strong>GPS location</strong> and <strong>face biometric</strong>.
+                  </p>
+                </div>
+
+                {!onboardCoords && !onboardGpsLoading && !onboardGpsError && (
+                  <>
+                    <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto">
+                      <Icons.MapPin className="w-9 h-9 text-indigo-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">Capture Your Location</h3>
+                      <p className="text-sm text-slate-500 mt-1.5 max-w-xs mx-auto leading-relaxed">
+                        Your current GPS coordinates will be saved as your registered location.
+                      </p>
+                    </div>
+                    <button
+                      onClick={captureOnboardGps}
+                      className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
+                    >
+                      <Icons.MapPin className="w-4 h-4" />
+                      Allow Location Access
+                    </button>
+                  </>
+                )}
+
+                {onboardGpsLoading && (
+                  <>
+                    <motion.div
+                      animate={{ scale: [1, 1.15, 1] }}
+                      transition={{ duration: 1.8, repeat: Infinity }}
+                      className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto"
+                    >
+                      <Icons.Loader2 className="w-9 h-9 text-indigo-600 animate-spin" />
+                    </motion.div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">Capturing Location...</h3>
+                      <p className="text-sm text-slate-500 mt-1">
+                        Please allow location access when your browser asks.
+                      </p>
+                    </div>
+                  </>
+                )}
+
+                {onboardGpsError && (
+                  <>
+                    <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto">
+                      <Icons.MapPinOff className="w-9 h-9 text-rose-500" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">Location Access Required</h3>
+                      <p className="text-sm text-rose-600 mt-1.5 max-w-xs mx-auto bg-rose-50 p-3 rounded-xl border border-rose-100 leading-relaxed">
+                        {onboardGpsError}
+                      </p>
+                    </div>
+                    <button
+                      onClick={captureOnboardGps}
+                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                    >
+                      <Icons.RefreshCw className="w-4 h-4" />
+                      Try Again
+                    </button>
+                  </>
+                )}
+
+                {onboardCoords && !onboardGpsError && (
+                  <>
+                    <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto">
+                      <Icons.MapPin className="w-9 h-9 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">Location Captured!</h3>
+                      <div className="mt-2 bg-emerald-50 border border-emerald-100 rounded-xl p-3 text-xs text-left space-y-1">
+                        <div className="flex justify-between">
+                          <span className="text-slate-500 font-medium">Latitude</span>
+                          <span className="font-mono font-bold text-slate-700">{onboardCoords.latitude.toFixed(6)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-500 font-medium">Longitude</span>
+                          <span className="font-mono font-bold text-slate-700">{onboardCoords.longitude.toFixed(6)}</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={handleOnboardLocationReady}
+                      className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
+                    >
+                      Continue to Face Enrollment
+                      <Icons.ChevronRight className="w-4 h-4" />
+                    </button>
+                  </>
+                )}
+              </motion.div>
+            )}
+
+            {/* Onboarding Step 2 — Face Enrollment */}
+            {loginStep === 'onboarding-face' && (
+              <motion.div
+                key="onboard-face"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <div className="flex items-center justify-center gap-2 text-xs text-slate-400 mb-4">
+                  <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                    <Icons.CheckCircle className="w-3.5 h-3.5" /> Credentials
+                  </span>
+                  <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                  <span className="flex items-center gap-1 text-emerald-600 font-semibold">
+                    <Icons.CheckCircle className="w-3.5 h-3.5" /> Location
+                  </span>
+                  <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-300" />
+                  <span className="flex items-center gap-1 text-indigo-600 font-semibold">
+                    <Icons.ScanFace className="w-3.5 h-3.5" /> Face Enroll
+                  </span>
+                </div>
+                <FaceEnrollment
+                  mode="signup"
+                  onSuccess={executeOnboarding}
+                />
+              </motion.div>
             )}
           </>
         ) : (
@@ -729,8 +905,7 @@ export default function Login() {
                 <button
                   type="submit"
                   disabled={loading}
-                  style={activeBgStyle}
-                  className="w-full py-3 rounded-xl text-white font-semibold text-sm hover:brightness-105 active:brightness-95 transition-all shadow-lg shadow-indigo-600/10 mt-2 flex items-center justify-center gap-2 disabled:opacity-60"
+                  className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm transition-all shadow-lg shadow-indigo-600/20 mt-2 flex items-center justify-center gap-2 disabled:opacity-60"
                 >
                   {loading ? (
                     <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -779,8 +954,7 @@ export default function Login() {
                     </div>
                     <button
                       onClick={captureRegGps}
-                      style={activeBgStyle}
-                      className="w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
                     >
                       <Icons.MapPin className="w-4 h-4" />
                       Allow Location Access
@@ -854,8 +1028,7 @@ export default function Login() {
                     </div>
                     <button
                       onClick={handleRegLocationReady}
-                      style={activeBgStyle}
-                      className="w-full py-3 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2"
+                      className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/20"
                     >
                       <Icons.ScanFace className="w-4 h-4" />
                       Continue to Face Enrollment

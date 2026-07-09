@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useThemeStore } from '../store/themeStore';
@@ -16,6 +16,61 @@ export default function Dashboard() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
+  // File upload and History timeline states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingRecordId, setUploadingRecordId] = useState<string | null>(null);
+  const [activeHistoryRecord, setActiveHistoryRecord] = useState<any | null>(null);
+  const [historyActivities, setHistoryActivities] = useState<any[]>([]);
+  const [historyDocuments, setHistoryDocuments] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const handleUploadClick = (recordId: string) => {
+    setUploadingRecordId(recordId);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingRecordId) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('recordId', uploadingRecordId);
+
+    try {
+      await api.post('/documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      alert('File uploaded successfully!');
+    } catch (err) {
+      alert('Failed to upload file.');
+    } finally {
+      setUploadingRecordId(null);
+    }
+  };
+
+  const openHistory = async (rec: any) => {
+    setActiveHistoryRecord(rec);
+    setLoadingHistory(true);
+    try {
+      const [activitiesRes, docsRes] = await Promise.all([
+        api.get(`/records/leads/${rec._id}/activities`),
+        api.get(`/documents`, { params: { recordId: rec._id } })
+      ]);
+      setHistoryActivities(activitiesRes.data);
+      setHistoryDocuments(docsRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   // Fetch live dashboard metrics from database with 5s polling intervals
   const { data: metricsData, isLoading, refetch } = useQuery({
     queryKey: ['dashboard-metrics'],
@@ -23,7 +78,7 @@ export default function Dashboard() {
       const res = await api.get('/dashboard/metrics');
       return res.data;
     },
-    refetchInterval: 5000 // Real-time polling auto-refresh
+    refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
   useEffect(() => {
@@ -84,14 +139,13 @@ export default function Dashboard() {
     { name: 'Closed Won', val: metricsData?.pipelineData?.['Closed Won'] || 0, color: 'from-violet-60 to-fuchsia-500', pct: '27%' }
   ];
 
-  // Funnel data derived dynamically
   const funnelData = [
     { stage: 'Prospecting', value: metricsData?.pipelineData?.['Prospecting'] || 0 },
     { stage: 'Qualification', value: metricsData?.pipelineData?.['Qualification'] || 0 },
     { stage: 'Proposal', value: metricsData?.pipelineData?.['Proposal'] || 0 },
     { stage: 'Negotiation', value: metricsData?.pipelineData?.['Negotiation'] || 0 },
     { stage: 'Closed Won', value: metricsData?.pipelineData?.['Closed Won'] || 0 }
-  ];
+  ].sort((a, b) => b.value - a.value);
 
   // Find max value in funnel to scale percentages
   const maxFunnelVal = Math.max(...funnelData.map(d => d.value), 1);
@@ -198,7 +252,7 @@ export default function Dashboard() {
       <div className="mb-10">
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
-            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Dashboard-Current Month</h1>
+            <h1 className="text-2xl uppercase font-black text-slate-800 tracking-tight">Dashboard-Current Month</h1>
             <Link 
               to="/modules/leads/new" 
               className="px-5 py-2 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-400 hover:to-lime-500 text-white shadow-lg shadow-lime-500/30 text-sm font-extrabold rounded-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-1.5"
@@ -428,10 +482,53 @@ export default function Dashboard() {
                       <span className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm">Followup From</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">WA Chat</button>
-                      <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Call</button>
-                      <button className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Upload File</button>
-                      <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Edit</Link>
+                      <button 
+                        onClick={() => {
+                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                          const cleanPhone = phone.replace(/\D/g, '');
+                          if (cleanPhone) {
+                            window.open(`https://wa.me/${cleanPhone}`, '_blank');
+                          } else {
+                            alert('No phone number available for this lead.');
+                          }
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        WA Chat
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                          const cleanPhone = phone.replace(/\D/g, '');
+                          if (cleanPhone) {
+                            window.location.href = `tel:${cleanPhone}`;
+                          } else {
+                            alert('No phone number available for this lead.');
+                          }
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        Call
+                      </button>
+                      
+                      <button 
+                        onClick={() => handleUploadClick(rec._id)}
+                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        Upload File
+                      </button>
+                      
+                      <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
+                        Edit
+                      </Link>
+
+                      <button 
+                        onClick={() => openHistory(rec)}
+                        className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        History
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -507,6 +604,121 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Hidden file uploader */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        className="hidden" 
+      />
+
+      {/* Record History & Timeline Modal */}
+      {activeHistoryRecord && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+              <div>
+                <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+                  Lead Audit History
+                </h3>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  {activeHistoryRecord.data?.firstName} {activeHistoryRecord.data?.lastName}
+                </p>
+              </div>
+              <button 
+                onClick={() => setActiveHistoryRecord(null)}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-400 transition-colors"
+              >
+                <Icons.X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {loadingHistory ? (
+                <div className="flex justify-center items-center py-12">
+                  <Icons.Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                </div>
+              ) : (
+                <>
+                  {/* Documents Section */}
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Icons.File className="w-3.5 h-3.5 text-amber-500" /> Attached Documents ({historyDocuments.length})
+                    </h4>
+                    {historyDocuments.length > 0 ? (
+                      <div className="space-y-2">
+                        {historyDocuments.map((doc: any) => (
+                          <div key={doc._id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-805">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Icons.FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{doc.name}</p>
+                                <p className="text-[10px] text-slate-400">{(doc.size / 1024).toFixed(1)} KB</p>
+                              </div>
+                            </div>
+                            <a 
+                              href={`http://localhost:5000${doc.filePath}`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                            >
+                              <Icons.Download className="w-3.5 h-3.5" /> Download
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No files attached to this record.</p>
+                    )}
+                  </div>
+
+                  {/* Timeline Section */}
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-455 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Icons.Clock className="w-3.5 h-3.5 text-indigo-500" /> System Activities
+                    </h4>
+                    {historyActivities.length > 0 ? (
+                      <div className="relative border-l border-slate-100 dark:border-slate-800 ml-2.5 pl-5 space-y-5">
+                        {historyActivities.map((act: any) => (
+                          <div key={act._id} className="relative">
+                            <span className="absolute -left-[26px] top-1 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-white dark:ring-slate-900" />
+                            <div className="text-xs">
+                              <p className="font-semibold text-slate-700 dark:text-slate-200">{act.action}</p>
+                              {act.details && Object.keys(act.details).length > 0 && (
+                                <p className="text-[11px] text-slate-500 mt-0.5">
+                                  {act.details.status && `Status: ${act.details.status}`}
+                                  {act.details.assignedTo && ` Assigned To: ${act.details.assignedTo}`}
+                                </p>
+                              )}
+                              <p className="text-[10px] text-slate-400 mt-1">
+                                {act.performedBy ? `${act.performedBy.firstName} ${act.performedBy.lastName}` : 'System'} • {new Date(act.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No activity log found for this record.</p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button 
+                onClick={() => setActiveHistoryRecord(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

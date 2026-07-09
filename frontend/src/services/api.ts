@@ -21,7 +21,7 @@ api.interceptors.request.use(
 
     // 2. Inject tenant ID context
     const tenantId = localStorage.getItem('tenantId');
-    if (tenantId) {
+    if (tenantId && tenantId !== 'undefined' && tenantId !== 'null') {
       config.headers['x-tenant-id'] = tenantId;
     }
 
@@ -36,7 +36,7 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    if ((error.response?.status === 401 || error.response?.status === 403) && !originalRequest._retry) {
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       try {
         const refreshToken = localStorage.getItem('refreshToken');
@@ -68,6 +68,15 @@ api.interceptors.response.use(
         if (window.location.pathname !== '/login') {
           window.location.href = '/login';
         }
+      }
+    } else if (error.response?.status === 404 && originalRequest.url?.includes('/auth/')) {
+      // User or auth endpoint not found (occurs after db clear/seeding) — log out immediately
+      localStorage.removeItem('token');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      localStorage.removeItem('tenantId');
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
       }
     }
 

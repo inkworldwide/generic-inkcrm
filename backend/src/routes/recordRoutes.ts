@@ -17,6 +17,16 @@ router.use(authenticate);
 router.use(requireTenant);
 
 // Helper: Check Role Permission dynamically
+const matchModuleName = (permName: string, targetName: string): boolean => {
+  const p = permName.toLowerCase();
+  const t = targetName.toLowerCase();
+  if (p === t) return true;
+  if (p === t + 's' || t === p + 's') return true;
+  if (p === t.replace(/y$/, 'ies') || t === p.replace(/y$/, 'ies')) return true;
+  return false;
+};
+
+// Helper: Check Role Permission dynamically
 const authorizeModuleAction = async (
   req: Request,
   res: Response,
@@ -33,7 +43,7 @@ const authorizeModuleAction = async (
     }
 
     const permission = role.permissions.modules.find(
-      (m) => m.moduleName.toLowerCase() === moduleName.toLowerCase()
+      (m) => matchModuleName(m.moduleName, moduleName)
     );
 
     if (!permission) return { allowed: false, scope: 'none' as any };
@@ -554,6 +564,22 @@ router.post('/transfer/leads', async (req: Request, res: Response): Promise<void
   } catch (error: any) {
     console.error('Failed to transfer leads:', error);
     res.status(500).json({ error: 'Failed to transfer leads.' });
+  }
+});
+
+// GET record activity history
+router.get('/:apiPath/:id/activities', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const activities = await Activity.find({
+      organizationId: req.organizationId,
+      recordId: new mongoose.Types.ObjectId(req.params.id)
+    })
+    .populate('performedBy', 'firstName lastName email')
+    .sort({ createdAt: -1 });
+
+    res.status(200).json(activities);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to retrieve record activities.' });
   }
 });
 

@@ -94,7 +94,12 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     root.style.setProperty('--header-bg', settings.headerBg || '#ffffff');
     root.style.setProperty('--font-family', `${settings.fontFamily || 'Inter'}, sans-serif`);
 
-    // Force light mode as requested by removing any dark class
-    root.classList.remove('dark');
+    // Apply dark/light class based on user override or branding defaults
+    const isDark = localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && settings.mode === 'dark');
+    if (isDark) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
   }
 }));

@@ -14,8 +14,9 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
   const [enrollmentComplete, setEnrollmentComplete] = useState(false);
   const [progress, setProgress] = useState(0);
   
-  // Track how many good frames we've averaged
-  const [descriptors, setDescriptors] = useState<Float32Array[]>([]);
+  // Track descriptors and interval using refs to avoid render-stage state update warnings
+  const descriptorsRef = useRef<Float32Array[]>([]);
+  const detectionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const loadModels = async () => {
@@ -40,9 +41,14 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
         console.error('Failed to fetch biometric enrollment status', e);
       }
     };
-    checkEnrollmentStatus();
+
+    if (mode === 'settings' && localStorage.getItem('token')) {
+      checkEnrollmentStatus();
+    }
     
-    return () => stopCamera();
+    return () => {
+      stopCamera();
+    };
   }, []);
 
   const startCamera = async () => {
@@ -63,7 +69,7 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setStatus('Please look directly at the camera. Processing...');
-          setDescriptors([]);
+          descriptorsRef.current = [];
           setProgress(0);
         } else {
           setIsCameraActive(false);
@@ -79,6 +85,10 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
   };
 
   const stopCamera = () => {
+    if (detectionIntervalRef.current) {
+      clearInterval(detectionIntervalRef.current);
+      detectionIntervalRef.current = null;
+    }
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach(track => track.stop());
@@ -89,7 +99,11 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
   const handleVideoPlay = () => {
     if (enrollmentComplete) return;
 
-    let detectionInterval = setInterval(async () => {
+    if (detectionIntervalRef.current) {
+      clearInterval(detectionIntervalRef.current);
+    }
+
+    detectionIntervalRef.current = setInterval(async () => {
       if (!videoRef.current || !isModelLoaded || enrollmentComplete) return;
       
       const detections = await faceapi.detectAllFaces(videoRef.current)
@@ -106,27 +120,26 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
         }
 
         // Collect descriptors over a few frames to average out noise
-        setDescriptors(prev => {
-          const newDesc = [...prev, detection.descriptor];
-          const newProgress = Math.min((newDesc.length / 4) * 100, 100);
-          setProgress(newProgress);
-          
-          if (newDesc.length === 4) {
-            clearInterval(detectionInterval);
-            finishEnrollment(newDesc);
+        descriptorsRef.current.push(detection.descriptor);
+        const count = descriptorsRef.current.length;
+        const newProgress = Math.min((count / 4) * 100, 100);
+        setProgress(newProgress);
+        
+        if (count === 4) {
+          if (detectionIntervalRef.current) {
+            clearInterval(detectionIntervalRef.current);
+            detectionIntervalRef.current = null;
           }
-          return newDesc;
-        });
+          finishEnrollment(descriptorsRef.current);
+        }
       } else if (detections.length > 1) {
         setStatus('Multiple faces detected! Only one face is allowed.');
-        setDescriptors([]);
+        descriptorsRef.current = [];
         setProgress(0);
       } else {
         setStatus('No face detected. Center your face.');
       }
     }, 100);
-
-    return () => clearInterval(detectionInterval);
   };
 
   const finishEnrollment = async (collectedDescriptors: Float32Array[]) => {
@@ -271,12 +284,12 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
 
 
 
-            {onCancel && (
+            {onCancel && mode !== 'signup' && (
               <button 
                 onClick={onCancel}
                 className="mt-6 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
               >
-                {mode === 'signup' ? 'Skip for Now' : 'Cancel'}
+                Cancel
               </button>
             )}
           </div>

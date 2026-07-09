@@ -32,8 +32,24 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const { fetchModules } = useModuleStore();
-  const { user } = useAuthStore();
+  const { user, logout } = useAuthStore();
   const { branding, fetchBranding } = useThemeStore();
+
+  const [darkMode, setDarkMode] = useState(() => {
+    return localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && branding?.themeSettings?.mode === 'dark');
+  });
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [darkMode]);
 
   useEffect(() => {
     if (!branding) {
@@ -45,15 +61,26 @@ export default function Layout({ children }: LayoutProps) {
   const { data: leadsData } = useQuery({
     queryKey: ['sidebar-leads'],
     queryFn: async () => {
-      try {
-        const res = await api.get('/records/leads', { params: { limit: 100 } });
-        return res.data;
-      } catch (err) {
-        return { records: [] };
-      }
+      const res = await api.get('/records/leads', { params: { limit: 100 } });
+      return res.data;
     },
-    refetchInterval: 5000
+    refetchInterval: (query) => (query.state.error ? false : 5000)
   });
+
+  const { data: notificationsData } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: async () => {
+      const res = await api.get('/audit', { params: { limit: 5 } });
+      return res.data;
+    },
+    refetchInterval: (query) => (query.state.error ? false : 15000),
+    enabled: !!user
+  });
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     fetchModules();
@@ -190,17 +217,17 @@ export default function Layout({ children }: LayoutProps) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 rounded-[26px] bg-white shadow-[0_0_40px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col relative border border-white/20">
+        <main className="flex-1 rounded-[26px] bg-white dark:bg-slate-900 shadow-[0_0_40px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col relative border border-white/20">
           
           {/* Dashboard Header */}
-          <header className="h-[70px] sm:h-[80px] bg-white/80 backdrop-blur-md border-b border-slate-200/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20">
+          <header className="h-[70px] sm:h-[80px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 transition-colors duration-300">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 sm:gap-3 mb-1">
                 <button 
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-1.5 -ml-1.5 text-slate-500 hover:bg-slate-100 rounded-xl transition-colors"
+                  className="lg:hidden p-1.5 -ml-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
                 >
-                  <Icons.Menu className="w-5 h-5" />
+                  <Icons.Menu className="w-5 h-5 dark:text-slate-400" />
                 </button>
                 <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
                   <Icons.Home className="w-3 h-3 hidden sm:block" />
@@ -208,35 +235,157 @@ export default function Layout({ children }: LayoutProps) {
                   <span>Dashboard</span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-slate-800 tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
                 Overview
-                <span className="px-2 py-0.5 rounded-full bg-lime-100 text-lime-700 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
+                <span className="px-2 py-0.5 rounded-full bg-lime-100 dark:bg-lime-950/40 text-lime-700 dark:text-lime-400 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
               </h2>
             </div>
 
-            <div className="flex items-center gap-5">
-              <div className="flex items-center gap-2 bg-slate-100/80 rounded-full p-1 border border-slate-200/50 shadow-inner">
-                <button className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-white shadow-sm transition-all">
-                  <Icons.Moon className="w-4 h-4" />
+            <div className="flex items-center gap-5 relative">
+              {/* Backdrops to close popovers when clicking outside */}
+              {(showNotifications || showUserDropdown) && (
+                <div 
+                  className="fixed inset-0 z-30" 
+                  onClick={() => {
+                    setShowNotifications(false);
+                    setShowUserDropdown(false);
+                  }}
+                />
+              )}
+
+              {/* Theme & Notification Buttons */}
+              <div className="flex items-center gap-2 bg-slate-100/80 dark:bg-slate-800 rounded-full p-1 border border-slate-200/50 dark:border-slate-700/50 shadow-inner z-40">
+                {/* Theme Toggle */}
+                <button 
+                  onClick={() => setDarkMode(!darkMode)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 shadow-sm transition-all"
+                  title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+                >
+                  {darkMode ? (
+                    <Icons.Sun className="w-4 h-4 text-amber-500 animate-pulse" />
+                  ) : (
+                    <Icons.Moon className="w-4 h-4" />
+                  )}
                 </button>
-                <button className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:bg-white shadow-sm transition-all relative">
+
+                {/* Notifications Bell */}
+                <button 
+                  onClick={() => {
+                    setShowNotifications(!showNotifications);
+                    setShowUserDropdown(false);
+                  }}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 shadow-sm transition-all relative"
+                  title="View Alerts"
+                >
                   <Icons.Bell className="w-4 h-4" />
-                  <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+                  {notificationsData && notificationsData.length > 0 && (
+                    <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+                  )}
                 </button>
               </div>
 
-              <div className="h-8 w-px bg-slate-200"></div>
+              {/* Notifications Popover */}
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 md:right-[110px] top-12 w-[calc(100vw-32px)] sm:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/80 p-4 z-40"
+                  >
+                    <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800 mb-3">
+                      <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                        <Icons.Bell className="w-3.5 h-3.5 text-indigo-500" /> Recent Actions
+                      </h4>
+                      <span className="text-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-semibold">Live</span>
+                    </div>
 
-              <div className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 p-1.5 rounded-full pr-4 transition-colors border border-transparent hover:border-slate-200">
+                    <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                      {notificationsData && notificationsData.length > 0 ? (
+                        notificationsData.map((item: any) => (
+                          <div key={item._id} className="flex gap-2.5 items-start text-xs border-b border-slate-50 dark:border-slate-800/30 pb-2.5 last:border-0 last:pb-0">
+                            <div className="p-1 rounded-lg bg-slate-50 dark:bg-slate-800 text-indigo-500 mt-0.5">
+                              <Icons.Activity className="w-3 h-3" />
+                            </div>
+                            <div className="flex-1 text-left min-w-0">
+                              <p className="font-semibold text-slate-700 dark:text-slate-200 truncate">
+                                {item.action}
+                              </p>
+                              <p className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
+                                <span>{item.performedBy?.firstName || 'System'}</span>
+                                <span>{new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <div className="text-center py-6 text-slate-400 text-xs">
+                          No recent actions logged.
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              <div className="h-8 w-px bg-slate-200 dark:bg-slate-800 z-40"></div>
+
+              {/* User Dropdown Button */}
+              <div 
+                onClick={() => {
+                  setShowUserDropdown(!showUserDropdown);
+                  setShowNotifications(false);
+                }}
+                className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-1.5 rounded-full pr-4 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700 z-40"
+              >
                 <div className="w-9 h-9 rounded-full bg-indigo-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
                   {user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || 'AD' : 'AD'}
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-sm font-semibold text-slate-700 leading-none">{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User' : 'Admin User'}</p>
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200 leading-none">{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User' : 'Admin User'}</p>
                   <p className="text-[10px] text-slate-400 font-medium mt-1">{user?.email || 'ink@crm.com'}</p>
                 </div>
                 <Icons.ChevronDown className="w-4 h-4 text-slate-400 ml-2" />
               </div>
+
+              {/* User Dropdown Menu */}
+              <AnimatePresence>
+                {showUserDropdown && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-14 w-52 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/80 py-2.5 z-40"
+                  >
+                    <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 mb-2 text-left">
+                      <p className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">Signed in as</p>
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate mt-0.5">{user?.email || 'ink@crm.com'}</p>
+                    </div>
+
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        navigate('/settings');
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors flex items-center gap-2.5"
+                    >
+                      <Icons.Settings className="w-4 h-4 text-indigo-500" />
+                      Account Settings
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setShowUserDropdown(false);
+                        handleLogout();
+                      }}
+                      className="w-full text-left px-4 py-2.5 text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-colors flex items-center gap-2.5 border-t border-slate-100 dark:border-slate-800 mt-2 pt-2.5"
+                    >
+                      <Icons.LogOut className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </header>
 

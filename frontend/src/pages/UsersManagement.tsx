@@ -16,6 +16,8 @@ export default function UsersManagement() {
   });
   const [userEditing, setUserEditing] = useState(false);
   const [userModalOpen, setUserModalOpen] = useState(false);
+  const [managerModalOpen, setManagerModalOpen] = useState(false);
+  const [selectedUserForManager, setSelectedUserForManager] = useState<any>(null);
 
   const [loading, setLoading] = useState(true);
 
@@ -100,6 +102,19 @@ export default function UsersManagement() {
     }
   };
 
+  const handleAssignManager = async (managerId: string) => {
+    try {
+      if (!selectedUserForManager) return;
+      await api.put(`/auth/users/${selectedUserForManager._id}`, { reportingManager: managerId });
+      alert('Reporting manager assigned successfully.');
+      setManagerModalOpen(false);
+      setSelectedUserForManager(null);
+      loadData();
+    } catch (err: any) {
+      alert(err.response?.data?.error || 'Failed to assign reporting manager.');
+    }
+  };
+
   if (loading) {
     return (
       <div className="space-y-6 p-6">
@@ -112,7 +127,7 @@ export default function UsersManagement() {
   return (
     <div className="space-y-8 p-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">
           Users Management
         </h1>
         <button
@@ -133,13 +148,14 @@ export default function UsersManagement() {
           <table className="w-full text-xs text-left border-collapse">
             <thead>
               <tr className="border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider h-10">
-                <th className="py-2 px-4">Employee</th>
+                <th className="py-2 px-4">EMPLOYEE</th>
                 <th className="py-2 px-4">ID</th>
-                <th className="py-2 px-4 text-center">Skip Face</th>
-                <th className="py-2 px-4 text-center">Skip Location</th>
-                <th className="py-2 px-4 text-center">Account Status</th>
-                <th className="py-2 px-4">Role</th>
-                <th className="py-2 px-4 text-center w-40">Action</th>
+                <th className="py-2 px-4 text-center">SKIP FACE</th>
+                <th className="py-2 px-4 text-center">SKIP LOCATION</th>
+                <th className="py-2 px-4 text-center">ACCOUNT STATUS</th>
+                <th className="py-2 px-4">ROLE</th>
+                <th className="py-2 px-4">REPORTING MANAGER</th>
+                <th className="py-2 px-4 text-center w-40">ACTION</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -221,19 +237,22 @@ export default function UsersManagement() {
                     </div>
                   </td>
 
-                  {/* Dropdown Role Selector */}
-                  <td className="px-4 py-2">
-                    <select
-                      value={u.roleId?._id || ''}
-                      onChange={(e) => handleUserRoleChange(u._id, e.target.value)}
-                      className="px-2.5 py-1 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
-                    >
-                      {roles.map((r) => (
-                        <option key={r._id} value={r._id}>
-                          {r.name}
-                        </option>
-                      ))}
-                    </select>
+                  {/* Role (Read Only) */}
+                  <td className="px-4 py-2 text-xs font-semibold text-slate-700">
+                    {u.roleId?.name || 'No Role'}
+                  </td>
+
+                  {/* Reporting Manager */}
+                  <td className="px-4 py-2 cursor-pointer" onClick={() => {
+                    setSelectedUserForManager(u);
+                    setManagerModalOpen(true);
+                  }}>
+                    <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg transition-colors w-max">
+                      <Icons.UserPlus className="w-3.5 h-3.5 text-slate-400" />
+                      <span className="text-xs font-semibold text-slate-700">
+                        {u.reportingManager ? `${u.reportingManager.firstName} ${u.reportingManager.lastName}` : 'Assign Manager'}
+                      </span>
+                    </div>
                   </td>
 
                   {/* Action Buttons */}
@@ -343,6 +362,53 @@ export default function UsersManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Manager Assignment Modal */}
+      {managerModalOpen && selectedUserForManager && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-slate-200 shadow-xl space-y-4">
+            <h3 className="text-lg font-bold text-slate-800">
+              Assign Reporting Manager
+            </h3>
+            <p className="text-xs text-slate-500">
+              Select a manager for {selectedUserForManager.firstName} {selectedUserForManager.lastName}.
+            </p>
+            <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
+              {users.filter(user => user._id !== selectedUserForManager._id).map(manager => (
+                <button
+                  key={manager._id}
+                  type="button"
+                  onClick={() => handleAssignManager(manager._id)}
+                  className="w-full text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 transition-all flex items-center gap-3"
+                >
+                  <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 uppercase">
+                    {manager.firstName ? manager.firstName[0] : 'U'}
+                  </div>
+                  <div>
+                    <div className="text-sm font-bold text-slate-800">{manager.firstName} {manager.lastName}</div>
+                    <div className="text-xs text-slate-500">{manager.roleId?.name || 'No Role'}</div>
+                  </div>
+                </button>
+              ))}
+              {users.filter(user => user._id !== selectedUserForManager._id).length === 0 && (
+                <div className="text-center text-slate-500 text-xs py-4">No other users available.</div>
+              )}
+            </div>
+            <div className="flex justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setManagerModalOpen(false);
+                  setSelectedUserForManager(null);
+                }}
+                className="px-5 py-2.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold transition-all"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}

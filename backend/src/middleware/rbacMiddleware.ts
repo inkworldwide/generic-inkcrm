@@ -10,6 +10,15 @@ declare global {
   }
 }
 
+const matchModuleName = (permName: string, targetName: string): boolean => {
+  const p = permName.toLowerCase();
+  const t = targetName.toLowerCase();
+  if (p === t) return true;
+  if (p === t + 's' || t === p + 's') return true;
+  if (p === t.replace(/y$/, 'ies') || t === p.replace(/y$/, 'ies')) return true;
+  return false;
+};
+
 export const checkPermission = (
   moduleName: string,
   action: 'create' | 'read' | 'update' | 'delete'
@@ -33,9 +42,9 @@ export const checkPermission = (
         return next();
       }
 
-      // Find module permission configuration
+      // Find module permission configuration using singular/plural helper
       const modulePerm = role.permissions.modules.find(
-        (p) => p.moduleName.toLowerCase() === moduleName.toLowerCase()
+        (p) => matchModuleName(p.moduleName, moduleName)
       );
 
       if (!modulePerm) {

@@ -54,7 +54,7 @@ export default function Status() {
   return (
     <div className="space-y-6 text-left">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">System Status & Logs</h1>
+        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">System Status & Logs</h1>
         <p className="text-sm text-slate-500 mt-1">Real-time database performance and administrative audit logs</p>
       </div>
 

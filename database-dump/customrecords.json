@@ -1,0 +1,1145 @@
+[
+  {
+    "_id": "6a4f853ed1277b454ae893b0",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8936d",
+    "data": {
+      "companyName": "Stripe Inc",
+      "website": "https://stripe.com",
+      "employees": 8000,
+      "industry": "Finance"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.962Z",
+    "updatedAt": "2026-07-09T11:25:50.962Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893b2",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8936d",
+    "data": {
+      "companyName": "Apple Inc",
+      "website": "https://apple.com",
+      "employees": 150000,
+      "industry": "Software"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.965Z",
+    "updatedAt": "2026-07-09T11:25:50.965Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893b4",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8936d",
+    "data": {
+      "companyName": "Tesla Motors",
+      "website": "https://tesla.com",
+      "employees": 90000,
+      "industry": "Manufacturing"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.966Z",
+    "updatedAt": "2026-07-09T11:25:50.966Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893b6",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8936d",
+    "data": {
+      "companyName": "Netflix Inc",
+      "website": "https://netflix.com",
+      "employees": 12000,
+      "industry": "Retail"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.968Z",
+    "updatedAt": "2026-07-09T11:25:50.968Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893d0",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89382",
+    "data": {
+      "name": "Sales & Marketing",
+      "code": "SALES"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.984Z",
+    "updatedAt": "2026-07-09T11:25:50.984Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893d2",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89382",
+    "data": {
+      "name": "Finance & Underwriting",
+      "code": "FINANCE"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.985Z",
+    "updatedAt": "2026-07-09T11:25:50.985Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893d4",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89386",
+    "data": {
+      "name": "Enterprise CRM Suite",
+      "code": "CRM_ENT"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.986Z",
+    "updatedAt": "2026-07-09T11:25:50.986Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893d6",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89386",
+    "data": {
+      "name": "Cloud Integration API",
+      "code": "API_CLOUD"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.987Z",
+    "updatedAt": "2026-07-09T11:25:50.987Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893d8",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8938a",
+    "data": {
+      "bankName": "State Bank of India",
+      "code": "SBI"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.988Z",
+    "updatedAt": "2026-07-09T11:25:50.988Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893da",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8938a",
+    "data": {
+      "bankName": "HDFC Bank",
+      "code": "HDFC"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.989Z",
+    "updatedAt": "2026-07-09T11:25:50.989Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893dc",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8938a",
+    "data": {
+      "bankName": "ICICI Bank",
+      "code": "ICICI"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.991Z",
+    "updatedAt": "2026-07-09T11:25:50.991Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893de",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8938a",
+    "data": {
+      "bankName": "Axis Bank",
+      "code": "AXIS"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.992Z",
+    "updatedAt": "2026-07-09T11:25:50.992Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893e0",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8938a",
+    "data": {
+      "bankName": "IndusInd Bank",
+      "code": "INDUSIND"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.993Z",
+    "updatedAt": "2026-07-09T11:25:50.993Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893e2",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8938e",
+    "data": {
+      "bank": "State Bank of India, HDFC Bank",
+      "loanType": "LOAN AGAINST PROPERTY LOAN",
+      "psm": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.994Z",
+    "updatedAt": "2026-07-09T11:25:50.994Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893e4",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "HotLead_1",
+      "lastName": "Test",
+      "company": "LeadCorp",
+      "email": "hot_1@test.com",
+      "status": "Hot",
+      "source": "Website",
+      "leadScore": 90,
+      "budget": 12000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.995Z",
+    "updatedAt": "2026-07-09T11:25:50.995Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893e6",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "HotLead_2",
+      "lastName": "Test",
+      "company": "LeadCorp",
+      "email": "hot_2@test.com",
+      "status": "Hot",
+      "source": "Website",
+      "leadScore": 90,
+      "budget": 14000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.997Z",
+    "updatedAt": "2026-07-09T11:25:50.997Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893e8",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "HotLead_3",
+      "lastName": "Test",
+      "company": "LeadCorp",
+      "email": "hot_3@test.com",
+      "status": "Hot",
+      "source": "Website",
+      "leadScore": 90,
+      "budget": 16000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:50.999Z",
+    "updatedAt": "2026-07-09T11:25:50.999Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893ea",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "HotLead_4",
+      "lastName": "Test",
+      "company": "LeadCorp",
+      "email": "hot_4@test.com",
+      "status": "Hot",
+      "source": "Website",
+      "leadScore": 90,
+      "budget": 18000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.001Z",
+    "updatedAt": "2026-07-09T11:25:51.001Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893ec",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "HotLead_5",
+      "lastName": "Test",
+      "company": "LeadCorp",
+      "email": "hot_5@test.com",
+      "status": "Hot",
+      "source": "Website",
+      "leadScore": 90,
+      "budget": 20000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.003Z",
+    "updatedAt": "2026-07-09T11:25:51.003Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893ee",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "WarmLead_1",
+      "lastName": "Test",
+      "company": "Acme Inc",
+      "email": "warm@test.com",
+      "status": "Warm",
+      "source": "Referral",
+      "leadScore": 70,
+      "budget": 8000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.005Z",
+    "updatedAt": "2026-07-09T11:25:51.005Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893f0",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DocPendingLead_1",
+      "lastName": "Test",
+      "company": "TechFlow",
+      "email": "docpending@test.com",
+      "status": "Document Pending",
+      "source": "Cold Call",
+      "leadScore": 60,
+      "budget": 4500,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.006Z",
+    "updatedAt": "2026-07-09T11:25:51.006Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893f2",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DisbursedLead_1",
+      "lastName": "Test",
+      "company": "PartnerCorp",
+      "email": "disbursed_1@test.com",
+      "status": "Disbursed",
+      "source": "Website",
+      "leadScore": 100,
+      "budget": 20000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.007Z",
+    "updatedAt": "2026-07-09T11:25:51.007Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893f4",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DisbursedLead_2",
+      "lastName": "Test",
+      "company": "PartnerCorp",
+      "email": "disbursed_2@test.com",
+      "status": "Disbursed",
+      "source": "Website",
+      "leadScore": 100,
+      "budget": 20000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.008Z",
+    "updatedAt": "2026-07-09T11:25:51.008Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893f6",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DisbursedLead_3",
+      "lastName": "Test",
+      "company": "PartnerCorp",
+      "email": "disbursed_3@test.com",
+      "status": "Disbursed",
+      "source": "Website",
+      "leadScore": 100,
+      "budget": 20000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.010Z",
+    "updatedAt": "2026-07-09T11:25:51.010Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893f8",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DisbursedLead_4",
+      "lastName": "Test",
+      "company": "PartnerCorp",
+      "email": "disbursed_4@test.com",
+      "status": "Disbursed",
+      "source": "Website",
+      "leadScore": 100,
+      "budget": 20000,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.011Z",
+    "updatedAt": "2026-07-09T11:25:51.011Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893fa",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "FollowupLead_1",
+      "lastName": "Test",
+      "company": "FollowInc",
+      "email": "follow_1@test.com",
+      "status": "Followup",
+      "source": "Social Media",
+      "leadScore": 50,
+      "budget": 5000,
+      "assignedTo": "Ink CRM",
+      "followUpDate": "2026-07-09T11:25:50.995Z"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.012Z",
+    "updatedAt": "2026-07-09T11:25:51.012Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893fc",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "FollowupLead_2",
+      "lastName": "Test",
+      "company": "FollowInc",
+      "email": "follow_2@test.com",
+      "status": "Followup",
+      "source": "Social Media",
+      "leadScore": 50,
+      "budget": 5000,
+      "assignedTo": "Ink CRM",
+      "followUpDate": "2026-07-09T11:25:50.995Z"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.014Z",
+    "updatedAt": "2026-07-09T11:25:51.014Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae893fe",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "FollowupLead_3",
+      "lastName": "Test",
+      "company": "FollowInc",
+      "email": "follow_3@test.com",
+      "status": "Followup",
+      "source": "Social Media",
+      "leadScore": 50,
+      "budget": 5000,
+      "assignedTo": "Ink CRM",
+      "followUpDate": "2026-07-09T11:25:50.995Z"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.015Z",
+    "updatedAt": "2026-07-09T11:25:51.015Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89400",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DroppedLead_1",
+      "lastName": "Test",
+      "company": "DropCorp",
+      "email": "dropped_1@test.com",
+      "status": "Dropped",
+      "source": "Website",
+      "leadScore": 10,
+      "budget": 1500,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.017Z",
+    "updatedAt": "2026-07-09T11:25:51.017Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89402",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DroppedLead_2",
+      "lastName": "Test",
+      "company": "DropCorp",
+      "email": "dropped_2@test.com",
+      "status": "Dropped",
+      "source": "Website",
+      "leadScore": 10,
+      "budget": 1500,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.018Z",
+    "updatedAt": "2026-07-09T11:25:51.018Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89404",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "DroppedLead_3",
+      "lastName": "Test",
+      "company": "DropCorp",
+      "email": "dropped_3@test.com",
+      "status": "Dropped",
+      "source": "Website",
+      "leadScore": 10,
+      "budget": 1500,
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.019Z",
+    "updatedAt": "2026-07-09T11:25:51.019Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89406",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8934a",
+    "data": {
+      "firstName": "Sarah",
+      "lastName": "Malone",
+      "company": "TechFlow.ai",
+      "email": "sarah@techflow.ai",
+      "phone": "123-456-7890",
+      "status": "Negotiation",
+      "source": "Website",
+      "leadScore": 85,
+      "budget": 18500,
+      "notes": "<p>Sarah is very interested in our payment integration platform.</p>",
+      "companyId": "6a4f853ed1277b454ae893b0",
+      "followUpDate": "2026-07-09T11:25:50.995Z",
+      "assignedTo": "Ink CRM"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.020Z",
+    "updatedAt": "2026-07-09T11:25:51.020Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89408",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89365",
+    "data": {
+      "dealName": "Apple Mobile Suite Deal",
+      "amount": 150000,
+      "stage": "Proposal",
+      "closeDate": "2026-08-23T11:25:51.021Z",
+      "probability": 60,
+      "companyId": "6a4f853ed1277b454ae893b2"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.021Z",
+    "updatedAt": "2026-07-09T11:25:51.021Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8940a",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89365",
+    "data": {
+      "dealName": "Tesla Autopilot Licensing",
+      "amount": 300000,
+      "stage": "Negotiation",
+      "closeDate": "2026-07-24T11:25:51.023Z",
+      "probability": 80,
+      "companyId": "6a4f853ed1277b454ae893b4"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.023Z",
+    "updatedAt": "2026-07-09T11:25:51.023Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8940c",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89365",
+    "data": {
+      "dealName": "Netflix CDN Optimization",
+      "amount": 90000,
+      "stage": "Qualification",
+      "closeDate": "2026-09-07T11:25:51.024Z",
+      "probability": 40,
+      "companyId": "6a4f853ed1277b454ae893b6"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.024Z",
+    "updatedAt": "2026-07-09T11:25:51.024Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8940e",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89365",
+    "data": {
+      "dealName": "Stripe Global Extension",
+      "amount": 120000,
+      "stage": "Closed Won",
+      "closeDate": "2026-06-29T11:25:51.025Z",
+      "probability": 100,
+      "companyId": "6a4f853ed1277b454ae893b0"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.025Z",
+    "updatedAt": "2026-07-09T11:25:51.025Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89410",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "test raja",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-01T06:10:00.000Z",
+    "updatedAt": "2026-07-01T06:10:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89412",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "apmc-cate-a -2k-4k-17-06-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-23T01:32:00.000Z",
+    "updatedAt": "2026-06-23T01:32:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89414",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "b2b-b1-10k-20k-23-06-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-23T00:58:00.000Z",
+    "updatedAt": "2026-06-23T00:58:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89416",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "apmc-cate-a-4k-12k-12-06-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-12T00:45:00.000Z",
+    "updatedAt": "2026-06-12T00:45:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89418",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "vc-ka01-01-10k-11-06-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-11T03:25:00.000Z",
+    "updatedAt": "2026-06-11T03:25:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8941a",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "B2B-B2-25-35K-05-06-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-05T07:32:00.000Z",
+    "updatedAt": "2026-06-05T07:32:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8941c",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "KTK-PL-1001-1100-03-06-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-03T03:13:00.000Z",
+    "updatedAt": "2026-06-03T03:13:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8941e",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "crmdemo2",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-06-01T01:55:00.000Z",
+    "updatedAt": "2026-06-01T01:55:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89420",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "B2B-F1-27-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-27T01:42:00.000Z",
+    "updatedAt": "2026-05-27T01:42:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89422",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "GOVT-PL-DEMO-26-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-26T07:18:00.000Z",
+    "updatedAt": "2026-05-26T07:18:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89424",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "BOMMANAHALLI-E-PL-26-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-26T03:43:00.000Z",
+    "updatedAt": "2026-05-26T03:43:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89426",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "KA-PL-BLY-21-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-21T05:48:00.000Z",
+    "updatedAt": "2026-05-21T05:48:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89428",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "B2B-B1-01 TO 10K-20-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-20T06:21:00.000Z",
+    "updatedAt": "2026-05-20T06:21:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8942a",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "ALAND-EPL-19-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-19T00:20:00.000Z",
+    "updatedAt": "2026-05-19T00:20:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8942c",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae89373",
+    "data": {
+      "campaignName": "KVB-DB-19-05-26",
+      "status": "Active",
+      "type": "Email",
+      "budget": 10000
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-05-18T23:59:00.000Z",
+    "updatedAt": "2026-05-18T23:59:00.000Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8942e",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "moduleId": "6a4f853ed1277b454ae8937c",
+    "data": {
+      "assignmentName": "Sarah Malone - Summer Promo 2026",
+      "campaign": "Summer Promo 2026",
+      "lead": "Sarah Malone",
+      "assignedDate": "2026-07-09T11:25:50.995Z"
+    },
+    "createdBy": "6a4f853ed1277b454ae89334",
+    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdAt": "2026-07-09T11:25:51.045Z",
+    "updatedAt": "2026-07-09T11:25:51.045Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89430",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae8939b",
+    "data": {
+      "courseCode": "CS101",
+      "courseName": "Introduction to Computer Science",
+      "credits": 4,
+      "department": "Computer Science"
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.047Z",
+    "updatedAt": "2026-07-09T11:25:51.047Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89432",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae8939b",
+    "data": {
+      "courseCode": "MATH201",
+      "courseName": "Advanced Calculus",
+      "credits": 3,
+      "department": "Mathematics"
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.048Z",
+    "updatedAt": "2026-07-09T11:25:51.048Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89434",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae8939b",
+    "data": {
+      "courseCode": "PHYS301",
+      "courseName": "Quantum Mechanics",
+      "credits": 4,
+      "department": "Physics"
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.049Z",
+    "updatedAt": "2026-07-09T11:25:51.049Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89436",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae89393",
+    "data": {
+      "studentId": "STU-2026-001",
+      "fullName": "Harry Potter",
+      "email": "harry.potter@hogwarts.edu",
+      "dob": "2008-07-31T00:00:00.000Z",
+      "gradeLevel": "Junior",
+      "gpa": 3.6
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.050Z",
+    "updatedAt": "2026-07-09T11:25:51.050Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89438",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae89393",
+    "data": {
+      "studentId": "STU-2026-002",
+      "fullName": "Hermione Granger",
+      "email": "hermione@hogwarts.edu",
+      "dob": "2008-09-19T00:00:00.000Z",
+      "gradeLevel": "Senior",
+      "gpa": 4
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.051Z",
+    "updatedAt": "2026-07-09T11:25:51.051Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8943a",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae89393",
+    "data": {
+      "studentId": "STU-2026-003",
+      "fullName": "Ron Weasley",
+      "email": "ron@hogwarts.edu",
+      "dob": "2008-03-01T00:00:00.000Z",
+      "gradeLevel": "Junior",
+      "gpa": 2.8
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.052Z",
+    "updatedAt": "2026-07-09T11:25:51.052Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8943c",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "moduleId": "6a4f853ed1277b454ae89393",
+    "data": {
+      "studentId": "STU-2026-004",
+      "fullName": "Draco Malfoy",
+      "email": "draco@hogwarts.edu",
+      "dob": "2008-06-05T00:00:00.000Z",
+      "gradeLevel": "Senior",
+      "gpa": 3.4
+    },
+    "createdBy": "6a4f853ed1277b454ae8933e",
+    "updatedBy": "6a4f853ed1277b454ae8933e",
+    "createdAt": "2026-07-09T11:25:51.054Z",
+    "updatedAt": "2026-07-09T11:25:51.054Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8943e",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "moduleId": "6a4f853ed1277b454ae893a1",
+    "data": {
+      "mrn": "MRN-4493-2",
+      "fullName": "Alice Wonders",
+      "dob": "1992-04-10T00:00:00.000Z",
+      "bloodGroup": "O+",
+      "allergies": "Penicillin",
+      "emergencyPhone": "555-019-2834"
+    },
+    "createdBy": "6a4f853ed1277b454ae89348",
+    "updatedBy": "6a4f853ed1277b454ae89348",
+    "createdAt": "2026-07-09T11:25:51.054Z",
+    "updatedAt": "2026-07-09T11:25:51.054Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89440",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "moduleId": "6a4f853ed1277b454ae893a1",
+    "data": {
+      "mrn": "MRN-1029-3",
+      "fullName": "Bob Builder",
+      "dob": "1985-05-12T00:00:00.000Z",
+      "bloodGroup": "A+",
+      "allergies": "None",
+      "emergencyPhone": "555-021-9988"
+    },
+    "createdBy": "6a4f853ed1277b454ae89348",
+    "updatedBy": "6a4f853ed1277b454ae89348",
+    "createdAt": "2026-07-09T11:25:51.055Z",
+    "updatedAt": "2026-07-09T11:25:51.055Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89442",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "moduleId": "6a4f853ed1277b454ae893a1",
+    "data": {
+      "mrn": "MRN-8849-1",
+      "fullName": "Charlie Brown",
+      "dob": "2001-10-30T00:00:00.000Z",
+      "bloodGroup": "B-",
+      "allergies": "Peanuts",
+      "emergencyPhone": "555-102-4433"
+    },
+    "createdBy": "6a4f853ed1277b454ae89348",
+    "updatedBy": "6a4f853ed1277b454ae89348",
+    "createdAt": "2026-07-09T11:25:51.056Z",
+    "updatedAt": "2026-07-09T11:25:51.056Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89444",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "moduleId": "6a4f853ed1277b454ae893a9",
+    "data": {
+      "appointmentDate": "2026-07-11T11:25:51.057Z",
+      "doctorName": "Dr. Gregory House",
+      "status": "Scheduled",
+      "reason": "<p>Routine diagnostic follow-up on allergy sensitivity.</p>",
+      "patientId": "6a4f853fd1277b454ae8943e"
+    },
+    "createdBy": "6a4f853ed1277b454ae89348",
+    "updatedBy": "6a4f853ed1277b454ae89348",
+    "createdAt": "2026-07-09T11:25:51.057Z",
+    "updatedAt": "2026-07-09T11:25:51.057Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89446",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "moduleId": "6a4f853ed1277b454ae893a9",
+    "data": {
+      "appointmentDate": "2026-07-10T11:25:51.058Z",
+      "doctorName": "Dr. Allison Cameron",
+      "status": "Scheduled",
+      "reason": "<p>Annual cardiovascular diagnostic test.</p>",
+      "patientId": "6a4f853fd1277b454ae89440"
+    },
+    "createdBy": "6a4f853ed1277b454ae89348",
+    "updatedBy": "6a4f853ed1277b454ae89348",
+    "createdAt": "2026-07-09T11:25:51.058Z",
+    "updatedAt": "2026-07-09T11:25:51.058Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89448",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "moduleId": "6a4f853ed1277b454ae893a9",
+    "data": {
+      "appointmentDate": "2026-07-06T11:25:51.059Z",
+      "doctorName": "Dr. Eric Foreman",
+      "status": "Completed",
+      "reason": "<p>Follow up consultation.</p>",
+      "patientId": "6a4f853fd1277b454ae89442"
+    },
+    "createdBy": "6a4f853ed1277b454ae89348",
+    "updatedBy": "6a4f853ed1277b454ae89348",
+    "createdAt": "2026-07-09T11:25:51.059Z",
+    "updatedAt": "2026-07-09T11:25:51.059Z",
+    "__v": 0
+  }
+]

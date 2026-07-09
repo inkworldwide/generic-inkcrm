@@ -108,7 +108,7 @@ export default function WorkflowsList() {
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">Workflow Automations</h1>
+          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">Workflow Automations</h1>
           <p className="text-sm text-slate-500 mt-1">IF-Trigger-THEN-Action background automation engine</p>
         </div>
         <button

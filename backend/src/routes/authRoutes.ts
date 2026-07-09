@@ -214,10 +214,27 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       user.lastFailedLoginAt = undefined;
     }
 
-    // ── Step 2: Location verification (Haversine) — conditional ──────────────
+    // ── Check if first-time onboarding is required ─────────────────────────────
     const hasRegisteredLocation = user.registrationLocation?.latitude !== undefined && 
                                   user.registrationLocation?.longitude !== undefined;
+    const hasFaceEnrolled = user.faceRecognition?.encryptedEmbedding != null;
 
+    if ((!hasRegisteredLocation && !user.skipLocation) || (!hasFaceEnrolled && !user.skipFace)) {
+      await user.save();
+      const tempToken = jwt.sign(
+        { id: user._id, onboarding: true, issuedAt: Date.now() },
+        JWT_SECRET,
+        { expiresIn: '15m' }
+      );
+      res.status(200).json({
+        onboardingRequired: true,
+        tempToken,
+        message: 'Please complete your account registration (location and face scan).'
+      });
+      return;
+    }
+
+    // ── Step 2: Location verification (Haversine) — conditional ──────────────
     if (hasRegisteredLocation && !user.skipLocation) {
       if (typeof latitude !== 'number' || typeof longitude !== 'number') {
         res.status(200).json({
@@ -329,7 +346,82 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ error: 'Authentication failed.' });
+    res.status(500).json({ error: 'Failed to authenticate user.' });
+  }
+});
+
+// 2a. Onboarding (for admin-created users to complete location & face setup)
+router.post('/onboarding', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { tempToken, latitude, longitude, faceEmbedding } = req.body;
+    if (!tempToken || typeof latitude !== 'number' || typeof longitude !== 'number' || !faceEmbedding) {
+      res.status(400).json({ error: 'Missing onboarding data. Token, location, and face scan are required.' });
+      return;
+    }
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(tempToken, JWT_SECRET);
+      if (!decoded.onboarding) throw new Error('Invalid token type');
+    } catch (e) {
+      res.status(401).json({ error: 'Invalid or expired session. Please log in again.' });
+      return;
+    }
+
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    // Update location and face
+    user.registrationLocation = {
+      latitude,
+      longitude,
+      capturedAt: new Date()
+    };
+    
+    user.faceRecognition = {
+      enabled: true,
+      encryptedEmbedding: encrypt(JSON.stringify(faceEmbedding)),
+      enrolledAt: new Date()
+    };
+
+    const uaString = req.headers['user-agent'] || '';
+    const { browser, os } = parseUserAgent(uaString);
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    const deviceId = Math.random().toString(36).substring(2, 15);
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshTokens.push(refreshToken);
+    if (user.refreshTokens.length > 5) user.refreshTokens.shift();
+    user.activeDevices.push({ deviceId, browser, os, ip, lastActive: new Date() });
+    if (user.activeDevices.length > 5) user.activeDevices.shift();
+    await user.save();
+
+    const org = await Organization.findById(user.organizationId);
+    const subdomain = org?.subdomain || 'sales';
+
+    res.status(200).json({
+      message: 'Successfully created your account.',
+      token: accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        roleId: user.roleId,
+        organizationId: user.organizationId,
+        subdomain,
+        companyCode: org?.companyCode || ''
+      }
+    });
+  } catch (error) {
+    console.error('Onboarding Error:', error);
+    res.status(500).json({ error: 'Failed to complete onboarding.' });
   }
 });
 
@@ -800,6 +892,7 @@ router.get('/users', authenticate, async (req: Request, res: Response): Promise<
   try {
     const users = await User.find({ organizationId: req.organizationId })
       .populate('roleId', 'name')
+      .populate('reportingManager', 'firstName lastName email')
       .select('-passwordHash -refreshTokens');
     res.status(200).json(users);
   } catch (e) {
@@ -872,7 +965,7 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       return;
     }
 
-    const { firstName, lastName, roleId, email, skipFace, skipLocation, isActive } = req.body;
+    const { firstName, lastName, roleId, email, skipFace, skipLocation, isActive, reportingManager } = req.body;
     const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
@@ -899,6 +992,7 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
     if (skipFace !== undefined) user.skipFace = skipFace;
     if (skipLocation !== undefined) user.skipLocation = skipLocation;
     if (isActive !== undefined) user.isActive = isActive;
+    if (reportingManager !== undefined) user.reportingManager = reportingManager || null;
     
     await user.save();
     res.status(200).json(user);

@@ -142,7 +142,7 @@ export default function LeadTransfer() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800">Lead Transfer</h1>
+          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">Lead Transfer</h1>
           <p className="text-sm text-slate-500 mt-0.5">Transfer or unassign leads between agents</p>
         </div>
       </div>

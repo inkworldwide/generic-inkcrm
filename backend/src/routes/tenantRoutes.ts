@@ -53,6 +53,7 @@ router.get('/branding', async (req: Request, res: Response): Promise<void> => {
       adminDetails: organization.adminDetails
     });
   } catch (error) {
+    console.error('[BRANDING ERROR]', error);
     res.status(500).json({ error: 'Failed to retrieve branding profile.' });
   }
 });

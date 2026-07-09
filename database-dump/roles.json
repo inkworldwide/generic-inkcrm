@@ -1,0 +1,218 @@
+[
+  {
+    "_id": "6a4f853ed1277b454ae8931e",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Super Admin",
+    "description": "Full organizational access",
+    "isSystem": true,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae8931f"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae89320"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae89321"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "leads",
+        "deals",
+        "companies",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-09T11:25:50.797Z",
+    "updatedAt": "2026-07-09T11:25:50.797Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89323",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Sales Agent",
+    "description": "Manage sales pipelines",
+    "isSystem": false,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "own",
+          "_id": "6a4f853ed1277b454ae89324"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "none",
+          "_id": "6a4f853ed1277b454ae89325"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "none",
+          "_id": "6a4f853ed1277b454ae89326"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "leads",
+        "deals",
+        "companies",
+        "reports"
+      ]
+    },
+    "createdAt": "2026-07-09T11:25:50.802Z",
+    "updatedAt": "2026-07-09T11:25:50.802Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89328",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "name": "Super Admin",
+    "description": "School Administrator",
+    "isSystem": true,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "students",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae89329"
+        },
+        {
+          "moduleName": "courses",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae8932a"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "students",
+        "courses",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-09T11:25:50.806Z",
+    "updatedAt": "2026-07-09T11:25:50.806Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8932c",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "name": "Teacher",
+    "description": "Faculty members",
+    "isSystem": false,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "students",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae8932d"
+        },
+        {
+          "moduleName": "courses",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae8932e"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "students",
+        "courses",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-09T11:25:50.808Z",
+    "updatedAt": "2026-07-09T11:25:50.808Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89330",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "name": "Super Admin",
+    "description": "Hospital Administrator",
+    "isSystem": true,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "patients",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae89331"
+        },
+        {
+          "moduleName": "appointments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all",
+          "_id": "6a4f853ed1277b454ae89332"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "patients",
+        "appointments",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-09T11:25:50.810Z",
+    "updatedAt": "2026-07-09T11:25:50.810Z",
+    "__v": 0
+  }
+]

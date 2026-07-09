@@ -116,7 +116,7 @@ export default function ReportsList() {
       {/* Title Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">Saved Reports</h1>
+          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">Saved Reports</h1>
           <p className="text-sm text-slate-500 mt-1">Configure visual chart aggregations and data queries</p>
         </div>
         <button

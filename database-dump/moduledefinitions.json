@@ -1,0 +1,989 @@
+[
+  {
+    "_id": "6a4f853ed1277b454ae8934a",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Lead",
+    "singularLabel": "Lead",
+    "pluralLabel": "Leads",
+    "apiPath": "leads",
+    "icon": "UserPlus",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "source",
+        "label": "Source",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "Website",
+          "Referral",
+          "Cold Call",
+          "Social Media",
+          "Rajabaksh Ilyala"
+        ],
+        "_id": "6a4f853ed1277b454ae8934b"
+      },
+      {
+        "name": "loanType",
+        "label": "Loan Type",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "defaultValue": "SALARIED PERSONAL LOAN",
+        "options": [
+          "SALARIED PERSONAL LOAN",
+          "BUSINESS LOAN",
+          "HOME LOAN",
+          "LAP"
+        ],
+        "_id": "6a4f853ed1277b454ae8934c"
+      },
+      {
+        "name": "budget",
+        "label": "Loan Amount",
+        "type": "currency",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8934d"
+      },
+      {
+        "name": "dataCode",
+        "label": "Data Code",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8934e"
+      },
+      {
+        "name": "businessPartner",
+        "label": "Business Partners",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "AXIS BANK",
+          "HDFC BANK",
+          "ICICI BANK",
+          "SBI"
+        ],
+        "_id": "6a4f853ed1277b454ae8934f"
+      },
+      {
+        "name": "psm",
+        "label": "PSM",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89350"
+      },
+      {
+        "name": "status",
+        "label": "Current Status",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "defaultValue": "New",
+        "options": [
+          "New",
+          "Hot",
+          "Warm",
+          "Cedil Pending",
+          "Document Pending",
+          "Approval Pending",
+          "Approved",
+          "Disbursed",
+          "Rejected",
+          "Followup",
+          "Dropped",
+          "Pending"
+        ],
+        "_id": "6a4f853ed1277b454ae89351"
+      },
+      {
+        "name": "caseDetails",
+        "label": "Case Details",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89352"
+      },
+      {
+        "name": "assignToTeam",
+        "label": "Assign To Team",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "Select One",
+          "Team A",
+          "Team B"
+        ],
+        "_id": "6a4f853ed1277b454ae89353"
+      },
+      {
+        "name": "assignedTo",
+        "label": "Assign To Agent",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89354"
+      },
+      {
+        "name": "followUpDate",
+        "label": "Follow-up Date",
+        "type": "date",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89355"
+      },
+      {
+        "name": "notes",
+        "label": "Remarks",
+        "type": "rich-text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89356"
+      },
+      {
+        "name": "firstName",
+        "label": "First Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89357"
+      },
+      {
+        "name": "lastName",
+        "label": "Last Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89358"
+      },
+      {
+        "name": "company",
+        "label": "Company Name",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89359"
+      },
+      {
+        "name": "salary",
+        "label": "Salary",
+        "type": "number",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8935a"
+      },
+      {
+        "name": "phone",
+        "label": "Mobile",
+        "type": "phone",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8935b"
+      },
+      {
+        "name": "email",
+        "label": "E-Mail",
+        "type": "email",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8935c"
+      },
+      {
+        "name": "presentAddress",
+        "label": "Present Address",
+        "type": "rich-text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8935d"
+      },
+      {
+        "name": "city",
+        "label": "City",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8935e"
+      },
+      {
+        "name": "pinCode",
+        "label": "PinCode",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8935f"
+      },
+      {
+        "name": "state",
+        "label": "State",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "KARNATAKA",
+          "MAHARASHTRA",
+          "DELHI",
+          "TAMIL NADU"
+        ],
+        "_id": "6a4f853ed1277b454ae89360"
+      },
+      {
+        "name": "country",
+        "label": "Country",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "INDIA",
+          "USA",
+          "UK"
+        ],
+        "_id": "6a4f853ed1277b454ae89361"
+      },
+      {
+        "name": "leadScore",
+        "label": "Lead Score",
+        "type": "number",
+        "required": false,
+        "unique": false,
+        "defaultValue": "50",
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89362"
+      }
+    ],
+    "relationships": [
+      {
+        "targetModule": "Company",
+        "type": "many-to-one",
+        "fieldName": "companyId",
+        "_id": "6a4f853ed1277b454ae89363"
+      }
+    ],
+    "createdAt": "2026-07-09T11:25:50.923Z",
+    "updatedAt": "2026-07-09T11:25:50.923Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89365",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Deal",
+    "singularLabel": "Deal",
+    "pluralLabel": "Deals",
+    "apiPath": "deals",
+    "icon": "TrendingUp",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "dealName",
+        "label": "Deal Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89366"
+      },
+      {
+        "name": "amount",
+        "label": "Deal Amount",
+        "type": "currency",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89367"
+      },
+      {
+        "name": "stage",
+        "label": "Stage",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "defaultValue": "Prospecting",
+        "options": [
+          "Prospecting",
+          "Qualification",
+          "Proposal",
+          "Negotiation",
+          "Closed Won",
+          "Closed Lost"
+        ],
+        "_id": "6a4f853ed1277b454ae89368"
+      },
+      {
+        "name": "closeDate",
+        "label": "Expected Close Date",
+        "type": "date",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89369"
+      },
+      {
+        "name": "probability",
+        "label": "Win Probability (%)",
+        "type": "number",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8936a"
+      }
+    ],
+    "relationships": [
+      {
+        "targetModule": "Company",
+        "type": "many-to-one",
+        "fieldName": "companyId",
+        "_id": "6a4f853ed1277b454ae8936b"
+      }
+    ],
+    "createdAt": "2026-07-09T11:25:50.930Z",
+    "updatedAt": "2026-07-09T11:25:50.930Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8936d",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Company",
+    "singularLabel": "Company",
+    "pluralLabel": "Companies",
+    "apiPath": "companies",
+    "icon": "Briefcase",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "companyName",
+        "label": "Company Name",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8936e"
+      },
+      {
+        "name": "website",
+        "label": "Website",
+        "type": "url",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8936f"
+      },
+      {
+        "name": "employees",
+        "label": "Employee Count",
+        "type": "number",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89370"
+      },
+      {
+        "name": "industry",
+        "label": "Industry",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "Software",
+          "Finance",
+          "Manufacturing",
+          "Retail",
+          "Healthcare"
+        ],
+        "_id": "6a4f853ed1277b454ae89371"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.933Z",
+    "updatedAt": "2026-07-09T11:25:50.933Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89373",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Campaign",
+    "singularLabel": "Campaign",
+    "pluralLabel": "Campaigns",
+    "apiPath": "campaigns",
+    "icon": "Target",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "campaignName",
+        "label": "Campaign Name",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89374"
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "defaultValue": "Planned",
+        "options": [
+          "Planned",
+          "Active",
+          "Completed",
+          "Cancelled"
+        ],
+        "_id": "6a4f853ed1277b454ae89375"
+      },
+      {
+        "name": "type",
+        "label": "Type",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "defaultValue": "Email",
+        "options": [
+          "Email",
+          "Social Media",
+          "Cold Call",
+          "Webinar",
+          "Event"
+        ],
+        "_id": "6a4f853ed1277b454ae89376"
+      },
+      {
+        "name": "budget",
+        "label": "Budget",
+        "type": "currency",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89377"
+      },
+      {
+        "name": "startDate",
+        "label": "Start Date",
+        "type": "date",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89378"
+      },
+      {
+        "name": "endDate",
+        "label": "End Date",
+        "type": "date",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89379"
+      },
+      {
+        "name": "notes",
+        "label": "Notes",
+        "type": "rich-text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8937a"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.936Z",
+    "updatedAt": "2026-07-09T11:25:50.936Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8937c",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "CampaignAssignment",
+    "singularLabel": "Campaign Assignment",
+    "pluralLabel": "Campaign Assignments",
+    "apiPath": "campaignassignments",
+    "icon": "UserCheck",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "assignmentName",
+        "label": "Assignment Title",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8937d"
+      },
+      {
+        "name": "campaign",
+        "label": "Campaign",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "options": [
+          "Summer Promo 2026",
+          "Q3 Cold Call Drive",
+          "Enterprise API Webinar"
+        ],
+        "_id": "6a4f853ed1277b454ae8937e"
+      },
+      {
+        "name": "lead",
+        "label": "Assigned Lead",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "options": [
+          "Sarah Malone",
+          "Michael Chen",
+          "Emma Watson"
+        ],
+        "_id": "6a4f853ed1277b454ae8937f"
+      },
+      {
+        "name": "assignedDate",
+        "label": "Assigned Date",
+        "type": "date",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89380"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.939Z",
+    "updatedAt": "2026-07-09T11:25:50.939Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89382",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Department",
+    "singularLabel": "Department",
+    "pluralLabel": "Departments",
+    "apiPath": "departments",
+    "icon": "Network",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "name",
+        "label": "Department Name",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89383"
+      },
+      {
+        "name": "code",
+        "label": "Department Code",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89384"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.941Z",
+    "updatedAt": "2026-07-09T11:25:50.941Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89386",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "Product",
+    "singularLabel": "Product",
+    "pluralLabel": "Products",
+    "apiPath": "products",
+    "icon": "Package",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "code",
+        "label": "Product Code",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89387"
+      },
+      {
+        "name": "name",
+        "label": "Product Name",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89388"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.943Z",
+    "updatedAt": "2026-07-09T11:25:50.943Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8938a",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "BankMaster",
+    "singularLabel": "Bank Master",
+    "pluralLabel": "Bank Masters",
+    "apiPath": "bankmasters",
+    "icon": "Landmark",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "bankName",
+        "label": "Bank Name",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8938b"
+      },
+      {
+        "name": "code",
+        "label": "Bank Code",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8938c"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.944Z",
+    "updatedAt": "2026-07-09T11:25:50.944Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8938e",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "name": "BankingPartner",
+    "singularLabel": "Banking Partner",
+    "pluralLabel": "Banking Partners",
+    "apiPath": "bankingpartners",
+    "icon": "Briefcase",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "bank",
+        "label": "Bank Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8938f"
+      },
+      {
+        "name": "loanType",
+        "label": "Loan Type",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89390"
+      },
+      {
+        "name": "psm",
+        "label": "PSM",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89391"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.948Z",
+    "updatedAt": "2026-07-09T11:25:50.948Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae89393",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "name": "Student",
+    "singularLabel": "Student",
+    "pluralLabel": "Students",
+    "apiPath": "students",
+    "icon": "GraduationCap",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "studentId",
+        "label": "Enrollment Number",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89394"
+      },
+      {
+        "name": "fullName",
+        "label": "Full Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89395"
+      },
+      {
+        "name": "email",
+        "label": "Student Email",
+        "type": "email",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89396"
+      },
+      {
+        "name": "dob",
+        "label": "Date of Birth",
+        "type": "date",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89397"
+      },
+      {
+        "name": "gradeLevel",
+        "label": "Grade Level",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "options": [
+          "Freshman",
+          "Sophomore",
+          "Junior",
+          "Senior"
+        ],
+        "_id": "6a4f853ed1277b454ae89398"
+      },
+      {
+        "name": "gpa",
+        "label": "GPA",
+        "type": "number",
+        "required": false,
+        "unique": false,
+        "defaultValue": "4.0",
+        "options": [],
+        "_id": "6a4f853ed1277b454ae89399"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.950Z",
+    "updatedAt": "2026-07-09T11:25:50.950Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8939b",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "name": "Course",
+    "singularLabel": "Course",
+    "pluralLabel": "Courses",
+    "apiPath": "courses",
+    "icon": "BookOpen",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "courseCode",
+        "label": "Course Code",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8939c"
+      },
+      {
+        "name": "courseName",
+        "label": "Course Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8939d"
+      },
+      {
+        "name": "credits",
+        "label": "Credits",
+        "type": "number",
+        "required": true,
+        "unique": false,
+        "defaultValue": "3",
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8939e"
+      },
+      {
+        "name": "department",
+        "label": "Department",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae8939f"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.953Z",
+    "updatedAt": "2026-07-09T11:25:50.953Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893a1",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "name": "Patient",
+    "singularLabel": "Patient",
+    "pluralLabel": "Patients",
+    "apiPath": "patients",
+    "icon": "Heart",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "mrn",
+        "label": "Medical Record Number",
+        "type": "text",
+        "required": true,
+        "unique": true,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893a2"
+      },
+      {
+        "name": "fullName",
+        "label": "Patient Name",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893a3"
+      },
+      {
+        "name": "dob",
+        "label": "Date of Birth",
+        "type": "date",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893a4"
+      },
+      {
+        "name": "bloodGroup",
+        "label": "Blood Type",
+        "type": "dropdown",
+        "required": false,
+        "unique": false,
+        "options": [
+          "A+",
+          "A-",
+          "B+",
+          "B-",
+          "O+",
+          "O-",
+          "AB+",
+          "AB-"
+        ],
+        "_id": "6a4f853ed1277b454ae893a5"
+      },
+      {
+        "name": "allergies",
+        "label": "Allergies",
+        "type": "text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893a6"
+      },
+      {
+        "name": "emergencyPhone",
+        "label": "Emergency Contact",
+        "type": "phone",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893a7"
+      }
+    ],
+    "relationships": [],
+    "createdAt": "2026-07-09T11:25:50.955Z",
+    "updatedAt": "2026-07-09T11:25:50.955Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae893a9",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "name": "Appointment",
+    "singularLabel": "Appointment",
+    "pluralLabel": "Appointments",
+    "apiPath": "appointments",
+    "icon": "Calendar",
+    "isSystem": true,
+    "fields": [
+      {
+        "name": "appointmentDate",
+        "label": "Appointment Date",
+        "type": "date",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893aa"
+      },
+      {
+        "name": "doctorName",
+        "label": "Doctor",
+        "type": "text",
+        "required": true,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893ab"
+      },
+      {
+        "name": "status",
+        "label": "Status",
+        "type": "dropdown",
+        "required": true,
+        "unique": false,
+        "defaultValue": "Scheduled",
+        "options": [
+          "Scheduled",
+          "Completed",
+          "Cancelled"
+        ],
+        "_id": "6a4f853ed1277b454ae893ac"
+      },
+      {
+        "name": "reason",
+        "label": "Reason for Visit",
+        "type": "rich-text",
+        "required": false,
+        "unique": false,
+        "options": [],
+        "_id": "6a4f853ed1277b454ae893ad"
+      }
+    ],
+    "relationships": [
+      {
+        "targetModule": "Patient",
+        "type": "many-to-one",
+        "fieldName": "patientId",
+        "_id": "6a4f853ed1277b454ae893ae"
+      }
+    ],
+    "createdAt": "2026-07-09T11:25:50.958Z",
+    "updatedAt": "2026-07-09T11:25:50.958Z",
+    "__v": 0
+  }
+]

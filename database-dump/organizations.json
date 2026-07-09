@@ -1,0 +1,94 @@
+[
+  {
+    "_id": "6a4f853ed1277b454ae89318",
+    "name": "inkSales Enterprises",
+    "subdomain": "sales",
+    "logoUrl": "/logo.png",
+    "faviconUrl": "/favicon.ico",
+    "themeSettings": {
+      "primaryColor": "79 70 229",
+      "sidebarBg": "#0f172a",
+      "headerBg": "#ffffff",
+      "fontFamily": "Inter",
+      "mode": "dark"
+    },
+    "enabledModules": [
+      "dashboard",
+      "leads",
+      "deals",
+      "companies",
+      "tasks",
+      "settings",
+      "reports",
+      "workflows"
+    ],
+    "subscription": {
+      "plan": "enterprise",
+      "status": "active",
+      "expiresAt": "2027-07-09T11:25:50.770Z"
+    },
+    "createdAt": "2026-07-09T11:25:50.781Z",
+    "updatedAt": "2026-07-09T11:25:50.781Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8931a",
+    "name": "Acme International School",
+    "subdomain": "school",
+    "logoUrl": "/logo.png",
+    "faviconUrl": "/favicon.ico",
+    "themeSettings": {
+      "primaryColor": "16 185 129",
+      "sidebarBg": "#064e3b",
+      "headerBg": "#f0fdf4",
+      "fontFamily": "Outfit",
+      "mode": "light"
+    },
+    "enabledModules": [
+      "dashboard",
+      "students",
+      "courses",
+      "tasks",
+      "settings",
+      "reports"
+    ],
+    "subscription": {
+      "plan": "growth",
+      "status": "active",
+      "expiresAt": "2027-01-05T11:25:50.786Z"
+    },
+    "createdAt": "2026-07-09T11:25:50.787Z",
+    "updatedAt": "2026-07-09T11:25:50.787Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853ed1277b454ae8931c",
+    "name": "Metro Care Hospital",
+    "subdomain": "hospital",
+    "logoUrl": "/logo.png",
+    "faviconUrl": "/favicon.ico",
+    "themeSettings": {
+      "primaryColor": "13 148 136",
+      "sidebarBg": "#115e59",
+      "headerBg": "#f0fdfa",
+      "fontFamily": "Roboto",
+      "mode": "light"
+    },
+    "enabledModules": [
+      "dashboard",
+      "patients",
+      "appointments",
+      "tasks",
+      "settings",
+      "reports"
+    ],
+    "subscription": {
+      "plan": "enterprise",
+      "status": "active",
+      "expiresAt": "2027-07-09T11:25:50.789Z"
+    },
+    "createdAt": "2026-07-09T11:25:50.789Z",
+    "updatedAt": "2026-07-09T11:25:50.789Z",
+    "__v": 0
+  }
+]

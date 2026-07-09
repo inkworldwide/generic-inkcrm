@@ -43,6 +43,7 @@ export interface IUser extends Document {
   skipFace: boolean; // Bypass biometric face recognition check
   skipLocation: boolean; // Bypass proximity location check
   isActive: boolean; // Account status: enabled (true) or disabled (false)
+  reportingManager?: mongoose.Types.ObjectId; // Reference to another User who is their manager
   createdAt: Date;
   updatedAt: Date;
 }
@@ -93,7 +94,8 @@ const UserSchema = new Schema<IUser>(
     // Toggles for bypassing face recognition, location verification, and status
     skipFace: { type: Boolean, default: false },
     skipLocation: { type: Boolean, default: false },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    reportingManager: { type: Schema.Types.ObjectId, ref: 'User' }
   },
   { timestamps: true }
 );

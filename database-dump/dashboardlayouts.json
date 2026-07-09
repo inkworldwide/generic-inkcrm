@@ -1,0 +1,137 @@
+[
+  {
+    "_id": "6a4f853fd1277b454ae8944f",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "userId": "6a4f853ed1277b454ae89334",
+    "name": "Sales Overview",
+    "isDefault": true,
+    "widgets": [
+      {
+        "id": "widget_1",
+        "type": "leads_count",
+        "title": "Total Leads",
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89450"
+      },
+      {
+        "id": "widget_2",
+        "type": "deals_count",
+        "title": "Open Deals",
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89451"
+      },
+      {
+        "id": "widget_3",
+        "type": "revenue",
+        "title": "Revenue Closed",
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89452"
+      },
+      {
+        "id": "widget_4",
+        "type": "sales_funnel",
+        "title": "Sales Pipeline Funnel",
+        "x": 0,
+        "y": 2,
+        "w": 8,
+        "h": 4,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89453"
+      },
+      {
+        "id": "widget_5",
+        "type": "recent_activities",
+        "title": "Recent Activity Timeline",
+        "x": 8,
+        "y": 2,
+        "w": 4,
+        "h": 4,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89454"
+      }
+    ],
+    "createdAt": "2026-07-09T11:25:51.067Z",
+    "updatedAt": "2026-07-09T11:25:51.067Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae89456",
+    "organizationId": "6a4f853ed1277b454ae8931a",
+    "userId": "6a4f853ed1277b454ae8933e",
+    "name": "School Portal Dashboard",
+    "isDefault": true,
+    "widgets": [
+      {
+        "id": "sch_widget_1",
+        "type": "students_count",
+        "title": "Enrolled Students",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89457"
+      },
+      {
+        "id": "sch_widget_2",
+        "type": "courses_count",
+        "title": "Active Courses",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae89458"
+      }
+    ],
+    "createdAt": "2026-07-09T11:25:51.070Z",
+    "updatedAt": "2026-07-09T11:25:51.070Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a4f853fd1277b454ae8945a",
+    "organizationId": "6a4f853ed1277b454ae8931c",
+    "userId": "6a4f853ed1277b454ae89348",
+    "name": "Clinical Operations Dashboard",
+    "isDefault": true,
+    "widgets": [
+      {
+        "id": "hosp_widget_1",
+        "type": "patients_count",
+        "title": "Active Patients",
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae8945b"
+      },
+      {
+        "id": "hosp_widget_2",
+        "type": "appointments_count",
+        "title": "Today's Visits",
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 2,
+        "config": {},
+        "_id": "6a4f853fd1277b454ae8945c"
+      }
+    ],
+    "createdAt": "2026-07-09T11:25:51.071Z",
+    "updatedAt": "2026-07-09T11:25:51.071Z",
+    "__v": 0
+  }
+]

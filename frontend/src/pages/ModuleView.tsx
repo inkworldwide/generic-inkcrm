@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Icons from 'lucide-react';
@@ -21,6 +21,61 @@ export default function ModuleView() {
   const [filterField, setFilterField] = useState('');
   const [filterVal, setFilterVal] = useState('');
   const [page, setPage] = useState(1);
+
+  // File upload and History timeline states
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingRecordId, setUploadingRecordId] = useState<string | null>(null);
+  const [activeHistoryRecord, setActiveHistoryRecord] = useState<any | null>(null);
+  const [historyActivities, setHistoryActivities] = useState<any[]>([]);
+  const [historyDocuments, setHistoryDocuments] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  const handleUploadClick = (recordId: string) => {
+    setUploadingRecordId(recordId);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !uploadingRecordId) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('recordId', uploadingRecordId);
+
+    try {
+      await api.post('/documents/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+      alert('File uploaded successfully!');
+    } catch (err) {
+      alert('Failed to upload file.');
+    } finally {
+      setUploadingRecordId(null);
+    }
+  };
+
+  const openHistory = async (rec: any) => {
+    setActiveHistoryRecord(rec);
+    setLoadingHistory(true);
+    try {
+      const [activitiesRes, docsRes] = await Promise.all([
+        api.get(`/records/leads/${rec._id}/activities`),
+        api.get(`/documents`, { params: { recordId: rec._id } })
+      ]);
+      setHistoryActivities(activitiesRes.data);
+      setHistoryDocuments(docsRes.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
   
   // Campaigns local state for inline form
   const [campaignNameInput, setCampaignNameInput] = useState('');
@@ -158,7 +213,7 @@ export default function ModuleView() {
       return res.data;
     },
     enabled: !!apiPath,
-    refetchInterval: 5000 // Auto-refresh every 5 seconds for live sync
+    refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
   const deleteMutation = useMutation({
@@ -297,39 +352,42 @@ export default function ModuleView() {
             <Icons.Calendar className="w-4 h-4 text-primary" /> Mapping: <span className="font-semibold text-slate-500">{dateField.label}</span>
           </span>
         </div>
+        <div className="overflow-x-auto pb-2">
+          <div className="min-w-[650px] pr-1">
+            <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+              <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+            </div>
 
-        <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
-          <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-        </div>
+            <div className="grid grid-cols-7 gap-2">
+              {calendarGrid.map((day, idx) => {
+                if (!day) return <div key={`empty-${idx}`} className="h-24 bg-slate-50 dark:bg-slate-900/30 rounded-lg"></div>;
 
-        <div className="grid grid-cols-7 gap-2">
-          {calendarGrid.map((day, idx) => {
-            if (!day) return <div key={`empty-${idx}`} className="h-24 bg-slate-50 dark:bg-slate-900/30 rounded-lg"></div>;
+                // Match records falling on this day
+                const dayRecords = records.filter((r) => {
+                  if (!r.data[dateField.name]) return false;
+                  const recDate = new Date(r.data[dateField.name]);
+                  return recDate.getDate() === day && recDate.getMonth() === today.getMonth();
+                });
 
-            // Match records falling on this day
-            const dayRecords = records.filter((r) => {
-              if (!r.data[dateField.name]) return false;
-              const recDate = new Date(r.data[dateField.name]);
-              return recDate.getDate() === day && recDate.getMonth() === today.getMonth();
-            });
-
-            return (
-              <div key={day} className="h-28 border border-slate-100 dark:border-slate-700 rounded-lg p-2 flex flex-col text-left hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
-                <span className="text-xs font-bold text-slate-500">{day}</span>
-                <div className="mt-1 space-y-1 flex-1 overflow-y-auto scrollbar-none">
-                  {dayRecords.map((r) => (
-                    <Link
-                      key={r._id}
-                      to={`/modules/${moduleDef.apiPath}/${r._id}`}
-                      className="block text-[9px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded truncate"
-                    >
-                      {r.data.fullName || r.data.companyName || r.data.dealName || r.data.title || r._id.substring(18)}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
+                return (
+                  <div key={day} className="h-28 border border-slate-100 dark:border-slate-700 rounded-lg p-2 flex flex-col text-left hover:bg-slate-50/50 dark:hover:bg-slate-700/20 transition-all">
+                    <span className="text-xs font-bold text-slate-500">{day}</span>
+                    <div className="mt-1 space-y-1 flex-1 overflow-y-auto scrollbar-none">
+                      {dayRecords.map((r) => (
+                        <Link
+                          key={r._id}
+                          to={`/modules/${moduleDef.apiPath}/${r._id}`}
+                          className="block text-[9px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded truncate"
+                        >
+                          {r.data.fullName || r.data.companyName || r.data.dealName || r.data.title || r._id.substring(18)}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -376,7 +434,7 @@ export default function ModuleView() {
         <div className="space-y-6">
           {/* Header Title */}
           <div className="text-left">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-700 dark:text-white">
+            <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-700 dark:text-white">
               Campaigns
             </h1>
           </div>
@@ -424,7 +482,7 @@ export default function ModuleView() {
           {/* Header Title */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div className="text-left">
-              <h1 className="text-2xl font-black text-slate-800 dark:text-white uppercase tracking-wider">
+              <h1 className="text-2xl uppercase font-black text-slate-800 dark:text-white uppercase tracking-wider">
                 {urlStatus ? `${urlStatus} Leads` : 'ALL LEADS'}
               </h1>
             </div>
@@ -502,7 +560,7 @@ export default function ModuleView() {
                 <DynamicIcon name={activeModule.icon} className="w-6 h-6" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-800 dark:text-white">
+                <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">
                   {urlStatus ? `${urlStatus} Leads` : activeModule.pluralLabel}
                 </h1>
                 <p className="text-sm text-slate-500 mt-1">
@@ -745,11 +803,53 @@ export default function ModuleView() {
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <button className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">WA Chat</button>
-                          <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Call</button>
-                          <button className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Upload File</button>
-                          <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">Edit</Link>
-                          <button className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">History</button>
+                          <button 
+                            onClick={() => {
+                              const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                              const cleanPhone = phone.replace(/\D/g, '');
+                              if (cleanPhone) {
+                                window.open(`https://wa.me/${cleanPhone}`, '_blank');
+                              } else {
+                                alert('No phone number available for this lead.');
+                              }
+                            }}
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                          >
+                            WA Chat
+                          </button>
+                          
+                          <button 
+                            onClick={() => {
+                              const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                              const cleanPhone = phone.replace(/\D/g, '');
+                              if (cleanPhone) {
+                                window.location.href = `tel:${cleanPhone}`;
+                              } else {
+                                alert('No phone number available for this lead.');
+                              }
+                            }}
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                          >
+                            Call
+                          </button>
+                          
+                          <button 
+                            onClick={() => handleUploadClick(rec._id)}
+                            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                          >
+                            Upload File
+                          </button>
+                          
+                          <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
+                            Edit
+                          </Link>
+                          
+                          <button 
+                            onClick={() => openHistory(rec)}
+                            className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                          >
+                            History
+                          </button>
                         </div>
                       </div>
                     </div>
@@ -886,6 +986,121 @@ export default function ModuleView() {
 
           {viewMode === 'timeline' && renderTimeline(data?.records || [])}
         </>
+      )}
+      {/* Hidden file uploader */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        onChange={handleFileChange} 
+        className="hidden" 
+      />
+
+      {/* Record History & Timeline Modal */}
+      {activeHistoryRecord && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+              <div>
+                <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+                  Lead Audit History
+                </h3>
+                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                  {activeHistoryRecord.data?.firstName} {activeHistoryRecord.data?.lastName}
+                </p>
+              </div>
+              <button 
+                onClick={() => setActiveHistoryRecord(null)}
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-400 transition-colors"
+              >
+                <Icons.X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              {loadingHistory ? (
+                <div className="flex justify-center items-center py-12">
+                  <Icons.Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
+                </div>
+              ) : (
+                <>
+                  {/* Documents Section */}
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Icons.File className="w-3.5 h-3.5 text-amber-500" /> Attached Documents ({historyDocuments.length})
+                    </h4>
+                    {historyDocuments.length > 0 ? (
+                      <div className="space-y-2">
+                        {historyDocuments.map((doc: any) => (
+                          <div key={doc._id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-805">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <Icons.FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{doc.name}</p>
+                                <p className="text-[10px] text-slate-400">{(doc.size / 1024).toFixed(1)} KB</p>
+                              </div>
+                            </div>
+                            <a 
+                              href={`http://localhost:5000${doc.filePath}`} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                            >
+                              <Icons.Download className="w-3.5 h-3.5" /> Download
+                            </a>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No files attached to this record.</p>
+                    )}
+                  </div>
+
+                  {/* Timeline Section */}
+                  <div>
+                    <h4 className="text-xs font-bold text-slate-455 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Icons.Clock className="w-3.5 h-3.5 text-indigo-500" /> System Activities
+                    </h4>
+                    {historyActivities.length > 0 ? (
+                      <div className="relative border-l border-slate-100 dark:border-slate-800 ml-2.5 pl-5 space-y-5">
+                        {historyActivities.map((act: any) => (
+                          <div key={act._id} className="relative">
+                            <span className="absolute -left-[26px] top-1 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-white dark:ring-slate-900" />
+                            <div className="text-xs">
+                              <p className="font-semibold text-slate-700 dark:text-slate-200">{act.action}</p>
+                              {act.details && Object.keys(act.details).length > 0 && (
+                                <p className="text-[11px] text-slate-500 mt-0.5">
+                                  {act.details.status && `Status: ${act.details.status}`}
+                                  {act.details.assignedTo && ` Assigned To: ${act.details.assignedTo}`}
+                                </p>
+                              )}
+                              <p className="text-[10px] text-slate-400 mt-1">
+                                {act.performedBy ? `${act.performedBy.firstName} ${act.performedBy.lastName}` : 'System'} • {new Date(act.createdAt).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">No activity log found for this record.</p>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+            
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+              <button 
+                onClick={() => setActiveHistoryRecord(null)}
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

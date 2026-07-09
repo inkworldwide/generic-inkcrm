@@ -609,7 +609,7 @@ export default function Settings() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">
             Settings
           </h1>
         </div>
@@ -638,7 +638,7 @@ export default function Settings() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-slate-800">
+        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">
           Settings
         </h1>
       </div>
@@ -919,7 +919,7 @@ export default function Settings() {
         {/* Roles Management */}
         <div className={`lg:col-span-12 space-y-6 ${currentTab === 'role' ? 'block' : 'hidden'}`}>
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-slate-800 tracking-tight">Roles</h1>
+            <h1 className="text-2xl uppercase font-bold text-slate-800 tracking-tight">Roles</h1>
           </div>
 
           {/* Form Card (Add/Edit) */}

@@ -183,6 +183,63 @@ async function seed() {
     }
   });
 
+  // Seed sample Sales Agents matching standard accounts
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: salesAgentRole._id,
+    firstName: 'Suma',
+    lastName: 'Dhar',
+    email: 'agent.suma@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-SUMA',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: salesAgentRole._id,
+    firstName: 'Priya',
+    lastName: 'Sharma',
+    email: 'agent.priya@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-PRIYA',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: salesAgentRole._id,
+    firstName: 'Sunita',
+    lastName: 'Devi',
+    email: 'agent.sunita@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-SUNITA',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: salesAgentRole._id,
+    firstName: 'Ankit',
+    lastName: 'Verma',
+    email: 'agent.ankit@gmail.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-ANKIT',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
   const schoolAdmin = await User.create({
     organizationId: schoolOrg._id,
     roleId: schoolAdminRole._id,
