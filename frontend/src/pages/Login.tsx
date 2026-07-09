@@ -11,6 +11,19 @@ import FaceEnrollment from '../components/FaceEnrollment';
 import LocationVerificationStep from '../components/LocationVerificationStep';
 import api from '../services/api';
 
+// ─── User Code generator ─────────────────────────────────────────────────────
+const generateUserCode = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, '0');
+  const year = now.getFullYear();
+  const month = pad(now.getMonth() + 1);
+  const day = pad(now.getDate());
+  const hours = pad(now.getHours());
+  const minutes = pad(now.getMinutes());
+  const seconds = pad(now.getSeconds());
+  return `PTR--${year}${month}${day}${hours}${minutes}${seconds}`;
+};
+
 // ─── Step types ──────────────────────────────────────────────────────────────
 type LoginStep = 'credentials' | 'location' | 'face';
 type RegStep = 'form' | 'location' | 'face';
@@ -76,7 +89,6 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [tempToken, setTempToken] = useState('');
-
   // ── Registration: three-step state ─────────────────────────────────────────
   const [regStep, setRegStep] = useState<RegStep>('form');
   const [companyName, setCompanyName] = useState('');
@@ -85,6 +97,8 @@ export default function Login() {
   const [lastName, setLastName] = useState('');
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [userCode, setUserCode] = useState('');
   const { coords: regCoords, gpsError: regGpsError, gpsLoading: regGpsLoading, capture: captureRegGps } = useGpsCapture();
 
   // ── Shared state ────────────────────────────────────────────────────────────
@@ -97,6 +111,12 @@ export default function Login() {
     const activeSub = branding?.subdomain || localStorage.getItem('tenantSubdomain') || 'sales';
     fetchBranding(activeSub);
 
+    if (isSignUpTab && !userCode) {
+      setUserCode(generateUserCode());
+    }
+  }, [isSignUpTab, userCode]);
+
+  useEffect(() => {
     if (location.state?.openRegister) {
       setIsSignUpTab(true);
       // clear the state so refreshes don't lock the tab
@@ -174,21 +194,38 @@ export default function Login() {
   };
 
   // ─── REGISTRATION FLOW ──────────────────────────────────────────────────────
-
-  /** Step 1 → 2: Validate form then trigger GPS capture */
+  /** Step 1 → 2: Validate partner registration form details */
   const handleRegFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!companyName || !subdomain || !firstName || !lastName || !signUpEmail || !signUpPassword) {
+
+    if (!userCode || !firstName.trim() || !lastName.trim() || !signUpEmail.trim() || !signUpPassword.trim() || !confirmPassword.trim()) {
       setError('All fields are required.');
       return;
     }
+
     if (signUpPassword.length < 8) {
       setError('Password must be at least 8 characters.');
       return;
     }
+
+    if (signUpPassword !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+
+    // Auto-generate subdomain from the email prefix (raja@gmail.com -> raja)
+    const emailPrefix = signUpEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+    // Guarantee uniqueness by appending timestamp if empty
+    const generatedSubdomain = emailPrefix || 'partner' + Date.now().toString().slice(-4);
+    
+    // Auto-generate company name
+    const generatedCompanyName = `${firstName} ${lastName} Workspace`;
+
+    setSubdomain(generatedSubdomain);
+    setCompanyName(generatedCompanyName);
+
     setRegStep('location');
-    // Immediately start GPS capture when location step mounts
   };
 
   /** Step 2 → 3: GPS obtained, proceed to face enrollment */
@@ -198,7 +235,7 @@ export default function Login() {
     }
   };
 
-  /** Step 3 → API: Face enrolled, now register with everything */
+  /** Step 3 → API: Face enrolled, now register workspace and partner */
   const executeRegistration = async (faceEmbedding: number[]) => {
     if (!regCoords) {
       setError('Registration location is missing. Please go back and allow location access.');
@@ -208,7 +245,7 @@ export default function Login() {
     setError('');
     setSuccess('');
     setLoading(true);
-    setRegStep('form'); // close enrollment modal UI
+    setRegStep('form');
 
     try {
       await import('../services/api').then(({ default: api }) =>
@@ -223,11 +260,12 @@ export default function Login() {
           registrationLocation: {
             latitude: regCoords.latitude,
             longitude: regCoords.longitude
-          }
+          },
+          userCode
         })
       );
 
-      setSuccess('Workspace registered successfully! Logging you in...');
+      setSuccess('Account registered successfully! Initiating session...');
       localStorage.setItem('tenantSubdomain', subdomain.toLowerCase());
       await fetchBranding(subdomain.toLowerCase());
 
@@ -254,7 +292,6 @@ export default function Login() {
             navigate('/');
           }
         } catch {
-          // If auto-login fails, just direct to login tab
           setIsSignUpTab(false);
           setEmail(signUpEmail);
           setSuccess('');
@@ -266,7 +303,6 @@ export default function Login() {
       setLoading(false);
     }
   };
-
   const resetRegFlow = () => {
     setRegStep('form');
     setError('');
@@ -545,45 +581,24 @@ export default function Login() {
                   <p className="text-[11px] text-indigo-700 font-medium leading-relaxed">
                     Registration requires your <strong>GPS location</strong> and <strong>face biometric</strong>. Both are mandatory for account security.
                   </p>
-                </div>
-
+                </div>                {/* User Code */}
                 <div className="text-left">
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Company Name
+                    User Code
                   </label>
                   <div className="relative">
-                    <Icons.Building className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Icons.Key className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                       type="text"
-                      required
-                      value={companyName}
-                      onChange={(e) => setCompanyName(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                      placeholder="Acme Inc"
+                      disabled
+                      value={userCode}
+                      className="w-full pl-10 pr-4 py-2.5 bg-slate-100 border border-slate-200/80 rounded-xl text-slate-500 font-mono text-sm focus:outline-none cursor-not-allowed select-none"
                     />
-                  </div>
-                </div>
-
-                <div className="text-left">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Subdomain
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="text"
-                      required
-                      value={subdomain}
-                      onChange={(e) => setSubdomain(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
-                      className="w-full pl-4 pr-24 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                      placeholder="acme"
-                    />
-                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-100 py-1 px-2 rounded-lg">
-                      .inkcrm.com
-                    </span>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
+                  {/* First Name */}
                   <div className="text-left">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                       First Name
@@ -594,9 +609,10 @@ export default function Login() {
                       value={firstName}
                       onChange={(e) => setFirstName(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                      placeholder="Sarah"
+                      placeholder="First Name"
                     />
                   </div>
+                  {/* Last Name */}
                   <div className="text-left">
                     <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
                       Last Name
@@ -607,53 +623,81 @@ export default function Login() {
                       value={lastName}
                       onChange={(e) => setLastName(e.target.value)}
                       className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                      placeholder="Connor"
+                      placeholder="Last Name"
                     />
                   </div>
                 </div>
 
+                {/* User Name (Email) */}
                 <div className="text-left">
                   <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Admin Email
+                    User Name (Like : raja@gmail.com)
                   </label>
                   <div className="relative">
-                    <Icons.Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    <Icons.User className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                     <input
                       type="email"
                       required
                       value={signUpEmail}
                       onChange={(e) => setSignUpEmail(e.target.value)}
                       className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                      placeholder="admin@acme.com"
+                      placeholder="User Name"
                     />
                   </div>
                 </div>
 
-                <div className="text-left">
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <Icons.Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      required
-                      minLength={8}
-                      value={signUpPassword}
-                      onChange={(e) => setSignUpPassword(e.target.value)}
-                      className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
-                      placeholder="Min. 8 characters"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
-                    >
-                      {showPassword ? <Icons.EyeOff className="w-4 h-4" /> : <Icons.Eye className="w-4 h-4" />}
-                    </button>
+                {/* Password & Confirm Password */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="text-left">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Password*
+                    </label>
+                    <div className="relative">
+                      <Icons.Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        minLength={8}
+                        value={signUpPassword}
+                        onChange={(e) => setSignUpPassword(e.target.value)}
+                        className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        placeholder="Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showPassword ? <Icons.EyeOff className="w-4 h-4" /> : <Icons.Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="text-left">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">
+                      Confirm Password*
+                    </label>
+                    <div className="relative">
+                      <Icons.Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type={showPassword ? 'text' : 'password'}
+                        required
+                        minLength={8}
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200/80 rounded-xl text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                        placeholder="Confirm Password"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                      >
+                        {showPassword ? <Icons.EyeOff className="w-4 h-4" /> : <Icons.Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
-
                 {/* Registration steps preview */}
                 <div className="flex items-center gap-2 text-[10px] text-slate-400 py-1">
                   <span className="flex items-center gap-1 font-semibold text-indigo-600">

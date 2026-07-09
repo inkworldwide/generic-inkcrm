@@ -39,6 +39,7 @@ export interface IUser extends Document {
   activeDevices: IDeviceSession[];
   failedLoginAttempts: number;
   lastFailedLoginAt?: Date;
+  userCode?: string; // Captured unique partner/user code (e.g. PTR--20260709080516)
   createdAt: Date;
   updatedAt: Date;
 }
@@ -83,7 +84,9 @@ const UserSchema = new Schema<IUser>(
     ],
     // Audit: track consecutive failed login attempts
     failedLoginAttempts: { type: Number, default: 0 },
-    lastFailedLoginAt: { type: Date }
+    lastFailedLoginAt: { type: Date },
+    // Partner code
+    userCode: { type: String, trim: true }
   },
   { timestamps: true }
 );

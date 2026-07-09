@@ -61,7 +61,7 @@ const parseUserAgent = (userAgentString: string = '') => {
 // 1. Register User
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, firstName, lastName, companyName, subdomain, faceEmbedding, registrationLocation } = req.body;
+    const { email, password, firstName, lastName, companyName, subdomain, faceEmbedding, registrationLocation, userCode } = req.body;
 
     // ── Field validation ─────────────────────────────────────────────────────
     if (!email || !password || !firstName || !lastName || !companyName || !subdomain) {
@@ -151,7 +151,8 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
         longitude: registrationLocation.longitude,
         capturedAt: new Date()
       },
-      locationRadius: 100 // default 100 meter radius
+      locationRadius: 100, // default 100 meter radius
+      userCode: userCode || undefined
     });
 
     console.log(`[AUTH] New account registered: ${email}, location: (${registrationLocation.latitude}, ${registrationLocation.longitude})`);
