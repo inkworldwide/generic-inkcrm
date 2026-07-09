@@ -269,13 +269,7 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
               {isModelLoaded ? 'Setup Face Login' : 'Loading AI Models...'}
             </button>
 
-            {/* DEV MODE BYPASS FOR TESTING */}
-            <button 
-              onClick={() => finishEnrollment(Array.from({ length: 10 }).map(() => new Float32Array(128).fill(Math.random())))}
-              className="mt-4 text-[10px] uppercase font-bold tracking-widest text-slate-400 hover:text-indigo-500 transition-colors"
-            >
-              Simulate Camera (Dev Mode)
-            </button>
+
 
             {onCancel && (
               <button 

@@ -8,6 +8,12 @@ export interface IDeviceSession {
   lastActive: Date;
 }
 
+export interface IRegistrationLocation {
+  latitude: number;
+  longitude: number;
+  capturedAt: Date;
+}
+
 export interface IUser extends Document {
   organizationId: mongoose.Types.ObjectId;
   roleId: mongoose.Types.ObjectId;
@@ -26,9 +32,13 @@ export interface IUser extends Document {
     encryptedEmbedding?: string;
     enrolledAt?: Date;
   };
+  registrationLocation?: IRegistrationLocation;
+  locationRadius: number; // allowed radius in meters (default: 100)
   avatarUrl?: string;
-  refreshTokens: string[]; // Supports multiple active sessions
+  refreshTokens: string[];
   activeDevices: IDeviceSession[];
+  failedLoginAttempts: number;
+  lastFailedLoginAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -52,6 +62,14 @@ const UserSchema = new Schema<IUser>(
       encryptedEmbedding: { type: String },
       enrolledAt: { type: Date }
     },
+    // GPS registration location — stored once at signup
+    registrationLocation: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+      capturedAt: { type: Date }
+    },
+    // Allowed login radius in meters (configurable per user, default 100m)
+    locationRadius: { type: Number, default: 100 },
     avatarUrl: { type: String },
     refreshTokens: [{ type: String }],
     activeDevices: [
@@ -62,7 +80,10 @@ const UserSchema = new Schema<IUser>(
         ip: { type: String, default: 'Unknown' },
         lastActive: { type: Date, default: Date.now }
       }
-    ]
+    ],
+    // Audit: track consecutive failed login attempts
+    failedLoginAttempts: { type: Number, default: 0 },
+    lastFailedLoginAt: { type: Date }
   },
   { timestamps: true }
 );

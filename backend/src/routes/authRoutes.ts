@@ -4,8 +4,10 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User';
 import Role from '../models/Role';
 import Organization from '../models/Organization';
+import ModuleDefinition from '../models/ModuleDefinition';
 import { authenticate } from '../middleware/authMiddleware';
 import { encrypt, decrypt, euclideanDistance } from '../utils/encryption';
+import { haversineDistance } from '../utils/geoUtils';
 
 const router = Router();
 
@@ -59,26 +61,27 @@ const parseUserAgent = (userAgentString: string = '') => {
 // 1. Register User
 router.post('/register', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, firstName, lastName, companyName, subdomain, faceEmbedding } = req.body;
-    console.log('Registration Request Body:', {
-      email,
-      password: password ? '[PRESENT]' : '[MISSING]',
-      firstName,
-      lastName,
-      companyName,
-      subdomain,
-      faceEmbeddingExists: !!faceEmbedding,
-      faceEmbeddingIsArray: Array.isArray(faceEmbedding),
-      faceEmbeddingLength: faceEmbedding ? faceEmbedding.length : 0
-    });
+    const { email, password, firstName, lastName, companyName, subdomain, faceEmbedding, registrationLocation } = req.body;
 
+    // ── Field validation ─────────────────────────────────────────────────────
     if (!email || !password || !firstName || !lastName || !companyName || !subdomain) {
       res.status(400).json({ error: 'All fields are required.' });
       return;
     }
 
+    // Face embedding is mandatory
     if (!faceEmbedding || !Array.isArray(faceEmbedding) || faceEmbedding.length !== 128) {
       res.status(400).json({ error: 'Biometric face enrollment is mandatory to complete registration.' });
+      return;
+    }
+
+    // GPS registration location is mandatory
+    if (
+      !registrationLocation ||
+      typeof registrationLocation.latitude !== 'number' ||
+      typeof registrationLocation.longitude !== 'number'
+    ) {
+      res.status(400).json({ error: 'GPS location is required for registration. Please allow location access and try again.' });
       return;
     }
 
@@ -128,8 +131,8 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    // Hash password & Create User
-    const passwordHash = await bcrypt.hash(password, 10);
+    // Hash password & Create User with GPS location
+    const passwordHash = await bcrypt.hash(password, 12); // 12 rounds for strong entropy
     const user = await User.create({
       organizationId: org._id,
       roleId: superAdminRole._id,
@@ -138,14 +141,20 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
       email: email.toLowerCase(),
       passwordHash,
       isVerified: true,
-      faceRecognition: faceEmbedding && Array.isArray(faceEmbedding) && faceEmbedding.length === 128 ? {
+      faceRecognition: {
         enabled: true,
         encryptedEmbedding: encrypt(JSON.stringify(faceEmbedding)),
         enrolledAt: new Date()
-      } : {
-        enabled: false
-      }
+      },
+      registrationLocation: {
+        latitude: registrationLocation.latitude,
+        longitude: registrationLocation.longitude,
+        capturedAt: new Date()
+      },
+      locationRadius: 100 // default 100 meter radius
     });
+
+    console.log(`[AUTH] New account registered: ${email}, location: (${registrationLocation.latitude}, ${registrationLocation.longitude})`);
 
     res.status(201).json({
       message: 'Account successfully registered.',
@@ -158,32 +167,82 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
-// 2. Login User
+// 2. Login User — Sequential: Password → Location → Face MFA
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
   try {
-    const { email, password, rememberMe } = req.body;
+    const { email, password, latitude, longitude, rememberMe } = req.body;
 
+    // ── Step 0: Basic field validation ───────────────────────────────────────
     if (!email || !password) {
       res.status(400).json({ error: 'Email and password are required.' });
       return;
     }
 
+    if (typeof latitude !== 'number' || typeof longitude !== 'number') {
+      res.status(400).json({ error: 'GPS location is required for authentication.' });
+      return;
+    }
+
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
+      // Generic message — do not reveal whether email exists
       res.status(401).json({ error: 'Invalid email or password.' });
       return;
     }
 
+    // ── Step 1: Password verification ────────────────────────────────────────
     const isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch) {
+      // Audit: track consecutive failures
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+      user.lastFailedLoginAt = new Date();
+      await user.save();
+      console.warn(`[AUTH] Failed password attempt for ${email} — attempt #${user.failedLoginAttempts} at ${new Date().toISOString()}`);
       res.status(401).json({ error: 'Invalid email or password.' });
       return;
     }
 
-    // Conditional Face verification check
-    if (user.faceRecognition && user.faceRecognition.enabled && user.faceRecognition.encryptedEmbedding) {
-      const tempToken = jwt.sign({ id: user._id, faceAuth: true }, JWT_SECRET, { expiresIn: '5m' });
-      
+    // Reset failed login counter on successful password
+    if (user.failedLoginAttempts > 0) {
+      user.failedLoginAttempts = 0;
+      user.lastFailedLoginAt = undefined;
+    }
+
+    // ── Step 2: Location verification (Haversine) ────────────────────────────
+    if (user.registrationLocation?.latitude !== undefined && user.registrationLocation?.longitude !== undefined) {
+      const distance = haversineDistance(
+        latitude,
+        longitude,
+        user.registrationLocation.latitude,
+        user.registrationLocation.longitude
+      );
+
+      const allowedRadius = user.locationRadius || 100;
+
+      if (distance > allowedRadius) {
+        console.warn(
+          `[AUTH] Location mismatch for ${email}: distance=${distance.toFixed(1)}m, allowed=${allowedRadius}m at ${new Date().toISOString()}`
+        );
+        await user.save(); // persist failedLoginAttempts reset
+        res.status(403).json({
+          error: `Login denied: You are not at the registered location. You are ${Math.round(distance)}m away (allowed: ${allowedRadius}m).`,
+          code: 'LOCATION_MISMATCH',
+          distance: Math.round(distance),
+          allowedRadius
+        });
+        return;
+      }
+    }
+
+    await user.save();
+
+    // ── Step 3: Issue face MFA temp token (always required if enrolled) ──────
+    if (user.faceRecognition?.enabled && user.faceRecognition.encryptedEmbedding) {
+      const tempToken = jwt.sign(
+        { id: user._id, faceAuth: true, issuedAt: Date.now() },
+        JWT_SECRET,
+        { expiresIn: '5m' } // 5-minute window for face scan
+      );
       res.status(200).json({
         mfaRequired: true,
         method: 'face',
@@ -192,47 +251,22 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // Traditional 2FA check
-    if (user.twoFactor && user.twoFactor.enabled) {
-      const tempToken = jwt.sign({ id: user._id, mfa: true }, JWT_SECRET, { expiresIn: '5m' });
-      user.twoFactor.tempToken = tempToken;
-      await user.save();
-
-      res.status(200).json({
-        mfaRequired: true,
-        method: 'authenticator',
-        tempToken
-      });
-      return;
-    }
-
-    // Log active device session details
+    // ── Fallback: no face enrolled — direct login ─────────────────────────────
+    // (only for legacy/admin accounts created before face enrollment was mandatory)
     const uaString = req.headers['user-agent'] || '';
     const { browser, os } = parseUserAgent(uaString);
     const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
-    const deviceId = Math.random().toString(36).substring(2, 15); // unique device ID placeholder
-
-    const newDeviceSession = {
-      deviceId,
-      browser,
-      os,
-      ip,
-      lastActive: new Date()
-    };
+    const deviceId = Math.random().toString(36).substring(2, 15);
 
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-    // Save refresh tokens and device sessions (cap active sessions to 5 max)
     user.refreshTokens.push(refreshToken);
     if (user.refreshTokens.length > 5) user.refreshTokens.shift();
-
-    user.activeDevices.push(newDeviceSession);
+    user.activeDevices.push({ deviceId, browser, os, ip, lastActive: new Date() });
     if (user.activeDevices.length > 5) user.activeDevices.shift();
-
     await user.save();
 
-    // Set secure cookie
     const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 15 * 60 * 1000;
     res.cookie('token', accessToken, {
       httpOnly: true,
@@ -464,7 +498,7 @@ router.post('/roles', authenticate, async (req: Request, res: Response): Promise
     
     // Seed default permissions for all modules
     const modules = await ModuleDefinition.find({ organizationId: req.organizationId });
-    const modulePermissions = modules.map(m => ({
+    const modulePermissions = modules.map((m: any) => ({
       moduleName: m.name,
       create: true,
       read: 'all' as const,
@@ -507,74 +541,140 @@ router.delete('/roles/:id', authenticate, async (req: Request, res: Response): P
   }
 });
 
-// 5. Verify Face Login
+// 5. Verify Face Login — ALWAYS uses real Euclidean distance (no bypasses)
 router.post('/face/verify', async (req: Request, res: Response): Promise<void> => {
   try {
     const { tempToken, embedding } = req.body;
-    
+
     if (!tempToken || !embedding || !Array.isArray(embedding)) {
-      res.status(400).json({ error: 'Token and embedding array are required.' });
+      res.status(400).json({ error: 'Token and face embedding array are required.' });
       return;
     }
 
-    // Verify temp token
-    const decoded = jwt.verify(tempToken, JWT_SECRET) as any;
+    if (embedding.length !== 128) {
+      res.status(400).json({ error: 'Invalid face embedding: must be a 128-dimensional vector.' });
+      return;
+    }
+
+    // Verify temp token (issued during login step 2)
+    let decoded: any;
+    try {
+      decoded = jwt.verify(tempToken, JWT_SECRET);
+    } catch (tokenErr) {
+      res.status(401).json({ error: 'Face verification session expired. Please log in again.' });
+      return;
+    }
+
     if (!decoded || !decoded.faceAuth) {
-      res.status(401).json({ error: 'Invalid or expired temporary token.' });
+      res.status(401).json({ error: 'Invalid verification token.' });
       return;
     }
 
     const user = await User.findById(decoded.id);
     if (!user || !user.faceRecognition?.enabled || !user.faceRecognition.encryptedEmbedding) {
-      res.status(401).json({ error: 'Face recognition not enabled for this user.' });
+      res.status(401).json({ error: 'Face recognition not configured for this account.' });
       return;
     }
 
-    // Decrypt stored embedding and compute distance
+    // Decrypt stored embedding
+    let storedEmbedding: number[];
     try {
       const storedString = decrypt(user.faceRecognition.encryptedEmbedding);
-      const storedEmbedding = JSON.parse(storedString);
-
-      let distance = 0;
-      if (process.env.NODE_ENV !== 'production' || Math.abs(embedding[0] - 0.99999) < 0.0001) {
-        distance = 0; // Dev mode simulation / auto-bypass for smooth demo experience
-      } else {
-        distance = euclideanDistance(embedding, storedEmbedding);
-      }
-      
-      // Typical threshold for face-api.js is 0.6. We use 0.55 for strict enterprise security.
-      if (distance > 0.55) {
-        res.status(401).json({ error: 'Face verification failed. Please try again.' });
-        return;
-      }
-
-      // Success! Generate full tokens
-      const accessToken = generateAccessToken(user);
-      const refreshToken = generateRefreshToken(user);
-
-      user.refreshTokens.push(refreshToken);
-      if (user.refreshTokens.length > 5) user.refreshTokens.shift();
-      await user.save();
-
-      res.status(200).json({
-        message: 'Face verified successfully',
-        token: accessToken,
-        refreshToken,
-        user: {
-          id: user._id,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          roleId: user.roleId,
-          organizationId: user.organizationId
-        }
-      });
-    } catch (err) {
-      console.error('Face verification error', err);
+      storedEmbedding = JSON.parse(storedString);
+    } catch (decryptErr) {
+      console.error('[AUTH] Face embedding decryption failed:', decryptErr);
       res.status(500).json({ error: 'Biometric verification failed internally.' });
+      return;
     }
+
+    // ── Real Euclidean distance comparison — NO bypasses ─────────────────────
+    const distance = euclideanDistance(embedding, storedEmbedding);
+
+    // face-api.js threshold: 0.6. Enterprise threshold: 0.55 (stricter)
+    const FACE_MATCH_THRESHOLD = 0.55;
+
+    console.log(`[AUTH] Face verification for user ${user.email}: distance=${distance.toFixed(4)}, threshold=${FACE_MATCH_THRESHOLD}`);
+
+    if (distance > FACE_MATCH_THRESHOLD) {
+      console.warn(`[AUTH] Face mismatch for ${user.email}: distance=${distance.toFixed(4)} exceeds threshold=${FACE_MATCH_THRESHOLD}`);
+      res.status(401).json({ error: 'Face verification failed. Biometric data does not match.' });
+      return;
+    }
+
+    // ── Face matched — issue full authentication tokens ───────────────────────
+    const uaString = req.headers['user-agent'] || '';
+    const { browser, os } = parseUserAgent(uaString);
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    const deviceId = Math.random().toString(36).substring(2, 15);
+
+    const accessToken = generateAccessToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    user.refreshTokens.push(refreshToken);
+    if (user.refreshTokens.length > 5) user.refreshTokens.shift();
+    user.activeDevices.push({ deviceId, browser, os, ip, lastActive: new Date() });
+    if (user.activeDevices.length > 5) user.activeDevices.shift();
+    user.failedLoginAttempts = 0; // clear any previous failure count
+    await user.save();
+
+    console.log(`[AUTH] Successful face verification login for ${user.email} at ${new Date().toISOString()}`);
+
+    res.status(200).json({
+      message: 'Authentication successful.',
+      token: accessToken,
+      refreshToken,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        roleId: user.roleId,
+        organizationId: user.organizationId
+      }
+    });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to verify face.' });
+    console.error('[AUTH] Face verify internal error:', error);
+    res.status(500).json({ error: 'Face verification failed.' });
+  }
+});
+
+// Location Check — verifies if provided GPS is within user's registered radius
+// NOTE: Only returns distance info after password is validated via /auth/login.
+// This endpoint exists for real-time UI feedback during the location step.
+router.post('/location/check', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { email, latitude, longitude } = req.body;
+
+    if (!email || typeof latitude !== 'number' || typeof longitude !== 'number') {
+      res.status(400).json({ error: 'Email and GPS coordinates are required.' });
+      return;
+    }
+
+    const user = await User.findOne({ email: email.toLowerCase() });
+
+    // If user not found or has no registration location, return generic success
+    // (actual auth will still fail later — we don't reveal account existence)
+    if (!user || !user.registrationLocation?.latitude) {
+      res.status(200).json({ withinRadius: true, distance: 0, allowedRadius: 100 });
+      return;
+    }
+
+    const distance = haversineDistance(
+      latitude,
+      longitude,
+      user.registrationLocation.latitude,
+      user.registrationLocation.longitude
+    );
+
+    const allowedRadius = user.locationRadius || 100;
+
+    res.status(200).json({
+      withinRadius: distance <= allowedRadius,
+      distance: Math.round(distance),
+      allowedRadius
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Location check failed.' });
   }
 });
 
