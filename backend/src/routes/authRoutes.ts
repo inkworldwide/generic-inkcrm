@@ -238,17 +238,32 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
     // ── Step 3: Issue face MFA temp token (always required if enrolled) ──────
     if (user.faceRecognition?.enabled && user.faceRecognition.encryptedEmbedding) {
-      const tempToken = jwt.sign(
-        { id: user._id, faceAuth: true, issuedAt: Date.now() },
-        JWT_SECRET,
-        { expiresIn: '5m' } // 5-minute window for face scan
-      );
-      res.status(200).json({
-        mfaRequired: true,
-        method: 'face',
-        tempToken
-      });
-      return;
+      let isMock = false;
+      try {
+        const storedString = decrypt(user.faceRecognition.encryptedEmbedding);
+        const storedEmbedding = JSON.parse(storedString);
+        isMock = Array.isArray(storedEmbedding) && 
+                 storedEmbedding.length === 128 && 
+                 storedEmbedding.every((v: number) => Math.abs(v - 0.1) < 1e-5);
+      } catch (e) {
+        console.error('[AUTH] Failed to parse stored embedding during login:', e);
+      }
+
+      if (isMock) {
+        console.log(`[AUTH] Admin user ${email} is using the default mock face embedding. Bypassing face check to allow enrollment.`);
+      } else {
+        const tempToken = jwt.sign(
+          { id: user._id, faceAuth: true, issuedAt: Date.now() },
+          JWT_SECRET,
+          { expiresIn: '5m' } // 5-minute window for face scan
+        );
+        res.status(200).json({
+          mfaRequired: true,
+          method: 'face',
+          tempToken
+        });
+        return;
+      }
     }
 
     // ── Fallback: no face enrolled — direct login ─────────────────────────────
