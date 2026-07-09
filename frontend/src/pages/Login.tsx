@@ -158,6 +158,9 @@ export default function Login() {
         // Successful password verification and no MFA/location required
         setAuth(res.data.user, res.data.token, res.data.refreshToken);
         localStorage.setItem('user', JSON.stringify(res.data.user));
+        if (res.data.user.subdomain) {
+          localStorage.setItem('tenantSubdomain', res.data.user.subdomain);
+        }
         navigate('/');
       }
     } catch (err: any) {
@@ -167,9 +170,18 @@ export default function Login() {
     }
   };
   /** Step 2 → 3: LocationVerificationStep calls /auth/login and returns tempToken */
-  const handleLocationSuccess = (token: string) => {
-    setTempToken(token);
-    setLoginStep('face');
+  const handleLocationSuccess = (token: string, finalData?: any) => {
+    if (finalData?.token) {
+      setAuth(finalData.user, finalData.token, finalData.refreshToken);
+      localStorage.setItem('user', JSON.stringify(finalData.user));
+      if (finalData.user.subdomain) {
+        localStorage.setItem('tenantSubdomain', finalData.user.subdomain);
+      }
+      navigate('/');
+    } else {
+      setTempToken(token);
+      setLoginStep('face');
+    }
   };
 
   /** Step 2 → 1: Wrong password reported by location step */
@@ -177,14 +189,15 @@ export default function Login() {
     setLoginStep('credentials');
     setError('Invalid email or password. Please check your credentials.');
   };
-
   /** Step 3 → dashboard: Face verified, tokens received */
   const handleFaceSuccess = (user: any, token: string, refreshToken: string) => {
     setAuth(user, token, refreshToken);
     localStorage.setItem('user', JSON.stringify(user));
+    if (user.subdomain) {
+      localStorage.setItem('tenantSubdomain', user.subdomain);
+    }
     navigate('/');
   };
-
   const resetLoginFlow = () => {
     setLoginStep('credentials');
     setEmail('');

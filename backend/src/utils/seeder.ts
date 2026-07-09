@@ -1335,6 +1335,175 @@ export async function seedDatabase(shouldDisconnect = false): Promise<void> {
   }
 }
 
+export async function seedNewTenantData(organizationId: mongoose.Types.ObjectId) {
+  // 1. Create Module Definitions (Lead, Deal, Company)
+  const leadModule = await ModuleDefinition.create({
+    organizationId,
+    name: 'Lead',
+    singularLabel: 'Lead',
+    pluralLabel: 'Leads',
+    apiPath: 'leads',
+    icon: 'UserPlus',
+    isSystem: true,
+    fields: [
+      {
+        name: 'source',
+        label: 'Source',
+        type: 'dropdown',
+        required: false,
+        unique: false,
+        options: ['Website', 'Referral', 'Cold Call', 'Social Media', 'Rajabaksh Ilyala']
+      },
+      {
+        name: 'loanType',
+        label: 'Loan Type',
+        type: 'dropdown',
+        required: true,
+        unique: false,
+        defaultValue: 'SALARIED PERSONAL LOAN',
+        options: ['SALARIED PERSONAL LOAN', 'BUSINESS LOAN', 'HOME LOAN', 'LAP']
+      },
+      { name: 'budget', label: 'Loan Amount', type: 'currency', required: false, unique: false },
+      { name: 'dataCode', label: 'Data Code', type: 'text', required: false, unique: false },
+      {
+        name: 'status',
+        label: 'Status',
+        type: 'dropdown',
+        required: true,
+        unique: false,
+        defaultValue: 'New',
+        options: [
+          'New',
+          'Hot',
+          'Warm',
+          'Cedil Pending',
+          'Document Pending',
+          'Approval Pending',
+          'Approved',
+          'Disbursed',
+          'Rejected',
+          'Followup',
+          'Dropped',
+          'Pending'
+        ]
+      },
+      { name: 'bankName', label: 'Bank Name', type: 'text', required: false, unique: false }
+    ]
+  });
+
+  const companyModule = await ModuleDefinition.create({
+    organizationId,
+    name: 'Company',
+    singularLabel: 'Company',
+    pluralLabel: 'Companies',
+    apiPath: 'companies',
+    icon: 'Building2',
+    isSystem: true,
+    fields: [
+      { name: 'companyName', label: 'Company Name', type: 'text', required: true, unique: true },
+      { name: 'website', label: 'Website', type: 'text', required: false, unique: false },
+      { name: 'employees', label: 'Employees', type: 'number', required: false, unique: false },
+      { name: 'industry', label: 'Industry', type: 'text', required: false, unique: false }
+    ]
+  });
+
+  const dealModule = await ModuleDefinition.create({
+    organizationId,
+    name: 'Deal',
+    singularLabel: 'Deal',
+    pluralLabel: 'Deals',
+    apiPath: 'deals',
+    icon: 'Briefcase',
+    isSystem: true,
+    fields: [
+      { name: 'dealName', label: 'Deal Name', type: 'text', required: true, unique: false },
+      { name: 'amount', label: 'Amount', type: 'currency', required: true, unique: false },
+      { name: 'stage', label: 'Stage', type: 'text', required: true, unique: false },
+      { name: 'closingDate', label: 'Closing Date', type: 'date', required: false, unique: false }
+    ]
+  });
+
+  // 2. Create default statuses
+  const defaultStatuses = [
+    { name: 'New', color: '#6366f1', icon: 'Sparkles', pipelinePosition: 0, order: 0 },
+    { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 1, order: 1 },
+    { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 2, order: 2 },
+    { name: 'Cedil Pending', color: '#ec4899', icon: 'FileWarning', pipelinePosition: 3, order: 3 },
+    { name: 'Document Pending', color: '#14b8a6', icon: 'FileText', pipelinePosition: 4, order: 4 },
+    { name: 'Approval Pending', color: '#f97316', icon: 'Clock', pipelinePosition: 5, order: 5 },
+    { name: 'Approved', color: '#10b981', icon: 'CheckCircle', pipelinePosition: 6, order: 6 },
+    { name: 'Disbursed', color: '#10b981', icon: 'Banknote', pipelinePosition: 7, order: 7, isFinal: true, isSuccess: true },
+    { name: 'Rejected', color: '#ef4444', icon: 'XOctagon', pipelinePosition: 8, order: 8, isFinal: true, isSuccess: false },
+    { name: 'Followup', color: '#3b82f6', icon: 'PhoneCall', pipelinePosition: 9, order: 9 },
+    { name: 'Dropped', color: '#ef4444', icon: 'ArrowDownCircle', pipelinePosition: 10, order: 10, isFinal: true, isSuccess: false },
+    { name: 'Pending', color: '#eab308', icon: 'Hourglass', pipelinePosition: 11, order: 11 }
+  ];
+
+  for (const s of defaultStatuses) {
+    await Status.create({
+      organizationId,
+      ...s
+    });
+  }
+
+  // 3. Create default dashboard layout
+  await DashboardLayout.create({
+    organizationId,
+    name: 'Sales Dashboard',
+    isDefault: true,
+    widgets: [
+      { id: 'widget_1', type: 'leads_funnel', title: 'Leads Funnel', x: 0, y: 0, w: 12, h: 4, config: {} }
+    ]
+  });
+
+  // 4. Create some sample Leads (CustomRecord)
+  const sampleLeads = [
+    {
+      firstName: 'Raja',
+      lastName: 'Baksh',
+      email: 'raja.baksh@gmail.com',
+      phone: '9876543210',
+      status: 'New',
+      loanType: 'SALARIED PERSONAL LOAN',
+      budget: 500000,
+      source: 'Website',
+      bankName: 'HDFC Bank'
+    },
+    {
+      firstName: 'Suma',
+      lastName: 'Dhar',
+      email: 'suma.dhar@yahoo.com',
+      phone: '8765432109',
+      status: 'Followup',
+      loanType: 'BUSINESS LOAN',
+      budget: 1500000,
+      source: 'Referral',
+      bankName: 'ICICI Bank'
+    },
+    {
+      firstName: 'Ankit',
+      lastName: 'Sharma',
+      email: 'ankit.sharma@outlook.com',
+      phone: '7654321098',
+      status: 'Document Pending',
+      loanType: 'HOME LOAN',
+      budget: 3500000,
+      source: 'Cold Call',
+      bankName: 'SBI'
+    }
+  ];
+
+  for (const lead of sampleLeads) {
+    await CustomRecord.create({
+      organizationId,
+      moduleId: leadModule._id,
+      data: lead
+    });
+  }
+
+  console.log(`Successfully seeded sample data for new organization: ${organizationId}`);
+}
+
 if (require.main === module) {
   seedDatabase(true).catch((err) => {
     console.error('Error seeding database:', err);

@@ -8,6 +8,7 @@ import ModuleDefinition from '../models/ModuleDefinition';
 import { authenticate } from '../middleware/authMiddleware';
 import { encrypt, decrypt, euclideanDistance } from '../utils/encryption';
 import { haversineDistance } from '../utils/geoUtils';
+import { seedNewTenantData } from '../utils/seeder';
 
 const router = Router();
 
@@ -157,6 +158,13 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
 
     console.log(`[AUTH] New account registered: ${email}, location: (${registrationLocation.latitude}, ${registrationLocation.longitude})`);
 
+    // Seed new organization with default modules, statuses, and sample leads
+    try {
+      await seedNewTenantData(org._id);
+    } catch (seedErr) {
+      console.error(`[AUTH] Failed to seed new tenant organization:`, seedErr);
+    }
+
     res.status(201).json({
       message: 'Account successfully registered.',
       organizationId: org._id,
@@ -300,6 +308,9 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       maxAge
     });
 
+    const org = await Organization.findById(user.organizationId);
+    const subdomain = org?.subdomain || 'sales';
+
     res.status(200).json({
       message: 'Login successful.',
       token: accessToken,
@@ -310,9 +321,12 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         lastName: user.lastName,
         email: user.email,
         roleId: user.roleId,
-        organizationId: user.organizationId
+        organizationId: user.organizationId,
+        subdomain
       }
     });
+
+
   } catch (error) {
     console.error('Login Error:', error);
     res.status(500).json({ error: 'Authentication failed.' });
@@ -644,6 +658,9 @@ router.post('/face/verify', async (req: Request, res: Response): Promise<void> =
 
     console.log(`[AUTH] Successful face verification login for ${user.email} at ${new Date().toISOString()}`);
 
+    const org = await Organization.findById(user.organizationId);
+    const subdomain = org?.subdomain || 'sales';
+
     res.status(200).json({
       message: 'Authentication successful.',
       token: accessToken,
@@ -654,7 +671,8 @@ router.post('/face/verify', async (req: Request, res: Response): Promise<void> =
         lastName: user.lastName,
         email: user.email,
         roleId: user.roleId,
-        organizationId: user.organizationId
+        organizationId: user.organizationId,
+        subdomain
       }
     });
   } catch (error) {

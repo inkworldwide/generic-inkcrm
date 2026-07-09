@@ -106,17 +106,9 @@ export default function Settings() {
 
   const currentUserRole = roles.find(r => r._id === user?.roleId);
   const isSuperAdmin = currentUserRole?.name === 'Super Admin';
+  const visibleTabs = SETTINGS_TABS;
+  const accessDenied = false;
 
-  const visibleTabs = SETTINGS_TABS.filter(tab => {
-    if (tab.id === 'users' || tab.id === 'role' || tab.id === 'security') {
-      return isSuperAdmin;
-    }
-    return true;
-  });
-
-  const isTabRestricted = ['users', 'role', 'security'].includes(currentTab);
-  const hasLoadedRoles = roles.length > 0;
-  const accessDenied = isTabRestricted && hasLoadedRoles && !isSuperAdmin;
   const tabToApiPath: Record<string, string> = {
     department: 'departments',
     product: 'products',

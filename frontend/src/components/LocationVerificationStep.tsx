@@ -7,7 +7,7 @@ interface Props {
   email: string;
   password: string;
   rememberMe?: boolean;
-  onSuccess: (tempToken: string) => void;
+  onSuccess: (tempToken: string, finalData?: any) => void;
   onPasswordError: () => void;
   onCancel: () => void;
 }
@@ -93,6 +93,8 @@ export default function LocationVerificationStep({
 
       if (res.data.mfaRequired && res.data.tempToken) {
         onSuccess(res.data.tempToken);
+      } else if (res.data.token) {
+        onSuccess('', res.data);
       }
     } catch (err: any) {
       const status = err.response?.status;
