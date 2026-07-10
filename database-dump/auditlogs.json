@@ -1,1 +1,37 @@
-[]
+[
+  {
+    "_id": "6a509cc0821f8637ee0a8e40",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "userId": "6a4f853ed1277b454ae89334",
+    "action": "record.create",
+    "resource": "Lead",
+    "resourceId": "6a509cc0821f8637ee0a8e3c",
+    "newValue": {
+      "source": "Cold Call",
+      "loanType": "SALARIED PERSONAL LOAN",
+      "budget": 2334,
+      "dataCode": "3245cb",
+      "businessPartner": "",
+      "psm": "",
+      "status": "Warm",
+      "caseDetails": "cash",
+      "assignToTeam": "",
+      "assignedTo": "",
+      "followUpDate": "2026-07-10",
+      "notes": "",
+      "firstName": "md",
+      "lastName": "sadiq",
+      "company": "google",
+      "phone": "09916102542",
+      "email": "mohammedhashmat481@gmail.com",
+      "presentAddress": "9900 4t cross ,pnt, AC post, banglore -45\nmuzMMILE APARTEMENT",
+      "city": "banglore",
+      "pinCode": "560045",
+      "state": "KARNATAKA",
+      "country": "INDIA",
+      "leadScore": 50
+    },
+    "createdAt": "2026-07-10T07:18:24.829Z",
+    "__v": 0
+  }
+]

@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "_id": "6a509cc0821f8637ee0a8e3e",
+    "organizationId": "6a4f853ed1277b454ae89318",
+    "recordId": "6a509cc0821f8637ee0a8e3c",
+    "userId": "6a4f853ed1277b454ae89334",
+    "type": "create",
+    "createdAt": "2026-07-10T07:18:24.826Z",
+    "__v": 0
+  }
+]
