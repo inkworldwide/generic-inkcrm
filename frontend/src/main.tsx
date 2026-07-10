@@ -5,6 +5,38 @@ import App from './App';
 import './index.css';
 import { useThemeStore } from './store/themeStore';
 import { useAuthStore } from './store/authStore';
+import { useToastStore } from './store/toastStore';
+
+// Override native window.alert to use premium custom toast notifications
+window.alert = (message: any) => {
+  const msgStr = message ? String(message) : '';
+  const msgLower = msgStr.toLowerCase();
+  let type: 'success' | 'error' | 'info' | 'warning' = 'info';
+  if (
+    msgLower.includes('success') ||
+    msgLower.includes('successfully') ||
+    msgLower.includes('created') ||
+    msgLower.includes('saved') ||
+    msgLower.includes('added')
+  ) {
+    type = 'success';
+  } else if (
+    msgLower.includes('fail') ||
+    msgLower.includes('failed') ||
+    msgLower.includes('error') ||
+    msgLower.includes('denied')
+  ) {
+    type = 'error';
+  } else if (
+    msgLower.includes('warning') ||
+    msgLower.includes('invalid') ||
+    msgLower.includes('required') ||
+    msgLower.includes('select')
+  ) {
+    type = 'warning';
+  }
+  useToastStore.getState().showToast(msgStr, type);
+};
 
 // Create React Query Client
 const queryClient = new QueryClient({

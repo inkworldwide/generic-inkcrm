@@ -1,7 +1,7 @@
 [
   {
-    "_id": "6a4f853ed1277b454ae8931e",
-    "organizationId": "6a4f853ed1277b454ae89318",
+    "_id": "6a50b1b63d61e35dc9ea1376",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
     "name": "Super Admin",
     "description": "Full organizational access",
     "isSystem": true,
@@ -14,7 +14,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae8931f"
+          "_id": "6a50b1b63d61e35dc9ea1377"
         },
         {
           "moduleName": "deals",
@@ -22,7 +22,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae89320"
+          "_id": "6a50b1b63d61e35dc9ea1378"
         },
         {
           "moduleName": "companies",
@@ -30,7 +30,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae89321"
+          "_id": "6a50b1b63d61e35dc9ea1379"
         }
       ],
       "fields": [],
@@ -44,13 +44,13 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-09T11:25:50.797Z",
-    "updatedAt": "2026-07-09T11:25:50.797Z",
+    "createdAt": "2026-07-10T08:47:50.210Z",
+    "updatedAt": "2026-07-10T08:47:50.210Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae89323",
-    "organizationId": "6a4f853ed1277b454ae89318",
+    "_id": "6a50b1b63d61e35dc9ea137b",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
     "name": "Sales Agent",
     "description": "Manage sales pipelines",
     "isSystem": false,
@@ -63,7 +63,7 @@
           "read": "all",
           "update": "all",
           "delete": "own",
-          "_id": "6a4f853ed1277b454ae89324"
+          "_id": "6a50b1b63d61e35dc9ea137c"
         },
         {
           "moduleName": "deals",
@@ -71,7 +71,7 @@
           "read": "all",
           "update": "all",
           "delete": "none",
-          "_id": "6a4f853ed1277b454ae89325"
+          "_id": "6a50b1b63d61e35dc9ea137d"
         },
         {
           "moduleName": "companies",
@@ -79,7 +79,7 @@
           "read": "all",
           "update": "all",
           "delete": "none",
-          "_id": "6a4f853ed1277b454ae89326"
+          "_id": "6a50b1b63d61e35dc9ea137e"
         }
       ],
       "fields": [],
@@ -91,13 +91,13 @@
         "reports"
       ]
     },
-    "createdAt": "2026-07-09T11:25:50.802Z",
-    "updatedAt": "2026-07-09T11:25:50.802Z",
+    "createdAt": "2026-07-10T08:47:50.219Z",
+    "updatedAt": "2026-07-10T08:47:50.219Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae89328",
-    "organizationId": "6a4f853ed1277b454ae8931a",
+    "_id": "6a50b1b63d61e35dc9ea1380",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
     "name": "Super Admin",
     "description": "School Administrator",
     "isSystem": true,
@@ -110,7 +110,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae89329"
+          "_id": "6a50b1b63d61e35dc9ea1381"
         },
         {
           "moduleName": "courses",
@@ -118,7 +118,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae8932a"
+          "_id": "6a50b1b63d61e35dc9ea1382"
         }
       ],
       "fields": [],
@@ -131,13 +131,13 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-09T11:25:50.806Z",
-    "updatedAt": "2026-07-09T11:25:50.806Z",
+    "createdAt": "2026-07-10T08:47:50.226Z",
+    "updatedAt": "2026-07-10T08:47:50.226Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae8932c",
-    "organizationId": "6a4f853ed1277b454ae8931a",
+    "_id": "6a50b1b63d61e35dc9ea1384",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
     "name": "Teacher",
     "description": "Faculty members",
     "isSystem": false,
@@ -150,7 +150,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae8932d"
+          "_id": "6a50b1b63d61e35dc9ea1385"
         },
         {
           "moduleName": "courses",
@@ -158,7 +158,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae8932e"
+          "_id": "6a50b1b63d61e35dc9ea1386"
         }
       ],
       "fields": [],
@@ -171,13 +171,13 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-09T11:25:50.808Z",
-    "updatedAt": "2026-07-09T11:25:50.808Z",
+    "createdAt": "2026-07-10T08:47:50.232Z",
+    "updatedAt": "2026-07-10T08:47:50.232Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae89330",
-    "organizationId": "6a4f853ed1277b454ae8931c",
+    "_id": "6a50b1b63d61e35dc9ea1388",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
     "name": "Super Admin",
     "description": "Hospital Administrator",
     "isSystem": true,
@@ -190,7 +190,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae89331"
+          "_id": "6a50b1b63d61e35dc9ea1389"
         },
         {
           "moduleName": "appointments",
@@ -198,7 +198,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a4f853ed1277b454ae89332"
+          "_id": "6a50b1b63d61e35dc9ea138a"
         }
       ],
       "fields": [],
@@ -211,8 +211,8 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-09T11:25:50.810Z",
-    "updatedAt": "2026-07-09T11:25:50.810Z",
+    "createdAt": "2026-07-10T08:47:50.237Z",
+    "updatedAt": "2026-07-10T08:47:50.237Z",
     "__v": 0
   }
 ]

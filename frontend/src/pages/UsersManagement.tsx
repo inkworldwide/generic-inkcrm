@@ -2,17 +2,26 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import * as Icons from 'lucide-react';
-import FaceEnrollment from '../components/FaceEnrollment';
 import { useAuthStore } from '../store/authStore';
+import { useToastStore } from '../store/toastStore';
 
 export default function UsersManagement() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { showConfirm, showToast } = useToastStore();
 
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [userForm, setUserForm] = useState({
-    id: '', email: '', password: '', firstName: '', lastName: '', roleId: ''
+    id: '',
+    email: '',
+    password: '',
+    firstName: '',
+    lastName: '',
+    roleId: '',
+    skipFace: false,
+    skipLocation: false,
+    isActive: true
   });
   const [userEditing, setUserEditing] = useState(false);
   const [userModalOpen, setUserModalOpen] = useState(false);
@@ -46,17 +55,27 @@ export default function UsersManagement() {
     try {
       if (userEditing) {
         await api.put(`/auth/users/${userForm.id}`, userForm);
-        alert('User updated successfully.');
+        showToast('User updated successfully.', 'success');
       } else {
         await api.post('/auth/users', userForm);
-        alert('User created successfully.');
+        showToast('User created successfully.', 'success');
       }
       setUserModalOpen(false);
       setUserEditing(false);
-      setUserForm({ id: '', email: '', password: '', firstName: '', lastName: '', roleId: '' });
+      setUserForm({
+        id: '',
+        email: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        roleId: '',
+        skipFace: false,
+        skipLocation: false,
+        isActive: true
+      });
       loadData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save user.');
+      showToast(err.response?.data?.error || 'Failed to save user.', 'error');
     }
   };
 
@@ -67,20 +86,29 @@ export default function UsersManagement() {
       password: '',
       firstName: u.firstName,
       lastName: u.lastName,
-      roleId: u.roleId?._id || ''
+      roleId: u.roleId?._id || '',
+      skipFace: !!u.skipFace,
+      skipLocation: !!u.skipLocation,
+      isActive: u.isActive !== false
     });
     setUserEditing(true);
     setUserModalOpen(true);
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (!window.confirm('Remove this user?')) return;
-    try {
-      await api.delete(`/auth/users/${id}`);
-      loadData();
-    } catch (err) {
-      alert('Failed to delete user.');
-    }
+  const handleDeleteUser = (id: string) => {
+    showConfirm({
+      title: 'Remove User',
+      message: 'Are you sure you want to remove this user? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/auth/users/${id}`);
+          showToast('User removed successfully.', 'success');
+          loadData();
+        } catch (err) {
+          showToast('Failed to delete user.', 'error');
+        }
+      }
+    });
   };
 
   const handleToggleUserSetting = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
@@ -134,7 +162,17 @@ export default function UsersManagement() {
           type="button"
           onClick={() => {
             setUserEditing(false);
-            setUserForm({ id: '', email: '', password: '', firstName: '', lastName: '', roleId: '' });
+            setUserForm({
+              id: '',
+              email: '',
+              password: '',
+              firstName: '',
+              lastName: '',
+              roleId: '',
+              skipFace: false,
+              skipLocation: false,
+              isActive: true
+            });
             setUserModalOpen(true);
           }}
           className="btn-primary-premium flex items-center gap-2"
@@ -268,27 +306,6 @@ export default function UsersManagement() {
                       </button>
                       <button
                         type="button"
-                        className="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors"
-                        title="Schedule"
-                      >
-                        <Icons.Calendar className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        className="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors"
-                        title="Settings"
-                      >
-                        <Icons.Settings className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        className="p-1 rounded hover:bg-slate-100 text-slate-400 transition-colors"
-                        title="Keys"
-                      >
-                        <Icons.Key className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
                         onClick={() => handleDeleteUser(u._id)}
                         className="p-1 rounded hover:bg-rose-50 text-slate-450 hover:text-rose-600 transition-colors"
                         title="Remove User"
@@ -345,13 +362,36 @@ export default function UsersManagement() {
                 </select>
               </div>
 
-              {/* Face Enrollment Box for Face Auth */}
-              {userEditing && (
-                <div className="border border-slate-100 rounded-xl p-3 bg-slate-50/50 space-y-2">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Biometric Credentials</span>
-                  <FaceEnrollment onSuccess={() => alert('Face enrolled successfully.')} />
+              {/* Security & Access Controls */}
+              <div className="border border-slate-100 rounded-2xl p-4 bg-slate-50/50 space-y-4">
+                <span className="text-[10px] font-[800] text-slate-405 uppercase tracking-wider block">Access Permissions & Controls</span>
+                
+                {/* Approve Status Toggle */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-start gap-2.5">
+                    <Icons.CheckCircle2 className="w-4 h-4 text-slate-400 mt-0.5" />
+                    <div>
+                      <div className="text-xs font-bold text-slate-700">Approve Account</div>
+                      <div className="text-[10px] text-slate-400">Approve/activate user account status</div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUserForm({ ...userForm, isActive: !userForm.isActive })}
+                    className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      userForm.isActive ? 'bg-emerald-500' : 'bg-rose-500'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        userForm.isActive ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
                 </div>
-              )}
+              </div>
+
+
 
               <div className="flex justify-end gap-3 pt-2">
                 <button type="button" onClick={() => setUserModalOpen(false)} className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold text-sm hover:bg-slate-200">

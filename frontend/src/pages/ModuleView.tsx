@@ -5,6 +5,8 @@ import * as Icons from 'lucide-react';
 import { useModuleStore, ModuleDefinition } from '../store/moduleStore';
 import api from '../services/api';
 import { DynamicIcon } from '../components/Layout';
+import { useToastStore } from '../store/toastStore';
+import { formatDate } from '../utils/dateFormatter';
 
 type ViewMode = 'table' | 'kanban' | 'calendar' | 'timeline';
 
@@ -15,6 +17,7 @@ export default function ModuleView() {
   const [searchParams] = useSearchParams();
 
   const { activeModule, setActiveModuleByPath } = useModuleStore();
+  const { showConfirm, showToast } = useToastStore();
 
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [searchVal, setSearchVal] = useState('');
@@ -168,7 +171,7 @@ export default function ModuleView() {
 
   const handleDownloadCampaign = (rec: any) => {
     const headers = 'Campaign Name,Created Date,Total Allocated Numbers,Total Dialed Numbers\n';
-    const row = `"${rec.data.campaignName}","${new Date(rec.createdAt).toLocaleDateString()}","${getAllocatedNumbers(rec.data.campaignName)}","${getDialedNumbers(rec.data.campaignName)}"\n`;
+    const row = `"${rec.data.campaignName}","${formatDate(rec.createdAt)}","${getAllocatedNumbers(rec.data.campaignName)}","${getDialedNumbers(rec.data.campaignName)}"\n`;
     const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + headers + row);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
@@ -226,9 +229,20 @@ export default function ModuleView() {
   });
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this record?')) {
-      deleteMutation.mutate(id);
-    }
+    showConfirm({
+      title: 'Delete Record',
+      message: `Are you sure you want to delete this ${activeModule?.singularLabel || 'record'}?`,
+      onConfirm: () => {
+        deleteMutation.mutate(id, {
+          onSuccess: () => {
+            showToast('Record deleted successfully.', 'success');
+          },
+          onError: () => {
+            showToast('Failed to delete record.', 'error');
+          }
+        });
+      }
+    });
   };
 
   // CSV Export Utility
@@ -405,7 +419,7 @@ export default function ModuleView() {
               <div className="absolute -left-[30px] top-1.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-800 bg-primary shadow-sm"></div>
               
               <div className="text-xs text-left">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">{new Date(rec.createdAt).toLocaleDateString()} {new Date(rec.createdAt).toLocaleTimeString()}</p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase">{formatDate(rec.createdAt)} {new Date(rec.createdAt).toLocaleTimeString()}</p>
                 <p className="text-slate-700 dark:text-slate-300 mt-1">
                   Record Created: <Link to={`/modules/${apiPath}/${rec._id}`} className="font-semibold text-primary hover:underline">
                     {rec.data.fullName || rec.data.companyName || rec.data.dealName || rec.data.title || rec._id}
@@ -685,11 +699,7 @@ export default function ModuleView() {
                       <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                         {data?.records.map((rec: any) => {
                           const name = rec.data?.campaignName || 'Unnamed Campaign';
-                          const createdDateStr = new Date(rec.createdAt).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          }) + ' ' + new Date(rec.createdAt).toLocaleTimeString('en-US', {
+                          const createdDateStr = formatDate(rec.createdAt) + ' ' + new Date(rec.createdAt).toLocaleTimeString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
                             hour12: true
@@ -777,7 +787,7 @@ export default function ModuleView() {
 
                         {/* Column 3 */}
                         <div className="space-y-4">
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Created On:</span> <span className="text-slate-600 dark:text-slate-400">{new Date(rec.createdAt).toLocaleDateString()}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Created On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.createdAt)}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Created By:</span> <span className="text-slate-600 dark:text-slate-400">System</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Pending at:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignToTeam || 'Sales Review'}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">PSM:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignedTo || 'Unassigned'}</span></div>
@@ -787,7 +797,7 @@ export default function ModuleView() {
                         {/* Column 4 */}
                         <div className="space-y-4">
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Firm/Company:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.company || 'N/A'}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Modified On:</span> <span className="text-slate-600 dark:text-slate-400">{new Date(rec.updatedAt).toLocaleDateString()}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Modified On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.updatedAt)}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Assigned By:</span> <span className="text-slate-600 dark:text-slate-400">System Router</span></div>
                           <div>
                             <span className="font-bold text-slate-700 dark:text-slate-350">Remarks:</span> 
@@ -900,11 +910,15 @@ export default function ModuleView() {
                             </td>
                             {activeModule.fields.slice(1, 5).map((field) => (
                               <td key={field.name} className="px-6 py-4 truncate max-w-[150px]">
-                                {field.type === 'currency' ? `$${rec.data[field.name] || 0}` : String(rec.data[field.name] || '-')}
+                                {field.type === 'currency' 
+                                  ? `$${rec.data[field.name] || 0}` 
+                                  : field.type === 'date'
+                                    ? formatDate(rec.data[field.name])
+                                    : String(rec.data[field.name] || '-')}
                               </td>
                             ))}
                             <td className="px-6 py-4 text-xs text-slate-400">
-                              {new Date(rec.createdAt).toLocaleDateString()}
+                              {formatDate(rec.createdAt)}
                             </td>
                             <td className="px-6 py-4 text-right space-x-3">
                               <Link

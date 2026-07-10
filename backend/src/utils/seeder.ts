@@ -793,14 +793,28 @@ async function seed() {
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: productModule._id,
-    data: { name: 'Enterprise CRM Suite', code: 'CRM_ENT' },
+    data: { name: 'SALARIED PERSONAL LOAN', code: 'SALARIED_PERSONAL_LOAN' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: productModule._id,
-    data: { name: 'Cloud Integration API', code: 'API_CLOUD' },
+    data: { name: 'BUSINESS LOAN', code: 'BUSINESS_LOAN' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: productModule._id,
+    data: { name: 'HOME LOAN', code: 'HOME_LOAN' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: productModule._id,
+    data: { name: 'LAP', code: 'LAP' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
@@ -808,35 +822,35 @@ async function seed() {
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'State Bank of India', code: 'SBI' },
+    data: { bankName: 'State Bank of India', code: 'bank_sbi' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'HDFC Bank', code: 'HDFC' },
+    data: { bankName: 'HDFC Bank', code: 'bank_hdfc' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'ICICI Bank', code: 'ICICI' },
+    data: { bankName: 'ICICI Bank', code: 'bank_icici' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'Axis Bank', code: 'AXIS' },
+    data: { bankName: 'Axis Bank', code: 'bank_axis' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
   await CustomRecord.create({
     organizationId: salesOrg._id,
     moduleId: bankMasterModule._id,
-    data: { bankName: 'IndusInd Bank', code: 'INDUSIND' },
+    data: { bankName: 'IndusInd Bank', code: 'bank_indusind' },
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });

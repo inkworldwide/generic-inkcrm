@@ -69,8 +69,16 @@ api.interceptors.response.use(
           window.location.href = '/login';
         }
       }
-    } else if (error.response?.status === 404 && originalRequest.url?.includes('/auth/')) {
-      // User or auth endpoint not found (occurs after db clear/seeding) — log out immediately
+    } else if (
+      (error.response?.status === 404 && originalRequest.url?.includes('/auth/')) ||
+      (error.response?.status === 403 &&
+        error.response?.data?.error &&
+        (error.response.data.error.toLowerCase().includes('user role not found') ||
+         error.response.data.error.toLowerCase().includes('access denied') ||
+         error.response.data.error.toLowerCase().includes('cross-tenant') ||
+         error.response.data.error.toLowerCase().includes('forbidden')))
+    ) {
+      // User/role/tenant context invalid or stale (e.g. after db seeding) — log out immediately
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');

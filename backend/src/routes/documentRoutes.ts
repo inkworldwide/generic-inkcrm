@@ -104,4 +104,30 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
   }
 });
 
+// 4. Update/Rename document
+router.put('/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      res.status(400).json({ error: 'Document name is required.' });
+      return;
+    }
+
+    const doc = await Document.findOneAndUpdate(
+      { _id: req.params.id, organizationId: req.organizationId },
+      { name: name.trim() },
+      { new: true }
+    );
+
+    if (!doc) {
+      res.status(404).json({ error: 'Document not found.' });
+      return;
+    }
+
+    res.status(200).json(doc);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to update document.' });
+  }
+});
+
 export default router;

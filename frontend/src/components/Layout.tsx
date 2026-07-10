@@ -6,6 +6,7 @@ import api from '../services/api';
 import { useModuleStore } from '../store/moduleStore';
 import { useAuthStore } from '../store/authStore';
 import { useThemeStore } from '../store/themeStore';
+import { useToastStore } from '../store/toastStore';
 import loginLogo from '../assets/login-logo.png';
 import * as Icons from 'lucide-react';
 import {
@@ -34,6 +35,7 @@ export default function Layout({ children }: LayoutProps) {
   const { fetchModules } = useModuleStore();
   const { user, logout } = useAuthStore();
   const { branding, fetchBranding } = useThemeStore();
+  const { toasts, hideToast, confirm, hideConfirm } = useToastStore();
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && branding?.themeSettings?.mode === 'dark');
@@ -414,6 +416,96 @@ export default function Layout({ children }: LayoutProps) {
           </footer>
         </main>
       </div>
+
+      {/* Premium Toast Notifications Overlay */}
+      <div className="fixed bottom-5 right-5 z-[9999] flex flex-col gap-3 max-w-md w-[calc(100vw-40px)] pointer-events-none">
+        <AnimatePresence>
+          {toasts.map((toast) => {
+            let bgColor = 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100';
+            let icon = <Icons.Info className="w-5 h-5 text-blue-500" />;
+            if (toast.type === 'success') {
+              bgColor = 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900/50 text-emerald-800 dark:text-emerald-300';
+              icon = <Icons.CheckCircle2 className="w-5 h-5 text-emerald-505" />;
+            } else if (toast.type === 'error') {
+              bgColor = 'bg-rose-50 dark:bg-rose-950/20 border-rose-200 dark:border-rose-900/50 text-rose-800 dark:text-rose-300';
+              icon = <Icons.AlertCircle className="w-5 h-5 text-rose-500" />;
+            } else if (toast.type === 'warning') {
+              bgColor = 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/50 text-amber-800 dark:text-amber-300';
+              icon = <Icons.AlertTriangle className="w-5 h-5 text-amber-505" />;
+            }
+
+            return (
+              <motion.div
+                key={toast.id}
+                initial={{ opacity: 0, y: 20, x: 20, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, x: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.85, x: 50, transition: { duration: 0.2 } }}
+                className={cn(
+                  "p-4 rounded-2xl border shadow-lg flex items-start gap-3 pointer-events-auto backdrop-blur-md",
+                  bgColor
+                )}
+              >
+                <div className="flex-shrink-0 mt-0.5">{icon}</div>
+                <div className="flex-grow text-xs font-bold leading-relaxed">{toast.message}</div>
+                <button
+                  onClick={() => hideToast(toast.id)}
+                  className="flex-shrink-0 text-slate-400 hover:text-slate-650 dark:hover:text-slate-200 transition-colors"
+                >
+                  <Icons.X className="w-4 h-4" />
+                </button>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </div>
+
+      {/* Premium Confirm Dialog Modal */}
+      <AnimatePresence>
+        {confirm && (
+          <div className="fixed inset-0 z-[9998] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={hideConfirm}
+              className="absolute inset-0 bg-[#0f1115]/50 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              transition={{ type: "spring", duration: 0.4 }}
+              className="relative w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-2xl p-6 text-center z-10"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-amber-500/10 dark:bg-amber-500/5 flex items-center justify-center mx-auto mb-4 text-amber-500">
+                <Icons.HelpCircle className="w-6 h-6" />
+              </div>
+              <h3 className="text-sm font-[800] text-slate-800 dark:text-slate-100 uppercase tracking-wider mb-2">{confirm.title}</h3>
+              <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed mb-6">{confirm.message}</p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={() => {
+                    if (confirm.onCancel) confirm.onCancel();
+                    hideConfirm();
+                  }}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 transition-colors text-xs font-bold text-slate-650 dark:text-slate-350 shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    confirm.onConfirm();
+                    hideConfirm();
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-colors text-xs font-bold text-white shadow-md shadow-indigo-600/20"
+                >
+                  Confirm
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

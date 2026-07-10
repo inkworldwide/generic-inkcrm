@@ -5,6 +5,7 @@ import { useThemeStore } from '../store/themeStore';
 import { Link } from 'react-router-dom';
 import { DynamicIcon } from '../components/Layout';
 import { useQuery } from '@tanstack/react-query';
+import { formatDate } from '../utils/dateFormatter';
 
 const FUNNEL_COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#f97316', '#8b5cf6'];
 
@@ -460,7 +461,7 @@ export default function Dashboard() {
                     </div>
 
                     <div className="space-y-4">
-                      <div><span className="font-bold text-slate-700">Created On:</span> <span className="text-slate-600">{new Date(rec.createdAt).toLocaleDateString()}</span></div>
+                      <div><span className="font-bold text-slate-700">Created On:</span> <span className="text-slate-600">{formatDate(rec.createdAt)}</span></div>
                       <div><span className="font-bold text-slate-700">Created By:</span> <span className="text-slate-600">System</span></div>
                       <div><span className="font-bold text-slate-700">Pending at:</span> <span className="text-slate-600">{rec.data?.pendingAt || 'Sales Review'}</span></div>
                       <div><span className="font-bold text-slate-700">PSM:</span> <span className="text-slate-600">{rec.data?.assignedTo || 'Unassigned'}</span></div>
@@ -468,7 +469,7 @@ export default function Dashboard() {
 
                     <div className="space-y-4">
                       <div><span className="font-bold text-slate-700">Firm/Company:</span> <span className="text-slate-600">{rec.data?.company}</span></div>
-                      <div><span className="font-bold text-slate-700">Modified On:</span> <span className="text-slate-600">{new Date(rec.updatedAt).toLocaleDateString()}</span></div>
+                      <div><span className="font-bold text-slate-700">Modified On:</span> <span className="text-slate-600">{formatDate(rec.updatedAt)}</span></div>
                       <div><span className="font-bold text-slate-700">Assigned By:</span> <span className="text-slate-600">System Router</span></div>
                       <div>
                         <span className="font-bold text-slate-700">Remarks:</span> 

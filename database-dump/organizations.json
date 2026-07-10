@@ -1,6 +1,6 @@
 [
   {
-    "_id": "6a4f853ed1277b454ae89318",
+    "_id": "6a50b1b63d61e35dc9ea1370",
     "name": "inkSales Enterprises",
     "subdomain": "sales",
     "logoUrl": "/logo.png",
@@ -25,14 +25,37 @@
     "subscription": {
       "plan": "enterprise",
       "status": "active",
-      "expiresAt": "2027-07-09T11:25:50.770Z"
+      "expiresAt": "2027-07-10T08:47:50.151Z"
     },
-    "createdAt": "2026-07-09T11:25:50.781Z",
-    "updatedAt": "2026-07-09T11:25:50.781Z",
-    "__v": 0
+    "createdAt": "2026-07-10T08:47:50.177Z",
+    "updatedAt": "2026-07-10T09:42:05.888Z",
+    "__v": 0,
+    "address": "",
+    "adminDetails": {
+      "firstName": "",
+      "lastName": "",
+      "username": "",
+      "password": "",
+      "financialYear": "",
+      "roleType": ""
+    },
+    "city": "",
+    "companyCode": "",
+    "companyDocUrl": "",
+    "country": "India",
+    "email": "",
+    "endDate": "",
+    "fax": "",
+    "mobile": "",
+    "phoneNumber": "",
+    "postalCode": "",
+    "registrationId": "",
+    "startDate": "",
+    "state": "",
+    "website": ""
   },
   {
-    "_id": "6a4f853ed1277b454ae8931a",
+    "_id": "6a50b1b63d61e35dc9ea1372",
     "name": "Acme International School",
     "subdomain": "school",
     "logoUrl": "/logo.png",
@@ -55,14 +78,14 @@
     "subscription": {
       "plan": "growth",
       "status": "active",
-      "expiresAt": "2027-01-05T11:25:50.786Z"
+      "expiresAt": "2027-01-06T08:47:50.188Z"
     },
-    "createdAt": "2026-07-09T11:25:50.787Z",
-    "updatedAt": "2026-07-09T11:25:50.787Z",
+    "createdAt": "2026-07-10T08:47:50.191Z",
+    "updatedAt": "2026-07-10T08:47:50.191Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae8931c",
+    "_id": "6a50b1b63d61e35dc9ea1374",
     "name": "Metro Care Hospital",
     "subdomain": "hospital",
     "logoUrl": "/logo.png",
@@ -85,10 +108,10 @@
     "subscription": {
       "plan": "enterprise",
       "status": "active",
-      "expiresAt": "2027-07-09T11:25:50.789Z"
+      "expiresAt": "2027-07-10T08:47:50.193Z"
     },
-    "createdAt": "2026-07-09T11:25:50.789Z",
-    "updatedAt": "2026-07-09T11:25:50.789Z",
+    "createdAt": "2026-07-10T08:47:50.195Z",
+    "updatedAt": "2026-07-10T08:47:50.195Z",
     "__v": 0
   }
 ]

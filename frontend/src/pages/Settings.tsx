@@ -6,6 +6,7 @@ import api from '../services/api';
 import * as Icons from 'lucide-react';
 import FaceEnrollment from '../components/FaceEnrollment';
 import { useAuthStore } from '../store/authStore';
+import { useToastStore } from '../store/toastStore';
 
 const PRESET_COLORS = [
   { name: 'Indigo', rgb: '79 70 229', hex: '#4F46E5' },
@@ -21,6 +22,7 @@ const FONTS = ['Inter', 'Outfit', 'Roboto'];
 export default function Settings() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
+  const { showConfirm, showToast } = useToastStore();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const currentTab = queryParams.get('tab') || 'company';
@@ -112,14 +114,33 @@ export default function Settings() {
   const [bankMastersList, setBankMastersList] = useState<string[]>(INDIAN_BANKS);
   const [bpForm, setBpForm] = useState({ bank: '', loanType: '', psm: '' });
   const [selectedBanks, setSelectedBanks] = useState<string[]>([]);
+  const [editingBpId, setEditingBpId] = useState<string | null>(null);
+  const [bpEditModalOpen, setBpEditModalOpen] = useState(false);
+  const [bpEditForm, setBpEditForm] = useState({ bank: '', loanType: '', psm: '' });
+  const [selectedEditBanks, setSelectedEditBanks] = useState<string[]>([]);
   const [bpFilterBank, setBpFilterBank] = useState('');
   const [bpFilterBankShow, setBpFilterBankShow] = useState('');
+  const [showAllBp, setShowAllBp] = useState(false);
+  const [bpConflictModal, setBpConflictModal] = useState<{
+    isOpen: boolean;
+    psmName: string;
+    bankName: string;
+    loanType: string;
+  } | null>(null);
 
   const handleBankCheckboxChange = (bankName: string, checked: boolean) => {
     if (checked) {
       setSelectedBanks([...selectedBanks, bankName]);
     } else {
       setSelectedBanks(selectedBanks.filter((b) => b !== bankName));
+    }
+  };
+
+  const handleEditBankCheckboxChange = (bankName: string, checked: boolean) => {
+    if (checked) {
+      setSelectedEditBanks([...selectedEditBanks, bankName]);
+    } else {
+      setSelectedEditBanks(selectedEditBanks.filter((b) => b !== bankName));
     }
   };
   const SETTINGS_TABS = [
@@ -129,7 +150,6 @@ export default function Settings() {
     { id: 'product', label: 'Product', icon: Icons.Package },
     { id: 'bankmaster', label: 'Bank Master', icon: Icons.Landmark },
     { id: 'bankingpartner', label: 'Banking Partner', icon: Icons.Briefcase },
-    { id: 'security', label: 'Security', icon: Icons.ShieldCheck },
     { id: 'status', label: 'Status', icon: Icons.Tag },
   ];
 
@@ -146,6 +166,11 @@ export default function Settings() {
   };
 
   useEffect(() => {
+    setBpForm({ bank: '', loanType: '', psm: '' });
+    setSelectedBanks([]);
+    setBpFilterBank('');
+    setBpFilterBankShow('');
+    setShowAllBp(false);
     loadSettingsData();
   }, [branding, currentTab]);
 
@@ -388,18 +413,22 @@ export default function Settings() {
     }
   };
 
-  const handleDeleteRole = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this role?')) return;
-    if (!window.confirm('Please confirm once again: Are you absolutely sure you want to delete this role?')) return;
-    try {
-      await api.delete(`/auth/roles/${id}`);
-      alert('Role deleted successfully.');
-      // Reload roles list
-      const res = await api.get('/auth/roles');
-      setRoles(res.data || []);
-    } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to delete role.');
-    }
+  const handleDeleteRole = (id: string) => {
+    showConfirm({
+      title: 'Delete Role',
+      message: 'Are you sure you want to delete this role? This will permanently remove its permissions settings.',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/auth/roles/${id}`);
+          showToast('Role deleted successfully.', 'success');
+          // Reload roles list
+          const res = await api.get('/auth/roles');
+          setRoles(res.data || []);
+        } catch (err: any) {
+          showToast(err.response?.data?.error || 'Failed to delete role.', 'error');
+        }
+      }
+    });
   };
 
   const handleCancelRoleEdit = () => {
@@ -445,14 +474,20 @@ export default function Settings() {
     setStatusEditing(true);
   };
 
-  const handleDeleteStatus = async (id: string) => {
-    if (!window.confirm('Delete this status?')) return;
-    try {
-      await api.delete(`/statuses/${id}`);
-      loadSettingsData();
-    } catch (err) {
-      alert('Failed to delete status.');
-    }
+  const handleDeleteStatus = (id: string) => {
+    showConfirm({
+      title: 'Delete Status',
+      message: 'Are you sure you want to delete this status? Leads using this status will lose their mapping.',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/statuses/${id}`);
+          showToast('Status deleted successfully.', 'success');
+          loadSettingsData();
+        } catch (err) {
+          showToast('Failed to delete status.', 'error');
+        }
+      }
+    });
   };
 
   // User Handlers
@@ -488,14 +523,20 @@ export default function Settings() {
     setUserModalOpen(true);
   };
 
-  const handleDeleteUser = async (id: string) => {
-    if (!window.confirm('Remove this user?')) return;
-    try {
-      await api.delete(`/auth/users/${id}`);
-      loadSettingsData();
-    } catch (err) {
-      alert('Failed to delete user.');
-    }
+  const handleDeleteUser = (id: string) => {
+    showConfirm({
+      title: 'Remove User',
+      message: 'Are you sure you want to remove this user? This action cannot be undone.',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/auth/users/${id}`);
+          showToast('User removed successfully.', 'success');
+          loadSettingsData();
+        } catch (err) {
+          showToast('Failed to delete user.', 'error');
+        }
+      }
+    });
   };
 
   const handleToggleUserSetting = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
@@ -547,53 +588,154 @@ export default function Settings() {
     setModuleModalOpen(true);
   };
 
-  const handleDeleteModuleRecord = async (id: string) => {
-    if (!window.confirm('Delete this record?')) return;
+  const handleDeleteModuleRecord = (id: string) => {
     if (!activeModuleDef) return;
-    try {
-      await api.delete(`/records/${activeModuleDef.apiPath}/${id}`);
-      loadSettingsData();
-    } catch (err) {
-      alert('Failed to delete record.');
-    }
+    showConfirm({
+      title: 'Delete Record',
+      message: `Are you sure you want to delete this ${activeModuleDef.singularLabel} record?`,
+      onConfirm: async () => {
+        try {
+          await api.delete(`/records/${activeModuleDef.apiPath}/${id}`);
+          showToast('Record deleted successfully.', 'success');
+          loadSettingsData();
+        } catch (err) {
+          showToast('Failed to delete record.', 'error');
+        }
+      }
+    });
   };
 
   // Banking Partner Handlers
+  const checkBpConflict = (banks: string[], loanType: string, excludeId?: string) => {
+    for (const bank of banks) {
+      const targetBank = bank.trim().toLowerCase();
+      const targetLoan = loanType.trim().toLowerCase();
+      
+      const conflict = moduleRecords.find((rec: any) => {
+        if (excludeId && rec._id === excludeId) return false;
+        
+        const bpLoanType = rec.data?.loanType || rec.loanType || '';
+        const bpBanks = (rec.data?.bank || rec.bank || '')
+          .split(',')
+          .map((s: string) => s.trim().toLowerCase());
+          
+        return bpLoanType.trim().toLowerCase() === targetLoan && bpBanks.includes(targetBank);
+      });
+      
+      if (conflict) {
+        return {
+          bank,
+          psmName: conflict.data?.psm || conflict.psm,
+          loanType
+        };
+      }
+    }
+    return null;
+  };
+
   const handleSaveBankingPartner = async (e: React.FormEvent) => {
     e.preventDefault();
     const banksStr = selectedBanks.join(', ');
     if (!banksStr || !bpForm.loanType || !bpForm.psm) {
-      alert('Please select all required fields (including at least one bank).');
+      showToast('Please select all required fields (including at least one bank).', 'warning');
       return;
     }
+
+    const conflict = checkBpConflict(selectedBanks, bpForm.loanType);
+    if (conflict) {
+      setBpConflictModal({
+        isOpen: true,
+        psmName: conflict.psmName,
+        bankName: conflict.bank,
+        loanType: conflict.loanType
+      });
+      return;
+    }
+
     try {
       await api.post('/records/bankingpartners', {
         bank: banksStr,
         loanType: bpForm.loanType,
         psm: bpForm.psm
       });
-      alert('Banking Partner saved successfully.');
+      showToast('Banking Partner saved successfully.', 'success');
       setBpForm({ bank: '', loanType: '', psm: '' });
       setSelectedBanks([]);
       loadSettingsData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save banking partner.');
+      showToast(err.response?.data?.error || 'Failed to save banking partner.', 'error');
     }
   };
 
-  const handleCancelBankingPartner = () => {
-    setBpForm({ bank: '', loanType: '', psm: '' });
-    setSelectedBanks([]);
+  const handleEditBankingPartner = (bp: any) => {
+    setEditingBpId(bp._id);
+    setBpEditForm({
+      bank: bp.bank || '',
+      loanType: bp.loanType || '',
+      psm: bp.psm || ''
+    });
+    const banks = (bp.bank || '').split(',').map((s: string) => s.trim()).filter(Boolean);
+    setSelectedEditBanks(banks);
+    setBpEditModalOpen(true);
   };
 
-  const handleDeleteBankingPartner = async (id: string) => {
-    if (!window.confirm('Delete this banking partner?')) return;
+  const handleSaveEditedBankingPartner = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const banksStr = selectedEditBanks.join(', ');
+    if (!banksStr || !bpEditForm.loanType || !bpEditForm.psm) {
+      showToast('Please select all required fields (including at least one bank).', 'warning');
+      return;
+    }
+
+    const conflict = checkBpConflict(selectedEditBanks, bpEditForm.loanType, editingBpId || undefined);
+    if (conflict) {
+      setBpConflictModal({
+        isOpen: true,
+        psmName: conflict.psmName,
+        bankName: conflict.bank,
+        loanType: conflict.loanType
+      });
+      return;
+    }
+
     try {
-      await api.delete(`/records/bankingpartners/${id}`);
+      await api.put(`/records/bankingpartners/${editingBpId}`, {
+        bank: banksStr,
+        loanType: bpEditForm.loanType,
+        psm: bpEditForm.psm
+      });
+      showToast('Banking Partner updated successfully.', 'success');
+      setBpEditForm({ bank: '', loanType: '', psm: '' });
+      setSelectedEditBanks([]);
+      setEditingBpId(null);
+      setBpEditModalOpen(false);
       loadSettingsData();
-    } catch (err) {
-      alert('Failed to delete banking partner.');
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to save banking partner.', 'error');
     }
+  };
+
+  const handleCancelEditBankingPartner = () => {
+    setBpEditForm({ bank: '', loanType: '', psm: '' });
+    setSelectedEditBanks([]);
+    setEditingBpId(null);
+    setBpEditModalOpen(false);
+  };
+
+  const handleDeleteBankingPartner = (id: string) => {
+    showConfirm({
+      title: 'Delete Banking Partner',
+      message: 'Are you sure you want to delete this banking partner?',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/records/bankingpartners/${id}`);
+          showToast('Banking partner deleted successfully.', 'success');
+          loadSettingsData();
+        } catch (err) {
+          showToast('Failed to delete banking partner.', 'error');
+        }
+      }
+    });
   };
 
   if (loading) {
@@ -678,8 +820,8 @@ export default function Settings() {
               onClick={() => setCompanySubTab('details')}
               className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
                 companySubTab === 'details'
-                  ? 'bg-indigo-650 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-black hover:text-white border-r border-slate-200/60'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
               }`}
             >
               Company Details
@@ -692,8 +834,8 @@ export default function Settings() {
               onClick={() => setCompanySubTab('address')}
               className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
                 companySubTab === 'address'
-                  ? 'bg-indigo-650 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-black hover:text-white border-r border-slate-200/60'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
               }`}
             >
               Address
@@ -706,8 +848,8 @@ export default function Settings() {
               onClick={() => setCompanySubTab('admin')}
               className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
                 companySubTab === 'admin'
-                  ? 'bg-indigo-650 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-black hover:text-white'
+                  ? 'bg-white text-slate-800 shadow-sm'
+                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
               }`}
             >
               Admin Details
@@ -1057,10 +1199,7 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Security / Biometric configuration */}
-        <div className={`lg:col-span-12 ${currentTab === 'security' ? 'block' : 'hidden'}`}>
-          <FaceEnrollment />
-        </div>
+
 
         {/* Status Settings tab */}
         <div className={`lg:col-span-12 grid grid-cols-1 md:grid-cols-12 gap-5 ${currentTab === 'status' ? 'block' : 'hidden'}`}>
@@ -1250,7 +1389,7 @@ export default function Settings() {
         {currentTab === 'bankingpartner' && (
           <div className="lg:col-span-12 space-y-6">
             
-            {/* Top Form Card */}
+            {/* Top Form Card */}            {/* Top Form Card */}
             <div className="card-premium">
               <form onSubmit={handleSaveBankingPartner} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
@@ -1323,24 +1462,116 @@ export default function Settings() {
                       })}
                     </select>
                   </div>
-                  <div className="flex gap-3 justify-end md:justify-start">
-                    <button
-                      type="button"
-                      onClick={handleCancelBankingPartner}
-                      className="btn-secondary-premium"
-                    >
-                      Cancel
-                    </button>
+                  <div>
                     <button
                       type="submit"
-                      className="btn-primary-premium"
+                      className="btn-primary-premium w-full py-2.5"
                     >
-                      Save
+                      Save Partner
                     </button>
                   </div>
                 </div>
               </form>
             </div>
+
+            {/* Banking Partner Edit Modal */}
+            {bpEditModalOpen && (
+              <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fadeIn">
+                <div className="bg-white rounded-2xl p-6 w-full max-w-2xl border border-slate-200 shadow-xl space-y-4 max-h-[90vh] overflow-y-auto">
+                  <h3 className="text-lg font-bold text-slate-800">
+                    Edit Banking Partner
+                  </h3>
+                  <form onSubmit={handleSaveEditedBankingPartner} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        Banks <span className="text-red-500">*</span> (Select one or more)
+                      </label>
+                      <div className="bg-slate-50 border border-indigo-100 rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
+                        {bankMastersList.map((bankName) => {
+                          const isChecked = selectedEditBanks.includes(bankName);
+                          return (
+                            <label
+                              key={bankName}
+                              className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm font-medium transition-all cursor-pointer select-none ${
+                                isChecked
+                                  ? 'bg-indigo-50 border-indigo-400 text-indigo-705 shadow-sm shadow-indigo-105/50'
+                                  : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50 hover:border-indigo-200'
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={(e) => handleEditBankCheckboxChange(bankName, e.target.checked)}
+                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                              />
+                              <span>{bankName}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                          Loan Type <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          required
+                          value={bpEditForm.loanType}
+                          onChange={(e) => setBpEditForm({ ...bpEditForm, loanType: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                        >
+                          <option value="">-Select One-</option>
+                          <option value="HOME LOAN">HOME LOAN</option>
+                          <option value="LOAN AGAINST PROPERTY LOAN">LOAN AGAINST PROPERTY LOAN</option>
+                          <option value="BUSINESS LOAN">BUSINESS LOAN</option>
+                          <option value="PERSONAL LOAN">PERSONAL LOAN</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                          PSM <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          required
+                          value={bpEditForm.psm}
+                          onChange={(e) => setBpEditForm({ ...bpEditForm, psm: e.target.value })}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                        >
+                          <option value="">-Select PSM-</option>
+                          {users.length === 0 && (
+                            <option disabled value="">No users found — check Users tab</option>
+                          )}
+                          {users.map((u) => {
+                            const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
+                            return (
+                              <option key={u._id} value={fullName}>
+                                {fullName} {u.roleId?.name ? `(${u.roleId.name})` : ''}
+                              </option>
+                            );
+                          })}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={handleCancelEditBankingPartner}
+                        className="btn-secondary-premium"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="btn-primary-premium"
+                      >
+                        Save Changes
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
 
             {/* Middle Search Card */}
             <div className="card-premium">
@@ -1360,13 +1591,37 @@ export default function Settings() {
                     ))}
                   </select>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setBpFilterBankShow(bpFilterBank)}
-                  className="px-6 py-2 text-sm font-bold bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white rounded-lg transition-all shadow-sm"
-                >
-                  Show
-                </button>
+                 <div className="flex gap-2.5 w-full md:w-auto">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAllBp(false);
+                      setBpFilterBankShow(bpFilterBank);
+                    }}
+                    className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-sm flex-1 md:flex-initial text-center border ${
+                      bpFilterBankShow && !showAllBp
+                        ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-white hover:text-indigo-700 hover:border-indigo-600 active:bg-white active:text-indigo-850 shadow-md shadow-indigo-100/50'
+                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 active:bg-slate-50 active:text-slate-950'
+                    }`}
+                  >
+                    Show
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBpFilterBank('');
+                      setBpFilterBankShow('');
+                      setShowAllBp((prev) => !prev);
+                    }}
+                    className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-sm flex-1 md:flex-initial text-center border ${
+                      showAllBp
+                        ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-750 shadow-md shadow-indigo-100/50'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
+                    }`}
+                  >
+                    All
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1376,6 +1631,7 @@ export default function Settings() {
                 <table className="w-full text-sm text-left border-collapse">
                   <thead>
                     <tr className="table-header-premium">
+                      <th className="py-2.5 px-4">Bank Name</th>
                       <th className="py-2.5 px-4">Loan Type</th>
                       <th className="py-2.5 px-4">PSM</th>
                       <th className="py-2.5 px-4 text-center w-24">Action</th>
@@ -1384,7 +1640,8 @@ export default function Settings() {
                   <tbody className="divide-y divide-slate-150">
                     {(() => {
                       const filtered = moduleRecords.filter((rec) => {
-                        if (!bpFilterBankShow) return true;
+                        if (showAllBp) return true;
+                        if (!bpFilterBankShow) return false;
                         const recBanks = rec.data?.bank ? rec.data.bank.split(',').map((s: string) => s.trim()) : [];
                         return recBanks.includes(bpFilterBankShow);
                       });
@@ -1392,10 +1649,12 @@ export default function Settings() {
                       if (filtered.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={3} className="py-8 text-center text-slate-400 font-medium">
-                              {bpFilterBankShow 
-                                ? `No banking partners found for ${bpFilterBankShow}.`
-                                : "Please select a bank and click Show to view partners."
+                            <td colSpan={4} className="py-8 text-center text-slate-400 font-medium">
+                              {showAllBp 
+                                ? "No banking partners registered."
+                                : bpFilterBankShow 
+                                  ? `No banking partners found for ${bpFilterBankShow}.`
+                                  : "Please select a bank and click Show, or click All to view all partners."
                               }
                             </td>
                           </tr>
@@ -1404,20 +1663,37 @@ export default function Settings() {
 
                       return filtered.map((rec) => (
                         <tr key={rec._id} className="hover:bg-slate-50/50 transition-colors h-11">
+                          <td className="px-4 py-2 text-slate-900 font-semibold max-w-xs truncate" title={rec.data?.bank}>
+                            {rec.data?.bank}
+                          </td>
                           <td className="px-4 py-2 font-semibold text-slate-700">
                             {rec.data?.loanType}
                           </td>
                           <td className="px-4 py-2 text-slate-900 font-semibold">
                             {rec.data?.psm}
                           </td>
-                          <td className="px-4 py-2 text-center flex justify-center">
-                            <button
-                              onClick={() => handleDeleteBankingPartner(rec._id)}
-                              className="btn-delete-premium"
-                              title="Delete Banking Partner"
-                            >
-                              <Icons.Trash className="w-4 h-4" />
-                            </button>
+                          <td className="px-4 py-2 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleEditBankingPartner({
+                                  _id: rec._id,
+                                  bank: rec.data?.bank,
+                                  loanType: rec.data?.loanType,
+                                  psm: rec.data?.psm
+                                })}
+                                className="p-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg text-slate-500 hover:text-indigo-600 transition-colors"
+                                title="Edit Banking Partner"
+                              >
+                                <Icons.Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBankingPartner(rec._id)}
+                                className="btn-delete-premium"
+                                title="Delete Banking Partner"
+                              >
+                                <Icons.Trash className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ));
@@ -1431,6 +1707,36 @@ export default function Settings() {
         )}
 
       </div>
+
+      {/* Premium Conflict Modal for Banking Partner Settings */}
+      {bpConflictModal && bpConflictModal.isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div
+            onClick={() => setBpConflictModal(null)}
+            className="absolute inset-0 bg-[#0f1115]/50 backdrop-blur-sm animate-fade-in"
+          />
+          <div className="relative w-full max-w-md bg-white border border-slate-200/80 rounded-3xl shadow-2xl p-6 text-center z-10 transform transition-all duration-300 scale-100 animate-scale-up">
+            <div className="w-12 h-12 rounded-2xl bg-amber-500/10 flex items-center justify-center mx-auto mb-4 text-amber-600">
+              <Icons.AlertTriangle className="w-6 h-6 animate-pulse" />
+            </div>
+            <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-2">
+              PSM Already Assigned
+            </h3>
+            <p className="text-xs font-bold text-slate-500 leading-relaxed mb-6">
+              This Bank (<span className="text-slate-800 font-extrabold">{bpConflictModal.bankName}</span>) and Loan Type (<span className="text-slate-800 font-extrabold">{bpConflictModal.loanType}</span>) are already assigned to PSM '<span className="text-indigo-600 font-extrabold">{bpConflictModal.psmName}</span>'. Please select another Bank if you want a different assignment.
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setBpConflictModal(null)}
+                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-xs font-bold text-white shadow-md shadow-indigo-600/20"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

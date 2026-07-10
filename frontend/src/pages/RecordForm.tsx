@@ -7,12 +7,16 @@ import * as z from 'zod';
 import * as Icons from 'lucide-react';
 import { useModuleStore, FieldDefinition } from '../store/moduleStore';
 import api from '../services/api';
+import { useToastStore } from '../store/toastStore';
+import { useAuthStore } from '../store/authStore';
 
 export default function RecordForm() {
   const { apiPath, id } = useParams<{ apiPath: string; id?: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeModule, setActiveModuleByPath } = useModuleStore();
+  const { showConfirm, showToast } = useToastStore();
+  const { user } = useAuthStore();
   const isLeads = true; // Use light layout for all creation/edit forms
 
   const [loading, setLoading] = useState(true);
@@ -26,6 +30,24 @@ export default function RecordForm() {
   const [documents, setDocuments] = useState<any[]>([]);
   const [uploadingDoc, setUploadingDoc] = useState(false);
   const [dynamicStatuses, setDynamicStatuses] = useState<string[]>([]);
+  const [editingDocId, setEditingDocId] = useState<string | null>(null);
+  const [editingDocName, setEditingDocName] = useState<string>('');
+  const [bankPartnerMappings, setBankPartnerMappings] = useState<any[]>([]);
+  const [psmAutoFilled, setPsmAutoFilled] = useState(false);
+  const [psmWarningMessage, setPsmWarningMessage] = useState<string>('');
+  const [conflictModal, setConflictModal] = useState<{
+    isOpen: boolean;
+    psmName: string;
+    bankName: string;
+    loanType: string;
+  } | null>(null);
+  const [bpDropdownOpen, setBpDropdownOpen] = useState(false);
+  const [allBanks, setAllBanks] = useState<string[]>([]);
+  const [allLoanTypes, setAllLoanTypes] = useState<string[]>([]);
+  const [allTeams, setAllTeams] = useState<string[]>([]);
+  const [allUsers, setAllUsers] = useState<string[]>([]);
+
+  const isInitialLoadRef = React.useRef(true);
 
   useEffect(() => {
     const fetchDynamicStatuses = async () => {
@@ -37,7 +59,96 @@ export default function RecordForm() {
       }
     };
     fetchDynamicStatuses();
-  }, []);
+
+    // Fetch dependencies for Leads module
+    if (apiPath === 'leads') {
+      const fetchLeadsDependencies = async () => {
+        try {
+          const [resBP, resBM, resProducts, resDepts, resUsers] = await Promise.all([
+            api.get('/records/bankingpartners'),
+            api.get('/records/bankmasters'),
+            api.get('/records/products'),
+            api.get('/records/departments'),
+            api.get('/auth/users')
+          ]);
+          
+          setBankPartnerMappings(resBP.data?.records || resBP.data || []);
+          
+          // 1. Process bank options list (Bank Master Settings)
+          const customBanks = (resBM.data?.records || []).map((r: any) => r.data?.bankName).filter(Boolean);
+          const defaultBanks = [
+            'State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank',
+            'Punjab National Bank', 'Bank of Baroda', 'Canara Bank', 'IndusInd Bank', 'IDFC FIRST Bank',
+            'Union Bank of India', 'Bank of India', 'Central Bank of India', 'Indian Bank',
+            'Yes Bank', 'Federal Bank', 'South Indian Bank', 'Karur Vysya Bank', 'Tata Capital',
+            'L&T Finance', 'Bajaj Finserv', 'Shriram Finance', 'Fullerton India', 'Cholamandalam Finance'
+          ];
+          const mergedBanks = [...new Set([...defaultBanks, ...customBanks])].map(b => b.toUpperCase());
+          if (!mergedBanks.includes('SBI')) {
+            mergedBanks.unshift('SBI');
+          }
+          setAllBanks(mergedBanks);
+
+          // 2. Process loan types (Products Settings)
+          const dbLoanTypes = (resProducts.data?.records || [])
+            .map((r: any) => r.data?.name)
+            .filter(Boolean)
+            .map((b: string) => b.toUpperCase());
+          if (dbLoanTypes.length > 0) {
+            setAllLoanTypes(dbLoanTypes);
+          } else {
+            setAllLoanTypes(['SALARIED PERSONAL LOAN', 'BUSINESS LOAN', 'HOME LOAN', 'LAP']);
+          }
+
+          // 3. Process teams (Departments Settings)
+          const dbTeams = (resDepts.data?.records || [])
+            .map((r: any) => r.data?.name)
+            .filter(Boolean);
+          if (dbTeams.length > 0) {
+            setAllTeams(dbTeams);
+          } else {
+            setAllTeams(['Team A', 'Team B']);
+          }
+
+          // 4. Process agents (Users settings)
+          const dbUsers = (resUsers.data || [])
+            .map((u: any) => [u.firstName, u.lastName].filter(Boolean).join(' '))
+            .filter(Boolean);
+          setAllUsers(dbUsers);
+
+        } catch (err) {
+          console.error('Failed to load leads dependency data', err);
+          // Fallbacks
+          setAllBanks([
+            'SBI', 'State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank',
+            'Punjab National Bank', 'Bank of Baroda', 'Canara Bank', 'IndusInd Bank', 'IDFC FIRST Bank',
+            'Union Bank of India', 'Bank of India', 'Central Bank of India', 'Indian Bank',
+            'Yes Bank', 'Federal Bank', 'South Indian Bank', 'Karur Vysya Bank', 'Tata Capital',
+            'L&T Finance', 'Bajaj Finserv', 'Shriram Finance', 'Fullerton India', 'Cholamandalam Finance'
+          ].map(b => b.toUpperCase()));
+          setAllLoanTypes(['SALARIED PERSONAL LOAN', 'BUSINESS LOAN', 'HOME LOAN', 'LAP']);
+          setAllTeams(['Team A', 'Team B']);
+          setAllUsers([]);
+        }
+      };
+      fetchLeadsDependencies();
+    }
+  }, [apiPath]);
+
+  // Set isInitialLoadRef to false when loading goes from true to false
+  useEffect(() => {
+    let timer: any;
+    if (!loading) {
+      timer = setTimeout(() => {
+        isInitialLoadRef.current = false;
+      }, 300); // 300ms delay to make sure form values are fully loaded/reset
+    } else {
+      isInitialLoadRef.current = true;
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [loading]);
 
   // Set active module
   useEffect(() => {
@@ -93,10 +204,16 @@ export default function RecordForm() {
       activeModule.fields.forEach((f) => {
         if (f.defaultValue) defaults[f.name] = f.defaultValue;
       });
+      if (apiPath === 'leads') {
+        const loggedInName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email.split('@')[0] : '';
+        if (loggedInName) {
+          defaults['source'] = loggedInName;
+        }
+      }
       reset(defaults);
       setLoading(false);
     }
-  }, [activeModule, id]);
+  }, [activeModule, id, apiPath, user]);
 
   const loadRecordData = async () => {
     try {
@@ -140,6 +257,83 @@ export default function RecordForm() {
   const recordName = apiPath === 'leads'
     ? `${watchedValues.firstName || ''} ${watchedValues.lastName || ''}`.trim()
     : watchedValues.fullName || watchedValues.companyName || watchedValues.dealName || watchedValues.title;
+
+  // Auto-fill PSM when loanType + businessPartner are both selected
+  useEffect(() => {
+    if (loading || apiPath !== 'leads' || bankPartnerMappings.length === 0) return;
+    const selectedLoanType = watchedValues.loanType;
+    const selectedBank = watchedValues.businessPartner;
+    
+    if (!selectedLoanType || !selectedBank) {
+      if (psmAutoFilled) {
+        setValue('psm', '');
+        setPsmAutoFilled(false);
+      }
+      setPsmWarningMessage('');
+      return;
+    }
+    
+    // Normalization helper for bank names
+    const normalizeBank = (bankName: string): string => {
+      const name = bankName.trim().toLowerCase();
+      if (name === 'sbi') return 'state bank of india';
+      if (name === 'state bank of india') return 'state bank of india';
+      return name;
+    };
+
+    // Normalization helper for loan types
+    const normalizeLoan = (loanType: string): string => {
+      const type = loanType.trim().toLowerCase();
+      if (type === 'lap' || type === 'loan against property loan' || type === 'loan against property') {
+        return 'loan against property';
+      }
+      if (type === 'salaried personal loan' || type === 'personal loan') {
+        return 'personal loan';
+      }
+      return type;
+    };
+
+    const targetLoan = normalizeLoan(selectedLoanType);
+
+    // Split selected banks (supports comma-separated string)
+    const selectedBanksList = selectedBank.split(',').map((s: string) => s.trim()).filter(Boolean);
+
+    let matchedPsm: string | null = null;
+    let matchedBank: string | null = null;
+
+    console.log('[Bank Partner Debug] Selected Banks List:', selectedBanksList, 'Loan Type:', targetLoan);
+
+    // Find if any selected bank has a mapping
+    for (const bank of selectedBanksList) {
+      const targetBank = normalizeBank(bank);
+      const match = bankPartnerMappings.find((bp: any) => {
+        const bpLoanType = bp.data?.loanType || bp.loanType;
+        const bpBanks = (bp.data?.bank || bp.bank || '')
+          .split(',')
+          .map((s: string) => normalizeBank(s));
+        
+        const bpNormLoan = normalizeLoan(bpLoanType || '');
+        
+        return bpNormLoan === targetLoan && bpBanks.includes(targetBank);
+      });
+
+      if (match) {
+        matchedPsm = match.data?.psm || match.psm;
+        matchedBank = bank;
+        break; // Display first matching mapping in conflict popups
+      }
+    }
+
+    if (matchedPsm) {
+      setValue('psm', matchedPsm);
+      setPsmAutoFilled(true);
+      setPsmWarningMessage('');
+    } else {
+      setValue('psm', '');
+      setPsmAutoFilled(false);
+      setPsmWarningMessage('No PSM has been assigned for this Bank and Loan Type. Please configure it in Settings → Bank Partner.');
+    }
+  }, [watchedValues.loanType, watchedValues.businessPartner, bankPartnerMappings, loading]);
 
   useEffect(() => {
     if (Object.keys(errors).length > 0) {
@@ -189,14 +383,33 @@ export default function RecordForm() {
   };
 
   // Delete Document
-  const handleDeleteDoc = async (docId: string) => {
-    if (window.confirm('Delete this file?')) {
-      try {
-        await api.delete(`/documents/${docId}`);
-        setDocuments(documents.filter((d) => d._id !== docId));
-      } catch (err) {
-        alert('Failed to delete file.');
+  const handleDeleteDoc = (docId: string) => {
+    showConfirm({
+      title: 'Delete File',
+      message: 'Are you sure you want to delete this file attachment?',
+      onConfirm: async () => {
+        try {
+          await api.delete(`/documents/${docId}`);
+          setDocuments(documents.filter((d) => d._id !== docId));
+          showToast('File deleted successfully.', 'success');
+        } catch (err) {
+          showToast('Failed to delete file.', 'error');
+        }
       }
+    });
+  };
+
+  // Rename Document Submit
+  const handleRenameDocSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingDocId || !editingDocName.trim()) return;
+    try {
+      const res = await api.put(`/documents/${editingDocId}`, { name: editingDocName });
+      setDocuments(documents.map((d) => (d._id === editingDocId ? res.data : d)));
+      showToast('Document renamed successfully.', 'success');
+      setEditingDocId(null);
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to rename document.', 'error');
     }
   };
 
@@ -217,11 +430,161 @@ export default function RecordForm() {
       ? 'block text-xs md:text-[13px] font-bold text-slate-700 uppercase tracking-wider mb-2'
       : 'block text-xs md:text-[13px] font-bold text-slate-200 uppercase tracking-wider mb-2';
 
+    if (field.name === 'source' && apiPath === 'leads') {
+      return (
+        <div key={field.name} className="space-y-1.5 text-left">
+          <label className={labelClass}>
+            {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type="text"
+            readOnly
+            placeholder={field.label}
+            {...register(field.name)}
+            className={`${inputBase} bg-slate-50 text-slate-550 font-semibold cursor-not-allowed`}
+          />
+        </div>
+      );
+    }
+
+    if (field.name === 'psm' && apiPath === 'leads') {
+      return (
+        <div key={field.name} className="space-y-1.5 text-left">
+          <label className={labelClass}>
+            {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
+          </label>
+          <input
+            type="text"
+            readOnly
+            placeholder={field.label}
+            {...register(field.name)}
+            className={isLeads
+              ? "w-full px-4 py-3 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-650 focus:outline-none cursor-not-allowed font-medium"
+              : "w-full px-4 py-3 text-sm md:text-[15px] bg-slate-950/40 border border-slate-800 rounded-xl text-slate-450 focus:outline-none cursor-not-allowed font-medium"}
+          />
+          {psmWarningMessage && (
+            <p className="text-[11px] text-amber-600 font-bold mt-1 leading-normal">{psmWarningMessage}</p>
+          )}
+          {errors[field.name] && (
+            <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
+          )}
+        </div>
+      );
+    }
+
+    if (field.name === 'businessPartner' && apiPath === 'leads') {
+      const selectedVal = watchedValues[field.name] || '';
+      const selectedList = selectedVal ? selectedVal.split(',').map((s: string) => s.trim()).filter(Boolean) : [];
+      let opts = allBanks.length > 0 ? allBanks : field.options || [];
+
+      const toggleBank = (bank: string) => {
+        let newList: string[];
+        if (selectedList.includes(bank)) {
+          newList = selectedList.filter((x: string) => x !== bank);
+        } else {
+          newList = [...selectedList, bank];
+        }
+        setValue(field.name, newList.join(', '), { shouldValidate: true });
+      };
+
+      return (
+        <div key={field.name} className="space-y-1.5 text-left relative">
+          <label className={labelClass}>
+            {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
+          </label>
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setBpDropdownOpen(!bpDropdownOpen)}
+              className={`${inputBase} flex items-center justify-between text-left`}
+            >
+              <span className={selectedList.length === 0 ? "text-slate-400 font-medium" : "text-slate-900 font-medium truncate pr-4"}>
+                {selectedList.length === 0 ? '-Select Business Partners-' : selectedList.join(', ')}
+              </span>
+              <Icons.ChevronDown className="w-4 h-4 text-slate-500 flex-shrink-0" />
+            </button>
+
+            {/* Hidden input for react-hook-form integration */}
+            <input type="hidden" {...register(field.name)} value={selectedVal} />
+
+            {bpDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setBpDropdownOpen(false)} />
+                <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 z-50 max-h-60 overflow-y-auto space-y-1">
+                  {opts.map((opt) => {
+                    const isChecked = selectedList.includes(opt);
+                    return (
+                      <button
+                        key={opt}
+                        type="button"
+                        onClick={() => toggleBank(opt)}
+                        className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+                          isChecked
+                            ? 'bg-emerald-500/10 text-emerald-800'
+                            : 'hover:bg-slate-50 text-slate-700'
+                        }`}
+                      >
+                        <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                          isChecked
+                            ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                            : 'border-slate-300 bg-white'
+                        }`}>
+                          {isChecked && <Icons.Check className="w-3 h-3 stroke-[3]" />}
+                        </div>
+                        <span>{opt}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+          </div>
+          {errors[field.name] && (
+            <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
+          )}
+        </div>
+      );
+    }
+
+    if (field.name === 'assignedTo' && apiPath === 'leads') {
+      return (
+        <div key={field.name} className="space-y-1.5 text-left">
+          <label className={labelClass}>
+            {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
+          </label>
+          <select {...register(field.name)} className={inputBase}>
+            <option value="" className={isLeads ? "bg-white text-slate-500" : "bg-slate-950 text-slate-300"}>-Select Agent-</option>
+            {allUsers.map((userOpt) => (
+              <option key={userOpt} value={userOpt} className={isLeads ? "bg-white text-slate-800" : "bg-slate-950 text-slate-200"}>
+                {userOpt}
+              </option>
+            ))}
+          </select>
+          {errors[field.name] && (
+            <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
+          )}
+        </div>
+      );
+    }
+
     switch (field.type) {
       case 'dropdown': {
-        const opts = field.name === 'status' && dynamicStatuses.length > 0 
-          ? dynamicStatuses 
-          : field.options;
+        let opts = field.options || [];
+        
+        if (field.name === 'status' && dynamicStatuses.length > 0) {
+          opts = dynamicStatuses;
+        } else if (field.name === 'loanType' && apiPath === 'leads' && allLoanTypes.length > 0) {
+          opts = allLoanTypes;
+        } else if (field.name === 'assignToTeam' && apiPath === 'leads' && allTeams.length > 0) {
+          opts = allTeams;
+        }
+
+        if (field.name === 'source') {
+          const loggedInName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email.split('@')[0] : '';
+          if (loggedInName && !opts.includes(loggedInName)) {
+            opts = [loggedInName, ...opts];
+          }
+        }
         return (
           <div key={field.name} className="space-y-1.5 text-left">
             <label className={labelClass}>
@@ -290,22 +653,90 @@ export default function RecordForm() {
           </div>
         );
 
-      case 'date':
+      case 'date': {
+        const storedVal = watchedValues[field.name] || '';
+        const displayVal = (() => {
+          if (!storedVal) return '';
+          if (/^\d{4}-\d{2}-\d{2}$/.test(storedVal)) {
+            const [y, m, d] = storedVal.split('-');
+            return `${d}/${m}/${y}`;
+          }
+          return storedVal;
+        })();
+
+        const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const raw = e.target.value;
+          // Only allow digits and slashes
+          let v = raw.replace(/[^\d/]/g, '');
+
+          // Auto-insert slashes after dd and mm
+          const digits = v.replace(/\//g, '');
+          if (digits.length >= 4) {
+            v = digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4, 8);
+          } else if (digits.length >= 2) {
+            v = digits.slice(0, 2) + '/' + digits.slice(2);
+          }
+          if (v.length > 10) v = v.slice(0, 10);
+
+          // Store as yyyy-mm-dd when fully typed
+          if (/^\d{2}\/\d{2}\/\d{4}$/.test(v)) {
+            const [dd, mm, yyyy] = v.split('/');
+            setValue(field.name, `${yyyy}-${mm}-${dd}`);
+          } else {
+            // Store the raw typed text temporarily so it stays visible
+            setValue(field.name, v ? `__raw__${v}` : '');
+          }
+        };
+
+        // For display: convert stored value or show raw typing
+        const inputDisplay = (() => {
+          if (storedVal.startsWith('__raw__')) return storedVal.replace('__raw__', '');
+          return displayVal;
+        })();
+        const datePickerId = `date-picker-${field.name}`;
+
         return (
           <div key={field.name} className="space-y-1.5 text-left">
             <label className={labelClass}>
               {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
             </label>
-            <input
-              type="date"
-              {...register(field.name)}
-              className={inputBase}
-            />
+            <div className="relative">
+              <input
+                type="text"
+                value={inputDisplay}
+                onChange={handleDateChange}
+                placeholder="dd/mm/yyyy"
+                maxLength={10}
+                className={`${inputBase} pr-10`}
+              />
+              {/* Hidden native date picker */}
+              <input
+                id={datePickerId}
+                type="date"
+                className="sr-only"
+                value={/^\d{4}-\d{2}-\d{2}$/.test(storedVal) ? storedVal : ''}
+                onChange={(e) => {
+                  if (e.target.value) setValue(field.name, e.target.value);
+                }}
+                tabIndex={-1}
+              />
+              <button
+                type="button"
+                onClick={() => {
+                  const el = document.getElementById(datePickerId) as HTMLInputElement | null;
+                  if (el) { try { el.showPicker(); } catch { el.click(); } }
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded hover:bg-slate-100 transition-colors"
+              >
+                <Icons.Calendar className="w-4 h-4 text-slate-400" />
+              </button>
+            </div>
             {errors[field.name] && (
               <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
             )}
           </div>
         );
+      }
 
       default:
         return (
@@ -341,7 +772,7 @@ export default function RecordForm() {
     if (apiPath === 'leads') {
       const loanFields = fields.filter(f => loanDetailNames.includes(f.name));
       const persFields = fields.filter(f => personalNames.includes(f.name));
-      const remaining = fields.filter(f => !loanDetailNames.includes(f.name) && !personalNames.includes(f.name));
+      const remaining = fields.filter(f => !loanDetailNames.includes(f.name) && !personalNames.includes(f.name) && f.name !== 'leadScore');
 
       // Map labels specifically for Leads module
       loanFields.forEach(f => {
@@ -534,12 +965,25 @@ export default function RecordForm() {
                       </span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleDeleteDoc(doc._id)}
-                    className="p-1 text-red-500 hover:bg-red-500/10 rounded opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Icons.Trash className="w-3.5 h-3.5" />
-                  </button>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => {
+                        setEditingDocId(doc._id);
+                        setEditingDocName(doc.name);
+                      }}
+                      className="p-1 text-slate-500 hover:bg-slate-100 rounded transition-colors"
+                      title="Rename file"
+                    >
+                      <Icons.Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteDoc(doc._id)}
+                      className="p-1 text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                      title="Delete file"
+                    >
+                      <Icons.Trash className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
               ))}
               {documents.length === 0 && (
@@ -577,6 +1021,41 @@ export default function RecordForm() {
                 <div className={isLeads ? "text-center py-6 text-xs text-slate-500" : "text-center py-6 text-xs text-slate-600"}>No edits recorded.</div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+      {/* Premium Rename Document Modal */}
+      {editingDocId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="relative w-full max-w-sm bg-white border border-slate-200 rounded-2xl shadow-xl p-5 space-y-4">
+            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Rename File Attachment</h3>
+            <form onSubmit={handleRenameDocSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">New File Name</label>
+                <input
+                  type="text"
+                  required
+                  value={editingDocName}
+                  onChange={(e) => setEditingDocName(e.target.value)}
+                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                />
+              </div>
+              <div className="flex gap-2.5 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setEditingDocId(null)}
+                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-650 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-colors shadow-sm"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

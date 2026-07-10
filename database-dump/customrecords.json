@@ -1,213 +1,185 @@
 [
   {
-    "_id": "6a4f853ed1277b454ae893b0",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8936d",
+    "_id": "6a50b1b63d61e35dc9ea1408",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13c5",
     "data": {
       "companyName": "Stripe Inc",
       "website": "https://stripe.com",
       "employees": 8000,
       "industry": "Finance"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.962Z",
-    "updatedAt": "2026-07-09T11:25:50.962Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.533Z",
+    "updatedAt": "2026-07-10T08:47:50.533Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893b2",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8936d",
+    "_id": "6a50b1b63d61e35dc9ea140a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13c5",
     "data": {
       "companyName": "Apple Inc",
       "website": "https://apple.com",
       "employees": 150000,
       "industry": "Software"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.965Z",
-    "updatedAt": "2026-07-09T11:25:50.965Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.537Z",
+    "updatedAt": "2026-07-10T08:47:50.537Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893b4",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8936d",
+    "_id": "6a50b1b63d61e35dc9ea140c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13c5",
     "data": {
       "companyName": "Tesla Motors",
       "website": "https://tesla.com",
       "employees": 90000,
       "industry": "Manufacturing"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.966Z",
-    "updatedAt": "2026-07-09T11:25:50.966Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.539Z",
+    "updatedAt": "2026-07-10T08:47:50.539Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893b6",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8936d",
+    "_id": "6a50b1b63d61e35dc9ea140e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13c5",
     "data": {
       "companyName": "Netflix Inc",
       "website": "https://netflix.com",
       "employees": 12000,
       "industry": "Retail"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.968Z",
-    "updatedAt": "2026-07-09T11:25:50.968Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.541Z",
+    "updatedAt": "2026-07-10T08:47:50.541Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893d0",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89382",
+    "_id": "6a50b1b63d61e35dc9ea1428",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13da",
     "data": {
       "name": "Sales & Marketing",
       "code": "SALES"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.984Z",
-    "updatedAt": "2026-07-09T11:25:50.984Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.575Z",
+    "updatedAt": "2026-07-10T08:47:50.575Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893d2",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89382",
+    "_id": "6a50b1b63d61e35dc9ea142a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13da",
     "data": {
       "name": "Finance & Underwriting",
       "code": "FINANCE"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.985Z",
-    "updatedAt": "2026-07-09T11:25:50.985Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.577Z",
+    "updatedAt": "2026-07-10T08:47:50.577Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893d4",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89386",
-    "data": {
-      "name": "Enterprise CRM Suite",
-      "code": "CRM_ENT"
-    },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.986Z",
-    "updatedAt": "2026-07-09T11:25:50.986Z",
-    "__v": 0
-  },
-  {
-    "_id": "6a4f853ed1277b454ae893d6",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89386",
-    "data": {
-      "name": "Cloud Integration API",
-      "code": "API_CLOUD"
-    },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.987Z",
-    "updatedAt": "2026-07-09T11:25:50.987Z",
-    "__v": 0
-  },
-  {
-    "_id": "6a4f853ed1277b454ae893d8",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8938a",
+    "_id": "6a50b1b63d61e35dc9ea1430",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e2",
     "data": {
       "bankName": "State Bank of India",
-      "code": "SBI"
+      "code": "bank_sbi"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.988Z",
-    "updatedAt": "2026-07-09T11:25:50.988Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.584Z",
+    "updatedAt": "2026-07-10T08:47:50.584Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893da",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8938a",
+    "_id": "6a50b1b63d61e35dc9ea1432",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e2",
     "data": {
       "bankName": "HDFC Bank",
-      "code": "HDFC"
+      "code": "bank_hdfc"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.989Z",
-    "updatedAt": "2026-07-09T11:25:50.989Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.587Z",
+    "updatedAt": "2026-07-10T08:47:50.587Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893dc",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8938a",
+    "_id": "6a50b1b63d61e35dc9ea1434",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e2",
     "data": {
       "bankName": "ICICI Bank",
-      "code": "ICICI"
+      "code": "bank_icici"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.991Z",
-    "updatedAt": "2026-07-09T11:25:50.991Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.589Z",
+    "updatedAt": "2026-07-10T08:47:50.589Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893de",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8938a",
+    "_id": "6a50b1b63d61e35dc9ea1436",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e2",
     "data": {
       "bankName": "Axis Bank",
-      "code": "AXIS"
+      "code": "bank_axis"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.992Z",
-    "updatedAt": "2026-07-09T11:25:50.992Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.591Z",
+    "updatedAt": "2026-07-10T08:47:50.591Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893e0",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8938a",
+    "_id": "6a50b1b63d61e35dc9ea1438",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e2",
     "data": {
       "bankName": "IndusInd Bank",
-      "code": "INDUSIND"
+      "code": "bank_indusind"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.993Z",
-    "updatedAt": "2026-07-09T11:25:50.993Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.593Z",
+    "updatedAt": "2026-07-10T08:47:50.593Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893e2",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8938e",
+    "_id": "6a50b1b63d61e35dc9ea143a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e6",
     "data": {
       "bank": "State Bank of India, HDFC Bank",
       "loanType": "LOAN AGAINST PROPERTY LOAN",
       "psm": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.994Z",
-    "updatedAt": "2026-07-09T11:25:50.994Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.595Z",
+    "updatedAt": "2026-07-10T08:47:50.595Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893e4",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea143c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "HotLead_1",
       "lastName": "Test",
@@ -219,16 +191,16 @@
       "budget": 12000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.995Z",
-    "updatedAt": "2026-07-09T11:25:50.995Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.597Z",
+    "updatedAt": "2026-07-10T08:47:50.597Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893e6",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea143e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "HotLead_2",
       "lastName": "Test",
@@ -240,16 +212,16 @@
       "budget": 14000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.997Z",
-    "updatedAt": "2026-07-09T11:25:50.997Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.600Z",
+    "updatedAt": "2026-07-10T08:47:50.600Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853ed1277b454ae893e8",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1440",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "HotLead_3",
       "lastName": "Test",
@@ -261,16 +233,16 @@
       "budget": 16000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:50.999Z",
-    "updatedAt": "2026-07-09T11:25:50.999Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.602Z",
+    "updatedAt": "2026-07-10T08:47:50.602Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893ea",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1442",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "HotLead_4",
       "lastName": "Test",
@@ -282,16 +254,16 @@
       "budget": 18000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.001Z",
-    "updatedAt": "2026-07-09T11:25:51.001Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.605Z",
+    "updatedAt": "2026-07-10T08:47:50.605Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893ec",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1444",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "HotLead_5",
       "lastName": "Test",
@@ -303,16 +275,16 @@
       "budget": 20000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.003Z",
-    "updatedAt": "2026-07-09T11:25:51.003Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.607Z",
+    "updatedAt": "2026-07-10T08:47:50.607Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893ee",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1446",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "WarmLead_1",
       "lastName": "Test",
@@ -324,16 +296,16 @@
       "budget": 8000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.005Z",
-    "updatedAt": "2026-07-09T11:25:51.005Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.609Z",
+    "updatedAt": "2026-07-10T08:47:50.609Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893f0",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1448",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DocPendingLead_1",
       "lastName": "Test",
@@ -345,16 +317,16 @@
       "budget": 4500,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.006Z",
-    "updatedAt": "2026-07-09T11:25:51.006Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.611Z",
+    "updatedAt": "2026-07-10T08:47:50.611Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893f2",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea144a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DisbursedLead_1",
       "lastName": "Test",
@@ -366,16 +338,16 @@
       "budget": 20000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.007Z",
-    "updatedAt": "2026-07-09T11:25:51.007Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.613Z",
+    "updatedAt": "2026-07-10T08:47:50.613Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893f4",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea144c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DisbursedLead_2",
       "lastName": "Test",
@@ -387,16 +359,16 @@
       "budget": 20000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.008Z",
-    "updatedAt": "2026-07-09T11:25:51.008Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.616Z",
+    "updatedAt": "2026-07-10T08:47:50.616Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893f6",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea144e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DisbursedLead_3",
       "lastName": "Test",
@@ -408,16 +380,16 @@
       "budget": 20000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.010Z",
-    "updatedAt": "2026-07-09T11:25:51.010Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.619Z",
+    "updatedAt": "2026-07-10T08:47:50.619Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893f8",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1450",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DisbursedLead_4",
       "lastName": "Test",
@@ -429,16 +401,16 @@
       "budget": 20000,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.011Z",
-    "updatedAt": "2026-07-09T11:25:51.011Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.621Z",
+    "updatedAt": "2026-07-10T08:47:50.621Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893fa",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1452",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "FollowupLead_1",
       "lastName": "Test",
@@ -449,18 +421,18 @@
       "leadScore": 50,
       "budget": 5000,
       "assignedTo": "Ink CRM",
-      "followUpDate": "2026-07-09T11:25:50.995Z"
+      "followUpDate": "2026-07-10T08:47:50.596Z"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.012Z",
-    "updatedAt": "2026-07-09T11:25:51.012Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.624Z",
+    "updatedAt": "2026-07-10T08:47:50.624Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893fc",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1454",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "FollowupLead_2",
       "lastName": "Test",
@@ -471,18 +443,18 @@
       "leadScore": 50,
       "budget": 5000,
       "assignedTo": "Ink CRM",
-      "followUpDate": "2026-07-09T11:25:50.995Z"
+      "followUpDate": "2026-07-10T08:47:50.596Z"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.014Z",
-    "updatedAt": "2026-07-09T11:25:51.014Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.626Z",
+    "updatedAt": "2026-07-10T08:47:50.626Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae893fe",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1456",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "FollowupLead_3",
       "lastName": "Test",
@@ -493,18 +465,18 @@
       "leadScore": 50,
       "budget": 5000,
       "assignedTo": "Ink CRM",
-      "followUpDate": "2026-07-09T11:25:50.995Z"
+      "followUpDate": "2026-07-10T08:47:50.596Z"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.015Z",
-    "updatedAt": "2026-07-09T11:25:51.015Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.628Z",
+    "updatedAt": "2026-07-10T08:47:50.628Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89400",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea1458",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DroppedLead_1",
       "lastName": "Test",
@@ -516,16 +488,16 @@
       "budget": 1500,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.017Z",
-    "updatedAt": "2026-07-09T11:25:51.017Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.631Z",
+    "updatedAt": "2026-07-10T08:47:50.631Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89402",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea145a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DroppedLead_2",
       "lastName": "Test",
@@ -537,16 +509,16 @@
       "budget": 1500,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.018Z",
-    "updatedAt": "2026-07-09T11:25:51.018Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.634Z",
+    "updatedAt": "2026-07-10T08:47:50.634Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89404",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea145c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "DroppedLead_3",
       "lastName": "Test",
@@ -558,16 +530,16 @@
       "budget": 1500,
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.019Z",
-    "updatedAt": "2026-07-09T11:25:51.019Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.636Z",
+    "updatedAt": "2026-07-10T08:47:50.636Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89406",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1b63d61e35dc9ea145e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "Sarah",
       "lastName": "Malone",
@@ -579,396 +551,396 @@
       "leadScore": 85,
       "budget": 18500,
       "notes": "<p>Sarah is very interested in our payment integration platform.</p>",
-      "companyId": "6a4f853ed1277b454ae893b0",
-      "followUpDate": "2026-07-09T11:25:50.995Z",
+      "companyId": "6a50b1b63d61e35dc9ea1408",
+      "followUpDate": "2026-07-10T08:47:50.596Z",
       "assignedTo": "Ink CRM"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.020Z",
-    "updatedAt": "2026-07-09T11:25:51.020Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.639Z",
+    "updatedAt": "2026-07-10T08:47:50.639Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89408",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89365",
+    "_id": "6a50b1b63d61e35dc9ea1460",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13bd",
     "data": {
       "dealName": "Apple Mobile Suite Deal",
       "amount": 150000,
       "stage": "Proposal",
-      "closeDate": "2026-08-23T11:25:51.021Z",
+      "closeDate": "2026-08-24T08:47:50.640Z",
       "probability": 60,
-      "companyId": "6a4f853ed1277b454ae893b2"
+      "companyId": "6a50b1b63d61e35dc9ea140a"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.021Z",
-    "updatedAt": "2026-07-09T11:25:51.021Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.641Z",
+    "updatedAt": "2026-07-10T08:47:50.641Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8940a",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89365",
+    "_id": "6a50b1b63d61e35dc9ea1462",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13bd",
     "data": {
       "dealName": "Tesla Autopilot Licensing",
       "amount": 300000,
       "stage": "Negotiation",
-      "closeDate": "2026-07-24T11:25:51.023Z",
+      "closeDate": "2026-07-25T08:47:50.642Z",
       "probability": 80,
-      "companyId": "6a4f853ed1277b454ae893b4"
+      "companyId": "6a50b1b63d61e35dc9ea140c"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.023Z",
-    "updatedAt": "2026-07-09T11:25:51.023Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.643Z",
+    "updatedAt": "2026-07-10T08:47:50.643Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8940c",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89365",
+    "_id": "6a50b1b63d61e35dc9ea1464",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13bd",
     "data": {
       "dealName": "Netflix CDN Optimization",
       "amount": 90000,
       "stage": "Qualification",
-      "closeDate": "2026-09-07T11:25:51.024Z",
+      "closeDate": "2026-09-08T08:47:50.645Z",
       "probability": 40,
-      "companyId": "6a4f853ed1277b454ae893b6"
+      "companyId": "6a50b1b63d61e35dc9ea140e"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.024Z",
-    "updatedAt": "2026-07-09T11:25:51.024Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.645Z",
+    "updatedAt": "2026-07-10T08:47:50.645Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8940e",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89365",
+    "_id": "6a50b1b63d61e35dc9ea1466",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13bd",
     "data": {
       "dealName": "Stripe Global Extension",
       "amount": 120000,
       "stage": "Closed Won",
-      "closeDate": "2026-06-29T11:25:51.025Z",
+      "closeDate": "2026-06-30T08:47:50.647Z",
       "probability": 100,
-      "companyId": "6a4f853ed1277b454ae893b0"
+      "companyId": "6a50b1b63d61e35dc9ea1408"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.025Z",
-    "updatedAt": "2026-07-09T11:25:51.025Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.648Z",
+    "updatedAt": "2026-07-10T08:47:50.648Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89410",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1468",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "test raja",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-07-01T06:10:00.000Z",
     "updatedAt": "2026-07-01T06:10:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89412",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea146a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "apmc-cate-a -2k-4k-17-06-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-23T01:32:00.000Z",
     "updatedAt": "2026-06-23T01:32:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89414",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea146c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "b2b-b1-10k-20k-23-06-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-23T00:58:00.000Z",
     "updatedAt": "2026-06-23T00:58:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89416",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea146e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "apmc-cate-a-4k-12k-12-06-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-12T00:45:00.000Z",
     "updatedAt": "2026-06-12T00:45:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89418",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1470",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "vc-ka01-01-10k-11-06-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-11T03:25:00.000Z",
     "updatedAt": "2026-06-11T03:25:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8941a",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1472",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "B2B-B2-25-35K-05-06-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-05T07:32:00.000Z",
     "updatedAt": "2026-06-05T07:32:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8941c",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1474",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "KTK-PL-1001-1100-03-06-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-03T03:13:00.000Z",
     "updatedAt": "2026-06-03T03:13:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8941e",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1476",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "crmdemo2",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-06-01T01:55:00.000Z",
     "updatedAt": "2026-06-01T01:55:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89420",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1478",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "B2B-F1-27-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-27T01:42:00.000Z",
     "updatedAt": "2026-05-27T01:42:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89422",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea147a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "GOVT-PL-DEMO-26-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-26T07:18:00.000Z",
     "updatedAt": "2026-05-26T07:18:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89424",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea147c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "BOMMANAHALLI-E-PL-26-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-26T03:43:00.000Z",
     "updatedAt": "2026-05-26T03:43:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89426",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea147e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "KA-PL-BLY-21-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-21T05:48:00.000Z",
     "updatedAt": "2026-05-21T05:48:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89428",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1480",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "B2B-B1-01 TO 10K-20-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-20T06:21:00.000Z",
     "updatedAt": "2026-05-20T06:21:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8942a",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1482",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "ALAND-EPL-19-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-19T00:20:00.000Z",
     "updatedAt": "2026-05-19T00:20:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8942c",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae89373",
+    "_id": "6a50b1b63d61e35dc9ea1484",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13cb",
     "data": {
       "campaignName": "KVB-DB-19-05-26",
       "status": "Active",
       "type": "Email",
       "budget": 10000
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
     "createdAt": "2026-05-18T23:59:00.000Z",
     "updatedAt": "2026-05-18T23:59:00.000Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8942e",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8937c",
+    "_id": "6a50b1b63d61e35dc9ea1486",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13d4",
     "data": {
       "assignmentName": "Sarah Malone - Summer Promo 2026",
       "campaign": "Summer Promo 2026",
       "lead": "Sarah Malone",
-      "assignedDate": "2026-07-09T11:25:50.995Z"
+      "assignedDate": "2026-07-10T08:47:50.596Z"
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-09T11:25:51.045Z",
-    "updatedAt": "2026-07-09T11:25:51.045Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:47:50.687Z",
+    "updatedAt": "2026-07-10T08:47:50.687Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89430",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae8939b",
+    "_id": "6a50b1b63d61e35dc9ea1488",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13f3",
     "data": {
       "courseCode": "CS101",
       "courseName": "Introduction to Computer Science",
       "credits": 4,
       "department": "Computer Science"
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.047Z",
-    "updatedAt": "2026-07-09T11:25:51.047Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.689Z",
+    "updatedAt": "2026-07-10T08:47:50.689Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89432",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae8939b",
+    "_id": "6a50b1b63d61e35dc9ea148a",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13f3",
     "data": {
       "courseCode": "MATH201",
       "courseName": "Advanced Calculus",
       "credits": 3,
       "department": "Mathematics"
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.048Z",
-    "updatedAt": "2026-07-09T11:25:51.048Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.691Z",
+    "updatedAt": "2026-07-10T08:47:50.691Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89434",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae8939b",
+    "_id": "6a50b1b63d61e35dc9ea148c",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13f3",
     "data": {
       "courseCode": "PHYS301",
       "courseName": "Quantum Mechanics",
       "credits": 4,
       "department": "Physics"
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.049Z",
-    "updatedAt": "2026-07-09T11:25:51.049Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.693Z",
+    "updatedAt": "2026-07-10T08:47:50.693Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89436",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae89393",
+    "_id": "6a50b1b63d61e35dc9ea148e",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13eb",
     "data": {
       "studentId": "STU-2026-001",
       "fullName": "Harry Potter",
@@ -977,16 +949,16 @@
       "gradeLevel": "Junior",
       "gpa": 3.6
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.050Z",
-    "updatedAt": "2026-07-09T11:25:51.050Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.696Z",
+    "updatedAt": "2026-07-10T08:47:50.696Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89438",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae89393",
+    "_id": "6a50b1b63d61e35dc9ea1490",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13eb",
     "data": {
       "studentId": "STU-2026-002",
       "fullName": "Hermione Granger",
@@ -995,16 +967,16 @@
       "gradeLevel": "Senior",
       "gpa": 4
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.051Z",
-    "updatedAt": "2026-07-09T11:25:51.051Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.699Z",
+    "updatedAt": "2026-07-10T08:47:50.699Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8943a",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae89393",
+    "_id": "6a50b1b63d61e35dc9ea1492",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13eb",
     "data": {
       "studentId": "STU-2026-003",
       "fullName": "Ron Weasley",
@@ -1013,16 +985,16 @@
       "gradeLevel": "Junior",
       "gpa": 2.8
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.052Z",
-    "updatedAt": "2026-07-09T11:25:51.052Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.701Z",
+    "updatedAt": "2026-07-10T08:47:50.701Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8943c",
-    "organizationId": "6a4f853ed1277b454ae8931a",
-    "moduleId": "6a4f853ed1277b454ae89393",
+    "_id": "6a50b1b63d61e35dc9ea1494",
+    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "moduleId": "6a50b1b63d61e35dc9ea13eb",
     "data": {
       "studentId": "STU-2026-004",
       "fullName": "Draco Malfoy",
@@ -1031,16 +1003,16 @@
       "gradeLevel": "Senior",
       "gpa": 3.4
     },
-    "createdBy": "6a4f853ed1277b454ae8933e",
-    "updatedBy": "6a4f853ed1277b454ae8933e",
-    "createdAt": "2026-07-09T11:25:51.054Z",
-    "updatedAt": "2026-07-09T11:25:51.054Z",
+    "createdBy": "6a50b1b63d61e35dc9ea1396",
+    "updatedBy": "6a50b1b63d61e35dc9ea1396",
+    "createdAt": "2026-07-10T08:47:50.703Z",
+    "updatedAt": "2026-07-10T08:47:50.703Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae8943e",
-    "organizationId": "6a4f853ed1277b454ae8931c",
-    "moduleId": "6a4f853ed1277b454ae893a1",
+    "_id": "6a50b1b63d61e35dc9ea1496",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "moduleId": "6a50b1b63d61e35dc9ea13f9",
     "data": {
       "mrn": "MRN-4493-2",
       "fullName": "Alice Wonders",
@@ -1049,16 +1021,16 @@
       "allergies": "Penicillin",
       "emergencyPhone": "555-019-2834"
     },
-    "createdBy": "6a4f853ed1277b454ae89348",
-    "updatedBy": "6a4f853ed1277b454ae89348",
-    "createdAt": "2026-07-09T11:25:51.054Z",
-    "updatedAt": "2026-07-09T11:25:51.054Z",
+    "createdBy": "6a50b1b63d61e35dc9ea13a0",
+    "updatedBy": "6a50b1b63d61e35dc9ea13a0",
+    "createdAt": "2026-07-10T08:47:50.705Z",
+    "updatedAt": "2026-07-10T08:47:50.705Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89440",
-    "organizationId": "6a4f853ed1277b454ae8931c",
-    "moduleId": "6a4f853ed1277b454ae893a1",
+    "_id": "6a50b1b63d61e35dc9ea1498",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "moduleId": "6a50b1b63d61e35dc9ea13f9",
     "data": {
       "mrn": "MRN-1029-3",
       "fullName": "Bob Builder",
@@ -1067,16 +1039,16 @@
       "allergies": "None",
       "emergencyPhone": "555-021-9988"
     },
-    "createdBy": "6a4f853ed1277b454ae89348",
-    "updatedBy": "6a4f853ed1277b454ae89348",
-    "createdAt": "2026-07-09T11:25:51.055Z",
-    "updatedAt": "2026-07-09T11:25:51.055Z",
+    "createdBy": "6a50b1b63d61e35dc9ea13a0",
+    "updatedBy": "6a50b1b63d61e35dc9ea13a0",
+    "createdAt": "2026-07-10T08:47:50.707Z",
+    "updatedAt": "2026-07-10T08:47:50.707Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89442",
-    "organizationId": "6a4f853ed1277b454ae8931c",
-    "moduleId": "6a4f853ed1277b454ae893a1",
+    "_id": "6a50b1b63d61e35dc9ea149a",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "moduleId": "6a50b1b63d61e35dc9ea13f9",
     "data": {
       "mrn": "MRN-8849-1",
       "fullName": "Charlie Brown",
@@ -1085,102 +1057,67 @@
       "allergies": "Peanuts",
       "emergencyPhone": "555-102-4433"
     },
-    "createdBy": "6a4f853ed1277b454ae89348",
-    "updatedBy": "6a4f853ed1277b454ae89348",
-    "createdAt": "2026-07-09T11:25:51.056Z",
-    "updatedAt": "2026-07-09T11:25:51.056Z",
+    "createdBy": "6a50b1b63d61e35dc9ea13a0",
+    "updatedBy": "6a50b1b63d61e35dc9ea13a0",
+    "createdAt": "2026-07-10T08:47:50.709Z",
+    "updatedAt": "2026-07-10T08:47:50.709Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89444",
-    "organizationId": "6a4f853ed1277b454ae8931c",
-    "moduleId": "6a4f853ed1277b454ae893a9",
+    "_id": "6a50b1b63d61e35dc9ea149c",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "moduleId": "6a50b1b63d61e35dc9ea1401",
     "data": {
-      "appointmentDate": "2026-07-11T11:25:51.057Z",
+      "appointmentDate": "2026-07-12T08:47:50.711Z",
       "doctorName": "Dr. Gregory House",
       "status": "Scheduled",
       "reason": "<p>Routine diagnostic follow-up on allergy sensitivity.</p>",
-      "patientId": "6a4f853fd1277b454ae8943e"
+      "patientId": "6a50b1b63d61e35dc9ea1496"
     },
-    "createdBy": "6a4f853ed1277b454ae89348",
-    "updatedBy": "6a4f853ed1277b454ae89348",
-    "createdAt": "2026-07-09T11:25:51.057Z",
-    "updatedAt": "2026-07-09T11:25:51.057Z",
+    "createdBy": "6a50b1b63d61e35dc9ea13a0",
+    "updatedBy": "6a50b1b63d61e35dc9ea13a0",
+    "createdAt": "2026-07-10T08:47:50.712Z",
+    "updatedAt": "2026-07-10T08:47:50.712Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89446",
-    "organizationId": "6a4f853ed1277b454ae8931c",
-    "moduleId": "6a4f853ed1277b454ae893a9",
+    "_id": "6a50b1b63d61e35dc9ea149e",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "moduleId": "6a50b1b63d61e35dc9ea1401",
     "data": {
-      "appointmentDate": "2026-07-10T11:25:51.058Z",
+      "appointmentDate": "2026-07-11T08:47:50.714Z",
       "doctorName": "Dr. Allison Cameron",
       "status": "Scheduled",
       "reason": "<p>Annual cardiovascular diagnostic test.</p>",
-      "patientId": "6a4f853fd1277b454ae89440"
+      "patientId": "6a50b1b63d61e35dc9ea1498"
     },
-    "createdBy": "6a4f853ed1277b454ae89348",
-    "updatedBy": "6a4f853ed1277b454ae89348",
-    "createdAt": "2026-07-09T11:25:51.058Z",
-    "updatedAt": "2026-07-09T11:25:51.058Z",
+    "createdBy": "6a50b1b63d61e35dc9ea13a0",
+    "updatedBy": "6a50b1b63d61e35dc9ea13a0",
+    "createdAt": "2026-07-10T08:47:50.715Z",
+    "updatedAt": "2026-07-10T08:47:50.715Z",
     "__v": 0
   },
   {
-    "_id": "6a4f853fd1277b454ae89448",
-    "organizationId": "6a4f853ed1277b454ae8931c",
-    "moduleId": "6a4f853ed1277b454ae893a9",
+    "_id": "6a50b1b63d61e35dc9ea14a0",
+    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "moduleId": "6a50b1b63d61e35dc9ea1401",
     "data": {
-      "appointmentDate": "2026-07-06T11:25:51.059Z",
+      "appointmentDate": "2026-07-07T08:47:50.717Z",
       "doctorName": "Dr. Eric Foreman",
       "status": "Completed",
       "reason": "<p>Follow up consultation.</p>",
-      "patientId": "6a4f853fd1277b454ae89442"
+      "patientId": "6a50b1b63d61e35dc9ea149a"
     },
-    "createdBy": "6a4f853ed1277b454ae89348",
-    "updatedBy": "6a4f853ed1277b454ae89348",
-    "createdAt": "2026-07-09T11:25:51.059Z",
-    "updatedAt": "2026-07-09T11:25:51.059Z",
+    "createdBy": "6a50b1b63d61e35dc9ea13a0",
+    "updatedBy": "6a50b1b63d61e35dc9ea13a0",
+    "createdAt": "2026-07-10T08:47:50.718Z",
+    "updatedAt": "2026-07-10T08:47:50.718Z",
     "__v": 0
   },
   {
-    "_id": "6a509cc0821f8637ee0a8e3c",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
-    "data": {
-      "source": "Cold Call",
-      "loanType": "SALARIED PERSONAL LOAN",
-      "budget": 2334,
-      "dataCode": "3245cb",
-      "businessPartner": "",
-      "psm": "",
-      "status": "Warm",
-      "caseDetails": "cash",
-      "assignToTeam": "",
-      "assignedTo": "",
-      "followUpDate": "2026-07-10",
-      "notes": "",
-      "firstName": "md",
-      "lastName": "sadiq",
-      "company": "google",
-      "phone": "09916102542",
-      "email": "mohammedhashmat481@gmail.com",
-      "presentAddress": "9900 4t cross ,pnt, AC post, banglore -45\nmuzMMILE APARTEMENT",
-      "city": "banglore",
-      "pinCode": "560045",
-      "state": "KARNATAKA",
-      "country": "INDIA",
-      "leadScore": 50
-    },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-10T07:18:24.813Z",
-    "updatedAt": "2026-07-10T07:18:24.813Z",
-    "__v": 0
-  },
-  {
-    "_id": "6a509d5ea029541cfe8417b7",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1ce29504eb463f1d1d7",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "Vikram",
       "lastName": "Sen",
@@ -1191,19 +1128,19 @@
       "budget": 4500000,
       "source": "Website",
       "bankName": "Axis Bank",
-      "followUpDate": "2026-07-10T07:21:02.101Z",
+      "followUpDate": "2026-07-10T08:48:14.405Z",
       "notes": "Interested in property loan. Schedule site verification."
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-10T07:21:02.118Z",
-    "updatedAt": "2026-07-10T07:21:02.118Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:48:14.421Z",
+    "updatedAt": "2026-07-10T08:48:14.421Z",
     "__v": 0
   },
   {
-    "_id": "6a509d5ea029541cfe8417ba",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1ce29504eb463f1d1da",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "Neha",
       "lastName": "Patel",
@@ -1214,19 +1151,19 @@
       "budget": 800000,
       "source": "Referral",
       "bankName": "KOTAK Bank",
-      "followUpDate": "2026-07-10T07:21:02.101Z",
+      "followUpDate": "2026-07-10T08:48:14.405Z",
       "notes": "Needs quick personal loan for emergency. Call at 2:00 PM."
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-10T07:21:02.130Z",
-    "updatedAt": "2026-07-10T07:21:02.130Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:48:14.439Z",
+    "updatedAt": "2026-07-10T08:48:14.439Z",
     "__v": 0
   },
   {
-    "_id": "6a509d5ea029541cfe8417bc",
-    "organizationId": "6a4f853ed1277b454ae89318",
-    "moduleId": "6a4f853ed1277b454ae8934a",
+    "_id": "6a50b1ce29504eb463f1d1dc",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13a2",
     "data": {
       "firstName": "Rohan",
       "lastName": "Mehta",
@@ -1237,13 +1174,80 @@
       "budget": 2500000,
       "source": "Cold Call",
       "bankName": "ICICI Bank",
-      "followUpDate": "2026-07-10T07:21:02.101Z",
+      "followUpDate": "2026-07-10T08:48:14.405Z",
       "notes": "Requires working capital for warehouse expansion."
     },
-    "createdBy": "6a4f853ed1277b454ae89334",
-    "updatedBy": "6a4f853ed1277b454ae89334",
-    "createdAt": "2026-07-10T07:21:02.135Z",
-    "updatedAt": "2026-07-10T07:21:02.135Z",
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T08:48:14.445Z",
+    "updatedAt": "2026-07-10T08:48:14.445Z",
     "__v": 0
+  },
+  {
+    "_id": "6a50c238f173553c10141d0e",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13e6",
+    "data": {
+      "bank": "State Bank of India, Punjab National Bank",
+      "loanType": "HOME LOAN",
+      "psm": "Ink CRM"
+    },
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T09:58:16.216Z",
+    "updatedAt": "2026-07-10T09:58:16.216Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a50e7377be52192f227ea3a",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13de",
+    "data": {
+      "name": "SALARIED PERSONAL LOAN",
+      "code": "SALARIED_PERSONAL_LOAN"
+    },
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T12:36:07.846Z",
+    "updatedAt": "2026-07-10T12:36:07.846Z"
+  },
+  {
+    "_id": "6a50e7377be52192f227ea3b",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13de",
+    "data": {
+      "name": "BUSINESS LOAN",
+      "code": "BUSINESS_LOAN"
+    },
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T12:36:07.846Z",
+    "updatedAt": "2026-07-10T12:36:07.846Z"
+  },
+  {
+    "_id": "6a50e7377be52192f227ea3c",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13de",
+    "data": {
+      "name": "HOME LOAN",
+      "code": "HOME_LOAN"
+    },
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T12:36:07.846Z",
+    "updatedAt": "2026-07-10T12:36:07.846Z"
+  },
+  {
+    "_id": "6a50e7377be52192f227ea3d",
+    "organizationId": "6a50b1b63d61e35dc9ea1370",
+    "moduleId": "6a50b1b63d61e35dc9ea13de",
+    "data": {
+      "name": "LAP",
+      "code": "LAP"
+    },
+    "createdBy": "6a50b1b63d61e35dc9ea138c",
+    "updatedBy": "6a50b1b63d61e35dc9ea138c",
+    "createdAt": "2026-07-10T12:36:07.846Z",
+    "updatedAt": "2026-07-10T12:36:07.846Z"
   }
 ]

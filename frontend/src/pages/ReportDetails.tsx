@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
+import { formatDate } from '../utils/dateFormatter';
 
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
 
@@ -161,11 +162,11 @@ export default function ReportDetails() {
                 <tr key={row._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/10 transition-colors">
                   {cols.map((colName: string) => (
                     <td key={colName} className="px-6 py-3.5 font-medium text-slate-850 dark:text-slate-200 truncate max-w-[200px]">
-                      {String(row.data[colName] || '-')}
+                      {formatDate(row.data[colName]) || '-'}
                     </td>
                   ))}
                   <td className="px-6 py-3.5 text-xs text-slate-400">
-                    {new Date(row.createdAt).toLocaleDateString()}
+                    {formatDate(row.createdAt)}
                   </td>
                 </tr>
               ))}
