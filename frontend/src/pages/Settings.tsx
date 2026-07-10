@@ -679,7 +679,7 @@ export default function Settings() {
               className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
                 companySubTab === 'details'
                   ? 'bg-indigo-650 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
+                  : 'bg-slate-50 text-slate-600 hover:bg-black hover:text-white border-r border-slate-200/60'
               }`}
             >
               Company Details
@@ -693,7 +693,7 @@ export default function Settings() {
               className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
                 companySubTab === 'address'
                   ? 'bg-indigo-650 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
+                  : 'bg-slate-50 text-slate-600 hover:bg-black hover:text-white border-r border-slate-200/60'
               }`}
             >
               Address
@@ -707,7 +707,7 @@ export default function Settings() {
               className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
                 companySubTab === 'admin'
                   ? 'bg-indigo-650 text-white shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+                  : 'bg-slate-50 text-slate-600 hover:bg-black hover:text-white'
               }`}
             >
               Admin Details
