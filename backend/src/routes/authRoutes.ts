@@ -909,7 +909,7 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       return;
     }
 
-    const { email, password, firstName, lastName, roleId } = req.body;
+    const { email, password, firstName, lastName, roleId, department } = req.body;
     if (!email || !password || !firstName || !lastName || !roleId) {
       res.status(400).json({ error: 'All fields are required.' });
       return;
@@ -946,7 +946,8 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       userCode,
       skipFace: false,
       skipLocation: false,
-      isActive: true
+      isActive: true,
+      department: department || ''
     });
     
     res.status(201).json(newUser);
@@ -965,7 +966,7 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       return;
     }
 
-    const { firstName, lastName, roleId, email, skipFace, skipLocation, isActive, reportingManager } = req.body;
+    const { firstName, lastName, roleId, email, skipFace, skipLocation, isActive, reportingManager, department } = req.body;
     const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
@@ -993,6 +994,7 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
     if (skipLocation !== undefined) user.skipLocation = skipLocation;
     if (isActive !== undefined) user.isActive = isActive;
     if (reportingManager !== undefined) user.reportingManager = reportingManager || null;
+    if (department !== undefined) user.department = department;
     
     await user.save();
     res.status(200).json(user);

@@ -854,6 +854,41 @@ async function seed() {
     createdBy: salesAdmin._id,
     updatedBy: salesAdmin._id
   });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'Kotak Mahindra Bank', code: 'bank_kotak' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'Punjab National Bank', code: 'bank_pnb' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'Bank of Baroda', code: 'bank_bob' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'Canara Bank', code: 'bank_canara' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
+  await CustomRecord.create({
+    organizationId: salesOrg._id,
+    moduleId: bankMasterModule._id,
+    data: { bankName: 'IDFC FIRST Bank', code: 'bank_idfc' },
+    createdBy: salesAdmin._id,
+    updatedBy: salesAdmin._id
+  });
 
   await CustomRecord.create({
     organizationId: salesOrg._id,

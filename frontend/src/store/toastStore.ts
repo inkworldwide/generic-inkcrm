@@ -6,25 +6,36 @@ export interface Toast {
   type: 'success' | 'error' | 'info' | 'warning';
 }
 
-interface ConfirmOptions {
+export interface ConfirmOptions {
   title: string;
   message: string;
   onConfirm: () => void;
   onCancel?: () => void;
 }
 
+export interface AlertOptions {
+  title: string;
+  message: string;
+  type?: 'success' | 'info' | 'error' | 'warning';
+  onClose?: () => void;
+}
+
 interface ToastState {
   toasts: Toast[];
   confirm: ConfirmOptions | null;
+  alertModal: AlertOptions | null;
   showToast: (message: string, type?: Toast['type']) => void;
   hideToast: (id: string) => void;
   showConfirm: (options: ConfirmOptions) => void;
   hideConfirm: () => void;
+  showAlertModal: (options: AlertOptions) => void;
+  hideAlertModal: () => void;
 }
 
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   confirm: null,
+  alertModal: null,
   showToast: (message, type = 'success') => {
     const id = Math.random().toString(36).substring(2, 9);
     set((state) => ({
@@ -42,5 +53,7 @@ export const useToastStore = create<ToastState>((set) => ({
       toasts: state.toasts.filter((t) => t.id !== id)
     })),
   showConfirm: (options) => set({ confirm: options }),
-  hideConfirm: () => set({ confirm: null })
+  hideConfirm: () => set({ confirm: null }),
+  showAlertModal: (options) => set({ alertModal: options }),
+  hideAlertModal: () => set({ alertModal: null })
 }));

@@ -8,6 +8,50 @@ const router = Router();
 router.use(authenticate);
 router.use(requireTenant);
 
+// Helper function to dynamically adjust status orders sequentially
+async function adjustStatusOrders(organizationId: any, statusIdToPlace: string | null, targetOrder: number, newStatusFields: any) {
+  let statuses = await Status.find({ organizationId }).sort({ order: 1 });
+  if (statusIdToPlace) {
+    statuses = statuses.filter(s => s._id.toString() !== statusIdToPlace.toString());
+  }
+  const insertIdx = Math.max(0, Math.min(targetOrder - 1, statuses.length));
+  const resultList: any[] = [];
+  for (let i = 0; i < statuses.length; i++) {
+    if (i === insertIdx) {
+      resultList.push({ isTarget: true });
+    }
+    resultList.push(statuses[i]);
+  }
+  if (insertIdx >= statuses.length) {
+    resultList.push({ isTarget: true });
+  }
+  for (let index = 0; index < resultList.length; index++) {
+    const item = resultList[index];
+    const finalOrder = index + 1;
+    if (item.isTarget) {
+      newStatusFields.order = finalOrder;
+    } else {
+      if (item.order !== finalOrder) {
+        item.order = finalOrder;
+        await item.save();
+      }
+    }
+  }
+}
+
+// Helper function to close gaps when a status is deleted
+async function reorderAfterDelete(organizationId: any) {
+  const statuses = await Status.find({ organizationId }).sort({ order: 1 });
+  for (let index = 0; index < statuses.length; index++) {
+    const item = statuses[index];
+    const finalOrder = index + 1;
+    if (item.order !== finalOrder) {
+      item.order = finalOrder;
+      await item.save();
+    }
+  }
+}
+
 // 1. Get all statuses
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
@@ -30,12 +74,13 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
 
     // Auto-calculate order if not provided
     let calculatedOrder = order;
-    if (order === undefined) {
+    if (order === undefined || order === 0) {
       const count = await Status.countDocuments({ organizationId: req.organizationId });
-      calculatedOrder = count;
+      calculatedOrder = count + 1;
     }
+    calculatedOrder = Math.max(1, calculatedOrder);
 
-    const status = await Status.create({
+    const newStatusFields: any = {
       organizationId: req.organizationId,
       name,
       color: color || '#4F46E5',
@@ -45,8 +90,12 @@ router.post('/', async (req: Request, res: Response): Promise<void> => {
       isFinal: isFinal !== undefined ? isFinal : false,
       isSuccess: isSuccess !== undefined ? isSuccess : false,
       order: calculatedOrder
-    });
+    };
 
+    // Shift other statuses to accommodate the new status
+    await adjustStatusOrders(req.organizationId, null, calculatedOrder, newStatusFields);
+
+    const status = await Status.create(newStatusFields);
     res.status(201).json(status);
   } catch (error: any) {
     if (error.code === 11000) {
@@ -75,7 +124,13 @@ router.put('/:id', async (req: Request, res: Response): Promise<void> => {
     if (dashboardVisibility !== undefined) status.dashboardVisibility = dashboardVisibility;
     if (isFinal !== undefined) status.isFinal = isFinal;
     if (isSuccess !== undefined) status.isSuccess = isSuccess;
-    if (order !== undefined) status.order = order;
+
+    if (order !== undefined) {
+      const targetOrder = Math.max(1, order);
+      const tempWrapper = { order: targetOrder };
+      await adjustStatusOrders(req.organizationId, status._id.toString(), targetOrder, tempWrapper);
+      status.order = tempWrapper.order;
+    }
 
     await status.save();
     res.status(200).json(status);
@@ -96,6 +151,7 @@ router.delete('/:id', async (req: Request, res: Response): Promise<void> => {
       res.status(404).json({ error: 'Status not found.' });
       return;
     }
+    await reorderAfterDelete(req.organizationId);
     res.status(200).json({ message: 'Status deleted successfully.' });
   } catch (error) {
     res.status(500).json({ error: 'Failed to delete status.' });

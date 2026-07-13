@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import * as Icons from 'lucide-react';
 import { useModuleStore } from '../store/moduleStore';
 import api from '../services/api';
+import { useToastStore } from '../store/toastStore';
 
 export default function WorkflowsList() {
   const { modules } = useModuleStore();
+  const { showToast, showAlertModal } = useToastStore();
 
   const [workflows, setWorkflows] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,8 +49,9 @@ export default function WorkflowsList() {
     try {
       await api.put(`/workflows/${id}`, { isEnabled: !currentState });
       setWorkflows(workflows.map((w) => (w._id === id ? { ...w, isEnabled: !currentState } : w)));
+      showToast('Workflow status updated successfully.', 'success');
     } catch (err) {
-      alert('Failed to toggle workflow status.');
+      showToast('Failed to toggle workflow status.', 'error');
     }
   };
 
@@ -62,7 +65,7 @@ export default function WorkflowsList() {
 
   const handleSaveWorkflow = async () => {
     if (!name || !moduleId) {
-      alert('Name and module selection are required.');
+      showToast('Name and module selection are required.', 'warning');
       return;
     }
     try {
@@ -79,8 +82,13 @@ export default function WorkflowsList() {
       setWorkflows([...workflows, res.data]);
       setShowEditor(false);
       resetEditor();
+      showAlertModal({
+        title: 'Saved Successfully',
+        message: 'The new workflow automation has been saved successfully.',
+        type: 'success'
+      });
     } catch (err) {
-      alert('Failed to save workflow.');
+      showToast('Failed to save workflow.', 'error');
     }
   };
 

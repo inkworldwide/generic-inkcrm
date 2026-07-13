@@ -17,7 +17,7 @@ export default function ModuleView() {
   const [searchParams] = useSearchParams();
 
   const { activeModule, setActiveModuleByPath } = useModuleStore();
-  const { showConfirm, showToast } = useToastStore();
+  const { showConfirm, showToast, showAlertModal } = useToastStore();
 
   const [viewMode, setViewMode] = useState<ViewMode>('table');
   const [searchVal, setSearchVal] = useState('');
@@ -55,9 +55,9 @@ export default function ModuleView() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      alert('File uploaded successfully!');
+      showToast('File uploaded successfully!', 'success');
     } catch (err) {
-      alert('Failed to upload file.');
+      showToast('Failed to upload file.', 'error');
     } finally {
       setUploadingRecordId(null);
     }
@@ -88,7 +88,7 @@ export default function ModuleView() {
   const handleSaveCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!campaignNameInput.trim()) {
-      alert('Campaign Name is required');
+      showToast('Campaign Name is required', 'warning');
       return;
     }
 
@@ -105,12 +105,17 @@ export default function ModuleView() {
           data: { campaignName: campaignNameInput }
         });
       }
+      showAlertModal({
+        title: editCampaignId ? 'Saved Successfully' : 'Created Successfully',
+        message: editCampaignId ? 'The campaign has been updated successfully.' : 'The new campaign has been created successfully.',
+        type: 'success'
+      });
       setCampaignNameInput('');
       setEditCampaignId(null);
       refetch();
       queryClient.invalidateQueries({ queryKey: ['records', 'campaigns'] });
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save campaign');
+      showToast(err.response?.data?.error || 'Failed to save campaign', 'error');
     } finally {
       setIsSubmittingCampaign(false);
     }
@@ -235,7 +240,11 @@ export default function ModuleView() {
       onConfirm: () => {
         deleteMutation.mutate(id, {
           onSuccess: () => {
-            showToast('Record deleted successfully.', 'success');
+            showAlertModal({
+              title: 'Deleted Successfully',
+              message: `The ${activeModule?.singularLabel || 'record'} has been permanently deleted.`,
+              type: 'success'
+            });
           },
           onError: () => {
             showToast('Failed to delete record.', 'error');
@@ -820,7 +829,7 @@ export default function ModuleView() {
                               if (cleanPhone) {
                                 window.open(`https://wa.me/${cleanPhone}`, '_blank');
                               } else {
-                                alert('No phone number available for this lead.');
+                                showToast('No phone number available for this lead.', 'warning');
                               }
                             }}
                             className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
@@ -835,7 +844,7 @@ export default function ModuleView() {
                               if (cleanPhone) {
                                 window.location.href = `tel:${cleanPhone}`;
                               } else {
-                                alert('No phone number available for this lead.');
+                                showToast('No phone number available for this lead.', 'warning');
                               }
                             }}
                             className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"

@@ -3,8 +3,10 @@ import { motion } from 'framer-motion';
 import * as faceapi from 'face-api.js';
 import { Camera, ShieldCheck, Trash2, Loader2, XCircle, CheckCircle } from 'lucide-react';
 import api from '../services/api';
+import { useToastStore } from '../store/toastStore';
 
 export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel }: { mode?: 'settings' | 'signup', onSuccess?: (embedding: number[]) => void, onCancel?: () => void }) {
+  const { showConfirm, showAlertModal } = useToastStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   
   const [isModelLoaded, setIsModelLoaded] = useState(false);
@@ -177,14 +179,24 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
   };
 
   const disableFaceLogin = async () => {
-    if (!confirm('Are you sure you want to delete your biometric data?')) return;
-    try {
-      await api.post('/auth/face/disable');
-      setEnrollmentComplete(false);
-      setStatus('Biometric data securely deleted.');
-    } catch (err) {
-      setError('Failed to disable face recognition.');
-    }
+    showConfirm({
+      title: 'Delete Biometrics',
+      message: 'Are you sure you want to delete your biometric data?',
+      onConfirm: async () => {
+        try {
+          await api.post('/auth/face/disable');
+          setEnrollmentComplete(false);
+          setStatus('Biometric data securely deleted.');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: 'Your facial biometric data has been completely and securely deleted.',
+            type: 'success'
+          });
+        } catch (err) {
+          setError('Failed to disable face recognition.');
+        }
+      }
+    });
   };
 
   return (

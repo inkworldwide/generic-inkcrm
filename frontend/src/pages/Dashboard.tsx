@@ -6,10 +6,12 @@ import { Link } from 'react-router-dom';
 import { DynamicIcon } from '../components/Layout';
 import { useQuery } from '@tanstack/react-query';
 import { formatDate } from '../utils/dateFormatter';
+import { useToastStore } from '../store/toastStore';
 
 const FUNNEL_COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#f97316', '#8b5cf6'];
 
 export default function Dashboard() {
+  const { showToast } = useToastStore();
   const { branding, fetchBranding } = useThemeStore();
   const [animate, setAnimate] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,9 +49,9 @@ export default function Dashboard() {
           'Content-Type': 'multipart/form-data'
         }
       });
-      alert('File uploaded successfully!');
+      showToast('File uploaded successfully!', 'success');
     } catch (err) {
-      alert('Failed to upload file.');
+      showToast('Failed to upload file.', 'error');
     } finally {
       setUploadingRecordId(null);
     }
@@ -490,7 +492,7 @@ export default function Dashboard() {
                           if (cleanPhone) {
                             window.open(`https://wa.me/${cleanPhone}`, '_blank');
                           } else {
-                            alert('No phone number available for this lead.');
+                            showToast('No phone number available for this lead.', 'warning');
                           }
                         }}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
@@ -505,7 +507,7 @@ export default function Dashboard() {
                           if (cleanPhone) {
                             window.location.href = `tel:${cleanPhone}`;
                           } else {
-                            alert('No phone number available for this lead.');
+                            showToast('No phone number available for this lead.', 'warning');
                           }
                         }}
                         className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"

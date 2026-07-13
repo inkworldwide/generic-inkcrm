@@ -35,7 +35,7 @@ export default function Layout({ children }: LayoutProps) {
   const { fetchModules } = useModuleStore();
   const { user, logout } = useAuthStore();
   const { branding, fetchBranding } = useThemeStore();
-  const { toasts, hideToast, confirm, hideConfirm } = useToastStore();
+  const { toasts, hideToast, confirm, hideConfirm, alertModal, hideAlertModal } = useToastStore();
 
   const [darkMode, setDarkMode] = useState(() => {
     return localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && branding?.themeSettings?.mode === 'dark');
@@ -505,6 +505,63 @@ export default function Layout({ children }: LayoutProps) {
             </motion.div>
           </div>
         )}
+      </AnimatePresence>
+
+      {/* Premium Alert/Success Dialog Modal */}
+      <AnimatePresence>
+        {alertModal && (() => {
+          let alertIcon = <Icons.CheckCircle className="w-6 h-6 animate-pulse" />;
+          let iconBg = 'bg-emerald-500/10 text-emerald-600';
+          if (alertModal.type === 'error') {
+            alertIcon = <Icons.AlertOctagon className="w-6 h-6 animate-pulse" />;
+            iconBg = 'bg-rose-500/10 text-rose-600';
+          } else if (alertModal.type === 'warning') {
+            alertIcon = <Icons.AlertTriangle className="w-6 h-6 animate-pulse" />;
+            iconBg = 'bg-amber-500/10 text-amber-600';
+          } else if (alertModal.type === 'info') {
+            alertIcon = <Icons.Info className="w-6 h-6" />;
+            iconBg = 'bg-blue-500/10 text-blue-600';
+          }
+          
+          return (
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => {
+                  if (alertModal.onClose) alertModal.onClose();
+                  hideAlertModal();
+                }}
+                className="absolute inset-0 bg-[#0f1115]/50 backdrop-blur-sm"
+              />
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                transition={{ type: "spring", duration: 0.4 }}
+                className="relative w-full max-w-sm bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl shadow-2xl p-6 text-center z-10"
+              >
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4 ${iconBg}`}>
+                  {alertIcon}
+                </div>
+                <h3 className="text-sm font-[800] text-slate-800 dark:text-slate-100 uppercase tracking-wider mb-2">{alertModal.title}</h3>
+                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 leading-relaxed mb-6">{alertModal.message}</p>
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => {
+                      if (alertModal.onClose) alertModal.onClose();
+                      hideAlertModal();
+                    }}
+                    className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 transition-colors text-xs font-bold text-white shadow-md shadow-indigo-600/20"
+                  >
+                    Got it
+                  </button>
+                </div>
+              </motion.div>
+            </div>
+          );
+        })()}
       </AnimatePresence>
     </div>
   );

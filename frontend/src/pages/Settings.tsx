@@ -22,7 +22,7 @@ const FONTS = ['Inter', 'Outfit', 'Roboto'];
 export default function Settings() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const { showConfirm, showToast } = useToastStore();
+  const { showConfirm, showToast, showAlertModal } = useToastStore();
   const location = useLocation();
   const queryParams = new URLSearchParams(location.search);
   const currentTab = queryParams.get('tab') || 'company';
@@ -111,7 +111,7 @@ export default function Settings() {
     'Yes Bank', 'Federal Bank', 'South Indian Bank', 'Karur Vysya Bank', 'Tata Capital',
     'L&T Finance', 'Bajaj Finserv', 'Shriram Finance', 'Fullerton India', 'Cholamandalam Finance'
   ];
-  const [bankMastersList, setBankMastersList] = useState<string[]>(INDIAN_BANKS);
+  const [bankMastersList, setBankMastersList] = useState<string[]>([]);
   const [bpForm, setBpForm] = useState({ bank: '', loanType: '', psm: '' });
   const [selectedBanks, setSelectedBanks] = useState<string[]>([]);
   const [editingBpId, setEditingBpId] = useState<string | null>(null);
@@ -119,7 +119,8 @@ export default function Settings() {
   const [bpEditForm, setBpEditForm] = useState({ bank: '', loanType: '', psm: '' });
   const [selectedEditBanks, setSelectedEditBanks] = useState<string[]>([]);
   const [bpFilterBank, setBpFilterBank] = useState('');
-  const [bpFilterBankShow, setBpFilterBankShow] = useState('');
+  const [bpFilterPsm, setBpFilterPsm] = useState('');
+  const [bpFilterLoanType, setBpFilterLoanType] = useState('');
   const [showAllBp, setShowAllBp] = useState(false);
   const [bpConflictModal, setBpConflictModal] = useState<{
     isOpen: boolean;
@@ -127,9 +128,54 @@ export default function Settings() {
     bankName: string;
     loanType: string;
   } | null>(null);
+  const [bpPsmDropdownOpen, setBpPsmDropdownOpen] = useState(false);
+  const [bpPsmSearchQuery, setBpPsmSearchQuery] = useState('');
+  const [bpEditPsmDropdownOpen, setBpEditPsmDropdownOpen] = useState(false);
+  const [bpEditPsmSearchQuery, setBpEditPsmSearchQuery] = useState('');
+  const [bpProductsList, setBpProductsList] = useState<string[]>([]);
+  const [bpSuccessModal, setBpSuccessModal] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
+
+  const checkBpConflict = (banks: string[], loanType: string, excludeId?: string) => {
+    for (const bank of banks) {
+      const targetBank = bank.trim().toLowerCase();
+      const targetLoan = loanType.trim().toLowerCase();
+      
+      const conflict = moduleRecords.find((rec: any) => {
+        if (excludeId && rec._id === excludeId) return false;
+        
+        const bpLoanType = rec.data?.loanType || rec.loanType || '';
+        const bpBanks = (rec.data?.bank || rec.bank || '')
+          .split(',')
+          .map((s: string) => s.trim().toLowerCase());
+          
+        return bpLoanType.trim().toLowerCase() === targetLoan && bpBanks.includes(targetBank);
+      });
+      
+      if (conflict) {
+        return {
+          bank,
+          psmName: conflict.data?.psm || conflict.psm,
+          loanType
+        };
+      }
+    }
+    return null;
+  };
 
   const handleBankCheckboxChange = (bankName: string, checked: boolean) => {
     if (checked) {
+      if (bpForm.loanType) {
+        const conflict = checkBpConflict([bankName], bpForm.loanType);
+        if (conflict) {
+          setBpConflictModal({
+            isOpen: true,
+            psmName: conflict.psmName,
+            bankName: bankName,
+            loanType: bpForm.loanType
+          });
+          return; // Do not check the box
+        }
+      }
       setSelectedBanks([...selectedBanks, bankName]);
     } else {
       setSelectedBanks(selectedBanks.filter((b) => b !== bankName));
@@ -138,10 +184,56 @@ export default function Settings() {
 
   const handleEditBankCheckboxChange = (bankName: string, checked: boolean) => {
     if (checked) {
+      if (bpEditForm.loanType) {
+        const conflict = checkBpConflict([bankName], bpEditForm.loanType, editingBpId || undefined);
+        if (conflict) {
+          setBpConflictModal({
+            isOpen: true,
+            psmName: conflict.psmName,
+            bankName: bankName,
+            loanType: bpEditForm.loanType
+          });
+          return; // Do not check the box
+        }
+      }
       setSelectedEditBanks([...selectedEditBanks, bankName]);
     } else {
       setSelectedEditBanks(selectedEditBanks.filter((b) => b !== bankName));
     }
+  };
+
+  const handleBpLoanTypeChange = (newLoanType: string) => {
+    if (newLoanType && selectedBanks.length > 0) {
+      const conflict = checkBpConflict(selectedBanks, newLoanType);
+      if (conflict) {
+        setBpConflictModal({
+          isOpen: true,
+          psmName: conflict.psmName,
+          bankName: conflict.bank,
+          loanType: newLoanType
+        });
+        // Uncheck the conflicting bank
+        setSelectedBanks(selectedBanks.filter(b => b !== conflict.bank));
+      }
+    }
+    setBpForm({ ...bpForm, loanType: newLoanType });
+  };
+
+  const handleBpEditLoanTypeChange = (newLoanType: string) => {
+    if (newLoanType && selectedEditBanks.length > 0) {
+      const conflict = checkBpConflict(selectedEditBanks, newLoanType, editingBpId || undefined);
+      if (conflict) {
+        setBpConflictModal({
+          isOpen: true,
+          psmName: conflict.psmName,
+          bankName: conflict.bank,
+          loanType: newLoanType
+        });
+        // Uncheck the conflicting bank
+        setSelectedEditBanks(selectedEditBanks.filter(b => b !== conflict.bank));
+      }
+    }
+    setBpEditForm({ ...bpEditForm, loanType: newLoanType });
   };
   const SETTINGS_TABS = [
     { id: 'company', label: 'Company Setting', icon: Icons.Building2 },
@@ -169,7 +261,8 @@ export default function Settings() {
     setBpForm({ bank: '', loanType: '', psm: '' });
     setSelectedBanks([]);
     setBpFilterBank('');
-    setBpFilterBankShow('');
+    setBpFilterPsm('');
+    setBpFilterLoanType('');
     setShowAllBp(false);
     loadSettingsData();
   }, [branding, currentTab]);
@@ -247,17 +340,22 @@ export default function Settings() {
             const resUsers = await api.get('/auth/users');
             setUsers(resUsers.data || []);
           } catch { console.warn('Could not load users for PSM'); }
-          // Merge any custom banks added via Bank Master settings
+          // Fetch bank masters list
           try {
             const resBM = await api.get('/records/bankmasters');
             const apiNames: string[] = (resBM.data?.records || []).map((r: any) => r.data?.bankName).filter(Boolean);
-            if (apiNames.length > 0) {
-              setBankMastersList(prev => {
-                const merged = [...new Set([...prev, ...apiNames])];
-                return merged;
-              });
-            }
-          } catch { /* use hardcoded list */ }
+            setBankMastersList(apiNames);
+          } catch {
+            setBankMastersList([]);
+          }
+          // Fetch products for loan types
+          try {
+            const resProducts = await api.get('/records/products');
+            const productNames: string[] = (resProducts.data?.records || []).map((r: any) => r.data?.name).filter(Boolean);
+            setBpProductsList(productNames.map((n: string) => n.toUpperCase()));
+          } catch {
+            setBpProductsList(['HOME LOAN', 'LOAN AGAINST PROPERTY LOAN', 'BUSINESS LOAN', 'PERSONAL LOAN']);
+          }
         }
       }
     } catch (e) {
@@ -365,9 +463,9 @@ export default function Settings() {
       });
 
       await fetchBranding();
-      alert('Company settings saved successfully.');
+      showToast('Company settings saved successfully.', 'success');
     } catch (err) {
-      alert('Failed to save company settings.');
+      showToast('Failed to save company settings.', 'error');
     } finally {
       setSaving(false);
     }
@@ -385,7 +483,7 @@ export default function Settings() {
 
   const handleSaveRole = async () => {
     if (!roleFormName.trim()) {
-      alert('Role name cannot be empty.');
+      showToast('Role name cannot be empty.', 'warning');
       return;
     }
     setSaving(true);
@@ -393,11 +491,19 @@ export default function Settings() {
       if (editingRoleId) {
         // Update existing
         await api.put(`/auth/roles/${editingRoleId}`, { name: roleFormName, isActive: roleFormActive });
-        alert('Role updated successfully.');
+        showAlertModal({
+          title: 'Saved Successfully',
+          message: 'The Role configuration has been updated successfully.',
+          type: 'success'
+        });
       } else {
         // Create new
         await api.post('/auth/roles', { name: roleFormName, isActive: roleFormActive });
-        alert('Role created successfully.');
+        showAlertModal({
+          title: 'Created Successfully',
+          message: 'The new Role has been created successfully.',
+          type: 'success'
+        });
       }
       setRoleFormName('');
       setRoleFormActive(true);
@@ -407,7 +513,7 @@ export default function Settings() {
       const res = await api.get('/auth/roles');
       setRoles(res.data || []);
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save role.');
+      showToast(err.response?.data?.error || 'Failed to save role.', 'error');
     } finally {
       setSaving(false);
     }
@@ -420,7 +526,11 @@ export default function Settings() {
       onConfirm: async () => {
         try {
           await api.delete(`/auth/roles/${id}`);
-          showToast('Role deleted successfully.', 'success');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: 'The Role configuration has been permanently deleted.',
+            type: 'success'
+          });
           // Reload roles list
           const res = await api.get('/auth/roles');
           setRoles(res.data || []);
@@ -443,10 +553,18 @@ export default function Settings() {
     try {
       if (statusEditing) {
         await api.put(`/statuses/${statusForm.id}`, statusForm);
-        alert('Status updated successfully.');
+        showAlertModal({
+          title: 'Saved Successfully',
+          message: 'The status stage has been updated successfully.',
+          type: 'success'
+        });
       } else {
         await api.post('/statuses', statusForm);
-        alert('Status created successfully.');
+        showAlertModal({
+          title: 'Created Successfully',
+          message: 'The new status stage has been created successfully.',
+          type: 'success'
+        });
       }
       setStatusForm({
         id: '', name: '', color: '#4F46E5', icon: 'Circle', pipelinePosition: 0,
@@ -455,7 +573,7 @@ export default function Settings() {
       setStatusEditing(false);
       loadSettingsData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save status.');
+      showToast(err.response?.data?.error || 'Failed to save status.', 'error');
     }
   };
 
@@ -481,7 +599,11 @@ export default function Settings() {
       onConfirm: async () => {
         try {
           await api.delete(`/statuses/${id}`);
-          showToast('Status deleted successfully.', 'success');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: 'The Lead Status stage has been permanently deleted.',
+            type: 'success'
+          });
           loadSettingsData();
         } catch (err) {
           showToast('Failed to delete status.', 'error');
@@ -496,17 +618,25 @@ export default function Settings() {
     try {
       if (userEditing) {
         await api.put(`/auth/users/${userForm.id}`, userForm);
-        alert('User updated successfully.');
+        showAlertModal({
+          title: 'Saved Successfully',
+          message: 'The user account has been updated successfully.',
+          type: 'success'
+        });
       } else {
         await api.post('/auth/users', userForm);
-        alert('User created successfully.');
+        showAlertModal({
+          title: 'Created Successfully',
+          message: 'The new user account has been created successfully.',
+          type: 'success'
+        });
       }
       setUserModalOpen(false);
       setUserEditing(false);
       setUserForm({ id: '', email: '', password: '', firstName: '', lastName: '', roleId: '' });
       loadSettingsData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save user.');
+      showToast(err.response?.data?.error || 'Failed to save user.', 'error');
     }
   };
 
@@ -544,17 +674,17 @@ export default function Settings() {
       await api.put(`/auth/users/${userId}`, { [field]: !currentValue });
       loadSettingsData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to update user setting.');
+      showToast(err.response?.data?.error || 'Failed to update user setting.', 'error');
     }
   };
 
   const handleUserRoleChange = async (userId: string, newRoleId: string) => {
     try {
       await api.put(`/auth/users/${userId}`, { roleId: newRoleId });
-      alert('Role updated successfully.');
+      showToast('Role updated successfully.', 'success');
       loadSettingsData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to update user role.');
+      showToast(err.response?.data?.error || 'Failed to update user role.', 'error');
     }
   };
 
@@ -568,17 +698,25 @@ export default function Settings() {
     try {
       if (moduleEditingId) {
         await api.put(`/records/${apiPath}/${moduleEditingId}`, moduleForm);
-        alert('Record updated successfully.');
+        showAlertModal({
+          title: 'Saved Successfully',
+          message: `The ${activeModuleDef.singularLabel} record has been updated successfully.`,
+          type: 'success'
+        });
       } else {
         await api.post(`/records/${apiPath}`, moduleForm);
-        alert('Record created successfully.');
+        showAlertModal({
+          title: 'Created Successfully',
+          message: `The new ${activeModuleDef.singularLabel} record has been created successfully.`,
+          type: 'success'
+        });
       }
       setModuleModalOpen(false);
       setModuleForm({});
       setModuleEditingId('');
       loadSettingsData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to save record.');
+      showToast(err.response?.data?.error || 'Failed to save record.', 'error');
     }
   };
 
@@ -596,7 +734,11 @@ export default function Settings() {
       onConfirm: async () => {
         try {
           await api.delete(`/records/${activeModuleDef.apiPath}/${id}`);
-          showToast('Record deleted successfully.', 'success');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: `The ${activeModuleDef.singularLabel} record has been permanently deleted.`,
+            type: 'success'
+          });
           loadSettingsData();
         } catch (err) {
           showToast('Failed to delete record.', 'error');
@@ -606,32 +748,6 @@ export default function Settings() {
   };
 
   // Banking Partner Handlers
-  const checkBpConflict = (banks: string[], loanType: string, excludeId?: string) => {
-    for (const bank of banks) {
-      const targetBank = bank.trim().toLowerCase();
-      const targetLoan = loanType.trim().toLowerCase();
-      
-      const conflict = moduleRecords.find((rec: any) => {
-        if (excludeId && rec._id === excludeId) return false;
-        
-        const bpLoanType = rec.data?.loanType || rec.loanType || '';
-        const bpBanks = (rec.data?.bank || rec.bank || '')
-          .split(',')
-          .map((s: string) => s.trim().toLowerCase());
-          
-        return bpLoanType.trim().toLowerCase() === targetLoan && bpBanks.includes(targetBank);
-      });
-      
-      if (conflict) {
-        return {
-          bank,
-          psmName: conflict.data?.psm || conflict.psm,
-          loanType
-        };
-      }
-    }
-    return null;
-  };
 
   const handleSaveBankingPartner = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -658,9 +774,14 @@ export default function Settings() {
         loanType: bpForm.loanType,
         psm: bpForm.psm
       });
-      showToast('Banking Partner saved successfully.', 'success');
+      setBpSuccessModal({
+        isOpen: true,
+        title: 'Successfully Created',
+        message: 'The Banking Partner record has been successfully created and linked.'
+      });
       setBpForm({ bank: '', loanType: '', psm: '' });
       setSelectedBanks([]);
+      setBpPsmSearchQuery('');
       loadSettingsData();
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Failed to save banking partner.', 'error');
@@ -677,6 +798,7 @@ export default function Settings() {
     const banks = (bp.bank || '').split(',').map((s: string) => s.trim()).filter(Boolean);
     setSelectedEditBanks(banks);
     setBpEditModalOpen(true);
+    setBpEditPsmSearchQuery('');
   };
 
   const handleSaveEditedBankingPartner = async (e: React.FormEvent) => {
@@ -704,9 +826,14 @@ export default function Settings() {
         loanType: bpEditForm.loanType,
         psm: bpEditForm.psm
       });
-      showToast('Banking Partner updated successfully.', 'success');
+      setBpSuccessModal({
+        isOpen: true,
+        title: 'Successfully Saved',
+        message: 'The Banking Partner record has been successfully updated and saved.'
+      });
       setBpEditForm({ bank: '', loanType: '', psm: '' });
       setSelectedEditBanks([]);
+      setBpEditPsmSearchQuery('');
       setEditingBpId(null);
       setBpEditModalOpen(false);
       loadSettingsData();
@@ -729,7 +856,11 @@ export default function Settings() {
       onConfirm: async () => {
         try {
           await api.delete(`/records/bankingpartners/${id}`);
-          showToast('Banking partner deleted successfully.', 'success');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: 'The Banking Partner configuration has been permanently deleted.',
+            type: 'success'
+          });
           loadSettingsData();
         } catch (err) {
           showToast('Failed to delete banking partner.', 'error');
@@ -915,9 +1046,9 @@ export default function Settings() {
                           headers: { 'Content-Type': 'multipart/form-data' }
                         });
                         setCompanyDocUrl(`http://localhost:5000${res.data.filePath}`);
-                        alert('Company document uploaded successfully.');
+                        showToast('Company document uploaded successfully.', 'success');
                       } catch {
-                        alert('Failed to upload document.');
+                        showToast('Failed to upload document.', 'error');
                       }
                     }} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-slate-200 px-3 py-1 bg-white rounded-xl" />
                   </div>
@@ -1233,7 +1364,7 @@ export default function Settings() {
                   <input type="number" value={statusForm.pipelinePosition} onChange={e => setStatusForm({ ...statusForm, pipelinePosition: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">List Order</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Serial Number</label>
                   <input type="number" value={statusForm.order} onChange={e => setStatusForm({ ...statusForm, order: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
                 </div>
               </div>
@@ -1272,6 +1403,7 @@ export default function Settings() {
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
                   <tr className="table-header-premium">
+                    <th className="py-2.5 px-4 text-center w-24">Serial No.</th>
                     <th className="py-2.5 px-4">Name</th>
                     <th className="py-2.5 px-4">Pipeline Pos</th>
                     <th className="py-2.5 px-4">Dashboard</th>
@@ -1280,18 +1412,22 @@ export default function Settings() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-150">
-                  {statuses.map(st => {
-                    const Icon = (Icons as any)[st.icon] || Icons.Circle;
-                    return (
-                      <tr key={st._id} className="hover:bg-slate-50/50 transition-colors h-11">
-                        <td className="px-4 py-2 font-semibold text-slate-700 flex items-center gap-2">
-                          <span style={{ backgroundColor: st.color }} className="w-3 h-3 rounded-full inline-block border border-black/10"></span>
-                          <Icon className="w-4 h-4 text-slate-500" />
-                          {st.name}
-                        </td>
-                        <td className="px-4 py-2 text-slate-700 font-semibold">{st.pipelinePosition || 'None'}</td>
-                        <td className="px-4 py-2 text-slate-700 font-semibold">{st.dashboardVisibility ? 'Visible' : 'Hidden'}</td>
-                        <td className="px-4 py-2 text-slate-700 font-semibold">{st.isFinal ? (st.isSuccess ? 'Won' : 'Lost') : 'Open'}</td>
+                  {statuses
+                    .slice()
+                    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
+                    .map(st => {
+                      const Icon = (Icons as any)[st.icon] || Icons.Circle;
+                      return (
+                        <tr key={st._id} className="hover:bg-slate-50/50 transition-colors h-11">
+                          <td className="px-4 py-2 text-center font-bold text-indigo-650">{st.order ?? 0}</td>
+                          <td className="px-4 py-2 font-semibold text-slate-700 flex items-center gap-2">
+                            <span style={{ backgroundColor: st.color }} className="w-3 h-3 rounded-full inline-block border border-black/10"></span>
+                            <Icon className="w-4 h-4 text-slate-500" />
+                            {st.name}
+                          </td>
+                          <td className="px-4 py-2 text-slate-700 font-semibold">{st.pipelinePosition || 'None'}</td>
+                          <td className="px-4 py-2 text-slate-700 font-semibold">{st.dashboardVisibility ? 'Visible' : 'Hidden'}</td>
+                          <td className="px-4 py-2 text-slate-700 font-semibold">{st.isFinal ? (st.isSuccess ? 'Won' : 'Lost') : 'Open'}</td>
                         <td className="px-4 py-2 text-center flex justify-center gap-3">
                           <button onClick={() => handleEditStatus(st)} className="btn-edit-premium" title="Edit Status"><Icons.SquarePen className="w-4 h-4" /></button>
                           <button onClick={() => handleDeleteStatus(st._id)} className="btn-delete-premium" title="Delete Status"><Icons.Trash className="w-4 h-4" /></button>
@@ -1389,38 +1525,12 @@ export default function Settings() {
         {currentTab === 'bankingpartner' && (
           <div className="lg:col-span-12 space-y-6">
             
-            {/* Top Form Card */}            {/* Top Form Card */}
+            {/* Top Form Card */}
             <div className="card-premium">
-              <form onSubmit={handleSaveBankingPartner} className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
-                  <div className="md:col-span-3">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Banks <span className="text-red-500">*</span> (Select one or more)
-                    </label>
-                    <div className="bg-slate-50 border border-indigo-100 rounded-xl p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
-                      {bankMastersList.map((bankName) => {
-                        const isChecked = selectedBanks.includes(bankName);
-                        return (
-                          <label
-                            key={bankName}
-                            className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm font-medium transition-all cursor-pointer select-none ${
-                              isChecked
-                                ? 'bg-indigo-50 border-indigo-400 text-indigo-700 shadow-sm shadow-indigo-100/50'
-                                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-indigo-200'
-                            }`}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isChecked}
-                              onChange={(e) => handleBankCheckboxChange(bankName, e.target.checked)}
-                              className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
-                            />
-                            <span>{bankName}</span>
-                          </label>
-                        );
-                      })}
-                    </div>
-                  </div>
+              <form onSubmit={handleSaveBankingPartner} className="space-y-6">
+                
+                {/* 1. Loan Type & PSM (Top) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                       Loan Type <span className="text-red-500">*</span>
@@ -1428,49 +1538,123 @@ export default function Settings() {
                     <select
                       required
                       value={bpForm.loanType}
-                      onChange={(e) => setBpForm({ ...bpForm, loanType: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                      onChange={(e) => handleBpLoanTypeChange(e.target.value)}
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-850 font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-650 transition-all shadow-sm"
                     >
                       <option value="">-Select One-</option>
-                      <option value="HOME LOAN">HOME LOAN</option>
-                      <option value="LOAN AGAINST PROPERTY LOAN">LOAN AGAINST PROPERTY LOAN</option>
-                      <option value="BUSINESS LOAN">BUSINESS LOAN</option>
-                      <option value="PERSONAL LOAN">PERSONAL LOAN</option>
+                      {bpProductsList.map(type => (
+                        <option key={type} value={type}>{type}</option>
+                      ))}
                     </select>
                   </div>
-                  <div>
+                  <div className="relative">
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                       PSM <span className="text-red-500">*</span>
                     </label>
-                    <select
-                      required
-                      value={bpForm.psm}
-                      onChange={(e) => setBpForm({ ...bpForm, psm: e.target.value })}
-                      className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                    >
-                      <option value="">-Select PSM-</option>
-                      {users.length === 0 && (
-                        <option disabled value="">No users found — check Users tab</option>
-                      )}
-                      {users.map((u) => {
-                        const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
-                        return (
-                          <option key={u._id} value={fullName}>
-                            {fullName} {u.roleId?.name ? `(${u.roleId.name})` : ''}
-                          </option>
-                        );
-                      })}
-                    </select>
-                  </div>
-                  <div>
                     <button
-                      type="submit"
-                      className="btn-primary-premium w-full py-2.5"
+                      type="button"
+                      onClick={() => setBpPsmDropdownOpen(!bpPsmDropdownOpen)}
+                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-850 font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-650 transition-all shadow-sm flex items-center justify-between text-left"
                     >
-                      Save Partner
+                      <span className={bpForm.psm ? "text-slate-850 font-bold" : "text-slate-400 font-medium"}>
+                        {bpForm.psm || '-Select PSM-'}
+                      </span>
+                      <Icons.ChevronDown className="w-4 h-4 text-slate-500" />
                     </button>
+
+                    {bpPsmDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setBpPsmDropdownOpen(false)} />
+                        <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-50 space-y-2 max-h-60 overflow-y-auto">
+                          <input
+                            type="text"
+                            value={bpPsmSearchQuery}
+                            onChange={(e) => setBpPsmSearchQuery(e.target.value)}
+                            placeholder="Search PSM..."
+                            className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            autoFocus
+                          />
+                          <div className="space-y-0.5 max-h-44 overflow-y-auto pr-1">
+                            {users.length === 0 ? (
+                              <p className="text-xs text-slate-400 p-2 text-center">No users found</p>
+                            ) : (() => {
+                              const filtered = users.filter((u) => {
+                                const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').toLowerCase();
+                                return fullName.includes(bpPsmSearchQuery.toLowerCase());
+                              });
+                              if (filtered.length === 0) {
+                                return <p className="text-xs text-slate-400 p-2 text-center">No matches found</p>;
+                              }
+                              return filtered.map((u) => {
+                                const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
+                                const isSelected = bpForm.psm === fullName;
+                                return (
+                                  <button
+                                    key={u._id}
+                                    type="button"
+                                    onClick={() => {
+                                      setBpForm({ ...bpForm, psm: fullName });
+                                      setBpPsmDropdownOpen(false);
+                                      setBpPsmSearchQuery('');
+                                    }}
+                                    className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                      isSelected
+                                        ? 'bg-indigo-500/10 text-indigo-700'
+                                        : 'hover:bg-slate-50 text-slate-700'
+                                    }`}
+                                  >
+                                    {fullName} {u.roleId?.name ? `(${u.roleId.name})` : ''}
+                                  </button>
+                                );
+                              });
+                            })()}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
+
+                {/* 2. Banks Checkboxes (Middle) */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                    Banks <span className="text-red-500">*</span> (Select one or more)
+                  </label>
+                  <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-56 overflow-y-auto">
+                    {bankMastersList.map((bankName) => {
+                      const isChecked = selectedBanks.includes(bankName);
+                      return (
+                        <label
+                          key={bankName}
+                          className={`flex items-center gap-3 px-4 py-2.5 border rounded-xl text-sm font-semibold transition-all cursor-pointer select-none ${
+                            isChecked
+                              ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-sm shadow-indigo-100/30'
+                              : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50 hover:border-indigo-200'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => handleBankCheckboxChange(bankName, e.target.checked)}
+                            className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
+                          />
+                          <span>{bankName}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 3. Action Button (Bottom) */}
+                <div className="flex justify-end pt-2">
+                  <button
+                    type="submit"
+                    className="btn-primary-premium px-8 py-3 rounded-xl shadow-lg shadow-indigo-600/10 active:scale-95 transition-all text-xs uppercase tracking-wider font-bold"
+                  >
+                    Save Partner
+                  </button>
+                </div>
+
               </form>
             </div>
 
@@ -1481,7 +1665,96 @@ export default function Settings() {
                   <h3 className="text-lg font-bold text-slate-800">
                     Edit Banking Partner
                   </h3>
-                  <form onSubmit={handleSaveEditedBankingPartner} className="space-y-4">
+                  <form onSubmit={handleSaveEditedBankingPartner} className="space-y-6">
+                    {/* 1. Loan Type & PSM (Top) */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                          Loan Type <span className="text-red-500">*</span>
+                        </label>
+                        <select
+                          required
+                          value={bpEditForm.loanType}
+                          onChange={(e) => handleBpEditLoanTypeChange(e.target.value)}
+                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                        >
+                          <option value="">-Select One-</option>
+                          {bpProductsList.map(type => (
+                            <option key={type} value={type}>{type}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <div className="relative">
+                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                            PSM <span className="text-red-500">*</span>
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setBpEditPsmDropdownOpen(!bpEditPsmDropdownOpen)}
+                            className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600 flex items-center justify-between text-left"
+                          >
+                            <span className={bpEditForm.psm ? "text-slate-850 font-bold" : "text-slate-400 font-medium"}>
+                              {bpEditForm.psm || '-Select PSM-'}
+                            </span>
+                            <Icons.ChevronDown className="w-4 h-4 text-slate-500" />
+                          </button>
+
+                          {bpEditPsmDropdownOpen && (
+                            <>
+                              <div className="fixed inset-0 z-40" onClick={() => setBpEditPsmDropdownOpen(false)} />
+                              <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl p-3 z-50 space-y-2 max-h-60 overflow-y-auto">
+                                <input
+                                  type="text"
+                                  value={bpEditPsmSearchQuery}
+                                  onChange={(e) => setBpEditPsmSearchQuery(e.target.value)}
+                                  placeholder="Search PSM..."
+                                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  autoFocus
+                                />
+                                <div className="space-y-0.5 max-h-44 overflow-y-auto pr-1">
+                                  {users.length === 0 ? (
+                                    <p className="text-xs text-slate-400 p-2 text-center">No users found</p>
+                                  ) : (() => {
+                                    const filtered = users.filter((u) => {
+                                      const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').toLowerCase();
+                                      return fullName.includes(bpEditPsmSearchQuery.toLowerCase());
+                                    });
+                                    if (filtered.length === 0) {
+                                      return <p className="text-xs text-slate-400 p-2 text-center">No matches found</p>;
+                                    }
+                                    return filtered.map((u) => {
+                                      const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
+                                      const isSelected = bpEditForm.psm === fullName;
+                                      return (
+                                        <button
+                                          key={u._id}
+                                          type="button"
+                                          onClick={() => {
+                                            setBpEditForm({ ...bpEditForm, psm: fullName });
+                                            setBpEditPsmDropdownOpen(false);
+                                            setBpEditPsmSearchQuery('');
+                                          }}
+                                          className={`w-full text-left px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                            isSelected
+                                              ? 'bg-indigo-500/10 text-indigo-700'
+                                              : 'hover:bg-slate-50 text-slate-700'
+                                          }`}
+                                        >
+                                          {fullName} {u.roleId?.name ? `(${u.roleId.name})` : ''}
+                                        </button>
+                                      );
+                                    });
+                                  })()}
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 2. Banks Checkboxes (Middle) */}
                     <div>
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                         Banks <span className="text-red-500">*</span> (Select one or more)
@@ -1510,49 +1783,8 @@ export default function Settings() {
                         })}
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                          Loan Type <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          required
-                          value={bpEditForm.loanType}
-                          onChange={(e) => setBpEditForm({ ...bpEditForm, loanType: e.target.value })}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                        >
-                          <option value="">-Select One-</option>
-                          <option value="HOME LOAN">HOME LOAN</option>
-                          <option value="LOAN AGAINST PROPERTY LOAN">LOAN AGAINST PROPERTY LOAN</option>
-                          <option value="BUSINESS LOAN">BUSINESS LOAN</option>
-                          <option value="PERSONAL LOAN">PERSONAL LOAN</option>
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                          PSM <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                          required
-                          value={bpEditForm.psm}
-                          onChange={(e) => setBpEditForm({ ...bpEditForm, psm: e.target.value })}
-                          className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
-                        >
-                          <option value="">-Select PSM-</option>
-                          {users.length === 0 && (
-                            <option disabled value="">No users found — check Users tab</option>
-                          )}
-                          {users.map((u) => {
-                            const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
-                            return (
-                              <option key={u._id} value={fullName}>
-                                {fullName} {u.roleId?.name ? `(${u.roleId.name})` : ''}
-                              </option>
-                            );
-                          })}
-                        </select>
-                      </div>
-                    </div>
+
+                    {/* 3. Action Buttons (Bottom) */}
                     <div className="flex justify-end gap-3 pt-2">
                       <button
                         type="button"
@@ -1573,17 +1805,43 @@ export default function Settings() {
               </div>
             )}
 
-            {/* Middle Search Card */}
+            {/* Middle Search & Filter Card */}
             <div className="card-premium">
-              <h3 className="text-lg font-bold text-slate-800">Search Based on Banks</h3>
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <div className="w-full md:w-80">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                  <Icons.Search className="w-4 h-4 text-indigo-500" />
+                  Filter Banking Partners
+                </h3>
+                {(bpFilterBank || bpFilterPsm || bpFilterLoanType) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBpFilterBank('');
+                      setBpFilterPsm('');
+                      setBpFilterLoanType('');
+                      setShowAllBp(false);
+                    }}
+                    className="text-xs font-bold text-rose-500 hover:text-rose-600 transition-colors flex items-center gap-1.5 active:scale-95 transition-all"
+                  >
+                    <Icons.RotateCcw className="w-3.5 h-3.5" />
+                    Reset Filters
+                  </button>
+                )}
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {/* 1. Filter by Bank */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Filter by Bank</label>
                   <select
                     value={bpFilterBank}
-                    onChange={(e) => setBpFilterBank(e.target.value)}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-850 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                    onChange={(e) => {
+                      setBpFilterBank(e.target.value);
+                      setShowAllBp(false);
+                    }}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-850 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer"
                   >
-                    <option value="">Select Here</option>
+                    <option value="">-Select-</option>
                     {bankMastersList.map((bankName) => (
                       <option key={bankName} value={bankName}>
                         {bankName}
@@ -1591,37 +1849,72 @@ export default function Settings() {
                     ))}
                   </select>
                 </div>
-                 <div className="flex gap-2.5 w-full md:w-auto">
-                  <button
-                    type="button"
-                    onClick={() => {
+
+                {/* 2. Filter by PSM */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Filter by PSM</label>
+                  <select
+                    value={bpFilterPsm}
+                    onChange={(e) => {
+                      setBpFilterPsm(e.target.value);
                       setShowAllBp(false);
-                      setBpFilterBankShow(bpFilterBank);
                     }}
-                    className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-sm flex-1 md:flex-initial text-center border ${
-                      bpFilterBankShow && !showAllBp
-                        ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-white hover:text-indigo-700 hover:border-indigo-600 active:bg-white active:text-indigo-850 shadow-md shadow-indigo-100/50'
-                        : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 active:bg-slate-50 active:text-slate-950'
-                    }`}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-850 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer"
                   >
-                    Show
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBpFilterBank('');
-                      setBpFilterBankShow('');
-                      setShowAllBp((prev) => !prev);
-                    }}
-                    className={`px-6 py-2.5 text-sm font-bold rounded-xl transition-all shadow-sm flex-1 md:flex-initial text-center border ${
-                      showAllBp
-                        ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-750 shadow-md shadow-indigo-100/50'
-                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100 hover:border-slate-300'
-                    }`}
-                  >
-                    All
-                  </button>
+                    <option value="">-Select-</option>
+                    {users.map((u) => {
+                      const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ');
+                      return (
+                        <option key={u._id} value={fullName}>
+                          {fullName}
+                        </option>
+                      );
+                    })}
+                  </select>
                 </div>
+
+                {/* 3. Filter by Loan Type */}
+                <div>
+                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Filter by Loan Type</label>
+                  <select
+                    value={bpFilterLoanType}
+                    onChange={(e) => {
+                      setBpFilterLoanType(e.target.value);
+                      setShowAllBp(false);
+                    }}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-850 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all cursor-pointer"
+                  >
+                    <option value="">-Select-</option>
+                    {bpProductsList.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex justify-end pt-4 border-t border-slate-100 mt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Reset dropdown inputs
+                    setBpFilterBank('');
+                    setBpFilterPsm('');
+                    setBpFilterLoanType('');
+                    
+                    // Toggle showAllBp
+                    setShowAllBp(!showAllBp);
+                  }}
+                  className={`px-6 py-2.5 font-bold text-xs rounded-xl transition-all uppercase tracking-wider ${
+                    showAllBp
+                      ? 'bg-indigo-600 text-white hover:bg-indigo-700 active:scale-95 shadow-md shadow-indigo-600/15'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95'
+                  }`}
+                >
+                  {showAllBp ? 'Hide All' : 'Show All'}
+                </button>
               </div>
             </div>
 
@@ -1639,32 +1932,74 @@ export default function Settings() {
                   </thead>
                   <tbody className="divide-y divide-slate-150">
                     {(() => {
+                      const hasActiveFilters = bpFilterBank || bpFilterPsm || bpFilterLoanType;
+
                       const filtered = moduleRecords.filter((rec) => {
-                        if (showAllBp) return true;
-                        if (!bpFilterBankShow) return false;
-                        const recBanks = rec.data?.bank ? rec.data.bank.split(',').map((s: string) => s.trim()) : [];
-                        return recBanks.includes(bpFilterBankShow);
+                        if (!hasActiveFilters && !showAllBp) return false;
+
+                        // 1. Bank filter
+                        if (bpFilterBank) {
+                          const recBanks = rec.data?.bank ? rec.data.bank.split(',').map((s: string) => s.trim().toLowerCase()) : [];
+                          if (!recBanks.includes(bpFilterBank.toLowerCase())) {
+                            return false;
+                          }
+                        }
+                        // 2. PSM filter
+                        if (bpFilterPsm) {
+                          const recPsm = (rec.data?.psm || '').trim().toLowerCase();
+                          if (recPsm !== bpFilterPsm.trim().toLowerCase()) {
+                            return false;
+                          }
+                        }
+                        // 3. Loan Type filter
+                        if (bpFilterLoanType) {
+                          const recLoanType = (rec.data?.loanType || '').trim().toLowerCase();
+                          if (recLoanType !== bpFilterLoanType.trim().toLowerCase()) {
+                            return false;
+                          }
+                        }
+                        return true;
                       });
+
+                      if (!hasActiveFilters && !showAllBp) {
+                        return (
+                          <tr>
+                            <td colSpan={4} className="py-8 text-center text-slate-400 font-semibold text-xs">
+                              Please select filters to search, or click Show All to view all partners.
+                            </td>
+                          </tr>
+                        );
+                      }
 
                       if (filtered.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={4} className="py-8 text-center text-slate-400 font-medium">
-                              {showAllBp 
-                                ? "No banking partners registered."
-                                : bpFilterBankShow 
-                                  ? `No banking partners found for ${bpFilterBankShow}.`
-                                  : "Please select a bank and click Show, or click All to view all partners."
-                              }
+                            <td colSpan={4} className="py-8 text-center text-slate-400 font-semibold text-xs">
+                              No banking partners match the selected filter criteria.
                             </td>
                           </tr>
                         );
                       }
 
                       return filtered.map((rec) => (
-                        <tr key={rec._id} className="hover:bg-slate-50/50 transition-colors h-11">
-                          <td className="px-4 py-2 text-slate-900 font-semibold max-w-xs truncate" title={rec.data?.bank}>
-                            {rec.data?.bank}
+                        <tr key={rec._id} className="hover:bg-slate-50/50 transition-colors">
+                          <td className="px-4 py-2 font-semibold text-slate-850">
+                            <div className="flex flex-col gap-1.5 py-1.5">
+                              {(rec.data?.bank || '')
+                                .split(',')
+                                .map((b: string) => b.trim())
+                                .filter(Boolean)
+                                .filter((bankName: string) => {
+                                  if (!bpFilterBank) return true;
+                                  return bankName.toLowerCase() === bpFilterBank.toLowerCase();
+                                })
+                                .map((bankName: string) => (
+                                  <div key={bankName} className="flex items-center gap-2 text-[11px] text-slate-850 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 w-max font-bold shadow-sm shadow-slate-100/50">
+                                    <Icons.Landmark className="w-3.5 h-3.5 text-indigo-650" />
+                                    {bankName}
+                                  </div>
+                                ))}
+                            </div>
                           </td>
                           <td className="px-4 py-2 font-semibold text-slate-700">
                             {rec.data?.loanType}
@@ -1729,6 +2064,35 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => setBpConflictModal(null)}
+                className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-xs font-bold text-white shadow-md shadow-indigo-600/20"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Premium Success Modal for Banking Partner Settings */}
+      {bpSuccessModal && bpSuccessModal.isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+          <div
+            onClick={() => setBpSuccessModal(null)}
+            className="absolute inset-0 bg-[#0f1115]/50 backdrop-blur-sm animate-fade-in"
+          />
+          <div className="relative w-full max-w-md bg-white border border-slate-200/80 rounded-3xl shadow-2xl p-6 text-center z-10 transform transition-all duration-300 scale-100 animate-scale-up">
+            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto mb-4 text-emerald-600">
+              <Icons.BadgeCheck className="w-6 h-6 animate-pulse" />
+            </div>
+            <h3 className="text-base font-black text-slate-800 uppercase tracking-wider mb-2">
+              {bpSuccessModal.title}
+            </h3>
+            <p className="text-xs font-bold text-slate-500 leading-relaxed mb-6">
+              {bpSuccessModal.message}
+            </p>
+            <div className="flex justify-center">
+              <button
+                type="button"
+                onClick={() => setBpSuccessModal(null)}
                 className="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 transition-all text-xs font-bold text-white shadow-md shadow-indigo-600/20"
               >
                 Got it

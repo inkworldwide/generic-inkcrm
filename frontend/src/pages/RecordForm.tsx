@@ -15,7 +15,7 @@ export default function RecordForm() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { activeModule, setActiveModuleByPath } = useModuleStore();
-  const { showConfirm, showToast } = useToastStore();
+  const { showConfirm, showToast, showAlertModal } = useToastStore();
   const { user } = useAuthStore();
   const isLeads = true; // Use light layout for all creation/edit forms
 
@@ -46,6 +46,7 @@ export default function RecordForm() {
   const [allLoanTypes, setAllLoanTypes] = useState<string[]>([]);
   const [allTeams, setAllTeams] = useState<string[]>([]);
   const [allUsers, setAllUsers] = useState<string[]>([]);
+  const [rawUsersList, setRawUsersList] = useState<any[]>([]);
 
   const isInitialLoadRef = React.useRef(true);
 
@@ -76,15 +77,9 @@ export default function RecordForm() {
           
           // 1. Process bank options list (Bank Master Settings)
           const customBanks = (resBM.data?.records || []).map((r: any) => r.data?.bankName).filter(Boolean);
-          const defaultBanks = [
-            'State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank',
-            'Punjab National Bank', 'Bank of Baroda', 'Canara Bank', 'IndusInd Bank', 'IDFC FIRST Bank',
-            'Union Bank of India', 'Bank of India', 'Central Bank of India', 'Indian Bank',
-            'Yes Bank', 'Federal Bank', 'South Indian Bank', 'Karur Vysya Bank', 'Tata Capital',
-            'L&T Finance', 'Bajaj Finserv', 'Shriram Finance', 'Fullerton India', 'Cholamandalam Finance'
-          ];
-          const mergedBanks = [...new Set([...defaultBanks, ...customBanks])].map(b => b.toUpperCase());
-          if (!mergedBanks.includes('SBI')) {
+          const mergedBanks = customBanks.map((b: string) => b.toUpperCase());
+          // Keep both 'SBI' and 'STATE BANK OF INDIA' for backwards-compatibility matching
+          if (mergedBanks.includes('STATE BANK OF INDIA') && !mergedBanks.includes('SBI')) {
             mergedBanks.unshift('SBI');
           }
           setAllBanks(mergedBanks);
@@ -115,20 +110,16 @@ export default function RecordForm() {
             .map((u: any) => [u.firstName, u.lastName].filter(Boolean).join(' '))
             .filter(Boolean);
           setAllUsers(dbUsers);
+          setRawUsersList(resUsers.data || []);
 
         } catch (err) {
           console.error('Failed to load leads dependency data', err);
           // Fallbacks
-          setAllBanks([
-            'SBI', 'State Bank of India', 'HDFC Bank', 'ICICI Bank', 'Axis Bank', 'Kotak Mahindra Bank',
-            'Punjab National Bank', 'Bank of Baroda', 'Canara Bank', 'IndusInd Bank', 'IDFC FIRST Bank',
-            'Union Bank of India', 'Bank of India', 'Central Bank of India', 'Indian Bank',
-            'Yes Bank', 'Federal Bank', 'South Indian Bank', 'Karur Vysya Bank', 'Tata Capital',
-            'L&T Finance', 'Bajaj Finserv', 'Shriram Finance', 'Fullerton India', 'Cholamandalam Finance'
-          ].map(b => b.toUpperCase()));
+          setAllBanks([]);
           setAllLoanTypes(['SALARIED PERSONAL LOAN', 'BUSINESS LOAN', 'HOME LOAN', 'LAP']);
           setAllTeams(['Team A', 'Team B']);
           setAllUsers([]);
+          setRawUsersList([]);
         }
       };
       fetchLeadsDependencies();
@@ -254,6 +245,15 @@ export default function RecordForm() {
   // Watch fields for conditional visibility evaluation
   const watchedValues = watch();
 
+  const filteredUsers = React.useMemo(() => {
+    let list = rawUsersList.filter((u: any) => u.isActive !== false);
+    const selectedTeam = watchedValues.assignToTeam;
+    if (selectedTeam) {
+      list = list.filter((u: any) => String(u.department || '').trim().toLowerCase() === selectedTeam.trim().toLowerCase());
+    }
+    return list.map((u: any) => [u.firstName, u.lastName].filter(Boolean).join(' ')).filter(Boolean);
+  }, [rawUsersList, watchedValues.assignToTeam]);
+
   const recordName = apiPath === 'leads'
     ? `${watchedValues.firstName || ''} ${watchedValues.lastName || ''}`.trim()
     : watchedValues.fullName || watchedValues.companyName || watchedValues.dealName || watchedValues.title;
@@ -352,9 +352,16 @@ export default function RecordForm() {
       queryClient.invalidateQueries({ queryKey: ['records', apiPath] });
       queryClient.invalidateQueries({ queryKey: ['sidebar-leads'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
-      navigate(`/modules/${apiPath}`);
+      showAlertModal({
+        title: id ? 'Saved Successfully' : 'Created Successfully',
+        message: id ? 'The record has been updated successfully.' : 'The record has been created successfully.',
+        type: 'success',
+        onClose: () => {
+          navigate(`/modules/${apiPath}`);
+        }
+      });
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to submit form.');
+      showToast(err.response?.data?.error || 'Failed to submit form.', 'error');
     } finally {
       setSaving(false);
     }
@@ -376,7 +383,7 @@ export default function RecordForm() {
       });
       setDocuments([res.data, ...documents]);
     } catch (err) {
-      alert('Failed to upload document.');
+      showToast('Failed to upload document.', 'error');
     } finally {
       setUploadingDoc(false);
     }
@@ -391,7 +398,11 @@ export default function RecordForm() {
         try {
           await api.delete(`/documents/${docId}`);
           setDocuments(documents.filter((d) => d._id !== docId));
-          showToast('File deleted successfully.', 'success');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: 'The attached file has been permanently deleted.',
+            type: 'success'
+          });
         } catch (err) {
           showToast('Failed to delete file.', 'error');
         }
@@ -554,7 +565,7 @@ export default function RecordForm() {
           </label>
           <select {...register(field.name)} className={inputBase}>
             <option value="" className={isLeads ? "bg-white text-slate-500" : "bg-slate-950 text-slate-300"}>-Select Agent-</option>
-            {allUsers.map((userOpt) => (
+            {filteredUsers.map((userOpt) => (
               <option key={userOpt} value={userOpt} className={isLeads ? "bg-white text-slate-800" : "bg-slate-950 text-slate-200"}>
                 {userOpt}
               </option>
@@ -793,16 +804,16 @@ export default function RecordForm() {
       // Loan Details
       const orderedLoan = [
         loanFields.find(f => f.name === 'source'),
-        loanFields.find(f => f.name === 'loanType'),
         loanFields.find(f => f.name === 'budget'),
-        loanFields.find(f => f.name === 'dataCode'),
-        loanFields.find(f => f.name === 'businessPartner'),
+        loanFields.find(f => f.name === 'loanType'),
         loanFields.find(f => f.name === 'psm'),
+        loanFields.find(f => f.name === 'businessPartner'),
         loanFields.find(f => f.name === 'status'),
-        loanFields.find(f => f.name === 'caseDetails'),
         loanFields.find(f => f.name === 'assignToTeam'),
         loanFields.find(f => f.name === 'assignedTo'),
         loanFields.find(f => f.name === 'followUpDate'),
+        loanFields.find(f => f.name === 'dataCode'),
+        loanFields.find(f => f.name === 'caseDetails'),
         loanFields.find(f => f.name === 'notes')
       ].filter(Boolean) as FieldDefinition[];
 

@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import { useModuleStore } from '../store/moduleStore';
 import api from '../services/api';
+import { useToastStore } from '../store/toastStore';
 
 export default function ReportsList() {
   const { modules } = useModuleStore();
+  const { showToast } = useToastStore();
 
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -61,7 +63,7 @@ export default function ReportsList() {
 
   const handleSaveReport = async () => {
     if (!name || !moduleId) {
-      alert('Name and module selection are required.');
+      showToast('Name and module selection are required.', 'warning');
       return;
     }
     try {
@@ -82,8 +84,9 @@ export default function ReportsList() {
       setShowDesigner(false);
       resetDesigner();
       loadReports(); // refresh populate module values
+      showToast('Report configuration saved successfully.', 'success');
     } catch (err) {
-      alert('Failed to save report configuration.');
+      showToast('Failed to save report configuration.', 'error');
     }
   };
 

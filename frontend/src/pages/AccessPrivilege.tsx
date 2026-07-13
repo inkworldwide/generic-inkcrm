@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useModuleStore } from '../store/moduleStore';
+import { useToastStore } from '../store/toastStore';
 
 interface RolePermission {
   moduleName: string;
@@ -21,6 +22,7 @@ interface Role {
 
 export default function AccessPrivilege() {
   const { modules } = useModuleStore();
+  const { showToast } = useToastStore();
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState('');
   const [rolePermissions, setRolePermissions] = useState<RolePermission[]>([]);
@@ -70,7 +72,7 @@ export default function AccessPrivilege() {
     try {
       setSaving(true);
       await api.put(`/auth/roles/${selectedRoleId}`, { permissions: rolePermissions });
-      alert('Role-Based Access Control privileges updated successfully.');
+      showToast('Role-Based Access Control privileges updated successfully.', 'success');
       // Refresh local copy
       const updatedRoles = roles.map((r) => {
         if (r._id === selectedRoleId) {
@@ -87,7 +89,7 @@ export default function AccessPrivilege() {
       setRoles(updatedRoles);
     } catch (e) {
       console.error('Failed to save permissions:', e);
-      alert('Failed to update role permissions.');
+      showToast('Failed to update role permissions.', 'error');
     } finally {
       setSaving(false);
     }

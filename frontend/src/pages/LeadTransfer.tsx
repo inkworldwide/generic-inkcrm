@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useThemeStore } from '../store/themeStore';
+import { useToastStore } from '../store/toastStore';
 
 interface User {
   _id: string;
@@ -55,10 +56,12 @@ export default function LeadTransfer() {
     }).length;
   };
 
+  const { showConfirm, showToast } = useToastStore();
+
   const handleTransfer = async (fromUser: User) => {
     const toUserId = selectedDestinations[fromUser._id];
     if (!toUserId) {
-      alert('Please select a destination agent in the "Move To" dropdown.');
+      showToast('Please select a destination agent in the "Move To" dropdown.', 'warning');
       return;
     }
     const toUser = users.find((u) => u._id === toUserId);
@@ -69,67 +72,70 @@ export default function LeadTransfer() {
     const count = getLeadCount(fromUser);
 
     if (count === 0) {
-      alert(`Agent ${fromName} has no assigned leads to transfer.`);
+      showToast(`Agent ${fromName} has no assigned leads to transfer.`, 'warning');
       return;
     }
 
-    const confirmTransfer = window.confirm(
-      `Are you sure you want to transfer ${count} lead(s) from ${fromName} to ${toName}?`
-    );
-    if (!confirmTransfer) return;
-
-    try {
-      setTransferring(fromUser._id);
-      await api.post('/records/transfer/leads', {
-        fromAgentId: fromUser._id,
-        fromAgentName: fromName,
-        toAgentId: toUser._id,
-        toAgentName: toName,
-      });
-      alert(`Successfully transferred ${count} lead(s) to ${toName}!`);
-      setCheckedMoves(prev => ({ ...prev, [fromUser._id]: false }));
-      setSelectedDestinations((prev) => {
-        const copy = { ...prev };
-        delete copy[fromUser._id];
-        return copy;
-      });
-      await fetchData();
-    } catch (err) {
-      console.error('Transfer failed:', err);
-      alert('Failed to transfer leads. Please try again.');
-    } finally {
-      setTransferring(null);
-    }
+    showConfirm({
+      title: 'Transfer Leads',
+      message: `Are you sure you want to transfer ${count} lead(s) from ${fromName} to ${toName}?`,
+      onConfirm: async () => {
+        try {
+          setTransferring(fromUser._id);
+          await api.post('/records/transfer/leads', {
+            fromAgentId: fromUser._id,
+            fromAgentName: fromName,
+            toAgentId: toUser._id,
+            toAgentName: toName,
+          });
+          showToast(`Successfully transferred ${count} lead(s) to ${toName}!`, 'success');
+          setCheckedMoves(prev => ({ ...prev, [fromUser._id]: false }));
+          setSelectedDestinations((prev) => {
+            const copy = { ...prev };
+            delete copy[fromUser._id];
+            return copy;
+          });
+          await fetchData();
+        } catch (err) {
+          console.error('Transfer failed:', err);
+          showToast('Failed to transfer leads. Please try again.', 'error');
+        } finally {
+          setTransferring(null);
+        }
+      }
+    });
   };
 
   const handleClearLeads = async (fromUser: User) => {
     const fromName = `${fromUser.firstName} ${fromUser.lastName}`.trim();
     const count = getLeadCount(fromUser);
     if (count === 0) {
-      alert(`Agent ${fromName} has no assigned leads.`);
+      showToast(`Agent ${fromName} has no assigned leads.`, 'warning');
       return;
     }
-    const confirmClear = window.confirm(
-      `Are you sure you want to unassign all ${count} lead(s) from ${fromName}?`
-    );
-    if (!confirmClear) return;
 
-    try {
-      setTransferring(fromUser._id);
-      await api.post('/records/transfer/leads', {
-        fromAgentId: fromUser._id,
-        fromAgentName: fromName,
-        toAgentId: 'unassigned',
-        toAgentName: 'Unassigned',
-      });
-      alert(`Successfully unassigned leads from ${fromName}.`);
-      await fetchData();
-    } catch (err) {
-      console.error('Clear failed:', err);
-      alert('Failed to unassign leads.');
-    } finally {
-      setTransferring(null);
-    }
+    showConfirm({
+      title: 'Unassign Leads',
+      message: `Are you sure you want to unassign all ${count} lead(s) from ${fromName}?`,
+      onConfirm: async () => {
+        try {
+          setTransferring(fromUser._id);
+          await api.post('/records/transfer/leads', {
+            fromAgentId: fromUser._id,
+            fromAgentName: fromName,
+            toAgentId: 'unassigned',
+            toAgentName: 'Unassigned',
+          });
+          showToast(`Successfully unassigned leads from ${fromName}.`, 'success');
+          await fetchData();
+        } catch (err) {
+          console.error('Clear failed:', err);
+          showToast('Failed to unassign leads.', 'error');
+        } finally {
+          setTransferring(null);
+        }
+      }
+    });
   };
 
   const filteredUsers = users.filter((user) => {

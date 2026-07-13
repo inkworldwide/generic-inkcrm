@@ -44,6 +44,7 @@ export interface IUser extends Document {
   skipLocation: boolean; // Bypass proximity location check
   isActive: boolean; // Account status: enabled (true) or disabled (false)
   reportingManager?: mongoose.Types.ObjectId; // Reference to another User who is their manager
+  department?: string; // Associated department name
   createdAt: Date;
   updatedAt: Date;
 }
@@ -95,7 +96,8 @@ const UserSchema = new Schema<IUser>(
     skipFace: { type: Boolean, default: false },
     skipLocation: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
-    reportingManager: { type: Schema.Types.ObjectId, ref: 'User' }
+    reportingManager: { type: Schema.Types.ObjectId, ref: 'User' },
+    department: { type: String, trim: true }
   },
   { timestamps: true }
 );

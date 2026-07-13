@@ -8,10 +8,11 @@ import { useToastStore } from '../store/toastStore';
 export default function UsersManagement() {
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const { showConfirm, showToast } = useToastStore();
+  const { showConfirm, showToast, showAlertModal } = useToastStore();
 
   const [users, setUsers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
+  const [departments, setDepartments] = useState<any[]>([]);
   const [userForm, setUserForm] = useState({
     id: '',
     email: '',
@@ -19,6 +20,7 @@ export default function UsersManagement() {
     firstName: '',
     lastName: '',
     roleId: '',
+    department: '',
     skipFace: false,
     skipLocation: false,
     isActive: true
@@ -37,12 +39,14 @@ export default function UsersManagement() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [resUsers, resRoles] = await Promise.all([
+      const [resUsers, resRoles, resDepts] = await Promise.all([
         api.get('/auth/users'),
-        api.get('/auth/roles')
+        api.get('/auth/roles'),
+        api.get('/records/departments')
       ]);
       setUsers(resUsers.data || []);
       setRoles(resRoles.data || []);
+      setDepartments(resDepts.data?.records || resDepts.data || []);
     } catch (err) {
       console.error('Failed to load users management data:', err);
     } finally {
@@ -69,6 +73,7 @@ export default function UsersManagement() {
         firstName: '',
         lastName: '',
         roleId: '',
+        department: '',
         skipFace: false,
         skipLocation: false,
         isActive: true
@@ -87,6 +92,7 @@ export default function UsersManagement() {
       firstName: u.firstName,
       lastName: u.lastName,
       roleId: u.roleId?._id || '',
+      department: u.department || '',
       skipFace: !!u.skipFace,
       skipLocation: !!u.skipLocation,
       isActive: u.isActive !== false
@@ -102,7 +108,11 @@ export default function UsersManagement() {
       onConfirm: async () => {
         try {
           await api.delete(`/auth/users/${id}`);
-          showToast('User removed successfully.', 'success');
+          showAlertModal({
+            title: 'Deleted Successfully',
+            message: 'The user account has been permanently removed.',
+            type: 'success'
+          });
           loadData();
         } catch (err) {
           showToast('Failed to delete user.', 'error');
@@ -116,17 +126,17 @@ export default function UsersManagement() {
       await api.put(`/auth/users/${userId}`, { [field]: !currentValue });
       loadData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to update user setting.');
+      showToast(err.response?.data?.error || 'Failed to update user setting.', 'error');
     }
   };
 
   const handleUserRoleChange = async (userId: string, newRoleId: string) => {
     try {
       await api.put(`/auth/users/${userId}`, { roleId: newRoleId });
-      alert('Role updated successfully.');
+      showToast('Role updated successfully.', 'success');
       loadData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to update user role.');
+      showToast(err.response?.data?.error || 'Failed to update user role.', 'error');
     }
   };
 
@@ -134,12 +144,12 @@ export default function UsersManagement() {
     try {
       if (!selectedUserForManager) return;
       await api.put(`/auth/users/${selectedUserForManager._id}`, { reportingManager: managerId });
-      alert('Reporting manager assigned successfully.');
+      showToast('Reporting manager assigned successfully.', 'success');
       setManagerModalOpen(false);
       setSelectedUserForManager(null);
       loadData();
     } catch (err: any) {
-      alert(err.response?.data?.error || 'Failed to assign reporting manager.');
+      showToast(err.response?.data?.error || 'Failed to assign reporting manager.', 'error');
     }
   };
 
@@ -169,6 +179,7 @@ export default function UsersManagement() {
               firstName: '',
               lastName: '',
               roleId: '',
+              department: '',
               skipFace: false,
               skipLocation: false,
               isActive: true
@@ -192,6 +203,7 @@ export default function UsersManagement() {
                 <th className="py-2 px-4 text-center">SKIP LOCATION</th>
                 <th className="py-2 px-4 text-center">ACCOUNT STATUS</th>
                 <th className="py-2 px-4">ROLE</th>
+                <th className="py-2 px-4">DEPARTMENT</th>
                 <th className="py-2 px-4">REPORTING MANAGER</th>
                 <th className="py-2 px-4 text-center w-40">ACTION</th>
               </tr>
@@ -280,6 +292,11 @@ export default function UsersManagement() {
                     {u.roleId?.name || 'No Role'}
                   </td>
 
+                  {/* Department */}
+                  <td className="px-4 py-2 text-xs font-semibold text-slate-750">
+                    {u.department || 'N/A'}
+                  </td>
+
                   {/* Reporting Manager */}
                   <td className="px-4 py-2 cursor-pointer" onClick={() => {
                     setSelectedUserForManager(u);
@@ -352,14 +369,26 @@ export default function UsersManagement() {
                 </>
               )}
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Role Type</label>
-                <select required value={userForm.roleId} onChange={e => setUserForm({ ...userForm, roleId: e.target.value })} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
-                  <option value="">Select Role</option>
-                  {roles.map(r => (
-                    <option key={r._id} value={r._id}>{r.name}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Role Type <span className="text-red-500">*</span></label>
+                  <select required value={userForm.roleId} onChange={e => setUserForm({ ...userForm, roleId: e.target.value })} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    <option value="">Select Role</option>
+                    {roles.map(r => (
+                      <option key={r._id} value={r._id}>{r.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Department</label>
+                  <select value={userForm.department} onChange={e => setUserForm({ ...userForm, department: e.target.value })} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    <option value="">Select Department</option>
+                    {departments.map(d => {
+                      const deptName = d.data?.name || d.name || '';
+                      return <option key={d._id} value={deptName}>{deptName}</option>;
+                    })}
+                  </select>
+                </div>
               </div>
 
               {/* Security & Access Controls */}
