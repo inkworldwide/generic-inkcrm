@@ -303,7 +303,10 @@ export default function RecordForm() {
 
     console.log('[Bank Partner Debug] Selected Banks List:', selectedBanksList, 'Loan Type:', targetLoan);
 
-    // Find if any selected bank has a mapping
+    const resolvedPsms: string[] = [];
+    const unmappedBanks: string[] = [];
+
+    // Find mapping for each selected bank
     for (const bank of selectedBanksList) {
       const targetBank = normalizeBankForSubmit(bank);
       const match = bankPartnerMappings.find((bp: any) => {
@@ -318,20 +321,29 @@ export default function RecordForm() {
       });
 
       if (match) {
-        matchedPsm = match.data?.psm || match.psm;
-        matchedBank = bank;
-        break; // Display first matching mapping in conflict popups
+        const psmVal = match.data?.psm || match.psm;
+        if (psmVal) {
+          resolvedPsms.push(psmVal);
+        } else {
+          unmappedBanks.push(bank);
+        }
+      } else {
+        unmappedBanks.push(bank);
       }
     }
 
-    if (matchedPsm) {
-      setValue('psm', matchedPsm);
+    if (resolvedPsms.length > 0) {
+      setValue('psm', resolvedPsms.join(', '));
       setPsmAutoFilled(true);
-      setPsmWarningMessage('');
+      if (unmappedBanks.length > 0) {
+        setPsmWarningMessage(`No PSM has been assigned for: ${unmappedBanks.join(', ')} for this Loan Type. Please configure it in Settings → Bank Partner.`);
+      } else {
+        setPsmWarningMessage('');
+      }
     } else {
       setValue('psm', '');
       setPsmAutoFilled(false);
-      setPsmWarningMessage('No PSM has been assigned for this Bank and Loan Type. Please configure it in Settings → Bank Partner.');
+      setPsmWarningMessage('No PSM has been assigned for any of the selected Banks and Loan Type. Please configure it in Settings → Bank Partner.');
     }
   }, [watchedValues.loanType, watchedValues.businessPartner, bankPartnerMappings, loading]);
 
@@ -500,19 +512,23 @@ export default function RecordForm() {
     }
 
     if (field.name === 'psm' && apiPath === 'leads') {
+      const psmVal = watchedValues[field.name] || '';
+      const lineCount = Math.max(1, psmVal.split(',').length);
+      const calculatedRows = Math.min(6, lineCount);
+
       return (
         <div key={field.name} className="space-y-1.5 text-left">
           <label className={labelClass}>
             {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
           </label>
-          <input
-            type="text"
+          <textarea
             readOnly
+            rows={calculatedRows}
             placeholder={field.label}
             {...register(field.name)}
             className={isLeads
-              ? "w-full px-4 py-3 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-650 focus:outline-none cursor-not-allowed font-medium"
-              : "w-full px-4 py-3 text-sm md:text-[15px] bg-slate-950/40 border border-slate-800 rounded-xl text-slate-450 focus:outline-none cursor-not-allowed font-medium"}
+              ? "w-full px-4 py-3 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-650 focus:outline-none cursor-not-allowed font-medium resize-none transition-all duration-200"
+              : "w-full px-4 py-3 text-sm md:text-[15px] bg-slate-950/40 border border-slate-800 rounded-xl text-slate-450 focus:outline-none cursor-not-allowed font-medium resize-none transition-all duration-200"}
           />
           {psmWarningMessage && (
             <p className="text-[11px] text-amber-600 font-bold mt-1 leading-normal">{psmWarningMessage}</p>
