@@ -10,6 +10,26 @@ import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
 import { useAuthStore } from '../store/authStore';
 
+// Normalization helper for bank names
+const normalizeBankForSubmit = (bankName: string): string => {
+  const name = bankName.trim().toLowerCase();
+  if (name === 'sbi') return 'state bank of india';
+  if (name === 'state bank of india') return 'state bank of india';
+  return name;
+};
+
+// Normalization helper for loan types
+const normalizeLoanForSubmit = (loanType: string): string => {
+  const type = loanType.trim().toLowerCase();
+  if (type === 'lap' || type === 'loan against property loan' || type === 'loan against property') {
+    return 'loan against property';
+  }
+  if (type === 'salaried personal loan' || type === 'personal loan') {
+    return 'personal loan';
+  }
+  return type;
+};
+
 export default function RecordForm() {
   const { apiPath, id } = useParams<{ apiPath: string; id?: string }>();
   const navigate = useNavigate();
@@ -273,27 +293,7 @@ export default function RecordForm() {
       return;
     }
     
-    // Normalization helper for bank names
-    const normalizeBank = (bankName: string): string => {
-      const name = bankName.trim().toLowerCase();
-      if (name === 'sbi') return 'state bank of india';
-      if (name === 'state bank of india') return 'state bank of india';
-      return name;
-    };
-
-    // Normalization helper for loan types
-    const normalizeLoan = (loanType: string): string => {
-      const type = loanType.trim().toLowerCase();
-      if (type === 'lap' || type === 'loan against property loan' || type === 'loan against property') {
-        return 'loan against property';
-      }
-      if (type === 'salaried personal loan' || type === 'personal loan') {
-        return 'personal loan';
-      }
-      return type;
-    };
-
-    const targetLoan = normalizeLoan(selectedLoanType);
+    const targetLoan = normalizeLoanForSubmit(selectedLoanType);
 
     // Split selected banks (supports comma-separated string)
     const selectedBanksList = selectedBank.split(',').map((s: string) => s.trim()).filter(Boolean);
@@ -305,14 +305,14 @@ export default function RecordForm() {
 
     // Find if any selected bank has a mapping
     for (const bank of selectedBanksList) {
-      const targetBank = normalizeBank(bank);
+      const targetBank = normalizeBankForSubmit(bank);
       const match = bankPartnerMappings.find((bp: any) => {
         const bpLoanType = bp.data?.loanType || bp.loanType;
         const bpBanks = (bp.data?.bank || bp.bank || '')
           .split(',')
-          .map((s: string) => normalizeBank(s));
+          .map((s: string) => normalizeBankForSubmit(s));
         
-        const bpNormLoan = normalizeLoan(bpLoanType || '');
+        const bpNormLoan = normalizeLoanForSubmit(bpLoanType || '');
         
         return bpNormLoan === targetLoan && bpBanks.includes(targetBank);
       });
@@ -344,17 +344,58 @@ export default function RecordForm() {
   const onSubmitForm = async (data: any) => {
     setSaving(true);
     try {
+      let createdCount = 1;
       if (id) {
         await api.put(`/records/${apiPath}/${id}`, data);
       } else {
-        await api.post(`/records/${apiPath}`, data);
+        if (apiPath === 'leads' && data.businessPartner) {
+          const partners = data.businessPartner.split(',').map((s: string) => s.trim()).filter(Boolean);
+          if (partners.length > 1) {
+            createdCount = partners.length;
+            const promises = partners.map(async (partner: string) => {
+              let matchedPsm = '';
+              const targetLoan = normalizeLoanForSubmit(data.loanType || '');
+              const targetBank = normalizeBankForSubmit(partner);
+              
+              const match = bankPartnerMappings.find((bp: any) => {
+                const bpLoanType = bp.data?.loanType || bp.loanType;
+                const bpBanks = (bp.data?.bank || bp.bank || '')
+                  .split(',')
+                  .map((s: string) => normalizeBankForSubmit(s));
+                const bpNormLoan = normalizeLoanForSubmit(bpLoanType || '');
+                return bpNormLoan === targetLoan && bpBanks.includes(targetBank);
+              });
+              
+              if (match) {
+                matchedPsm = match.data?.psm || match.psm || '';
+              }
+              
+              const singleLeadData = {
+                ...data,
+                businessPartner: partner,
+                psm: matchedPsm
+              };
+              
+              return api.post(`/records/${apiPath}`, singleLeadData);
+            });
+            await Promise.all(promises);
+          } else {
+            await api.post(`/records/${apiPath}`, data);
+          }
+        } else {
+          await api.post(`/records/${apiPath}`, data);
+        }
       }
       queryClient.invalidateQueries({ queryKey: ['records', apiPath] });
       queryClient.invalidateQueries({ queryKey: ['sidebar-leads'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-metrics'] });
       showAlertModal({
         title: id ? 'Saved Successfully' : 'Created Successfully',
-        message: id ? 'The record has been updated successfully.' : 'The record has been created successfully.',
+        message: id 
+          ? 'The record has been updated successfully.' 
+          : createdCount > 1
+            ? `${createdCount} leads have been created successfully (one for each business partner).`
+            : 'The record has been created successfully.',
         type: 'success',
         onClose: () => {
           navigate(`/modules/${apiPath}`);
