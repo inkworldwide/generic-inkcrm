@@ -162,7 +162,7 @@ async function seed() {
 
   // 3. Create Users
   console.log('Seeding Admin Users...');
-  const passwordHash = await bcrypt.hash('password123', 10);
+  const passwordHash = await bcrypt.hash('password', 10);
 
   const mockEmbedding = Array(128).fill(0.1);
   const encryptedEmbedding = encrypt(JSON.stringify(mockEmbedding));
