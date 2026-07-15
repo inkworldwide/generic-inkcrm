@@ -3,6 +3,7 @@ import DashboardLayout from '../models/DashboardLayout';
 import ModuleDefinition from '../models/ModuleDefinition';
 import CustomRecord from '../models/CustomRecord';
 import Activity from '../models/Activity';
+import User from '../models/User';
 import { authenticate } from '../middleware/authMiddleware';
 import { requireTenant } from '../middleware/tenantMiddleware';
 

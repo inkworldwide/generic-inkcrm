@@ -263,26 +263,26 @@ export default function RecordForm() {
   });
 
   // Watch fields for conditional visibility evaluation
-  const watchedValues = watch();
+  const watchedValues = watch() || {};
 
   const filteredUsers = React.useMemo(() => {
     let list = rawUsersList.filter((u: any) => u.isActive !== false);
-    const selectedTeam = watchedValues.assignToTeam;
+    const selectedTeam = watchedValues?.assignToTeam;
     if (selectedTeam) {
       list = list.filter((u: any) => String(u.department || '').trim().toLowerCase() === selectedTeam.trim().toLowerCase());
     }
     return list.map((u: any) => [u.firstName, u.lastName].filter(Boolean).join(' ')).filter(Boolean);
-  }, [rawUsersList, watchedValues.assignToTeam]);
+  }, [rawUsersList, watchedValues?.assignToTeam]);
 
   const recordName = apiPath === 'leads'
-    ? `${watchedValues.firstName || ''} ${watchedValues.lastName || ''}`.trim()
-    : watchedValues.fullName || watchedValues.companyName || watchedValues.dealName || watchedValues.title;
+    ? `${watchedValues?.firstName || ''} ${watchedValues?.lastName || ''}`.trim()
+    : watchedValues?.fullName || watchedValues?.companyName || watchedValues?.dealName || watchedValues?.title || '';
 
   // Auto-fill PSM when loanType + businessPartner are both selected
   useEffect(() => {
     if (loading || apiPath !== 'leads' || bankPartnerMappings.length === 0) return;
-    const selectedLoanType = watchedValues.loanType;
-    const selectedBank = watchedValues.businessPartner;
+    const selectedLoanType = watchedValues?.loanType;
+    const selectedBank = watchedValues?.businessPartner;
     
     if (!selectedLoanType || !selectedBank) {
       if (psmAutoFilled) {
@@ -480,7 +480,7 @@ export default function RecordForm() {
   const renderField = (field: FieldDefinition) => {
     // Evaluate Conditional Visibility
     if (field.conditionalVisibility) {
-      const depValue = watchedValues[field.conditionalVisibility.dependsOnField];
+      const depValue = watchedValues?.[field.conditionalVisibility.dependsOnField];
       if (String(depValue || '').toLowerCase() !== field.conditionalVisibility.conditionValue.toLowerCase()) {
         return null;
       }
@@ -713,7 +713,7 @@ export default function RecordForm() {
             <input
               type="text"
               readOnly
-              value={watchedValues[field.name] || 'Auto-Calculated'}
+              value={watchedValues?.[field.name] || 'Auto-Calculated'}
               className={isLeads
                 ? "w-full px-4 py-3 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-600 focus:outline-none cursor-not-allowed"
                 : "w-full px-4 py-3 text-sm md:text-[15px] bg-slate-950/40 border border-slate-800 rounded-xl text-slate-450 focus:outline-none cursor-not-allowed"}
@@ -722,7 +722,7 @@ export default function RecordForm() {
         );
 
       case 'date': {
-        const storedVal = watchedValues[field.name] || '';
+        const storedVal = watchedValues?.[field.name] || '';
         const displayVal = (() => {
           if (!storedVal) return '';
           if (/^\d{4}-\d{2}-\d{2}$/.test(storedVal)) {
