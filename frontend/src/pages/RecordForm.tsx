@@ -6,7 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import * as Icons from 'lucide-react';
 import { useModuleStore, FieldDefinition } from '../store/moduleStore';
-import api from '../services/api';
+import api, { FILE_BASE_URL } from '../services/api';
 import { useToastStore } from '../store/toastStore';
 import { useAuthStore } from '../store/authStore';
 
@@ -1021,7 +1021,7 @@ export default function RecordForm() {
                     <Icons.File className="w-4 h-4 text-slate-500" />
                     <div className="truncate text-left">
                       <a
-                        href={`http://localhost:5000${doc.filePath}`}
+                        href={`${FILE_BASE_URL}${doc.filePath}`}
                         target="_blank"
                         rel="noreferrer"
                         className={isLeads ? "text-xs font-semibold text-slate-800 hover:text-emerald-600 hover:underline truncate block" : "text-xs font-semibold text-slate-300 hover:text-emerald-500 hover:underline truncate block"}

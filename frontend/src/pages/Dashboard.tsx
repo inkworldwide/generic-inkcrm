@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as Icons from 'lucide-react';
-import api from '../services/api';
+import api, { FILE_BASE_URL } from '../services/api';
 import { useThemeStore } from '../store/themeStore';
 import { Link } from 'react-router-dom';
 import { DynamicIcon } from '../components/Layout';
@@ -662,7 +662,7 @@ export default function Dashboard() {
                               </div>
                             </div>
                             <a 
-                              href={`http://localhost:5000${doc.filePath}`} 
+                              href={`${FILE_BASE_URL}${doc.filePath}`} 
                               target="_blank" 
                               rel="noreferrer"
                               className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"

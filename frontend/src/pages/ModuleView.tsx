@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Icons from 'lucide-react';
 import { useModuleStore, ModuleDefinition } from '../store/moduleStore';
-import api from '../services/api';
+import api, { FILE_BASE_URL } from '../services/api';
 import { DynamicIcon } from '../components/Layout';
 import { useToastStore } from '../store/toastStore';
 import { formatDate } from '../utils/dateFormatter';
@@ -1065,7 +1065,7 @@ export default function ModuleView() {
                               </div>
                             </div>
                             <a 
-                              href={`http://localhost:5000${doc.filePath}`} 
+                              href={`${FILE_BASE_URL}${doc.filePath}`} 
                               target="_blank" 
                               rel="noreferrer"
                               className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"

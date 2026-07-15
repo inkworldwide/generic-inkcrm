@@ -1,8 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import path from 'path';
+import mongoose from 'mongoose';
+import rateLimit from 'express-rate-limit';
 import { resolveTenant } from './middleware/tenantMiddleware';
+import { logger } from './utils/logger';
 
 // Import routers
 import authRoutes from './routes/authRoutes';
@@ -18,11 +22,26 @@ import statusRoutes from './routes/statusRoutes';
 
 const app = express();
 
-// Security and CORS configurations
+// 1. Request Response Compression
+app.use(compression());
+
+// 2. Helmet Security Headers Setup
 app.use(helmet({
   crossOriginResourcePolicy: false // Allows loading local static files
 }));
 
+// 3. Access Logger Middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    const ip = (req.headers['x-forwarded-for'] as string) || req.socket.remoteAddress || '127.0.0.1';
+    logger.access(req.method, req.originalUrl, res.statusCode, duration, ip);
+  });
+  next();
+});
+
+// 4. CORS Setup
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
   ? process.env.ALLOWED_ORIGINS.split(',') 
   : ['http://localhost:5173'];
@@ -41,14 +60,76 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// 5. Global Rate Limiter
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 300 requests per 15 minutes
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' }
+});
+app.use(globalLimiter);
+
+// 6. Strict Rate Limiter for Authentication endpoints
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // Limit each IP to 30 requests per 15 minutes for auth
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
+});
+
+// 7. Custom NoSQL Injection Protection
+const sanitizeObject = (obj: any): any => {
+  if (obj instanceof Object) {
+    for (const key in obj) {
+      if (key.startsWith('$')) {
+        delete obj[key];
+      } else if (obj[key] instanceof Object) {
+        sanitizeObject(obj[key]);
+      }
+    }
+  }
+  return obj;
+};
+
+app.use((req, res, next) => {
+  if (req.body) sanitizeObject(req.body);
+  if (req.query) sanitizeObject(req.query);
+  if (req.params) sanitizeObject(req.params);
+  next();
+});
+
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
+
+// 8. Health, Ready, and Version check endpoints (placed before tenant resolver)
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
+});
+
+app.get('/ready', async (req, res) => {
+  const dbState = mongoose.connection.readyState;
+  const isReady = dbState === 1; // 1 = connected
+  res.status(isReady ? 200 : 503).json({
+    status: isReady ? 'READY' : 'NOT_READY',
+    database: isReady ? 'connected' : 'disconnected'
+  });
+});
+
+app.get('/version', (req, res) => {
+  res.status(200).json({
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    buildTime: new Date().toISOString()
+  });
+});
 
 // Multi-tenant resolver middleware runs on all API routes
 app.use(resolveTenant);
 
 // Mount API routes
-app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/auth', authLimiter, authRoutes); // Apply strict auth rate limiter
 app.use('/api/v1/tenants', tenantRoutes);
 app.use('/api/v1/modules', moduleRoutes);
 app.use('/api/v1/records', recordRoutes);
@@ -64,10 +145,17 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to inkCRM API Server' });
 });
 
-// Error handling middleware
+// 9. Centralized Error Handling Middleware (Hides stack traces in production)
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: err.message || 'Something went wrong on the server!' });
+  logger.error(err.stack || err.message);
+  
+  const isProd = process.env.NODE_ENV === 'production';
+  const statusCode = err.statusCode || err.status || 500;
+  
+  res.status(statusCode).json({
+    success: false,
+    error: isProd ? 'Internal Server Error' : err.message || 'Something went wrong on the server!'
+  });
 });
 
 export default app;

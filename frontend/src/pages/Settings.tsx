@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useThemeStore, ThemeSettings } from '../store/themeStore';
 import { useModuleStore, FieldDefinition } from '../store/moduleStore';
-import api from '../services/api';
+import api, { FILE_BASE_URL } from '../services/api';
 import * as Icons from 'lucide-react';
 import FaceEnrollment from '../components/FaceEnrollment';
 import { useAuthStore } from '../store/authStore';
@@ -399,7 +399,7 @@ export default function Settings() {
       const res = await api.post('/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
-      const uploadedPath = `http://localhost:5000${res.data.filePath}`;
+      const uploadedPath = `${FILE_BASE_URL}${res.data.filePath}`;
       setLogoUrl(uploadedPath);
     } catch (err) {
       alert('Failed to upload logo.');
@@ -1045,7 +1045,7 @@ export default function Settings() {
                         const res = await api.post('/documents/upload', formData, {
                           headers: { 'Content-Type': 'multipart/form-data' }
                         });
-                        setCompanyDocUrl(`http://localhost:5000${res.data.filePath}`);
+                        setCompanyDocUrl(`${FILE_BASE_URL}${res.data.filePath}`);
                         showToast('Company document uploaded successfully.', 'success');
                       } catch {
                         showToast('Failed to upload document.', 'error');

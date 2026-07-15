@@ -29,13 +29,13 @@ export const connectDB = async (): Promise<void> => {
       fs.mkdirSync(dbPath, { recursive: true });
     }
 
-    // Default paths for Windows MongoDB installation
-    const mongodPaths = [
+    // Default paths for Windows MongoDB installation (only searched on Windows platforms)
+    const mongodPaths = process.platform === 'win32' ? [
       'C:\\Program Files\\MongoDB\\Server\\8.3\\bin\\mongod.exe',
       'C:\\Program Files\\MongoDB\\Server\\8.0\\bin\\mongod.exe',
       'C:\\Program Files\\MongoDB\\Server\\7.0\\bin\\mongod.exe',
       'C:\\Program Files\\MongoDB\\Server\\6.0\\bin\\mongod.exe',
-    ];
+    ] : [];
 
     let mongodBinary = '';
     for (const p of mongodPaths) {
