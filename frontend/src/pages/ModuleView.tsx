@@ -238,21 +238,36 @@ export default function ModuleView() {
     return (
       <div className="space-y-6">
         {/* Header Title */}
-        <div className="text-left">
-          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">
-            Assign Campaigns
-          </h1>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-left">
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-center">
+              <Icons.Target className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800 dark:text-white leading-tight">
+                Assign Campaigns
+              </h1>
+              <p className="text-xs font-semibold text-slate-450 dark:text-slate-500 mt-1">
+                Allocate leads and upload contact files for team members
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* Top Control Card */}
-        <div className="card-premium p-6">
+        <div className="card-premium p-6 relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-sm">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-650" />
+          
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 dark:text-slate-350 uppercase tracking-wider mb-2">Campaigns</label>
+            <div className="text-left">
+              <label className="block text-xs font-bold text-slate-450 dark:text-slate-350 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Icons.Layers className="w-3.5 h-3.5 text-indigo-500" />
+                Select Campaign
+              </label>
               <select 
                 value={caSelectedCampaign} 
                 onChange={e => setCaSelectedCampaign(e.target.value)} 
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-550 transition-all cursor-pointer"
               >
                 <option value="">Select Campaign</option>
                 {caCampaigns.map((c: any) => {
@@ -262,12 +277,15 @@ export default function ModuleView() {
               </select>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-400 dark:text-slate-355 uppercase tracking-wider mb-2">Load Agents Types</label>
+            <div className="text-left">
+              <label className="block text-xs font-bold text-slate-450 dark:text-slate-350 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Icons.Users2 className="w-3.5 h-3.5 text-indigo-500" />
+                Agent Type (Role)
+              </label>
               <select 
                 value={caSelectedRole} 
                 onChange={e => setCaSelectedRole(e.target.value)} 
-                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+                className="w-full px-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-550 transition-all cursor-pointer"
               >
                 <option value="">Select Role</option>
                 {caRoles.map((r: any) => (
@@ -280,21 +298,23 @@ export default function ModuleView() {
               <button 
                 type="button" 
                 onClick={handleLoadAgents}
-                className="btn-primary-premium py-2 px-5 text-sm font-bold flex items-center justify-center gap-1.5 h-10 w-36"
+                className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
                 disabled={caLoadingAgents}
               >
                 {caLoadingAgents ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
-                  <>Load Now</>
+                  <>
+                    <Icons.Search className="w-4 h-4" /> Load Now
+                  </>
                 )}
               </button>
               
               <Link 
                 to="/modules/campaigns"
-                className="flex items-center justify-center h-10 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/40 border border-indigo-100 dark:border-indigo-950 px-4 rounded-xl transition-all"
+                className="flex items-center justify-center h-11 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/40 hover:bg-indigo-100/60 dark:hover:bg-indigo-900/40 border border-indigo-100 dark:border-indigo-950 px-4 rounded-xl transition-all"
               >
-                View All Campaigns Details
+                View Details
               </Link>
             </div>
           </div>
@@ -302,23 +322,56 @@ export default function ModuleView() {
           <div className="border-t border-slate-100 dark:border-slate-800/60 my-6"></div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
-            <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-slate-400 dark:text-slate-360 uppercase tracking-wider mb-2">Upload Excel / CSV File</label>
-              <div className="flex items-center gap-3">
+            <div className="md:col-span-2 text-left">
+              <label className="block text-xs font-bold text-slate-450 dark:text-slate-350 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                <Icons.FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+                Upload Excel / CSV File
+              </label>
+              
+              <div 
+                onClick={() => document.getElementById('ca-file-input')?.click()}
+                className={`border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                  caFile 
+                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/10 dark:bg-emerald-950/5' 
+                    : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-800 bg-slate-50/20 dark:bg-slate-900/10'
+                }`}
+              >
                 <input 
+                  id="ca-file-input"
                   type="file" 
                   accept=".csv,.xlsx,.xls"
                   onChange={e => setCaFile(e.target.files?.[0] || null)}
-                  className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200 dark:hover:file:bg-slate-700 cursor-pointer border border-slate-200 dark:border-slate-750 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-xl"
+                  className="hidden"
                 />
-                {caFile && (
-                  <button 
-                    type="button" 
-                    onClick={() => setCaFile(null)}
-                    className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
-                  >
-                    <Icons.X className="w-4 h-4" />
-                  </button>
+                {caFile ? (
+                  <div className="flex items-center gap-3 w-full">
+                    <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                      <Icons.FileSpreadsheet className="w-6 h-6" />
+                    </div>
+                    <div className="flex-1 min-w-0 text-left">
+                      <p className="text-sm font-bold text-slate-750 dark:text-slate-200 truncate">{caFile.name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{(caFile.size / 1024).toFixed(1)} KB • Ready to assign</p>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setCaFile(null);
+                      }}
+                      className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors"
+                      title="Remove file"
+                    >
+                      <Icons.Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-1 text-center">
+                    <Icons.UploadCloud className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto" />
+                    <div className="text-xs text-slate-600 dark:text-slate-400">
+                      <span className="font-bold text-indigo-600 dark:text-indigo-455">Click to upload</span> or drag and drop
+                    </div>
+                    <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Supports .CSV, .XLSX, or .XLS lists</p>
+                  </div>
                 )}
               </div>
             </div>
@@ -327,14 +380,14 @@ export default function ModuleView() {
               <button 
                 type="button" 
                 onClick={handleAssignData}
-                className="w-full h-10 bg-emerald-650 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5"
+                className="w-full h-[70px] bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
                 disabled={caAssigning}
               >
                 {caAssigning ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <Icons.FileSpreadsheet className="w-4 h-4" /> Assign Data
+                    <Icons.CheckCircle2 className="w-5 h-5" /> Assign Data
                   </>
                 )}
               </button>
@@ -343,15 +396,24 @@ export default function ModuleView() {
         </div>
 
         {/* Employee Allocation Table Card */}
-        <div className="card-premium p-6 space-y-4">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-white text-left">
-            Assign Campaigns for Below Employees
-          </h2>
+        <div className="card-premium p-6 space-y-4 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-sm relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-white text-left">
+              Assign Campaigns for Below Employees
+            </h2>
+            {caAgents.length > 0 && (
+              <span className="text-xs font-bold text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 rounded-full border border-indigo-100/50 dark:border-indigo-900/50">
+                Selected: {caSelectedAgents.length} of {caAgents.length} Agents
+              </span>
+            )}
+          </div>
           
           <div className="overflow-x-auto">
             <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider h-10">
+                <tr className="border-b border-slate-200 dark:border-slate-750 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider h-11 bg-slate-50/50 dark:bg-slate-900/40">
                   <th className="py-2 px-4 w-12 text-center">
                     <input 
                       type="checkbox"
@@ -363,12 +425,12 @@ export default function ModuleView() {
                           setCaSelectedAgents([]);
                         }
                       }}
-                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                      className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
                     />
                   </th>
                   <th className="py-2 px-4">Full Name</th>
                   <th className="py-2 px-4">Role</th>
-                  <th className="py-2 px-4">RM</th>
+                  <th className="py-2 px-4">Reporting Manager</th>
                   <th className="py-2 px-4 text-center">Total Allocated #</th>
                   <th className="py-2 px-4 text-center">Total Dialed #</th>
                 </tr>
@@ -378,12 +440,21 @@ export default function ModuleView() {
                   const fullName = `${agent.firstName} ${agent.lastName}`;
                   const allocated = caAllocatedStats[fullName] || 0;
                   const dialed = caDialedStats[fullName] || 0;
+                  const isChecked = caSelectedAgents.includes(agent._id);
+                  
                   return (
-                    <tr key={agent._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors h-14">
+                    <tr 
+                      key={agent._id} 
+                      className={`transition-colors h-14 ${
+                        isChecked 
+                          ? 'bg-slate-50/45 dark:bg-slate-800/20 hover:bg-slate-50 dark:hover:bg-slate-800/30' 
+                          : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/10'
+                      }`}
+                    >
                       <td className="px-4 py-2 text-center">
                         <input 
                           type="checkbox"
-                          checked={caSelectedAgents.includes(agent._id)}
+                          checked={isChecked}
                           onChange={e => {
                             if (e.target.checked) {
                               setCaSelectedAgents([...caSelectedAgents, agent._id]);
@@ -391,30 +462,49 @@ export default function ModuleView() {
                               setCaSelectedAgents(caSelectedAgents.filter(id => id !== agent._id));
                             }
                           }}
-                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                          className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
                         />
                       </td>
-                      <td className="px-4 py-2 font-bold text-slate-800 dark:text-slate-200">
-                        {fullName}
+                      <td className="px-4 py-2 text-left">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center font-bold text-xs uppercase select-none">
+                            {agent.firstName ? agent.firstName[0] : 'U'}
+                          </div>
+                          <span className="font-bold text-slate-800 dark:text-slate-200">
+                            {fullName}
+                          </span>
+                        </div>
                       </td>
-                      <td className="px-4 py-2 text-slate-500 dark:text-slate-400 font-semibold">
-                        {agent.roleId?.name || 'No Role'}
+                      <td className="px-4 py-2 text-left">
+                        <span className="font-semibold text-slate-600 dark:text-slate-400">
+                          {agent.roleId?.name || 'No Role'}
+                        </span>
                       </td>
-                      <td className="px-4 py-2 text-slate-500 dark:text-slate-400 font-semibold">
-                        {agent.reportingManager ? `${agent.reportingManager.firstName} ${agent.reportingManager.lastName}` : 'N/A'}
+                      <td className="px-4 py-2 text-left">
+                        {agent.reportingManager ? (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-450 border border-slate-200/40 dark:border-slate-800/40">
+                            {agent.reportingManager.firstName} {agent.reportingManager.lastName}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400 dark:text-slate-600 font-medium">N/A</span>
+                        )}
                       </td>
-                      <td className="px-4 py-2 text-center font-bold text-indigo-650 dark:text-indigo-400">
-                        {allocated}
+                      <td className="px-4 py-2 text-center">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 min-w-[3rem]">
+                          {allocated}
+                        </span>
                       </td>
-                      <td className="px-4 py-2 text-center font-bold text-emerald-600 dark:text-emerald-500">
-                        {dialed}
+                      <td className="px-4 py-2 text-center">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 min-w-[3rem]">
+                          {dialed}
+                        </span>
                       </td>
                     </tr>
                   );
                 })}
                 {caAgents.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="text-center text-slate-400 dark:text-slate-500 py-8 italic">
+                    <td colSpan={6} className="text-center text-slate-400 dark:text-slate-500 py-10 italic">
                       No employees loaded. Select an agent role type above and click "Load Now".
                     </td>
                   </tr>
@@ -798,11 +888,17 @@ export default function ModuleView() {
 
   if (!activeModule) return null;
 
+  if (apiPath === 'campaignassignments') {
+    return (
+      <div className="space-y-6">
+        {renderCampaignAssignments()}
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
-      {apiPath === 'campaignassignments' ? (
-        renderCampaignAssignments()
-      ) : apiPath === 'campaigns' ? (
+      {apiPath === 'campaigns' ? (
         <div className="space-y-6">
           {/* Header Title */}
           <div className="text-left">
