@@ -104,6 +104,134 @@ const validateFields = (fields: any[], data: Record<string, any>) => {
   return errors;
 };
 
+// ── Special Campaign Assignment Aggregations ─────────────────────────────────
+router.get('/campaigns/allocation-stats', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId;
+    
+    // Find Lead Module Definition
+    const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
+    if (!leadModule) {
+      res.status(200).json({ stats: {}, dialedStats: {} });
+      return;
+    }
+
+    // Aggregate count of leads grouped by assignedTo
+    const stats = await CustomRecord.aggregate([
+      { $match: { organizationId: orgId, moduleId: leadModule._id } },
+      { $group: { _id: '$data.assignedTo', count: { $sum: 1 } } }
+    ]);
+
+    // Aggregate count of dialed leads (status is not New or Pending)
+    const dialedStats = await CustomRecord.aggregate([
+      { 
+        $match: { 
+          organizationId: orgId, 
+          moduleId: leadModule._id,
+          'data.status': { $nin: ['New', 'Pending'] }
+        } 
+      },
+      { $group: { _id: '$data.assignedTo', count: { $sum: 1 } } }
+    ]);
+
+    const statsMap: Record<string, number> = {};
+    stats.forEach(item => {
+      if (item._id) {
+        statsMap[item._id.toString()] = item.count;
+      }
+    });
+
+    const dialedMap: Record<string, number> = {};
+    dialedStats.forEach(item => {
+      if (item._id) {
+        dialedMap[item._id.toString()] = item.count;
+      }
+    });
+
+    res.status(200).json({ stats: statsMap, dialedStats: dialedMap });
+  } catch (error) {
+    console.error('Failed to get allocation stats:', error);
+    res.status(500).json({ error: 'Failed to get allocation stats.' });
+  }
+});
+
+router.post('/campaigns/bulk-assign', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId;
+    const userId = req.user?.id;
+    const { campaignName, agentNames, leads } = req.body;
+
+    if (!campaignName || !agentNames || !Array.isArray(agentNames) || agentNames.length === 0 || !Array.isArray(leads) || leads.length === 0) {
+      res.status(400).json({ error: 'campaignName, agentNames, and leads array are required.' });
+      return;
+    }
+
+    const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
+    if (!leadModule) {
+      res.status(404).json({ error: 'Leads module definition not found.' });
+      return;
+    }
+
+    // Distribute leads among agents
+    const recordsToCreate: any[] = [];
+    leads.forEach((lead: any, idx: number) => {
+      const assignedAgent = agentNames[idx % agentNames.length];
+      
+      // Parse names
+      let fName = lead.firstName || lead.name || 'Unnamed';
+      let lName = lead.lastName || '';
+      if (!lead.lastName && lead.name && lead.name.includes(' ')) {
+        const parts = lead.name.split(' ');
+        fName = parts[0];
+        lName = parts.slice(1).join(' ');
+      }
+
+      recordsToCreate.push({
+        organizationId: orgId,
+        moduleId: leadModule._id,
+        createdBy: userId,
+        updatedBy: userId,
+        data: {
+          firstName: fName,
+          lastName: lName,
+          phone: lead.phone || lead.mobile || '',
+          email: lead.email || '',
+          loanType: lead.loanType || 'SALARIED PERSONAL LOAN',
+          budget: lead.budget || lead.amount || '',
+          company: lead.company || '',
+          salary: lead.salary || '',
+          city: lead.city || '',
+          state: lead.state || '',
+          status: 'New',
+          source: campaignName, // Set source as campaign name
+          assignedTo: assignedAgent // Set agent name
+        }
+      });
+    });
+
+    // Bulk insert custom records
+    const result = await CustomRecord.insertMany(recordsToCreate);
+
+    // Create Audit Log
+    await AuditLog.create({
+      organizationId: orgId,
+      userId: userId,
+      action: 'campaign.bulk_assign',
+      resource: 'leads',
+      details: {
+        campaignName,
+        agentCount: agentNames.length,
+        assignedCount: result.length
+      }
+    });
+
+    res.status(201).json({ message: `Successfully assigned ${result.length} leads to ${agentNames.length} agents.` });
+  } catch (error: any) {
+    console.error('Failed to bulk assign leads:', error);
+    res.status(500).json({ error: error.message || 'Failed to bulk assign leads.' });
+  }
+});
+
 // 1. LIST RECORDS FOR A DYNAMIC MODULE
 router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
   try {

@@ -79,7 +79,354 @@ export default function ModuleView() {
       setLoadingHistory(false);
     }
   };
-  
+
+  // --- Campaign Assignment custom screen states ---
+  const [caCampaigns, setCaCampaigns] = useState<any[]>([]);
+  const [caSelectedCampaign, setCaSelectedCampaign] = useState('');
+  const [caRoles, setCaRoles] = useState<any[]>([]);
+  const [caSelectedRole, setCaSelectedRole] = useState('');
+  const [caAgents, setCaAgents] = useState<any[]>([]);
+  const [caSelectedAgents, setCaSelectedAgents] = useState<string[]>([]);
+  const [caFile, setCaFile] = useState<File | null>(null);
+  const [caAllocatedStats, setCaAllocatedStats] = useState<Record<string, number>>({});
+  const [caDialedStats, setCaDialedStats] = useState<Record<string, number>>({});
+  const [caLoadingStats, setCaLoadingStats] = useState(false);
+  const [caAssigning, setCaAssigning] = useState(false);
+  const [caLoadingAgents, setCaLoadingAgents] = useState(false);
+
+  useEffect(() => {
+    if (apiPath === 'campaignassignments') {
+      loadCampaignAssignmentsData();
+    }
+  }, [apiPath]);
+
+  const loadCampaignAssignmentsData = async () => {
+    try {
+      setCaLoadingStats(true);
+      const [campaignsRes, rolesRes, statsRes] = await Promise.all([
+        api.get('/records/campaigns?limit=100'),
+        api.get('/auth/roles'),
+        api.get('/records/campaigns/allocation-stats')
+      ]);
+      setCaCampaigns(campaignsRes.data?.records || []);
+      setCaRoles(rolesRes.data || []);
+      setCaAllocatedStats(statsRes.data?.stats || {});
+      setCaDialedStats(statsRes.data?.dialedStats || {});
+    } catch (err) {
+      console.error('Failed to load campaign assignments metadata:', err);
+    } finally {
+      setCaLoadingStats(false);
+    }
+  };
+
+  const handleLoadAgents = async () => {
+    if (!caSelectedRole) {
+      showToast('Please select an Agent Type.', 'warning');
+      return;
+    }
+    setCaLoadingAgents(true);
+    try {
+      const res = await api.get('/auth/users');
+      const allUsers = res.data || [];
+      const filtered = allUsers.filter((u: any) => u.roleId?._id === caSelectedRole && u.isActive !== false);
+      setCaAgents(filtered);
+      setCaSelectedAgents(filtered.map((u: any) => u._id));
+    } catch (err) {
+      console.error('Failed to load agents:', err);
+      showToast('Failed to load agents.', 'error');
+    } finally {
+      setCaLoadingAgents(false);
+    }
+  };
+
+  const parseCSV = (text: string): any[] => {
+    const lines = text.split(/\r?\n/);
+    if (lines.length === 0) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim().replace(/^["']|["']$/g, ''));
+    const results: any[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (!line) continue;
+      
+      const values: string[] = [];
+      let currentVal = '';
+      let insideQuotes = false;
+      
+      for (let j = 0; j < line.length; j++) {
+        const char = line[j];
+        if (char === '"') {
+          insideQuotes = !insideQuotes;
+        } else if (char === ',' && !insideQuotes) {
+          values.push(currentVal.trim().replace(/^["']|["']$/g, ''));
+          currentVal = '';
+        } else {
+          currentVal += char;
+        }
+      }
+      values.push(currentVal.trim().replace(/^["']|["']$/g, ''));
+      
+      const row: Record<string, string> = {};
+      headers.forEach((header, index) => {
+        row[header] = values[index] || '';
+      });
+      results.push(row);
+    }
+    return results;
+  };
+
+  const handleAssignData = async () => {
+    if (!caSelectedCampaign) {
+      showToast('Please select a Campaign.', 'warning');
+      return;
+    }
+    if (caSelectedAgents.length === 0) {
+      showToast('Please check at least one employee in the table.', 'warning');
+      return;
+    }
+    if (!caFile) {
+      showToast('Please upload an Excel or CSV file.', 'warning');
+      return;
+    }
+
+    setCaAssigning(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        try {
+          const csvText = event.target?.result as string;
+          const parsedLeads = parseCSV(csvText);
+          
+          if (parsedLeads.length === 0) {
+            showToast('The uploaded file is empty or invalid.', 'warning');
+            setCaAssigning(false);
+            return;
+          }
+
+          const agentNames = caAgents
+            .filter((a: any) => caSelectedAgents.includes(a._id))
+            .map((a: any) => `${a.firstName} ${a.lastName}`);
+
+          const res = await api.post('/records/campaigns/bulk-assign', {
+            campaignName: caSelectedCampaign,
+            agentNames,
+            leads: parsedLeads
+          });
+
+          showToast(res.data.message || 'Leads assigned successfully.', 'success');
+          setCaFile(null);
+          
+          queryClient.invalidateQueries({ queryKey: ['records', 'leads'] });
+          loadCampaignAssignmentsData();
+        } catch (err: any) {
+          console.error(err);
+          showToast(err.response?.data?.error || 'Failed to process bulk assignment.', 'error');
+        } finally {
+          setCaAssigning(false);
+        }
+      };
+      reader.readAsText(caFile);
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to read file.', 'error');
+      setCaAssigning(false);
+    }
+  };
+
+  const renderCampaignAssignments = () => {
+    return (
+      <div className="space-y-6">
+        {/* Header Title */}
+        <div className="text-left">
+          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">
+            Assign Campaigns
+          </h1>
+        </div>
+
+        {/* Top Control Card */}
+        <div className="card-premium p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            <div>
+              <label className="block text-xs font-bold text-slate-400 dark:text-slate-350 uppercase tracking-wider mb-2">Campaigns</label>
+              <select 
+                value={caSelectedCampaign} 
+                onChange={e => setCaSelectedCampaign(e.target.value)} 
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+              >
+                <option value="">Select Campaign</option>
+                {caCampaigns.map((c: any) => {
+                  const name = c.data?.campaignName;
+                  return <option key={c._id} value={name}>{name}</option>;
+                })}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-400 dark:text-slate-355 uppercase tracking-wider mb-2">Load Agents Types</label>
+              <select 
+                value={caSelectedRole} 
+                onChange={e => setCaSelectedRole(e.target.value)} 
+                className="w-full px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer"
+              >
+                <option value="">Select Role</option>
+                {caRoles.map((r: any) => (
+                  <option key={r._id} value={r._id}>{r.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                type="button" 
+                onClick={handleLoadAgents}
+                className="btn-primary-premium py-2 px-5 text-sm font-bold flex items-center justify-center gap-1.5 h-10 w-36"
+                disabled={caLoadingAgents}
+              >
+                {caLoadingAgents ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>Load Now</>
+                )}
+              </button>
+              
+              <Link 
+                to="/modules/campaigns"
+                className="flex items-center justify-center h-10 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100/80 dark:hover:bg-indigo-900/40 border border-indigo-100 dark:border-indigo-950 px-4 rounded-xl transition-all"
+              >
+                View All Campaigns Details
+              </Link>
+            </div>
+          </div>
+
+          <div className="border-t border-slate-100 dark:border-slate-800/60 my-6"></div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+            <div className="md:col-span-2">
+              <label className="block text-xs font-bold text-slate-400 dark:text-slate-360 uppercase tracking-wider mb-2">Upload Excel / CSV File</label>
+              <div className="flex items-center gap-3">
+                <input 
+                  type="file" 
+                  accept=".csv,.xlsx,.xls"
+                  onChange={e => setCaFile(e.target.files?.[0] || null)}
+                  className="w-full text-xs text-slate-500 dark:text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 dark:file:bg-slate-800 file:text-slate-700 dark:file:text-slate-300 hover:file:bg-slate-200 dark:hover:file:bg-slate-700 cursor-pointer border border-slate-200 dark:border-slate-750 px-3 py-1.5 bg-white dark:bg-slate-800 rounded-xl"
+                />
+                {caFile && (
+                  <button 
+                    type="button" 
+                    onClick={() => setCaFile(null)}
+                    className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-xl transition-colors"
+                  >
+                    <Icons.X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <button 
+                type="button" 
+                onClick={handleAssignData}
+                className="w-full h-10 bg-emerald-650 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-1.5"
+                disabled={caAssigning}
+              >
+                {caAssigning ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <Icons.FileSpreadsheet className="w-4 h-4" /> Assign Data
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Employee Allocation Table Card */}
+        <div className="card-premium p-6 space-y-4">
+          <h2 className="text-lg font-bold text-slate-800 dark:text-white text-left">
+            Assign Campaigns for Below Employees
+          </h2>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-800 text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider h-10">
+                  <th className="py-2 px-4 w-12 text-center">
+                    <input 
+                      type="checkbox"
+                      checked={caAgents.length > 0 && caSelectedAgents.length === caAgents.length}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setCaSelectedAgents(caAgents.map(a => a._id));
+                        } else {
+                          setCaSelectedAgents([]);
+                        }
+                      }}
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                    />
+                  </th>
+                  <th className="py-2 px-4">Full Name</th>
+                  <th className="py-2 px-4">Role</th>
+                  <th className="py-2 px-4">RM</th>
+                  <th className="py-2 px-4 text-center">Total Allocated #</th>
+                  <th className="py-2 px-4 text-center">Total Dialed #</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                {caAgents.map((agent: any) => {
+                  const fullName = `${agent.firstName} ${agent.lastName}`;
+                  const allocated = caAllocatedStats[fullName] || 0;
+                  const dialed = caDialedStats[fullName] || 0;
+                  return (
+                    <tr key={agent._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/10 transition-colors h-14">
+                      <td className="px-4 py-2 text-center">
+                        <input 
+                          type="checkbox"
+                          checked={caSelectedAgents.includes(agent._id)}
+                          onChange={e => {
+                            if (e.target.checked) {
+                              setCaSelectedAgents([...caSelectedAgents, agent._id]);
+                            } else {
+                              setCaSelectedAgents(caSelectedAgents.filter(id => id !== agent._id));
+                            }
+                          }}
+                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer"
+                        />
+                      </td>
+                      <td className="px-4 py-2 font-bold text-slate-800 dark:text-slate-200">
+                        {fullName}
+                      </td>
+                      <td className="px-4 py-2 text-slate-500 dark:text-slate-400 font-semibold">
+                        {agent.roleId?.name || 'No Role'}
+                      </td>
+                      <td className="px-4 py-2 text-slate-500 dark:text-slate-400 font-semibold">
+                        {agent.reportingManager ? `${agent.reportingManager.firstName} ${agent.reportingManager.lastName}` : 'N/A'}
+                      </td>
+                      <td className="px-4 py-2 text-center font-bold text-indigo-650 dark:text-indigo-400">
+                        {allocated}
+                      </td>
+                      <td className="px-4 py-2 text-center font-bold text-emerald-600 dark:text-emerald-500">
+                        {dialed}
+                      </td>
+                    </tr>
+                  );
+                })}
+                {caAgents.length === 0 && (
+                  <tr>
+                    <td colSpan={6} className="text-center text-slate-400 dark:text-slate-500 py-8 italic">
+                      No employees loaded. Select an agent role type above and click "Load Now".
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   // Campaigns local state for inline form
   const [campaignNameInput, setCampaignNameInput] = useState('');
   const [editCampaignId, setEditCampaignId] = useState<string | null>(null);
@@ -453,7 +800,9 @@ export default function ModuleView() {
 
   return (
     <div className="space-y-6">
-      {apiPath === 'campaigns' ? (
+      {apiPath === 'campaignassignments' ? (
+        renderCampaignAssignments()
+      ) : apiPath === 'campaigns' ? (
         <div className="space-y-6">
           {/* Header Title */}
           <div className="text-left">
