@@ -880,14 +880,14 @@ export default function Settings() {
 
   if (accessDenied) {
     return (
-      <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">
+      <div className="space-y-6 max-w-6xl mx-auto text-left">
+        <div className="pb-2">
+          <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">
             Settings
           </h1>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm text-center max-w-xl mx-auto space-y-4">
+        <div className="bg-white border border-[#E8ECF4] rounded-[20px] p-8 shadow-sm text-center max-w-xl mx-auto space-y-4">
           <div className="w-16 h-16 bg-rose-50 rounded-full flex items-center justify-center mx-auto text-rose-500">
             <Icons.ShieldAlert className="w-8 h-8" />
           </div>
@@ -897,8 +897,7 @@ export default function Settings() {
           </p>
           <button
             onClick={() => navigate('/settings?tab=company')}
-            style={{ backgroundColor: 'rgb(var(--color-primary))' }}
-            className="text-white px-6 py-2.5 rounded-xl font-semibold text-sm inline-flex items-center gap-2 hover:brightness-105 transition-all shadow-md"
+            className="btn-primary-premium inline-flex items-center gap-2"
           >
             <Icons.ArrowLeft className="w-4 h-4" />
             Back to Company Settings
@@ -909,15 +908,15 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">
+    <div className="space-y-6 max-w-6xl mx-auto text-left">
+      <div className="pb-2">
+        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">
           Settings
         </h1>
       </div>
 
       {/* Settings Tabs */}
-      <div className="flex overflow-x-auto border-b border-slate-200 hide-scrollbar pb-px">
+      <div className="flex overflow-x-auto border-b border-slate-100 hide-scrollbar pb-px">
         <div className="flex gap-6 min-w-max px-1">
           {visibleTabs.map(tab => {
             const Icon = tab.icon;
@@ -926,10 +925,10 @@ export default function Settings() {
               <button
                 key={tab.id}
                 onClick={() => navigate(`/settings?tab=${tab.id}`)}
-                className={`flex items-center gap-2 pb-3 text-sm font-bold border-b-2 transition-colors ${
+                className={`flex items-center gap-2 pb-3.5 text-xs font-[800] uppercase tracking-wider border-b-2 transition-all ${
                   isActive 
-                    ? 'border-primary text-primary' 
-                    : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-300'
+                    ? 'border-indigo-650 text-indigo-650' 
+                    : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-200'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -945,47 +944,47 @@ export default function Settings() {
         {/* Company Settings */}
         <div className={`lg:col-span-12 card-premium p-0 overflow-hidden ${currentTab === 'company' ? 'block' : 'hidden'}`}>
           {/* Sub-tabs Header */}
-          <div className="flex border-b border-slate-200">
+          <div className="flex border-b border-slate-100 bg-slate-50/50">
             <button
               type="button"
               onClick={() => setCompanySubTab('details')}
-              className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
+              className={`px-6 py-4 font-[800] text-[10px] uppercase tracking-wider transition-all relative ${
                 companySubTab === 'details'
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
+                  ? 'bg-white text-slate-800 border-r border-slate-100 shadow-sm'
+                  : 'text-slate-450 hover:bg-slate-50 hover:text-slate-800 border-r border-slate-100'
               }`}
             >
               Company Details
               {companySubTab === 'details' && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-650" />
               )}
             </button>
             <button
               type="button"
               onClick={() => setCompanySubTab('address')}
-              className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
+              className={`px-6 py-4 font-[800] text-[10px] uppercase tracking-wider transition-all relative ${
                 companySubTab === 'address'
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800 border-r border-slate-200/60'
+                  ? 'bg-white text-slate-800 border-r border-slate-100 shadow-sm'
+                  : 'text-slate-450 hover:bg-slate-50 hover:text-slate-800 border-r border-slate-100'
               }`}
             >
               Address
               {companySubTab === 'address' && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-650" />
               )}
             </button>
             <button
               type="button"
               onClick={() => setCompanySubTab('admin')}
-              className={`px-6 py-3.5 font-bold text-sm transition-all relative ${
+              className={`px-6 py-4 font-[800] text-[10px] uppercase tracking-wider transition-all relative ${
                 companySubTab === 'admin'
-                  ? 'bg-white text-slate-800 shadow-sm'
-                  : 'bg-slate-50 text-slate-600 hover:bg-slate-100 hover:text-slate-800'
+                  ? 'bg-white text-slate-800 border-r border-slate-100 shadow-sm'
+                  : 'text-slate-450 hover:bg-slate-50 hover:text-slate-800 border-r border-slate-100'
               }`}
             >
               Admin Details
               {companySubTab === 'admin' && (
-                <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-650" />
               )}
             </button>
           </div>
@@ -998,7 +997,7 @@ export default function Settings() {
               <div className="flex flex-col lg:flex-row gap-8 items-start">
                 {/* Logo Upload Box */}
                 <div className="flex flex-col items-center gap-3 bg-slate-50/50 p-5 border border-slate-150 rounded-2xl w-full lg:w-48 text-center shrink-0">
-                  <div className="w-24 h-24 rounded-2xl border border-slate-200 bg-white flex items-center justify-center p-2 shadow-sm overflow-hidden select-none">
+                  <div className="w-24 h-24 rounded-2xl border border-[#E8ECF4] bg-white flex items-center justify-center p-2 shadow-sm overflow-hidden select-none">
                     {logoUrl ? (
                       <img src={logoUrl} alt="Logo" className="w-full h-full object-contain" />
                     ) : (
@@ -1006,7 +1005,7 @@ export default function Settings() {
                     )}
                   </div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Logo Thumbnail</span>
-                  <label className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-650 cursor-pointer shadow-sm">
+                  <label className="px-3 py-1.5 rounded-xl border border-[#E8ECF4] bg-white hover:bg-slate-50 transition-colors text-xs font-bold text-slate-650 cursor-pointer shadow-sm">
                     {uploading ? 'Uploading...' : 'Choose file'}
                     <input type="file" onChange={handleLogoUpload} className="hidden" disabled={uploading} />
                   </label>
@@ -1015,27 +1014,27 @@ export default function Settings() {
                 {/* Form Fields Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5 flex-grow w-full">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Code *</label>
-                    <input type="text" value={companyCode} onChange={e => setCompanyCode(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="e.g. COMP01" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Company Code *</label>
+                    <input type="text" value={companyCode} onChange={e => setCompanyCode(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="e.g. COMP01" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Name *</label>
-                    <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="e.g. New Frontline Bazaar" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Company Name *</label>
+                    <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="e.g. New Frontline Bazaar" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Registration Id *</label>
-                    <input type="text" value={registrationId} onChange={e => setRegistrationId(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="e.g. 78658764873" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Company Registration Id *</label>
+                    <input type="text" value={registrationId} onChange={e => setRegistrationId(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="e.g. 78658764873" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company Start Date *</label>
-                    <input type="text" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="2/20/2018 12:00:00 AM" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Company Start Date *</label>
+                    <input type="text" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="2/20/2018 12:00:00 AM" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Company End Date *</label>
-                    <input type="text" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="3/23/2018 12:00:00 AM" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Company End Date *</label>
+                    <input type="text" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="3/23/2018 12:00:00 AM" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Upload Company Doc</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Upload Company Doc</label>
                     <input type="file" onChange={async (e) => {
                       if (!e.target.files || e.target.files.length === 0) return;
                       const file = e.target.files[0];
@@ -1050,31 +1049,31 @@ export default function Settings() {
                       } catch {
                         showToast('Failed to upload document.', 'error');
                       }
-                    }} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-slate-200 px-3 py-1 bg-white rounded-xl" />
+                    }} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-[#E8ECF4] px-3 py-1 bg-white rounded-xl" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Phone Number *</label>
-                    <input type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="65327642" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Phone Number *</label>
+                    <input type="text" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="65327642" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Mobile *</label>
-                    <input type="text" value={mobile} onChange={e => setMobile(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="56326563649" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Mobile *</label>
+                    <input type="text" value={mobile} onChange={e => setMobile(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="56326563649" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email *</label>
-                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="info@frontlinebazaar.com" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Email *</label>
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="info@frontlinebazaar.com" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Upload Logo</label>
-                    <input type="file" onChange={handleLogoUpload} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-slate-200 px-3 py-1 bg-white rounded-xl" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Upload Logo</label>
+                    <input type="file" onChange={handleLogoUpload} className="w-full text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 cursor-pointer border border-[#E8ECF4] px-3 py-1 bg-white rounded-xl" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Fax</label>
-                    <input type="text" value={fax} onChange={e => setFax(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="657676" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Fax</label>
+                    <input type="text" value={fax} onChange={e => setFax(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="657676" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Website</label>
-                    <input type="text" value={website} onChange={e => setWebsite(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="https://frontlinebazaar.com/" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Website</label>
+                    <input type="text" value={website} onChange={e => setWebsite(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="https://frontlinebazaar.com/" />
                   </div>
                 </div>
               </div>
@@ -1084,21 +1083,21 @@ export default function Settings() {
             {companySubTab === 'address' && (
               <div className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Address</label>
-                  <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Gangavati Karnataka" />
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Address</label>
+                  <input type="text" value={address} onChange={e => setAddress(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="Gangavati Karnataka" />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">City</label>
-                    <input type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Ganagavati" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">City</label>
+                    <input type="text" value={city} onChange={e => setCity(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="Ganagavati" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">State</label>
-                    <input type="text" value={companyState} onChange={e => setCompanyState(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Karnataka" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">State</label>
+                    <input type="text" value={companyState} onChange={e => setCompanyState(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="Karnataka" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Country</label>
-                    <select value={country} onChange={e => setCountry(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Country</label>
+                    <select value={country} onChange={e => setCountry(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer">
                       <option value="">Select Country</option>
                       <option value="India">India</option>
                       <option value="United States">United States</option>
@@ -1107,8 +1106,8 @@ export default function Settings() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Postal Code</label>
-                    <input type="text" value={postalCode} onChange={e => setPostalCode(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="583231" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Postal Code</label>
+                    <input type="text" value={postalCode} onChange={e => setPostalCode(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="583231" />
                   </div>
                 </div>
               </div>
@@ -1119,28 +1118,28 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">First Name</label>
-                    <input type="text" value={adminFirstName} onChange={e => setAdminFirstName(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="First Name" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">First Name</label>
+                    <input type="text" value={adminFirstName} onChange={e => setAdminFirstName(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="First Name" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Last Name</label>
-                    <input type="text" value={adminLastName} onChange={e => setAdminLastName(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Last Name" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Last Name</label>
+                    <input type="text" value={adminLastName} onChange={e => setAdminLastName(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="Last Name" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">User Name</label>
-                    <input type="text" value={adminUsername} onChange={e => setAdminUsername(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="User Name" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">User Name</label>
+                    <input type="text" value={adminUsername} onChange={e => setAdminUsername(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="User Name" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
-                    <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="******" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Password</label>
+                    <input type="password" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="******" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Confirm Password</label>
-                    <input type="password" value={adminConfirmPassword} onChange={e => setAdminConfirmPassword(e.target.value)} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Confirm Password" />
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Confirm Password</label>
+                    <input type="password" value={adminConfirmPassword} onChange={e => setAdminConfirmPassword(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="Confirm Password" />
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Financial Year</label>
-                    <select value={financialYear} onChange={e => setFinancialYear(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Financial Year</label>
+                    <select value={financialYear} onChange={e => setFinancialYear(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer">
                       <option value="">Select Financial Year</option>
                       <option value="2025-2026">2025-2026</option>
                       <option value="2026-2027">2026-2027</option>
@@ -1148,8 +1147,8 @@ export default function Settings() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Role Type *</label>
-                    <select value={roleType} onChange={e => setRoleType(e.target.value)} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500 cursor-pointer">
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Role Type *</label>
+                    <select value={roleType} onChange={e => setRoleType(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer">
                       <option value="">Select Role Type</option>
                       <option value="Super Admin">Super Admin</option>
                       <option value="Admin">Admin</option>
@@ -1165,7 +1164,7 @@ export default function Settings() {
               <button
                 type="button"
                 onClick={() => loadSettingsData()}
-                className="px-5 py-2 rounded-xl text-sm font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors"
+                className="btn-secondary-premium h-10 px-5 text-xs font-bold"
               >
                 Cancel
               </button>
@@ -1173,7 +1172,7 @@ export default function Settings() {
                 type="button"
                 onClick={handleSaveBranding}
                 disabled={saving}
-                className="px-5 py-2 rounded-xl text-sm font-bold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-all shadow-sm flex items-center gap-2"
+                className="btn-primary-premium flex items-center gap-2"
               >
                 {saving ? (
                   <>
@@ -1192,7 +1191,7 @@ export default function Settings() {
         {/* Roles Management */}
         <div className={`lg:col-span-12 space-y-6 ${currentTab === 'role' ? 'block' : 'hidden'}`}>
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl uppercase font-bold text-slate-800 tracking-tight">Roles</h1>
+            <h1 className="text-2xl uppercase font-[800] text-slate-800 tracking-tight">Roles</h1>
           </div>
 
           {/* Form Card (Add/Edit) */}
@@ -1200,21 +1199,21 @@ export default function Settings() {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col md:flex-row gap-4 flex-grow max-w-2xl">
                 <div className="flex-1">
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Role Type</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Role Type</label>
                   <input
                     type="text"
                     placeholder="Enter role type"
                     value={roleFormName}
                     onChange={(e) => setRoleFormName(e.target.value)}
-                    className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-indigo-600"
+                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                   />
                 </div>
                 <div className="w-full md:w-36">
-                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Status</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Status</label>
                   <select
                     value={roleFormActive ? 'active' : 'inactive'}
                     onChange={(e) => setRoleFormActive(e.target.value === 'active')}
-                    className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-1 focus:ring-indigo-600 font-semibold"
+                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
@@ -1241,17 +1240,17 @@ export default function Settings() {
           </div>
 
           {/* Table Card (List) */}
-          <div className="bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl shadow-sm overflow-hidden p-1">
+          <div className="bg-white border border-[#E8ECF4] rounded-[20px] shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
-                  <tr className="table-header-premium">
+                  <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
                     <th className="py-2.5 px-4">Role Type</th>
                     <th className="py-2.5 px-4">Status</th>
                     <th className="py-2.5 px-4 text-center w-36">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-150">
+                <tbody className="divide-y divide-slate-100">
                   {(() => {
                     const itemsPerPage = 5;
                     const totalPages = Math.ceil(roles.length / itemsPerPage) || 1;
@@ -1270,7 +1269,7 @@ export default function Settings() {
                     }
 
                     return paginatedRoles.map((role) => (
-                      <tr key={role._id} className="hover:bg-slate-50/50 transition-colors h-11">
+                      <tr key={role._id} className="hover:bg-slate-50/30 transition-colors h-14">
                         <td className="px-4 py-2 font-semibold text-slate-700">{role.name}</td>
                         <td className="px-4 py-2">
                           <span className={role.isActive !== false ? 'status-active-premium' : 'status-inactive-premium'}>
@@ -1309,7 +1308,7 @@ export default function Settings() {
 
             {/* Pagination */}
             {roles.length > 5 && (
-              <div className="py-4 border-t border-slate-150 flex justify-center">
+              <div className="py-4 border-t border-slate-100 flex justify-center">
                 <div className="flex gap-1">
                   {Array.from({ length: Math.ceil(roles.length / 5) }).map((_, idx) => (
                     <button
@@ -1318,7 +1317,7 @@ export default function Settings() {
                       className={`px-3 py-1.5 border rounded-lg text-xs font-semibold transition-all ${
                         rolePage === idx + 1
                           ? 'bg-[#0275d8] border-[#0275d8] text-white shadow-sm shadow-[#0275d8]/20'
-                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                          : 'bg-white border-[#E8ECF4] text-slate-600 hover:bg-slate-50'
                       }`}
                     >
                       {idx + 1}
@@ -1341,16 +1340,16 @@ export default function Settings() {
             </h3>
             <form onSubmit={handleSaveStatus} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Status Name</label>
+                <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Status Name</label>
                 <input required type="text" value={statusForm.name} onChange={e => setStatusForm({ ...statusForm, name: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Color</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Color</label>
                   <input type="color" value={statusForm.color} onChange={e => setStatusForm({ ...statusForm, color: e.target.value })} className="w-full h-10 p-1 border border-slate-200 rounded-xl cursor-pointer" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Icon</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Icon</label>
                   <select value={statusForm.icon} onChange={e => setStatusForm({ ...statusForm, icon: e.target.value })} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600">
                     {['Circle', 'Flame', 'Sun', 'Tag', 'CheckCircle', 'Clock', 'XOctagon', 'PhoneCall', 'ArrowDownCircle', 'Hourglass', 'FileWarning', 'FileText', 'Banknote'].map(ic => (
                       <option key={ic} value={ic}>{ic}</option>
@@ -1360,11 +1359,11 @@ export default function Settings() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Pipeline Pos</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Pipeline Pos</label>
                   <input type="number" value={statusForm.pipelinePosition} onChange={e => setStatusForm({ ...statusForm, pipelinePosition: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Serial Number</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Serial Number</label>
                   <input type="number" value={statusForm.order} onChange={e => setStatusForm({ ...statusForm, order: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
                 </div>
               </div>
@@ -1495,14 +1494,14 @@ export default function Settings() {
                   <form onSubmit={handleSaveModuleRecord} className="space-y-4">
                     {activeModuleDef.fields.map(f => (
                       <div key={f.name}>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">{f.label}</label>
+                        <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">{f.label}</label>
                         {f.type === 'dropdown' ? (
-                          <select required={f.required} value={moduleForm[f.name] || ''} onChange={e => setModuleForm({ ...moduleForm, [f.name]: e.target.value })} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500">
+                          <select required={f.required} value={moduleForm[f.name] || ''} onChange={e => setModuleForm({ ...moduleForm, [f.name]: e.target.value })} className="w-full h-11 px-4 text-sm font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500">
                             <option value="">Select Option...</option>
                             {f.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                           </select>
                         ) : f.type === 'number' || f.type === 'currency' ? (
-                          <input required={f.required} type="number" step="any" value={moduleForm[f.name] || ''} onChange={e => setModuleForm({ ...moduleForm, [f.name]: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                          <input required={f.required} type="number" step="any" value={moduleForm[f.name] || ''} onChange={e => setModuleForm({ ...moduleForm, [f.name]: Number(e.target.value) })} className="w-full h-11 px-4 text-sm font-semibold bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500" />
                         ) : f.type === 'date' ? (
                           <input required={f.required} type="date" value={moduleForm[f.name] || ''} onChange={e => setModuleForm({ ...moduleForm, [f.name]: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
                         ) : (
@@ -1532,7 +1531,7 @@ export default function Settings() {
                 {/* 1. Loan Type & PSM (Top) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
                       Loan Type <span className="text-red-500">*</span>
                     </label>
                     <select
@@ -1548,7 +1547,7 @@ export default function Settings() {
                     </select>
                   </div>
                   <div className="relative">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
                       PSM <span className="text-red-500">*</span>
                     </label>
                     <button
@@ -1669,7 +1668,7 @@ export default function Settings() {
                     {/* 1. Loan Type & PSM (Top) */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                        <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
                           Loan Type <span className="text-red-500">*</span>
                         </label>
                         <select
@@ -1686,7 +1685,7 @@ export default function Settings() {
                       </div>
                       <div>
                         <div className="relative">
-                          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                          <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
                             PSM <span className="text-red-500">*</span>
                           </label>
                           <button
@@ -1756,7 +1755,7 @@ export default function Settings() {
 
                     {/* 2. Banks Checkboxes (Middle) */}
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                      <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
                         Banks <span className="text-red-500">*</span> (Select one or more)
                       </label>
                       <div className="bg-slate-50 border border-indigo-100 rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">

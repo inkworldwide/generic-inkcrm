@@ -52,54 +52,54 @@ export default function Status() {
   }
 
   return (
-    <div className="space-y-6 text-left">
+    <div className="space-y-6 max-w-6xl mx-auto text-left">
       <div>
-        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">System Status & Logs</h1>
-        <p className="text-sm text-slate-500 mt-1">Real-time database performance and administrative audit logs</p>
+        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">System Status & Logs</h1>
+        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1.5">Real-time database performance and administrative audit logs</p>
       </div>
 
       {/* Health metrics grid */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-premium flex items-center gap-4">
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-lg">
+        <div className="card-premium flex items-center gap-4">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
             <Icons.Database className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-450 uppercase tracking-wider">Database status</p>
-            <p className="text-lg font-bold text-slate-800 mt-0.5">{healthMetrics.dbStatus}</p>
+            <p className="text-[10px] font-bold text-slate-450 uppercase tracking-wider">Database status</p>
+            <p className="text-lg font-[800] text-slate-800 mt-0.5">{healthMetrics.dbStatus}</p>
             <span className="text-[10px] text-slate-400 font-semibold">Latency: {healthMetrics.dbLatency}</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-premium flex items-center gap-4">
-          <div className="p-3 bg-indigo-50 text-primary rounded-lg">
+        <div className="card-premium flex items-center gap-4">
+          <div className="p-3 bg-indigo-50 text-indigo-650 rounded-xl">
             <Icons.Cpu className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-450 uppercase tracking-wider">Server Uptime</p>
-            <p className="text-lg font-bold text-slate-800 mt-0.5">{healthMetrics.uptime}</p>
+            <p className="text-[10px] font-bold text-slate-455 uppercase tracking-wider">Server Uptime</p>
+            <p className="text-lg font-[800] text-slate-800 mt-0.5">{healthMetrics.uptime}</p>
             <span className="text-[10px] text-slate-400 font-semibold">Memory: {healthMetrics.memoryUsage}</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-premium flex items-center gap-4">
-          <div className="p-3 bg-cyan-50 text-cyan-600 rounded-lg">
+        <div className="card-premium flex items-center gap-4">
+          <div className="p-3 bg-cyan-50 text-cyan-600 rounded-xl">
             <Icons.Users className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-450 uppercase tracking-wider">Active Devices</p>
-            <p className="text-lg font-bold text-slate-800 mt-0.5">{healthMetrics.activeSessions}</p>
+            <p className="text-[10px] font-bold text-slate-455 uppercase tracking-wider">Active Devices</p>
+            <p className="text-lg font-[800] text-slate-800 mt-0.5">{healthMetrics.activeSessions}</p>
             <span className="text-[10px] text-slate-400 font-semibold">Sessions verified</span>
           </div>
         </div>
 
-        <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-premium flex items-center gap-4">
-          <div className="p-3 bg-rose-50 text-rose-600 rounded-lg">
+        <div className="card-premium flex items-center gap-4">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
             <Icons.ShieldCheck className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-xs font-semibold text-slate-450 uppercase tracking-wider">Security Rules</p>
-            <p className="text-lg font-bold text-slate-800 mt-0.5">Enabled</p>
+            <p className="text-[10px] font-bold text-slate-455 uppercase tracking-wider">Security Rules</p>
+            <p className="text-lg font-[800] text-slate-800 mt-0.5">Enabled</p>
             <span className="text-[10px] text-slate-400 font-semibold">CORS & Rate limits active</span>
           </div>
         </div>
@@ -107,15 +107,15 @@ export default function Status() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Audit Log Table */}
-        <div className="lg:col-span-8 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-premium">
-          <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Icons.FileText className="w-4 h-4 text-primary" /> Admin Audit Logs
+        <div className="lg:col-span-8 card-premium p-0 overflow-hidden shadow-sm">
+          <div className="px-6 py-4.5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
+            <h3 className="text-xs font-[800] text-slate-450 uppercase tracking-wider flex items-center gap-1.5">
+              <Icons.FileText className="w-4 h-4 text-indigo-650" /> Admin Audit Logs
             </h3>
           </div>
-          <div className="overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
-            <table className="w-full min-w-[700px] text-left text-xs text-slate-600">
-              <thead className="bg-slate-50/50 border-b border-slate-100 text-slate-450 font-bold uppercase">
+          <div className="overflow-x-auto">
+            <table className="w-full text-[11px] text-left border-collapse">
+              <thead className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
                 <tr>
                   <th className="px-6 py-3">Timestamp</th>
                   <th className="px-6 py-3">Action</th>
@@ -126,20 +126,20 @@ export default function Status() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {logs.map((log) => (
-                  <tr key={log._id} className="hover:bg-slate-50/40 transition-colors">
-                    <td className="px-6 py-3.5 text-slate-400">
+                  <tr key={log._id} className="hover:bg-slate-50/30 transition-colors h-14">
+                    <td className="px-6 py-3.5 text-slate-400 font-semibold">
                       {new Date(log.createdAt).toLocaleString()}
                     </td>
-                    <td className="px-6 py-3.5 font-bold text-primary">
+                    <td className="px-6 py-3.5 font-[800] text-indigo-650 uppercase tracking-wider">
                       {log.action}
                     </td>
-                    <td className="px-6 py-3.5 font-semibold text-slate-700">
+                    <td className="px-6 py-3.5 font-bold text-slate-700">
                       {log.resource}
                     </td>
-                    <td className="px-6 py-3.5 text-slate-500">
+                    <td className="px-6 py-3.5 text-slate-500 font-semibold">
                       {log.userId?.email || 'System'}
                     </td>
-                    <td className="px-6 py-3.5 text-slate-400 font-mono">
+                    <td className="px-6 py-3.5 text-slate-400 font-mono font-semibold">
                       {log.ipAddress || '127.0.0.1'}
                     </td>
                   </tr>
@@ -150,29 +150,29 @@ export default function Status() {
         </div>
 
         {/* Sessions sidebar */}
-        <div className="lg:col-span-4 bg-white border border-slate-200 rounded-xl p-5 shadow-premium">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
-            <Icons.Key className="w-4 h-4 text-primary" /> Verified Devices
+        <div className="lg:col-span-4 card-premium shadow-sm">
+          <h3 className="text-xs font-[800] text-slate-450 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-3.5">
+            <Icons.Key className="w-4 h-4 text-indigo-650" /> Verified Devices
           </h3>
 
           <div className="space-y-3">
             {sessions.map((s, idx) => (
-              <div key={idx} className="p-3 bg-slate-50 rounded-lg border border-slate-100/50 text-xs">
-                <div className="flex justify-between font-semibold text-slate-700">
+              <div key={idx} className="p-4 bg-slate-50/50 border border-[#E8ECF4] rounded-2xl text-xs space-y-1.5">
+                <div className="flex justify-between font-bold text-slate-700">
                   <span>{s.browser} • {s.os}</span>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
+                  <span className="text-[9px] font-[800] text-emerald-650 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-lg tracking-wider uppercase">Active</span>
                 </div>
-                <p className="text-slate-400 mt-1 font-mono">IP: {s.ip}</p>
-                <p className="text-[10px] text-slate-400 mt-0.5">Last active: {new Date(s.lastActive).toLocaleTimeString()}</p>
+                <p className="text-slate-400 font-semibold font-mono">IP: {s.ip}</p>
+                <p className="text-[10px] text-slate-400 font-semibold">Last active: {new Date(s.lastActive).toLocaleTimeString()}</p>
               </div>
             ))}
             {sessions.length === 0 && (
-              <div className="p-3 bg-slate-50 rounded-lg border border-slate-100/50 text-xs">
-                <div className="flex justify-between font-semibold text-slate-700">
+              <div className="p-4 bg-slate-50/50 border border-[#E8ECF4] rounded-2xl text-xs space-y-1.5">
+                <div className="flex justify-between font-bold text-slate-700">
                   <span>Google Chrome • Windows</span>
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">Active</span>
+                  <span className="text-[9px] font-[800] text-emerald-650 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-lg tracking-wider uppercase">Active</span>
                 </div>
-                <p className="text-slate-400 mt-1 font-mono">IP: 192.168.1.12</p>
+                <p className="text-slate-400 font-semibold font-mono">IP: 192.168.1.12</p>
               </div>
             )}
           </div>

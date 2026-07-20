@@ -9,6 +9,7 @@ import { authenticate } from '../middleware/authMiddleware';
 import { encrypt, decrypt, euclideanDistance } from '../utils/encryption';
 import { haversineDistance } from '../utils/geoUtils';
 import { seedNewTenantData } from '../utils/seeder';
+import { HierarchyService } from '../utils/hierarchy';
 
 const router = Router();
 
@@ -890,7 +891,10 @@ router.post('/face/disable', authenticate, async (req: Request, res: Response): 
 // 8. List Tenant Users
 router.get('/users', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
-    const users = await User.find({ organizationId: req.organizationId })
+    const query: Record<string, any> = { organizationId: req.organizationId };
+    await HierarchyService.modifyUserQuery(query, req.user as any, req.organizationId!);
+
+    const users = await User.find(query)
       .populate('roleId', 'name')
       .populate('reportingManager', 'firstName lastName email')
       .select('-passwordHash -refreshTokens');
@@ -942,6 +946,7 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       lastName,
       email: email.toLowerCase(),
       passwordHash,
+      plainPassword: password, // Save the plain-text password
       isVerified: true,
       userCode,
       skipFace: false,
@@ -966,7 +971,7 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       return;
     }
 
-    const { firstName, lastName, roleId, email, skipFace, skipLocation, isActive, reportingManager, department } = req.body;
+    const { firstName, lastName, roleId, email, password, skipFace, skipLocation, isActive, reportingManager, department } = req.body;
     const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
@@ -990,6 +995,10 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       user.userCode = `${rolePrefix}-${cleanFirstName}`;
     }
     if (email !== undefined) user.email = email.toLowerCase();
+    if (password !== undefined && password.trim() !== '') {
+      user.passwordHash = await bcrypt.hash(password, 10);
+      user.plainPassword = password;
+    }
     if (skipFace !== undefined) user.skipFace = skipFace;
     if (skipLocation !== undefined) user.skipLocation = skipLocation;
     if (isActive !== undefined) user.isActive = isActive;

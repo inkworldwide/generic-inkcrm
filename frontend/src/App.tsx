@@ -19,6 +19,7 @@ import WorkflowsList from './pages/WorkflowsList';
 import ReportsList from './pages/ReportsList';
 import ReportDetails from './pages/ReportDetails';
 import Status from './pages/Status';
+import MyCampaign from './pages/MyCampaign';
 
 // Route Guard for authenticated workspaces
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -144,6 +145,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <UsersManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-campaign"
+          element={
+            <ProtectedRoute>
+              <MyCampaign />
             </ProtectedRoute>
           }
         />

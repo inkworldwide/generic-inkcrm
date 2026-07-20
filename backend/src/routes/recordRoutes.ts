@@ -9,6 +9,7 @@ import { FormulaEvaluator } from '../services/formulaEvaluator';
 import { WorkflowEngine } from '../services/workflowEngine';
 import { authenticate } from '../middleware/authMiddleware';
 import { requireTenant } from '../middleware/tenantMiddleware';
+import { HierarchyService } from '../utils/hierarchy';
 
 const router = Router();
 
@@ -122,13 +123,13 @@ router.get('/campaigns/allocation-stats', async (req: Request, res: Response): P
       { $group: { _id: '$data.assignedTo', count: { $sum: 1 } } }
     ]);
 
-    // Aggregate count of dialed leads (status is not New or Pending)
+    // Aggregate count of dialed leads (any status except 'Yet To Call' counts as dialed)
     const dialedStats = await CustomRecord.aggregate([
       { 
         $match: { 
           organizationId: orgId, 
           moduleId: leadModule._id,
-          'data.status': { $nin: ['New', 'Pending'] }
+          'data.status': { $nin: ['Yet To Call', ''] }
         } 
       },
       { $group: { _id: '$data.assignedTo', count: { $sum: 1 } } }
@@ -177,11 +178,11 @@ router.post('/campaigns/bulk-assign', async (req: Request, res: Response): Promi
     leads.forEach((lead: any, idx: number) => {
       const assignedAgent = agentNames[idx % agentNames.length];
       
-      // Parse names
-      let fName = lead.firstName || lead.name || 'Unnamed';
+      // Parse names — support multiple column name formats
+      let fName = lead.firstName || lead.name || lead.costomer || lead.customer || lead.customer_name || 'Unnamed';
       let lName = lead.lastName || '';
-      if (!lead.lastName && lead.name && lead.name.includes(' ')) {
-        const parts = lead.name.split(' ');
+      if (!lead.lastName && fName && fName.includes(' ')) {
+        const parts = fName.split(' ');
         fName = parts[0];
         lName = parts.slice(1).join(' ');
       }
@@ -194,15 +195,18 @@ router.post('/campaigns/bulk-assign', async (req: Request, res: Response): Promi
         data: {
           firstName: fName,
           lastName: lName,
-          phone: lead.phone || lead.mobile || '',
+          phone: lead.phone || lead.mobile || lead.name_contact_num || lead.contact_num || lead.contact || '',
           email: lead.email || '',
-          loanType: lead.loanType || 'SALARIED PERSONAL LOAN',
+          loanType: lead.loanType || lead.lead_category || lead.category || '',
           budget: lead.budget || lead.amount || '',
-          company: lead.company || '',
+          company: lead.company || lead.firm_name || lead.firmName || lead.firm || '',
           salary: lead.salary || '',
-          city: lead.city || '',
+          city: lead.city || lead.location || '',
           state: lead.state || '',
-          status: 'New',
+          dataCode: lead.dataCode || lead.data_code || '',
+          caseDetails: lead.caseDetails || lead.case_status || lead.case_details || '',
+          notes: lead.notes || lead.remarks || lead.remark || '',
+          status: 'Yet To Call',
           source: campaignName, // Set source as campaign name
           assignedTo: assignedAgent // Set agent name
         }
@@ -229,6 +233,128 @@ router.post('/campaigns/bulk-assign', async (req: Request, res: Response): Promi
   } catch (error: any) {
     console.error('Failed to bulk assign leads:', error);
     res.status(500).json({ error: error.message || 'Failed to bulk assign leads.' });
+  }
+});
+
+// GET my campaigns (assigned to logged in user)
+router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized.' });
+      return;
+    }
+
+    // Get the leads module
+    const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
+    if (!leadModule) {
+      res.status(200).json({ campaigns: [] });
+      return;
+    }
+
+    const query: Record<string, any> = {
+      organizationId: orgId,
+      moduleId: leadModule._id,
+      'data.source': { $exists: true, $ne: '' }
+    };
+
+    // Filter by reporting hierarchy
+    await HierarchyService.modifyRecordQuery(query, req.user as any, orgId!);
+
+    const leads = await CustomRecord.find(query);
+
+    // Group leads by campaign name (source)
+    const campaignGroups: Record<string, any[]> = {};
+    leads.forEach(lead => {
+      const source = lead.data?.get ? lead.data.get('source') : lead.data?.source;
+      if (source) {
+        if (!campaignGroups[source]) {
+          campaignGroups[source] = [];
+        }
+        campaignGroups[source].push(lead);
+      }
+    });
+
+    // Get all campaigns to match dates or other details
+    const campaignModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'campaigns' });
+    let campaignRecords: any[] = [];
+    if (campaignModule) {
+      campaignRecords = await CustomRecord.find({
+        organizationId: orgId,
+        moduleId: campaignModule._id
+      });
+    }
+
+    const result = Object.keys(campaignGroups).map(campName => {
+      const groupLeads = campaignGroups[campName];
+      const totalAssigned = groupLeads.length;
+      
+      const dialed = groupLeads.filter(l => {
+        const s = ((l.data?.get ? l.data.get('status') : l.data?.status) || '').toLowerCase();
+        return s !== 'yet to call' && s !== '';
+      }).length;
+      
+      const yetToDial = totalAssigned - dialed;
+
+      const campRecord = campaignRecords.find(c => {
+        const name = c.data?.get ? c.data.get('campaignName') : c.data?.campaignName;
+        return name === campName;
+      });
+      const createdAt = campRecord ? campRecord.createdAt : (groupLeads[0] ? groupLeads[0].createdAt : new Date());
+
+      return {
+        campaignName: campName,
+        totalAssigned,
+        dialed,
+        yetToDial,
+        createdAt,
+        dailyTarget: 200
+      };
+    });
+
+    res.status(200).json({ campaigns: result });
+  } catch (error) {
+    console.error('Failed to get my campaigns:', error);
+    res.status(500).json({ error: 'Failed to retrieve campaigns.' });
+  }
+});
+
+// GET my campaign details (assigned leads under campaignName)
+router.get('/campaigns/my-campaigns/details/:campaignName', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const orgId = req.organizationId;
+    const userId = req.user?.id;
+    const { campaignName } = req.params;
+
+    if (!userId) {
+      res.status(401).json({ error: 'Unauthorized.' });
+      return;
+    }
+
+    // Get the leads module
+    const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
+    if (!leadModule) {
+      res.status(404).json({ error: 'Leads module not found.' });
+      return;
+    }
+
+    const query: Record<string, any> = {
+      organizationId: orgId,
+      moduleId: leadModule._id,
+      'data.source': campaignName
+    };
+
+    // Filter by reporting hierarchy
+    await HierarchyService.modifyRecordQuery(query, req.user as any, orgId!);
+
+    const leads = await CustomRecord.find(query).sort({ createdAt: -1 });
+
+    res.status(200).json({ leads });
+  } catch (error) {
+    console.error('Failed to get my campaign details:', error);
+    res.status(500).json({ error: 'Failed to retrieve campaign details.' });
   }
 });
 
@@ -265,6 +391,19 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
       query.createdBy = req.user?.id;
     }
 
+    // Default filter for leads: exclude campaign calling statuses unless specifically queried
+    if (apiPath.toLowerCase() === 'leads') {
+      if (!req.query['data.status']) {
+        query['data.status'] = { 
+          $nin: [
+            'Yet To Call', 'Not Reachable', 'Not Intested', 'Call Rejected', 
+            'Not Connected', 'Cool Lead', 'No Answer', 'Wrong Number', 
+            'Not Exists', 'Repeated Number', 'No Business', 'Hot Lead', 'Warm Lead'
+          ] 
+        };
+      }
+    }
+
     // Parse other fields for inline filters, e.g. ?data.status=Qualified
     Object.keys(req.query).forEach((q) => {
       if (q.startsWith('data.')) {
@@ -283,6 +422,9 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
         query.$or = textFields;
       }
     }
+
+    // Apply Dynamic Reporting Manager Hierarchy filtering
+    await HierarchyService.modifyRecordQuery(query, req.user as any, req.organizationId!);
 
     // Pagination
     const pageNum = parseInt(page as string, 10);
@@ -442,6 +584,9 @@ router.get('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
       query.createdBy = req.user?.id;
     }
 
+    // Apply Dynamic Reporting Manager Hierarchy filtering
+    await HierarchyService.modifyRecordQuery(query, req.user as any, req.organizationId!);
+
     const record = await CustomRecord.findOne(query);
     if (!record) {
       res.status(404).json({ error: 'Record not found.' });
@@ -485,14 +630,23 @@ router.put('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
       recordQuery.createdBy = req.user?.id;
     }
 
+    // Apply Dynamic Reporting Manager Hierarchy filtering
+    await HierarchyService.modifyRecordQuery(recordQuery, req.user as any, req.organizationId!);
+
     const record = await CustomRecord.findOne(recordQuery);
     if (!record) {
       res.status(404).json({ error: 'Record not found.' });
       return;
     }
 
-    // Validate inputs
-    const validationErrors = validateFields(moduleDef.fields, updateData);
+    const oldValues = record.data instanceof Map ? Object.fromEntries(record.data) : record.data;
+
+    // Validate inputs against the merged data
+    const mergedData = {
+      ...oldValues,
+      ...updateData
+    };
+    const validationErrors = validateFields(moduleDef.fields, mergedData);
     if (validationErrors.length > 0) {
       res.status(400).json({ error: 'Validation failed', details: validationErrors });
       return;
@@ -516,7 +670,6 @@ router.put('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
 
     // Capture changed fields
     const changedFields: string[] = [];
-    const oldValues = record.data instanceof Map ? Object.fromEntries(record.data) : record.data;
 
     Object.keys(updateData).forEach((key) => {
       if (String(oldValues[key]) !== String(updateData[key])) {
@@ -611,6 +764,9 @@ router.delete('/:apiPath/:id', async (req: Request, res: Response): Promise<void
       query.createdBy = req.user?.id;
     }
 
+    // Apply Dynamic Reporting Manager Hierarchy filtering
+    await HierarchyService.modifyRecordQuery(query, req.user as any, req.organizationId!);
+
     const record = await CustomRecord.findOne(query);
     if (!record) {
       res.status(404).json({ error: 'Record not found.' });
@@ -698,6 +854,18 @@ router.post('/transfer/leads', async (req: Request, res: Response): Promise<void
 // GET record activity history
 router.get('/:apiPath/:id/activities', async (req: Request, res: Response): Promise<void> => {
   try {
+    const recordQuery = {
+      _id: req.params.id,
+      organizationId: req.organizationId
+    };
+    await HierarchyService.modifyRecordQuery(recordQuery, req.user as any, req.organizationId!);
+
+    const record = await CustomRecord.findOne(recordQuery);
+    if (!record) {
+      res.status(403).json({ error: 'Access denied.' });
+      return;
+    }
+
     const activities = await Activity.find({
       organizationId: req.organizationId,
       recordId: new mongoose.Types.ObjectId(req.params.id)

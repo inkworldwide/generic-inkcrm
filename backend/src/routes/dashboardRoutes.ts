@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import mongoose from 'mongoose';
 import DashboardLayout from '../models/DashboardLayout';
 import ModuleDefinition from '../models/ModuleDefinition';
 import CustomRecord from '../models/CustomRecord';
@@ -6,6 +7,7 @@ import Activity from '../models/Activity';
 import User from '../models/User';
 import { authenticate } from '../middleware/authMiddleware';
 import { requireTenant } from '../middleware/tenantMiddleware';
+import { HierarchyService } from '../utils/hierarchy';
 
 const router = Router();
 
@@ -72,6 +74,23 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
     const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
     const dealModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'deals' });
 
+    const leadQuery: Record<string, any> = {
+      organizationId: orgId
+    };
+    if (leadModule) {
+      leadQuery.moduleId = leadModule._id;
+    }
+    const dealQuery: Record<string, any> = {
+      organizationId: orgId
+    };
+    if (dealModule) {
+      dealQuery.moduleId = dealModule._id;
+    }
+
+    // Apply Dynamic Reporting Manager Hierarchy filtering
+    await HierarchyService.modifyRecordQuery(leadQuery, req.user as any, orgId!);
+    await HierarchyService.modifyRecordQuery(dealQuery, req.user as any, orgId!);
+
     const statusCounts: Record<string, number> = {};
     const pipelineData: Record<string, number> = {
       'Prospecting': 0,
@@ -93,8 +112,19 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
 
     if (leadModule) {
       // 1. Group leads count by status
+      const matchStage = {
+        ...leadQuery,
+        'data.status': { 
+          $nin: [
+            'Yet To Call', 'Not Reachable', 'Not Intested', 'Call Rejected', 
+            'Not Connected', 'Cool Lead', 'No Answer', 'Wrong Number', 
+            'Not Exists', 'Repeated Number', 'No Business', 'Hot Lead', 'Warm Lead'
+          ] 
+        }
+      };
+
       const leadAgg = await CustomRecord.aggregate([
-        { $match: { organizationId: orgId, moduleId: leadModule._id } },
+        { $match: matchStage },
         { $group: { _id: '$data.status', count: { $sum: 1 } } }
       ]);
       
@@ -105,14 +135,27 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
       });
 
       // 2. Count today's followups
-      const followUpQuery = {
-        organizationId: orgId,
-        moduleId: leadModule._id,
+      const followUpQuery: any = {
+        ...leadQuery
+      };
+      const timeFilter = {
         $or: [
           { 'data.followUpDate': { $gte: startOfToday, $lte: endOfToday } },
-          { 'data.followUpDate': { $regex: '^' + startOfToday.toISOString().split('T')[0] } } // string matching fallback
+          { 'data.followUpDate': { $regex: '^' + startOfToday.toISOString().split('T')[0] } }
         ]
       };
+      if (followUpQuery.$or) {
+        const existingOr = followUpQuery.$or;
+        delete followUpQuery.$or;
+        followUpQuery.$and = [
+          { $or: existingOr },
+          timeFilter
+        ];
+      } else if (followUpQuery.$and) {
+        followUpQuery.$and.push(timeFilter);
+      } else {
+        Object.assign(followUpQuery, timeFilter);
+      }
       
       todayFollowupsCount = await CustomRecord.countDocuments(followUpQuery);
       todayFollowupsList = await CustomRecord.find(followUpQuery).limit(5);
@@ -121,7 +164,7 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
     if (dealModule) {
       // 3. sum amount grouped by stage for Pipeline
       const dealAgg = await CustomRecord.aggregate([
-        { $match: { organizationId: orgId, moduleId: dealModule._id } },
+        { $match: dealQuery },
         { $group: { _id: '$data.stage', total: { $sum: { $toDouble: '$data.amount' } } } }
       ]);
 
@@ -132,9 +175,9 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
       });
 
       // 4. Count Deal Statuses
-      const deals = await CustomRecord.find({ organizationId: orgId, moduleId: dealModule._id });
+      const deals = await CustomRecord.find(dealQuery);
       deals.forEach(deal => {
-        const stage = deal.data?.get('stage');
+        const stage = deal.data?.get ? deal.data.get('stage') : deal.data?.stage;
         if (stage === 'Closed Won') {
           dealStatus.won++;
         } else if (stage === 'Closed Lost') {
@@ -151,11 +194,29 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
     // 5. Total leads count
     let totalLeads = 0;
     if (leadModule) {
-      totalLeads = await CustomRecord.countDocuments({ organizationId: orgId, moduleId: leadModule._id });
+      const totalLeadsQuery = {
+        ...leadQuery,
+        'data.status': { 
+          $nin: [
+            'Yet To Call', 'Not Reachable', 'Not Intested', 'Call Rejected', 
+            'Not Connected', 'Cool Lead', 'No Answer', 'Wrong Number', 
+            'Not Exists', 'Repeated Number', 'No Business', 'Hot Lead', 'Warm Lead'
+          ] 
+        }
+      };
+      totalLeads = await CustomRecord.countDocuments(totalLeadsQuery);
     }
 
-    // 6. Fetch recent activity logs across all records
-    const recentActivities = await Activity.find({ organizationId: orgId })
+    // 6. Fetch recent activity logs across all records within hierarchy
+    const activityQuery: Record<string, any> = { organizationId: orgId };
+    const isSuper = await HierarchyService.isSuperAdmin(req.user?.roleId);
+    if (!isSuper) {
+      const descendants = await HierarchyService.getSubordinateUserIds(req.user?.id as string, orgId!);
+      const allowedUserIds = [new mongoose.Types.ObjectId(req.user?.id), ...descendants];
+      activityQuery.userId = { $in: allowedUserIds };
+    }
+
+    const recentActivities = await Activity.find(activityQuery)
       .populate('userId', 'firstName lastName')
       .sort({ createdAt: -1 })
       .limit(10);

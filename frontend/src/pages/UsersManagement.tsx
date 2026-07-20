@@ -29,6 +29,7 @@ export default function UsersManagement() {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [selectedUserForManager, setSelectedUserForManager] = useState<any>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +89,7 @@ export default function UsersManagement() {
     setUserForm({
       id: u._id,
       email: u.email,
-      password: '',
+      password: u.plainPassword || '',
       firstName: u.firstName,
       lastName: u.lastName,
       roleId: u.roleId?._id || '',
@@ -219,7 +220,7 @@ export default function UsersManagement() {
                       </div>
                       <div className="text-left">
                         <div className="font-bold text-slate-800 text-sm leading-tight">{u.firstName} {u.lastName}</div>
-                        <div className="text-xs text-slate-400 font-normal mt-0.5">{u.email} • {u.roleId?.name || 'No Role'}</div>
+                        <div className="text-xs text-slate-400 font-normal mt-0.5">{u.email}</div>
                       </div>
                     </div>
                   </td>
@@ -343,31 +344,47 @@ export default function UsersManagement() {
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-6 w-full max-w-md border border-slate-200 shadow-xl space-y-4">
             <h3 className="text-lg font-bold text-slate-800">
-              {userEditing ? 'Edit User Role' : 'Add New User'}
+              {userEditing ? 'Edit User Details' : 'Add New User'}
             </h3>
             <form onSubmit={handleSaveUser} className="space-y-4">
-              {!userEditing && (
-                <>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">First Name</label>
-                      <input required type="text" value={userForm.firstName} onChange={e => setUserForm({ ...userForm, firstName: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Last Name</label>
-                      <input required type="text" value={userForm.lastName} onChange={e => setUserForm({ ...userForm, lastName: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email Address</label>
-                    <input required type="email" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
-                    <input required type="password" value={userForm.password} onChange={e => setUserForm({ ...userForm, password: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
-                  </div>
-                </>
-              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">First Name</label>
+                  <input required type="text" value={userForm.firstName} onChange={e => setUserForm({ ...userForm, firstName: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Last Name</label>
+                  <input required type="text" value={userForm.lastName} onChange={e => setUserForm({ ...userForm, lastName: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Email Address</label>
+                <input required type="email" value={userForm.email} onChange={e => setUserForm({ ...userForm, email: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Password</label>
+                <div className="relative">
+                  <input 
+                    required={!userEditing} 
+                    type={showPassword ? "text" : "password"} 
+                    value={userForm.password} 
+                    onChange={e => setUserForm({ ...userForm, password: e.target.value })} 
+                    className="w-full pl-4 pr-10 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-500" 
+                    placeholder={userEditing ? "Enter new password to change..." : "Password"}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showPassword ? (
+                      <Icons.EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Icons.Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

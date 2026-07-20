@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import AuditLog from '../models/AuditLog';
 import { authenticate } from '../middleware/authMiddleware';
 import { requireTenant } from '../middleware/tenantMiddleware';
+import { HierarchyService } from '../utils/hierarchy';
 
 const router = Router();
 
@@ -11,7 +12,10 @@ router.use(requireTenant);
 // List audit logs for tenant
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const logs = await AuditLog.find({ organizationId: req.organizationId })
+    const query: Record<string, any> = { organizationId: req.organizationId };
+    await HierarchyService.modifyAuditLogQuery(query, req.user as any, req.organizationId!);
+
+    const logs = await AuditLog.find(query)
       .populate('userId', 'firstName lastName email')
       .sort({ createdAt: -1 })
       .limit(100);

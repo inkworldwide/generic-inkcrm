@@ -752,18 +752,20 @@ async function seed() {
   // Seed dynamic Statuses for Sales Organization
   console.log('Seeding Statuses...');
   const defaultStatuses = [
-    { name: 'New', color: '#64748b', icon: 'Circle', pipelinePosition: 0, order: 0 },
-    { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 1, order: 1 },
-    { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 2, order: 2 },
-    { name: 'Cedil Pending', color: '#ec4899', icon: 'FileWarning', pipelinePosition: 3, order: 3 },
-    { name: 'Document Pending', color: '#14b8a6', icon: 'FileText', pipelinePosition: 4, order: 4 },
-    { name: 'Approval Pending', color: '#f97316', icon: 'Clock', pipelinePosition: 5, order: 5 },
-    { name: 'Approved', color: '#eab308', icon: 'CheckCircle', pipelinePosition: 6, order: 6 },
-    { name: 'Disbursed', color: '#10b981', icon: 'Banknote', pipelinePosition: 7, order: 7, isFinal: true, isSuccess: true },
-    { name: 'Rejected', color: '#ef4444', icon: 'XOctagon', pipelinePosition: 8, order: 8, isFinal: true, isSuccess: false },
-    { name: 'Followup', color: '#3b82f6', icon: 'PhoneCall', pipelinePosition: 9, order: 9 },
-    { name: 'Dropped', color: '#ef4444', icon: 'ArrowDownCircle', pipelinePosition: 10, order: 10, isFinal: true, isSuccess: false },
-    { name: 'Pending', color: '#eab308', icon: 'Hourglass', pipelinePosition: 11, order: 11 }
+    { name: 'Yet To Call', color: '#6366f1', icon: 'PhoneOff', pipelinePosition: 0, order: 0 },
+    { name: 'New', color: '#64748b', icon: 'Circle', pipelinePosition: 1, order: 1 },
+    { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 2, order: 2 },
+    { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 3, order: 3 },
+    { name: 'Not Reachable', color: '#94a3b8', icon: 'PhoneMissed', pipelinePosition: 4, order: 4 },
+    { name: 'Cedil Pending', color: '#ec4899', icon: 'FileWarning', pipelinePosition: 5, order: 5 },
+    { name: 'Document Pending', color: '#14b8a6', icon: 'FileText', pipelinePosition: 6, order: 6 },
+    { name: 'Approval Pending', color: '#f97316', icon: 'Clock', pipelinePosition: 7, order: 7 },
+    { name: 'Approved', color: '#eab308', icon: 'CheckCircle', pipelinePosition: 8, order: 8 },
+    { name: 'Disbursed', color: '#10b981', icon: 'Banknote', pipelinePosition: 9, order: 9, isFinal: true, isSuccess: true },
+    { name: 'Rejected', color: '#ef4444', icon: 'XOctagon', pipelinePosition: 10, order: 10, isFinal: true, isSuccess: false },
+    { name: 'Followup', color: '#3b82f6', icon: 'PhoneCall', pipelinePosition: 11, order: 11 },
+    { name: 'Dropped', color: '#ef4444', icon: 'ArrowDownCircle', pipelinePosition: 12, order: 12, isFinal: true, isSuccess: false },
+    { name: 'Pending', color: '#eab308', icon: 'Hourglass', pipelinePosition: 13, order: 13 }
   ];
 
   for (const s of defaultStatuses) {
@@ -1531,18 +1533,20 @@ export async function seedNewTenantData(organizationId: mongoose.Types.ObjectId)
 
   // 2. Create default statuses
   const defaultStatuses = [
-    { name: 'New', color: '#6366f1', icon: 'Sparkles', pipelinePosition: 0, order: 0 },
-    { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 1, order: 1 },
-    { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 2, order: 2 },
-    { name: 'Cedil Pending', color: '#ec4899', icon: 'FileWarning', pipelinePosition: 3, order: 3 },
-    { name: 'Document Pending', color: '#14b8a6', icon: 'FileText', pipelinePosition: 4, order: 4 },
-    { name: 'Approval Pending', color: '#f97316', icon: 'Clock', pipelinePosition: 5, order: 5 },
-    { name: 'Approved', color: '#10b981', icon: 'CheckCircle', pipelinePosition: 6, order: 6 },
-    { name: 'Disbursed', color: '#10b981', icon: 'Banknote', pipelinePosition: 7, order: 7, isFinal: true, isSuccess: true },
-    { name: 'Rejected', color: '#ef4444', icon: 'XOctagon', pipelinePosition: 8, order: 8, isFinal: true, isSuccess: false },
-    { name: 'Followup', color: '#3b82f6', icon: 'PhoneCall', pipelinePosition: 9, order: 9 },
-    { name: 'Dropped', color: '#ef4444', icon: 'ArrowDownCircle', pipelinePosition: 10, order: 10, isFinal: true, isSuccess: false },
-    { name: 'Pending', color: '#eab308', icon: 'Hourglass', pipelinePosition: 11, order: 11 }
+    { name: 'Yet To Call', color: '#6366f1', icon: 'PhoneOff', pipelinePosition: 0, order: 0 },
+    { name: 'New', color: '#6366f1', icon: 'Sparkles', pipelinePosition: 1, order: 1 },
+    { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 2, order: 2 },
+    { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 3, order: 3 },
+    { name: 'Not Reachable', color: '#94a3b8', icon: 'PhoneMissed', pipelinePosition: 4, order: 4 },
+    { name: 'Cedil Pending', color: '#ec4899', icon: 'FileWarning', pipelinePosition: 5, order: 5 },
+    { name: 'Document Pending', color: '#14b8a6', icon: 'FileText', pipelinePosition: 6, order: 6 },
+    { name: 'Approval Pending', color: '#f97316', icon: 'Clock', pipelinePosition: 7, order: 7 },
+    { name: 'Approved', color: '#10b981', icon: 'CheckCircle', pipelinePosition: 8, order: 8 },
+    { name: 'Disbursed', color: '#10b981', icon: 'Banknote', pipelinePosition: 9, order: 9, isFinal: true, isSuccess: true },
+    { name: 'Rejected', color: '#ef4444', icon: 'XOctagon', pipelinePosition: 10, order: 10, isFinal: true, isSuccess: false },
+    { name: 'Followup', color: '#3b82f6', icon: 'PhoneCall', pipelinePosition: 11, order: 11 },
+    { name: 'Dropped', color: '#ef4444', icon: 'ArrowDownCircle', pipelinePosition: 12, order: 12, isFinal: true, isSuccess: false },
+    { name: 'Pending', color: '#eab308', icon: 'Hourglass', pipelinePosition: 13, order: 13 }
   ];
 
   for (const s of defaultStatuses) {

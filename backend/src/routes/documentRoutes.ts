@@ -5,6 +5,7 @@ import fs from 'fs';
 import Document from '../models/Document';
 import { authenticate } from '../middleware/authMiddleware';
 import { requireTenant } from '../middleware/tenantMiddleware';
+import { HierarchyService } from '../utils/hierarchy';
 
 const router = Router();
 
@@ -67,6 +68,8 @@ router.get('/', async (req: Request, res: Response): Promise<void> => {
     if (req.query.recordId) {
       query.recordId = req.query.recordId;
     }
+
+    await HierarchyService.modifyDocumentQuery(query, req.user as any, req.organizationId!);
 
     const docs = await Document.find(query)
       .populate('uploadedBy', 'firstName lastName')

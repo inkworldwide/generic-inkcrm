@@ -32,7 +32,7 @@ export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
-  const { fetchModules } = useModuleStore();
+  const { modules, fetchModules } = useModuleStore();
   const { user, logout } = useAuthStore();
   const { branding, fetchBranding } = useThemeStore();
   const { toasts, hideToast, confirm, hideConfirm, alertModal, hideAlertModal } = useToastStore();
@@ -99,7 +99,7 @@ export default function Layout({ children }: LayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#f1f5f9] dark:bg-[#0f1115] text-slate-800 dark:text-white selection:bg-lime-500/30 selection:text-lime-200">
+    <div className="min-h-screen relative overflow-hidden bg-[#fdfbf7] dark:bg-[#0f1115] text-slate-800 dark:text-white selection:bg-lime-500/30 selection:text-lime-200">
       
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -152,65 +152,129 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex-1 overflow-y-auto custom-scrollbar py-4 px-2 mt-2">
             <div className="space-y-1 px-3 mt-4">
               {/* 1. Create Lead */}
-              <SidebarItem to="/modules/leads/new" label="CREATE LEAD" icon={Icons.UserPlus} colorClass="text-emerald-400" />
+              {(!branding || branding.enabledModules.includes('leads')) && (
+                <SidebarItem to="/modules/leads/new" label="CREATE LEAD" icon={Icons.UserPlus} colorClass="text-emerald-400" />
+              )}
+              
+              {/* 1.5 My Campaign */}
+              <SidebarItem to="/my-campaign" label="MY CAMPAIGN" icon={Icons.Megaphone} colorClass="text-orange-400" />
               
               {/* 2. Dashboard */}
-              <SidebarItem to="/" label="DASHBOARD" icon={Icons.LayoutDashboard} colorClass="text-blue-400" />
+              <SidebarItem to="/" label="DASHBOARD" icon={Icons.LayoutDashboard} colorClass="text-indigo-400" />
 
-              {/* 3. Campaign */}
-              <SidebarAccordion label="CAMPAIGN" icon={Icons.Megaphone} colorClass="text-orange-400">
-                <SidebarItem to="/modules/campaigns" label="Campaign" icon={Icons.Target} colorClass="text-orange-400" indent />
-                <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent />
-              </SidebarAccordion>
+              {/* 3. Core Modules (Dynamic) */}
+              {modules.filter(m => {
+                const hiddenSettingsModules = ['departments', 'products', 'bankmasters', 'bankingpartners', 'companies', 'deals'];
+                if (hiddenSettingsModules.includes(m.apiPath.toLowerCase())) return false;
+                if (!branding) return true;
+                return branding.enabledModules.includes(m.apiPath.toLowerCase());
+              }).map(m => {
+                let icon = Icons.FileText;
+                let colorClass = "text-indigo-400";
+                
+                const path = m.apiPath.toLowerCase();
+                if (path === 'leads') {
+                  icon = Icons.Layers;
+                  colorClass = "text-indigo-400";
+                } else if (path === 'deals') {
+                  icon = Icons.DollarSign;
+                  colorClass = "text-emerald-400";
+                } else if (path === 'companies') {
+                  icon = Icons.Building2;
+                  colorClass = "text-cyan-400";
+                } else if (path === 'campaigns') {
+                  icon = Icons.Target;
+                  colorClass = "text-orange-400";
+                } else if (path === 'campaignassignments') {
+                  icon = Icons.UserCheck;
+                  colorClass = "text-orange-400";
+                } else if (path === 'students') {
+                  icon = Icons.GraduationCap;
+                  colorClass = "text-pink-400";
+                } else if (path === 'courses') {
+                  icon = Icons.BookOpen;
+                  colorClass = "text-teal-400";
+                } else if (path === 'patients') {
+                  icon = Icons.HeartPulse;
+                  colorClass = "text-rose-400";
+                } else if (path === 'appointments') {
+                  icon = Icons.Calendar;
+                  colorClass = "text-sky-400";
+                } else if (m.icon) {
+                  icon = (Icons as any)[m.icon] || Icons.FileText;
+                }
 
-              {/* 4. Process */}
-              <SidebarAccordion label="PROCESS" icon={Icons.GitMerge} colorClass="text-indigo-400" defaultOpen={true}>
-                <SidebarItem to="/modules/leads" label="All Leads" icon={Icons.Layers} colorClass="text-indigo-400" indent badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} />
-                {(() => {
-                  const statusCategories = [
-                    { label: 'New', icon: Icons.Sparkles, color: 'text-indigo-400' },
-                    { label: 'Hot', icon: Icons.Flame, color: 'text-red-400' },
-                    { label: 'Warm', icon: Icons.Sun, color: 'text-amber-400' },
-                    { label: 'Cedil Pending', icon: Icons.FileWarning, color: 'text-pink-400' },
-                    { label: 'Document Pending', icon: Icons.FileText, color: 'text-teal-400' },
-                    { label: 'Approval Pending', icon: Icons.Clock, color: 'text-orange-400' },
-                    { label: 'Approved', icon: Icons.CheckCircle, color: 'text-green-400' },
-                    { label: 'Disbursed', icon: Icons.Banknote, color: 'text-lime-400' },
-                    { label: 'Rejected', icon: Icons.XOctagon, color: 'text-rose-400' },
-                    { label: 'Followup', icon: Icons.PhoneCall, color: 'text-sky-400' },
-                    { label: 'Dropped', icon: Icons.ArrowDownCircle, color: 'text-red-400' },
-                    { label: 'Pending', icon: Icons.Hourglass, color: 'text-yellow-400' },
-                  ];
-                  const records = leadsData?.records || [];
-                  return statusCategories.map((cat) => {
-                    const count = records.filter((r: any) =>
-                      (r.data?.status || '').toLowerCase() === cat.label.toLowerCase()
-                    ).length;
-                    return (
-                      <SidebarItem
-                        key={cat.label}
-                        to={`/modules/leads?status=${encodeURIComponent(cat.label)}`}
-                        label={cat.label}
-                        icon={cat.icon}
-                        colorClass={cat.color}
-                        indent
-                        badge={count}
-                      />
-                    );
-                  });
-                })()}
-              </SidebarAccordion>
+                if (path === 'leads') {
+                  return (
+                    <SidebarAccordion key={m._id} label="LEADS PROCESS" icon={icon} colorClass={colorClass} defaultOpen={true}>
+                      <SidebarItem to="/modules/leads" label="All Leads" icon={Icons.Layers} colorClass="text-indigo-400" indent badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} />
+                      {(() => {
+                        const statusCategories = [
+                          { label: 'New', icon: Icons.Sparkles, color: 'text-indigo-400' },
+                          { label: 'Hot', icon: Icons.Flame, color: 'text-red-400' },
+                          { label: 'Warm', icon: Icons.Sun, color: 'text-amber-400' },
+                          { label: 'Cedil Pending', icon: Icons.FileWarning, color: 'text-pink-400' },
+                          { label: 'Document Pending', icon: Icons.FileText, color: 'text-teal-400' },
+                          { label: 'Approval Pending', icon: Icons.Clock, color: 'text-orange-400' },
+                          { label: 'Approved', icon: Icons.CheckCircle, color: 'text-green-400' },
+                          { label: 'Disbursed', icon: Icons.Banknote, color: 'text-lime-400' },
+                          { label: 'Rejected', icon: Icons.XOctagon, color: 'text-rose-400' },
+                          { label: 'Followup', icon: Icons.PhoneCall, color: 'text-sky-400' },
+                          { label: 'Dropped', icon: Icons.ArrowDownCircle, color: 'text-red-400' },
+                          { label: 'Pending', icon: Icons.Hourglass, color: 'text-yellow-400' },
+                        ];
+                        const records = leadsData?.records || [];
+                        return statusCategories.map((cat) => {
+                          const count = records.filter((r: any) =>
+                            (r.data?.status || '').toLowerCase() === cat.label.toLowerCase()
+                          ).length;
+                          return (
+                            <SidebarItem
+                              key={cat.label}
+                              to={`/modules/leads?status=${encodeURIComponent(cat.label)}`}
+                              label={cat.label}
+                              icon={cat.icon}
+                              colorClass={cat.color}
+                              indent
+                              badge={count}
+                            />
+                          );
+                        });
+                      })()}
+                    </SidebarAccordion>
+                  );
+                }
 
-              {/* 5. Setting */}
+                return (
+                  <SidebarItem 
+                    key={m._id} 
+                    to={`/modules/${m.apiPath}`} 
+                    label={m.pluralLabel.toUpperCase()} 
+                    icon={icon} 
+                    colorClass={colorClass} 
+                  />
+                );
+              })}
+
+              {/* 4. Campaigns accordion */}
+              {modules.some(m => m.apiPath === 'campaigns') && (!branding || branding.enabledModules.includes('leads') || branding.enabledModules.includes('campaigns')) && (
+                <SidebarAccordion label="CAMPAIGNS" icon={Icons.Megaphone} colorClass="text-orange-400">
+                  <SidebarItem to="/modules/campaigns" label="Campaign List" icon={Icons.Target} colorClass="text-orange-400" indent />
+                  <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent />
+                </SidebarAccordion>
+              )}
+
+
+              {/* 8. Setting */}
               <SidebarItem to="/settings" label="SETTING" icon={Icons.Settings} colorClass="text-amber-400" />
 
-              {/* 6. Security */}
+              {/* 9. Security */}
               <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400">
                 <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent />
                 <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent />
               </SidebarAccordion>
 
-              {/* 7. Users Management */}
+              {/* 10. Users Management */}
               <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-500" />
             </div>
           </div>
@@ -398,7 +462,7 @@ export default function Layout({ children }: LayoutProps) {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.25, ease: "easeOut" }}
-              className="flex-1 overflow-auto p-4 sm:p-5 bg-[#f8fafc] text-slate-800"
+              className="flex-1 overflow-auto p-4 sm:p-5 bg-[#fdfbf7] text-slate-800"
             >
               {children}
             </motion.div>

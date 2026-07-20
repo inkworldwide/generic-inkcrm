@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -33,6 +33,7 @@ const normalizeLoanForSubmit = (loanType: string): string => {
 export default function RecordForm() {
   const { apiPath, id } = useParams<{ apiPath: string; id?: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const { activeModule, setActiveModuleByPath } = useModuleStore();
   const { showConfirm, showToast, showAlertModal } = useToastStore();
@@ -221,10 +222,18 @@ export default function RecordForm() {
           defaults['source'] = loggedInName;
         }
       }
-      reset(defaults);
+      
+      // Merge values passed from campaign calling card
+      const passedData = location.state || {};
+      const finalDefaults = {
+        ...defaults,
+        ...passedData
+      };
+      
+      reset(finalDefaults);
       setLoading(false);
     }
-  }, [activeModule, id, apiPath, user]);
+  }, [activeModule, id, apiPath, user, location]);
 
   const loadRecordData = async () => {
     try {
@@ -486,13 +495,9 @@ export default function RecordForm() {
       }
     }
 
-    const inputBase = isLeads
-      ? 'w-full px-4 py-3 text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all text-slate-900 placeholder-slate-400 font-medium'
-      : 'w-full px-4 py-3 text-sm md:text-[15px] bg-slate-950/60 border border-slate-700 hover:border-slate-550 rounded-xl focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500/80 transition-all text-white font-medium placeholder-slate-400';
+    const inputBase = 'w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-slate-700 placeholder-slate-400';
 
-    const labelClass = isLeads
-      ? 'block text-xs md:text-[13px] font-bold text-slate-700 uppercase tracking-wider mb-2'
-      : 'block text-xs md:text-[13px] font-bold text-slate-200 uppercase tracking-wider mb-2';
+    const labelClass = 'text-[10px] font-[800] text-slate-400 uppercase tracking-wider block mb-1.5';
 
     if (field.name === 'source' && apiPath === 'leads') {
       return (
@@ -505,7 +510,7 @@ export default function RecordForm() {
             readOnly
             placeholder={field.label}
             {...register(field.name)}
-            className={`${inputBase} bg-slate-50 text-slate-550 font-semibold cursor-not-allowed`}
+            className={`${inputBase} bg-slate-50/50 text-slate-400 cursor-not-allowed border-[#E8ECF4]`}
           />
         </div>
       );
@@ -526,9 +531,7 @@ export default function RecordForm() {
             rows={calculatedRows}
             placeholder={field.label}
             {...register(field.name)}
-            className={isLeads
-              ? "w-full px-4 py-3 text-sm bg-slate-100 border border-slate-200 rounded-xl text-slate-650 focus:outline-none cursor-not-allowed font-medium resize-none transition-all duration-200"
-              : "w-full px-4 py-3 text-sm md:text-[15px] bg-slate-950/40 border border-slate-800 rounded-xl text-slate-450 focus:outline-none cursor-not-allowed font-medium resize-none transition-all duration-200"}
+            className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/50 border border-[#E8ECF4] rounded-xl text-slate-400 focus:outline-none cursor-not-allowed resize-none transition-all duration-200"
           />
           {psmWarningMessage && (
             <p className="text-[11px] text-amber-600 font-bold mt-1 leading-normal">{psmWarningMessage}</p>
@@ -914,33 +917,25 @@ export default function RecordForm() {
   const sections = groupFields(activeModule.fields);
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto text-left">
+    <div className="space-y-6 max-w-5xl mx-auto text-left">
       
       {/* breadcrumbs */}
-      <div className="flex items-center gap-2 text-xs font-semibold text-slate-450 uppercase tracking-widest">
-        <Link to={`/modules/${activeModule.apiPath}`} className="hover:text-emerald-500 transition-colors">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+        <Link to={`/modules/${activeModule.apiPath}`} className="hover:text-indigo-600 transition-colors">
           {activeModule.pluralLabel}
         </Link>
-        <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-        <span className="text-slate-500 dark:text-slate-400">
+        <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+        <span className="text-slate-500">
           {id ? `Edit: ${recordName}` : `New ${activeModule.singularLabel}`}
         </span>
       </div>
 
-      {/* Main card box with emerald top border */}
-      <div className={isLeads 
-        ? "bg-slate-50 border border-slate-200 rounded-2xl shadow-xl overflow-hidden relative"
-        : "bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-hidden relative"}>
-        {/* Glow accent line at top */}
-        <div className="bg-gradient-to-r from-emerald-500 via-teal-400 to-indigo-500 h-1 w-full absolute top-0 left-0" />
+      {/* Main card box */}
+      <div className="card-premium p-0 overflow-hidden relative">
         
         {/* Header */}
-        <div className={isLeads
-          ? "px-8 py-5 border-b border-slate-200 bg-slate-100 flex justify-between items-center mt-1"
-          : "px-8 py-5 border-b border-slate-800/80 bg-slate-950/20 flex justify-between items-center mt-1"}>
-          <h2 className={isLeads 
-            ? "text-lg font-black text-slate-800 tracking-wide uppercase"
-            : "text-lg font-black text-white tracking-wide uppercase"}>
+        <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+          <h2 className="text-xs font-[800] text-slate-400 uppercase tracking-wider">
             {id ? `Edit ${activeModule.singularLabel}: ${recordName}` : `Create ${activeModule.singularLabel}`}
           </h2>
         </div>
@@ -949,12 +944,10 @@ export default function RecordForm() {
         <form onSubmit={handleSubmit(onSubmitForm)}>
           
           {sections.map((section) => (
-            <div key={section.title} className={isLeads
-              ? "p-8 border-b border-slate-200 last:border-b-0 space-y-5"
-              : "p-8 border-b border-slate-800/80 last:border-b-0 space-y-5"}>
-              <div className="flex items-center gap-3 pb-2 mb-4">
-                <div className="w-1.5 h-4.5 bg-gradient-to-b from-[#97ff00] to-[#10b981] rounded-full shadow-[0_0_8px_rgba(151,255,0,0.5)]"></div>
-                <h3 className={`text-sm font-bold uppercase tracking-widest ${isLeads ? 'text-slate-800' : 'text-slate-200'}`}>
+            <div key={section.title} className="p-8 border-b border-slate-100 last:border-b-0 space-y-6">
+              <div className="flex items-center gap-2.5 pb-1.5 mb-2">
+                <div className="w-1.5 h-3.5 bg-indigo-600 rounded-full" />
+                <h3 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider">
                   {section.title}
                 </h3>
               </div>
@@ -966,23 +959,17 @@ export default function RecordForm() {
           ))}
 
           {/* Centered actions footer */}
-          <div className={isLeads
-            ? "p-8 bg-slate-100 border-t border-slate-200 flex items-center justify-center gap-4"
-            : "p-8 bg-slate-950/30 border-t border-slate-800/80 flex items-center justify-center gap-4"}>
+          <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-center gap-4">
             <Link
               to={`/modules/${activeModule.apiPath}`}
-              className={isLeads
-                ? "px-7 py-3 bg-red-600 hover:bg-red-500 text-white text-xs font-bold uppercase rounded-xl tracking-widest transition-all duration-200 shadow-md"
-                : "px-7 py-3 bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 hover:border-red-500/50 text-red-400 text-xs font-bold uppercase rounded-xl tracking-widest transition-all duration-200 shadow-md"}
+              className="btn-secondary-premium h-10 px-5 text-xs font-bold"
             >
               Cancel
             </Link>
             <button
               type="submit"
               disabled={saving}
-              className={isLeads
-                ? "px-7 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase rounded-xl tracking-widest transition-all duration-200 flex items-center gap-1.5 shadow-md"
-                : "px-7 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-450 hover:to-teal-450 hover:shadow-[0_0_25px_rgba(16,185,129,0.35)] text-white text-xs font-bold uppercase rounded-xl tracking-widest transition-all duration-200 flex items-center gap-1.5 shadow-md"}
+              className="btn-primary-premium h-10 px-5 text-xs font-bold shadow-md shadow-indigo-600/10 flex items-center gap-1.5"
             >
               {saving && <Icons.Loader className="w-3.5 h-3.5 animate-spin" />}
               Save
@@ -997,12 +984,12 @@ export default function RecordForm() {
       {id && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Attachments panel */}
-          <div className={isLeads ? "bg-slate-50 border border-slate-200 rounded-lg p-5 shadow-md" : "bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-lg"}>
+          <div className="card-premium p-6">
             <div className="flex justify-between items-center mb-4">
-              <h4 className={isLeads ? "text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5" : "text-xs font-bold text-slate-405 uppercase tracking-wider flex items-center gap-1.5"}>
-                <Icons.Paperclip className="w-4 h-4 text-emerald-500" /> Attachments
+              <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Icons.Paperclip className="w-4 h-4 text-indigo-500" /> Attachments
               </h4>
-              <label className={isLeads ? "text-[10px] font-bold text-emerald-600 hover:text-emerald-500 hover:underline cursor-pointer flex items-center gap-1" : "text-[10px] font-bold text-emerald-555 hover:underline cursor-pointer flex items-center gap-1"}>
+              <label className="text-[10px] font-[800] text-indigo-600 hover:underline cursor-pointer flex items-center gap-1">
                 {uploadingDoc ? (
                   <Icons.Loader className="w-3.5 h-3.5 animate-spin" />
                 ) : (
@@ -1016,19 +1003,19 @@ export default function RecordForm() {
 
             <div className="space-y-2">
               {documents.map((doc) => (
-                <div key={doc._id} className={isLeads ? "p-3 bg-white rounded border border-slate-200 flex items-center justify-between group" : "p-3 bg-slate-950/40 rounded border border-slate-800/60 flex items-center justify-between group"}>
-                  <div className="flex items-center gap-2 truncate">
-                    <Icons.File className="w-4 h-4 text-slate-500" />
+                <div key={doc._id} className="p-3 bg-slate-50/50 rounded-xl border border-[#E8ECF4] flex items-center justify-between group">
+                  <div className="flex items-center gap-2.5 truncate">
+                    <Icons.FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                     <div className="truncate text-left">
                       <a
                         href={`${FILE_BASE_URL}${doc.filePath}`}
                         target="_blank"
                         rel="noreferrer"
-                        className={isLeads ? "text-xs font-semibold text-slate-800 hover:text-emerald-600 hover:underline truncate block" : "text-xs font-semibold text-slate-300 hover:text-emerald-500 hover:underline truncate block"}
+                        className="text-xs font-semibold text-slate-700 hover:text-indigo-600 hover:underline truncate block"
                       >
                         {doc.name}
                       </a>
-                      <span className={isLeads ? "text-[9px] text-slate-500 block" : "text-[9px] text-slate-555 block"}>
+                      <span className="text-[9px] text-slate-400 block font-semibold mt-0.5">
                         {Math.round(doc.size / 1024)} KB • Version {doc.version}
                       </span>
                     </div>
@@ -1039,14 +1026,14 @@ export default function RecordForm() {
                         setEditingDocId(doc._id);
                         setEditingDocName(doc.name);
                       }}
-                      className="p-1 text-slate-500 hover:bg-slate-100 rounded transition-colors"
+                      className="p-1 text-slate-400 hover:text-indigo-650 hover:bg-slate-100 rounded transition-colors"
                       title="Rename file"
                     >
                       <Icons.Pencil className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDeleteDoc(doc._id)}
-                      className="p-1 text-red-500 hover:bg-red-500/10 rounded transition-colors"
+                      className="p-1 text-rose-500 hover:bg-rose-50 rounded transition-colors"
                       title="Delete file"
                     >
                       <Icons.Trash className="w-3.5 h-3.5" />
@@ -1055,7 +1042,7 @@ export default function RecordForm() {
                 </div>
               ))}
               {documents.length === 0 && (
-                <div className={isLeads ? "py-6 text-center text-xs text-slate-500 border border-dashed rounded border-slate-200" : "py-6 text-center text-xs text-slate-650 border border-dashed rounded border-slate-800"}>
+                <div className="py-6 text-center text-xs text-slate-400 border border-dashed rounded-xl border-slate-200 font-medium">
                   No files attached.
                 </div>
               )}
@@ -1063,22 +1050,22 @@ export default function RecordForm() {
           </div>
 
           {/* Activity History panel */}
-          <div className={isLeads ? "bg-slate-50 border border-slate-200 rounded-lg p-5 shadow-md" : "bg-slate-900 border border-slate-800 rounded-lg p-5 shadow-lg"}>
-            <h4 className={isLeads ? "text-xs font-bold text-slate-700 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-200 pb-2" : "text-xs font-bold text-slate-405 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-800 pb-2"}>
-              <Icons.History className="w-4 h-4 text-emerald-500" /> Activity History
+          <div className="card-premium p-6">
+            <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+              <Icons.History className="w-4 h-4 text-indigo-500" /> Activity History
             </h4>
 
-            <div className={isLeads ? "relative pl-4 border-l border-slate-200 space-y-4 max-h-[300px] overflow-y-auto" : "relative pl-4 border-l border-slate-800 space-y-4 max-h-[300px] overflow-y-auto"}>
+            <div className="relative pl-4 border-l border-slate-100 space-y-4 max-h-[300px] overflow-y-auto">
               {timeline.map((item) => (
                 <div key={item._id} className="relative text-left text-xs">
-                  <div className="absolute -left-[23px] top-1 w-2.5 h-2.5 rounded-full border border-slate-900 bg-emerald-500"></div>
-                  <p className={isLeads ? "font-semibold text-slate-800" : "font-semibold text-slate-350"}>
+                  <div className="absolute -left-[21px] top-1 w-2.5 h-2.5 rounded-full bg-indigo-500 ring-4 ring-white"></div>
+                  <p className="font-semibold text-slate-700">
                     {item.userId?.firstName} {item.userId?.lastName}
                   </p>
-                  <p className={isLeads ? "text-[10px] text-slate-500 mt-0.5" : "text-[10px] text-slate-550 mt-0.5"}>{item.type} change</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">{item.type} change</p>
                   {item.details?.fieldName && (
-                    <p className={isLeads ? "text-slate-600 mt-1" : "text-slate-400 mt-1"}>
-                      Changed <span className={isLeads ? "font-medium text-slate-750" : "font-medium text-slate-300"}>{item.details.fieldName}</span> from{' '}
+                    <p className="text-slate-600 mt-1">
+                      Changed <span className="font-medium text-slate-700">{item.details.fieldName}</span> from{' '}
                       <span className="font-semibold text-rose-500">{String(item.details.oldValue || 'None')}</span> to{' '}
                       <span className="font-semibold text-emerald-500">{String(item.details.newValue)}</span>.
                     </p>
@@ -1086,7 +1073,7 @@ export default function RecordForm() {
                 </div>
               ))}
               {timeline.length === 0 && (
-                <div className={isLeads ? "text-center py-6 text-xs text-slate-500" : "text-center py-6 text-xs text-slate-600"}>No edits recorded.</div>
+                <div className="text-center py-6 text-xs text-slate-400 font-medium">No edits recorded.</div>
               )}
             </div>
           </div>
@@ -1095,30 +1082,30 @@ export default function RecordForm() {
       {/* Premium Rename Document Modal */}
       {editingDocId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="relative w-full max-w-sm bg-white border border-slate-200 rounded-2xl shadow-xl p-5 space-y-4">
-            <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wider">Rename File Attachment</h3>
+          <div className="relative w-full max-w-sm bg-white border border-[#E8ECF4] rounded-[20px] shadow-xl p-6 space-y-4 text-left">
+            <h3 className="text-xs font-[800] text-slate-400 uppercase tracking-wider">Rename File Attachment</h3>
             <form onSubmit={handleRenameDocSubmit} className="space-y-4">
               <div>
-                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">New File Name</label>
+                <label className="block text-[10px] font-bold text-slate-450 uppercase tracking-wider mb-1.5">New File Name</label>
                 <input
                   type="text"
                   required
                   value={editingDocName}
                   onChange={(e) => setEditingDocName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500"
+                  className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                 />
               </div>
               <div className="flex gap-2.5 justify-end">
                 <button
                   type="button"
                   onClick={() => setEditingDocId(null)}
-                  className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-xs font-bold text-slate-650 transition-colors"
+                  className="btn-secondary-premium h-9 px-4 text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-xs font-bold text-white transition-colors shadow-sm"
+                  className="btn-primary-premium h-9 px-4 text-xs font-bold"
                 >
                   Save
                 </button>

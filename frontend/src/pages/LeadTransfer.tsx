@@ -144,34 +144,29 @@ export default function LeadTransfer() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto text-left">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">Lead Transfer</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Transfer or unassign leads between agents</p>
-        </div>
+      <div className="pb-2">
+        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">Lead Transfer</h1>
+        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1.5">Transfer or unassign leads between agents</p>
       </div>
 
       {/* Main Card — matches card-premium style */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        {/* Indigo top accent bar */}
-        <div className="h-[3px] bg-indigo-600 w-full" />
-
+      <div className="card-premium p-0 overflow-hidden shadow-sm">
         {/* Card Header with Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-b border-slate-100">
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Icons.ArrowLeftRight className="w-4 h-4 text-indigo-600" />
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-slate-100 bg-white">
+          <h2 className="text-xs font-[800] text-slate-450 uppercase tracking-wider flex items-center gap-2">
+            <Icons.ArrowLeftRight className="w-4 h-4 text-indigo-655" />
             Agent Lead Overview
           </h2>
           <div className="relative">
-            <Icons.Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Icons.Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               placeholder="Search agent..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 w-56 transition"
+              className="pl-10 pr-4 h-10 bg-white border border-[#E8ECF4] rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 w-56 transition-all"
             />
           </div>
         </div>
@@ -184,20 +179,20 @@ export default function LeadTransfer() {
               <span className="text-sm font-medium">Loading agent data...</span>
             </div>
           ) : (
-            <table className="w-full border-collapse text-left text-sm">
+            <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Agent Name</th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Lead Count</th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider">Move To</th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Select</th>
-                  <th className="py-3 px-6 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Actions</th>
+                <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
+                  <th className="py-2 px-6">Agent Name</th>
+                  <th className="py-2 px-6 text-center">Lead Count</th>
+                  <th className="py-2 px-6">Move To</th>
+                  <th className="py-2 px-6 text-center">Select</th>
+                  <th className="py-2 px-6 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {filteredUsers.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-12 text-center text-slate-400 font-medium text-sm">
+                    <td colSpan={5} className="py-12 text-center text-slate-400 font-semibold italic">
                       No agents found matching your search.
                     </td>
                   </tr>
@@ -211,24 +206,24 @@ export default function LeadTransfer() {
                     return (
                       <tr
                         key={user._id}
-                        className="hover:bg-indigo-50/30 transition-colors"
+                        className="hover:bg-slate-50/30 transition-colors h-16"
                       >
                         {/* Agent Name */}
                         <td className="py-3 px-6">
                           <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs font-bold shrink-0">
-                              {fullName.charAt(0).toUpperCase()}
+                            <div className="w-8 h-8 rounded-full bg-slate-50 border border-[#E8ECF4] text-indigo-650 flex items-center justify-center text-xs font-[800] uppercase shrink-0">
+                              {fullName.charAt(0)}
                             </div>
-                            <span className="font-semibold text-slate-800 text-sm">{fullName}</span>
+                            <span className="font-bold text-slate-800 text-sm">{fullName}</span>
                           </div>
                         </td>
 
                         {/* Lead Count Badge */}
                         <td className="py-3 px-6 text-center">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                          <span className={`inline-flex items-center px-2.5 py-1.5 rounded-xl text-[10px] font-[800] tracking-wider border ${
                             count > 0
-                              ? 'bg-indigo-100 text-indigo-700'
-                              : 'bg-slate-100 text-slate-500'
+                              ? 'bg-indigo-50 border-indigo-150 text-indigo-650 shadow-sm'
+                              : 'bg-slate-50 border-slate-150 text-slate-400'
                           }`}>
                             {count}
                           </span>
@@ -244,7 +239,7 @@ export default function LeadTransfer() {
                                 [user._id]: e.target.value,
                               }))
                             }
-                            className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 font-medium w-48 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition"
+                            className="h-10 px-3 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer w-48 transition-all"
                           >
                             <option value="">-- Select Agent --</option>
                             {destinationOptions.map((opt) => (
@@ -266,7 +261,7 @@ export default function LeadTransfer() {
                                 [user._id]: e.target.checked,
                               }))
                             }
-                            className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                            className="w-4 h-4 rounded text-indigo-650 focus:ring-0 border-[#E8ECF4] bg-white cursor-pointer transition-all"
                           />
                         </td>
 
@@ -277,10 +272,10 @@ export default function LeadTransfer() {
                               onClick={() => handleTransfer(user)}
                               disabled={isTransferring || !selectedDestinations[user._id] || count === 0}
                               title="Transfer Leads"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                              className="btn-primary-premium h-10 px-3.5 text-xs font-bold"
                             >
                               {isTransferring ? (
-                                <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                               ) : (
                                 <Icons.ArrowLeftRight className="w-3.5 h-3.5" />
                               )}
@@ -290,7 +285,7 @@ export default function LeadTransfer() {
                               onClick={() => handleClearLeads(user)}
                               disabled={isTransferring || count === 0}
                               title="Unassign All Leads"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                              className="btn-delete-premium h-10 px-3.5 text-xs font-bold text-rose-600"
                             >
                               <Icons.Trash2 className="w-3.5 h-3.5" />
                               Clear
@@ -308,12 +303,12 @@ export default function LeadTransfer() {
 
         {/* Footer summary */}
         {!loading && filteredUsers.length > 0 && (
-          <div className="px-6 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
-            <span className="text-xs text-slate-500 font-medium">
+          <div className="px-6 py-4 bg-slate-50/50 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-500">
+            <span>
               Showing <span className="font-bold text-slate-700">{filteredUsers.length}</span> agent{filteredUsers.length !== 1 ? 's' : ''}
             </span>
-            <span className="text-xs text-slate-500 font-medium">
-              Total leads: <span className="font-bold text-indigo-600">{leads.length}</span>
+            <span>
+              Total leads: <span className="font-bold text-indigo-650">{leads.length}</span>
             </span>
           </div>
         )}

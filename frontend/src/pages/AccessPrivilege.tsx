@@ -96,19 +96,18 @@ export default function AccessPrivilege() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto text-left">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex justify-between items-center pb-2">
         <div>
-          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 flex items-center gap-2">
-            <Icons.ShieldCheck className="w-6 h-6 text-indigo-600" />
+          <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800 flex items-center gap-2">
+            <Icons.ShieldCheck className="w-6 h-6 text-indigo-650" />
             Access Privilege
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">Manage role-based access control for each module</p>
         </div>
         <button
           onClick={fetchRoles}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl transition-all"
+          className="btn-secondary-premium h-10 px-4 text-xs font-bold"
         >
           <Icons.RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           Refresh
@@ -116,21 +115,19 @@ export default function AccessPrivilege() {
       </div>
 
       {/* Main Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        {/* Indigo top accent bar */}
-        <div className="h-[3px] bg-indigo-600 w-full" />
-        <div className="p-6 space-y-6">
+      <div className="card-premium">
+        <div className="space-y-6">
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
-            Select Role to Edit Privileges:
+          <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-2">
+            Select Role to Edit Privileges
           </label>
           {loading ? (
-            <div className="h-10 w-48 bg-slate-100 rounded-md animate-pulse"></div>
+            <div className="h-11 w-48 bg-slate-100 rounded-xl animate-pulse"></div>
           ) : (
             <select
               value={selectedRoleId}
               onChange={(e) => handleRoleSelectChange(e.target.value)}
-              className="w-full p-2.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 max-w-xs focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 max-w-xs cursor-pointer"
             >
               {roles.map((role) => (
                 <option key={role._id} value={role._id}>
@@ -148,54 +145,54 @@ export default function AccessPrivilege() {
               <span className="text-sm font-medium">Loading permissions data...</span>
             </div>
           ) : (
-            <table className="w-full text-sm text-left border-collapse">
+            <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Module</th>
-                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Create</th>
-                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Read</th>
-                  <th className="py-3 px-4 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">Update</th>
+                <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
+                  <th className="py-2 px-6">Module</th>
+                  <th className="py-2 px-6 text-center">Create</th>
+                  <th className="py-2 px-6 text-center">Read</th>
+                  <th className="py-2 px-6 text-center">Update</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-150">
+              <tbody className="divide-y divide-slate-100">
                 {rolePermissions.map((perm, index) => {
                   const mod = modules.find(
                     (m) => m.name.toLowerCase() === perm.moduleName.toLowerCase()
                   ) || { _id: index, pluralLabel: perm.moduleName, name: perm.moduleName };
 
                   return (
-                    <tr key={mod._id} className="hover:bg-slate-50/50 transition-colors h-12">
-                      <td className="px-4 py-3 font-semibold text-slate-700">{mod.pluralLabel}</td>
-                      <td className="px-4 py-3 text-center">
+                    <tr key={mod._id} className="hover:bg-slate-50/30 transition-colors h-14">
+                      <td className="px-6 py-3 font-semibold text-slate-700">{mod.pluralLabel}</td>
+                      <td className="px-6 py-3 text-center">
                         <input
                           type="checkbox"
                           checked={perm.create}
                           onChange={(e) =>
                             handlePermissionChange(mod.name, 'create', e.target.checked)
                           }
-                          className="rounded border-slate-350 bg-white text-indigo-600 focus:ring-0 w-4 h-4"
+                          className="w-4 h-4 rounded text-indigo-650 focus:ring-0 border-[#E8ECF4] bg-white cursor-pointer transition-all"
                         />
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-6 py-3 text-center">
                         <select
                           value={perm.read}
                           onChange={(e) =>
                             handlePermissionChange(mod.name, 'read', e.target.value)
                           }
-                          className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-600 focus:outline-none"
+                          className="h-9 px-3 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer w-max mx-auto"
                         >
                           <option value="all">All Records</option>
                           <option value="own">Own Only</option>
                           <option value="none">No Access</option>
                         </select>
                       </td>
-                      <td className="px-4 py-3 text-center">
+                      <td className="px-6 py-3 text-center">
                         <select
                           value={perm.update || 'all'}
                           onChange={(e) =>
                             handlePermissionChange(mod.name, 'update', e.target.value)
                           }
-                          className="bg-white border border-slate-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-600 focus:outline-none"
+                          className="h-9 px-3 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer w-max mx-auto"
                         >
                           <option value="all">All Records</option>
                           <option value="own">Own Only</option>
@@ -214,7 +211,7 @@ export default function AccessPrivilege() {
           <button
             onClick={handleSavePermissions}
             disabled={saving || loading}
-            className="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 disabled:opacity-50 text-white rounded-xl font-semibold transition-all shadow-sm shadow-indigo-600/10 text-sm"
+            className="btn-primary-premium h-11 px-6 text-xs font-bold"
           >
             {saving && <Icons.Loader2 className="w-4 h-4 animate-spin" />}
             Save Permissions

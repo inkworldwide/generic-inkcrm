@@ -111,21 +111,17 @@ export default function WorkflowsList() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto text-left">
       
       {/* Title Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">Workflow Automations</h1>
-          <p className="text-sm text-slate-500 mt-1">IF-Trigger-THEN-Action background automation engine</p>
-        </div>
+      <div className="flex justify-between items-center pb-2">
+        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">Workflow Automations</h1>
         <button
           onClick={() => {
             resetEditor();
             setShowEditor(true);
           }}
-          style={{ backgroundColor: 'rgb(var(--color-primary))' }}
-          className="px-4 py-2 text-white rounded-lg text-sm font-medium transition-all hover:brightness-110 flex items-center gap-1.5 shadow-md"
+          className="btn-primary-premium flex items-center gap-1.5"
         >
           <Icons.Plus className="w-4 h-4" /> Create Workflow
         </button>
@@ -136,21 +132,19 @@ export default function WorkflowsList() {
         {workflows.map((wf) => (
           <div
             key={wf._id}
-            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 hover-card-trigger relative text-left"
+            className="card-premium text-left"
           >
             <div className="flex justify-between items-start">
               <div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-slate-100 dark:bg-slate-700 px-2 py-0.5 rounded">
-                  On {wf.trigger.event}
+                <h3 className="font-bold text-slate-850 text-sm">{wf.name}</h3>
+                <span className="text-[9px] font-[800] text-slate-450 uppercase tracking-wider block mt-1.5">
+                  Triggered on {wf.trigger.event}
                 </span>
-                <h3 className="font-bold text-slate-800 dark:text-white text-base mt-2">{wf.name}</h3>
               </div>
-
-              {/* Toggle switch slider */}
               <button
                 onClick={() => handleToggle(wf._id, wf.isEnabled)}
                 className={`w-10 h-6 rounded-full p-0.5 transition-colors focus:outline-none ${
-                  wf.isEnabled ? 'bg-primary' : 'bg-slate-300 dark:bg-slate-700'
+                  wf.isEnabled ? 'bg-indigo-600' : 'bg-slate-200'
                 }`}
               >
                 <div
@@ -162,20 +156,20 @@ export default function WorkflowsList() {
             </div>
 
             {/* Conditions summary description */}
-            <div className="mt-4 border-t border-slate-100 dark:border-slate-700/50 pt-3 space-y-2">
+            <div className="mt-4 border-t border-slate-100 pt-4 space-y-2">
               <div className="flex items-center gap-2 text-xs">
                 <Icons.CheckCircle className="w-4 h-4 text-emerald-500" />
-                <span className="text-slate-500">Conditions:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-350">
+                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Conditions:</span>
+                <span className="font-semibold text-slate-700">
                   {wf.conditions.length > 0
                     ? wf.conditions.map((c: any) => `${c.field} ${c.operator} '${c.value}'`).join(' AND ')
                     : 'Execute unconditionally'}
                 </span>
               </div>
               <div className="flex items-center gap-2 text-xs">
-                <Icons.PlayCircle className="w-4 h-4 text-primary" />
-                <span className="text-slate-500">Actions:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-350">
+                <Icons.PlayCircle className="w-4 h-4 text-indigo-500" />
+                <span className="text-slate-400 font-bold text-[10px] uppercase tracking-wider">Actions:</span>
+                <span className="font-semibold text-slate-700">
                   {wf.actions.map((a: any) => a.type.replace('_', ' ')).join(', ')}
                 </span>
               </div>
@@ -187,39 +181,39 @@ export default function WorkflowsList() {
       {/* Workflow Visual Builder Overlay Canvas Modal */}
       {showEditor && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+          <div className="bg-slate-50 border border-[#E8ECF4] rounded-[24px] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             {/* Modal header */}
-            <div className="px-6 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-slate-800 dark:text-white">Visual Workflow Builder</h3>
+            <div className="px-6 py-5 bg-white border-b border-slate-100 flex justify-between items-center">
+              <h3 className="font-[800] text-slate-800 text-base uppercase tracking-wider">Visual Workflow Builder</h3>
               <button onClick={() => setShowEditor(false)} className="text-slate-400 hover:text-slate-600">
                 <Icons.X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Modal Canvas body */}
-            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-8">
+            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-6">
               
               {/* Settings side menu panel */}
-              <div className="md:col-span-4 bg-white dark:bg-slate-800 border border-slate-250/50 dark:border-slate-700/50 rounded-xl p-5 space-y-4 text-left">
-                <h4 className="font-semibold text-xs text-slate-400 uppercase tracking-wider">Configure Nodes</h4>
+              <div className="md:col-span-4 bg-white border border-[#E8ECF4] rounded-[20px] p-6 space-y-4 shadow-sm text-left">
+                <h4 className="font-[800] text-[10px] text-slate-400 uppercase tracking-wider mb-2">Configure Nodes</h4>
                 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Workflow Name</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Workflow Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-slate-800 dark:text-slate-200"
+                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                     placeholder="E.g. Lead Assigned alert"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Target Module</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Target Module</label>
                   <select
                     value={moduleId}
                     onChange={(e) => setModuleId(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-slate-850 dark:text-slate-200"
+                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                   >
                     <option value="">Select module...</option>
                     {modules.map((m) => (
@@ -232,11 +226,11 @@ export default function WorkflowsList() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Event</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Event</label>
                     <select
                       value={triggerEvent}
                       onChange={(e) => setTriggerEvent(e.target.value as any)}
-                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-slate-850 dark:text-slate-200"
+                      className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                     >
                       <option value="create">On Create</option>
                       <option value="update">On Update</option>
@@ -244,13 +238,13 @@ export default function WorkflowsList() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Trigger Field</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Trigger Field</label>
                     <input
                       type="text"
                       value={triggerField}
                       onChange={(e) => setTriggerField(e.target.value)}
                       placeholder="Optional"
-                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-750 rounded-lg focus:outline-none focus:ring-1 focus:ring-primary text-slate-850 dark:text-slate-200"
+                      className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                     />
                   </div>
                 </div>
@@ -260,29 +254,29 @@ export default function WorkflowsList() {
               <div className="md:col-span-8 space-y-6 flex flex-col justify-start">
                 
                 {/* Node 1: Trigger */}
-                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 relative text-left">
+                <div className="p-5 bg-slate-50 border border-[#E8ECF4] rounded-2xl relative shadow-sm text-left">
                   <div className="flex items-center gap-2 mb-2">
                     <Icons.Zap className="w-5 h-5 text-amber-500" />
-                    <span className="font-bold text-sm text-amber-600 uppercase tracking-wide">1. TRIGGER NODE</span>
+                    <span className="font-[800] text-[10px] text-slate-400 uppercase tracking-wider">1. TRIGGER NODE</span>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">
-                    Runs when a record in <span className="font-semibold text-primary">{modules.find((m) => m._id === moduleId)?.singularLabel || 'Selected Module'}</span> is <span className="font-semibold text-primary">{triggerEvent}d</span>.
+                  <p className="text-xs text-slate-600 font-semibold leading-relaxed">
+                    Runs when a record in <span className="font-bold text-indigo-600">{modules.find((m) => m._id === moduleId)?.singularLabel || 'Selected Module'}</span> is <span className="font-bold text-indigo-650">{triggerEvent}d</span>.
                   </p>
                 </div>
 
                 {/* Flow connector line */}
-                <div className="flex justify-center"><div className="w-0.5 h-6 bg-slate-300 dark:bg-slate-700"></div></div>
+                <div className="flex justify-center"><div className="w-[2px] h-6 bg-slate-200"></div></div>
 
                 {/* Node 2: Conditions */}
-                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-5 text-left space-y-3">
-                  <div className="flex justify-between items-center">
+                <div className="p-5 bg-slate-50 border border-[#E8ECF4] rounded-2xl relative shadow-sm text-left space-y-3">
+                  <div className="flex justify-between items-center pb-1">
                     <div className="flex items-center gap-2">
                       <Icons.Filter className="w-5 h-5 text-emerald-500" />
-                      <span className="font-bold text-sm text-emerald-600 uppercase tracking-wide">2. CONDITIONS (IF MATCH)</span>
+                      <span className="font-[800] text-[10px] text-slate-400 uppercase tracking-wider">2. CONDITIONS (IF MATCH)</span>
                     </div>
                     <button
                       onClick={handleAddCondition}
-                      className="text-xs font-semibold text-emerald-600 hover:underline flex items-center gap-1"
+                      className="text-[10px] font-[800] uppercase tracking-wider text-indigo-650 hover:underline flex items-center gap-1"
                     >
                       <Icons.Plus className="w-3.5 h-3.5" /> Add Rule
                     </button>
@@ -299,7 +293,7 @@ export default function WorkflowsList() {
                           setConditions(updated);
                         }}
                         placeholder="FieldName (e.g. status)"
-                        className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded focus:outline-none"
+                        className="h-9 px-3.5 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                       />
                       <select
                         value={cond.operator}
@@ -308,7 +302,7 @@ export default function WorkflowsList() {
                           updated[idx].operator = e.target.value;
                           setConditions(updated);
                         }}
-                        className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded focus:outline-none"
+                        className="h-9 px-3 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                       >
                         <option value="equals">equals</option>
                         <option value="not_equals">not equals</option>
@@ -323,36 +317,36 @@ export default function WorkflowsList() {
                           setConditions(updated);
                         }}
                         placeholder="value (e.g. Qualified)"
-                        className="px-2.5 py-1.5 text-xs bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded focus:outline-none"
+                        className="h-9 px-3.5 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                       />
                     </div>
                   ))}
 
                   {conditions.length === 0 && (
-                    <p className="text-xs text-slate-500">Unconditional. Triggers actions immediately.</p>
+                    <p className="text-xs text-slate-400 font-semibold italic">Unconditional. Triggers actions immediately.</p>
                   )}
                 </div>
 
                 {/* Flow connector line */}
-                <div className="flex justify-center"><div className="w-0.5 h-6 bg-slate-300 dark:bg-slate-700"></div></div>
+                <div className="flex justify-center"><div className="w-[2px] h-6 bg-slate-200"></div></div>
 
                 {/* Node 3: Actions */}
-                <div className="bg-indigo-500/10 border border-indigo-500/20 rounded-xl p-5 text-left space-y-3">
+                <div className="p-5 bg-slate-50 border border-[#E8ECF4] rounded-2xl relative shadow-sm text-left space-y-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <Icons.PlayCircle className="w-5 h-5 text-primary" />
-                      <span className="font-bold text-sm text-indigo-600 uppercase tracking-wide">3. ACTIONS (THEN RUN)</span>
+                      <Icons.PlayCircle className="w-5 h-5 text-indigo-500" />
+                      <span className="font-[800] text-[10px] text-slate-400 uppercase tracking-wider">3. ACTIONS (THEN RUN)</span>
                     </div>
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleAddAction('create_task')}
-                        className="text-[10px] font-bold px-2 py-1 bg-primary text-white rounded hover:brightness-110"
+                        className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-650 text-[10px] font-bold uppercase tracking-wider border border-indigo-200/50 rounded-lg transition-colors"
                       >
                         + CRM Task
                       </button>
                       <button
                         onClick={() => handleAddAction('notification')}
-                        className="text-[10px] font-bold px-2 py-1 bg-primary text-white rounded hover:brightness-110"
+                        className="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-650 text-[10px] font-bold uppercase tracking-wider border border-indigo-200/50 rounded-lg transition-colors"
                       >
                         + In-App Alert
                       </button>
@@ -360,8 +354,8 @@ export default function WorkflowsList() {
                   </div>
 
                   {actions.map((act, idx) => (
-                    <div key={idx} className="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg space-y-2">
-                      <p className="text-xs font-bold text-primary uppercase">{act.type.replace('_', ' ')}</p>
+                    <div key={idx} className="p-4 bg-white border border-[#E8ECF4] rounded-xl space-y-3">
+                      <p className="text-[10px] font-[800] text-indigo-650 uppercase tracking-wider">{act.type.replace('_', ' ')}</p>
                       <div className="grid grid-cols-2 gap-2">
                         <input
                           type="text"
@@ -372,7 +366,7 @@ export default function WorkflowsList() {
                             setActions(updated);
                           }}
                           placeholder="Action title"
-                          className="px-2 py-1 text-xs border border-slate-200 dark:border-slate-700 bg-transparent rounded"
+                          className="h-9 px-3.5 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                         />
                         <input
                           type="text"
@@ -383,31 +377,30 @@ export default function WorkflowsList() {
                             setActions(updated);
                           }}
                           placeholder="Action detail payload text"
-                          className="px-2 py-1 text-xs border border-slate-200 dark:border-slate-700 bg-transparent rounded"
+                          className="h-9 px-3.5 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                         />
                       </div>
                     </div>
                   ))}
 
                   {actions.length === 0 && (
-                    <p className="text-xs text-slate-500">Configure actions to execute.</p>
+                    <p className="text-xs text-slate-400 font-semibold italic">Configure actions to execute.</p>
                   )}
                 </div>
               </div>
             </div>
 
             {/* Modal footer */}
-            <div className="px-6 py-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
               <button
                 onClick={() => setShowEditor(false)}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700"
+                className="btn-secondary-premium h-10 px-5 text-xs font-bold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveWorkflow}
-                style={{ backgroundColor: 'rgb(var(--color-primary))' }}
-                className="px-5 py-2 text-white rounded-lg text-sm font-medium hover:brightness-110 transition-all shadow-md"
+                className="btn-primary-premium h-10 px-5 text-xs font-bold"
               >
                 Publish Automation
               </button>

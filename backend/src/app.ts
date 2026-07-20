@@ -57,13 +57,13 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// 5. Global Rate Limiter
+// 5. Global API Rate Limiter
 const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 300, // Limit each IP to 300 requests per 15 minutes
+  max: process.env.NODE_ENV === 'production' ? 300 : 100000, // limit relaxed in development
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' }
@@ -73,7 +73,7 @@ app.use(globalLimiter);
 // 6. Strict Rate Limiter for Authentication endpoints
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 30, // Limit each IP to 30 requests per 15 minutes for auth
+  max: process.env.NODE_ENV === 'production' ? 30 : 100000, // limit relaxed in development
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }

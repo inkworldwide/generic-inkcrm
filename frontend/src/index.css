@@ -31,7 +31,7 @@
 
   body {
     font-family: var(--font-family);
-    @apply text-slate-800 bg-[#f8fafc];
+    @apply text-slate-800 bg-[#fdfbf7];
   }
 }
 
@@ -103,34 +103,47 @@
 
 /* Premium Design System Utilities */
 .card-premium {
-  @apply bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl shadow-sm p-4 space-y-4;
+  @apply bg-white border border-[#E8ECF4] rounded-[20px] p-8 shadow-[0_10px_40px_rgba(15,23,42,0.04)] space-y-6;
+}
+
+.input-premium {
+  @apply bg-white border border-[#E8ECF4] rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-700 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all;
+}
+
+.label-premium {
+  @apply text-[10px] font-[800] text-slate-400 uppercase tracking-wider block mb-1.5;
 }
 
 .btn-primary-premium {
-  @apply px-6 py-2 text-sm font-bold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-lg transition-all shadow-sm shadow-indigo-600/10 disabled:opacity-50 disabled:pointer-events-none;
+  @apply h-[42px] px-6 text-xs font-[800] uppercase tracking-wider bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl transition-all shadow-sm shadow-indigo-600/10 disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-1.5 cursor-pointer;
 }
 
 .btn-secondary-premium {
-  @apply px-5 py-2 text-sm font-semibold bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-700 rounded-lg border border-slate-200/80 transition-all;
+  @apply h-[42px] px-5 text-xs font-[800] uppercase tracking-wider bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 rounded-xl border border-[#E8ECF4] transition-all flex items-center justify-center gap-1.5 cursor-pointer;
 }
 
 .btn-edit-premium {
-  @apply p-1.5 bg-sky-50 hover:bg-sky-100 active:bg-sky-200 text-sky-600 border border-sky-200/50 rounded-lg transition-all disabled:opacity-50;
+  @apply p-2 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-200 text-indigo-600 border border-indigo-200/50 rounded-xl transition-all disabled:opacity-50;
 }
 
 .btn-delete-premium {
-  @apply p-1.5 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 border border-rose-200/50 rounded-lg transition-all disabled:opacity-50;
+  @apply p-2 bg-rose-50 hover:bg-rose-100 active:bg-rose-200 text-rose-600 border border-rose-200/50 rounded-xl transition-all disabled:opacity-50;
 }
 
 .status-active-premium {
-  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border bg-emerald-50 text-emerald-700 border-emerald-200/60;
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-[800] uppercase tracking-wider border bg-emerald-50 text-emerald-700 border-emerald-200;
 }
 
 .status-inactive-premium {
-  @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold border bg-slate-50 text-slate-500 border-slate-200;
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-[800] uppercase tracking-wider border bg-slate-50 text-slate-500 border-slate-200;
 }
 
 .table-header-premium {
-  @apply bg-slate-50 text-slate-700 font-bold border-b border-slate-200;
+  @apply border-b border-slate-100 text-[10px] font-bold text-slate-500 uppercase tracking-wider h-12 bg-slate-50/50;
+}
+
+/* Custom premium checkbox style */
+.checkbox-premium {
+  @apply rounded border-slate-300 text-indigo-600 focus:ring-0 w-4 h-4 cursor-pointer;
 }
 

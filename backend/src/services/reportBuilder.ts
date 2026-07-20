@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import CustomRecord from '../models/CustomRecord';
 import { IReportDefinition } from '../models/ReportDefinition';
+import { HierarchyService } from '../utils/hierarchy';
 
 export class ReportBuilderService {
   /**
    * Evaluates a report definition and returns aggregated summary data.
    */
-  public static async generateReport(report: IReportDefinition): Promise<any[]> {
+  public static async generateReport(report: IReportDefinition, reqUser?: { id: string; roleId: string }): Promise<any[]> {
     const pipeline: any[] = [];
 
     // 1. Initial Match for Organization and Module
@@ -14,6 +15,10 @@ export class ReportBuilderService {
       organizationId: report.organizationId,
       moduleId: report.moduleId
     };
+
+    if (reqUser) {
+      await HierarchyService.modifyRecordQuery(matchStage, reqUser, report.organizationId);
+    }
 
     // 2. Map filters to pipeline match stages
     // Custom record dynamic fields are nested inside `data.<fieldName>`
@@ -111,11 +116,15 @@ export class ReportBuilderService {
   /**
    * Fetches raw rows for detailed table report display.
    */
-  public static async getReportDetails(report: IReportDefinition): Promise<any[]> {
+  public static async getReportDetails(report: IReportDefinition, reqUser?: { id: string; roleId: string }): Promise<any[]> {
     const query: Record<string, any> = {
       organizationId: report.organizationId,
       moduleId: report.moduleId
     };
+
+    if (reqUser) {
+      await HierarchyService.modifyRecordQuery(query, reqUser, report.organizationId);
+    }
 
     if (report.filters && report.filters.length > 0) {
       report.filters.forEach((filter) => {

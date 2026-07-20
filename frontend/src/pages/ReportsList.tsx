@@ -114,21 +114,17 @@ export default function ReportsList() {
   }
 
   return (
-    <div className="space-y-6">
-      
-      {/* Title Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">Saved Reports</h1>
-          <p className="text-sm text-slate-500 mt-1">Configure visual chart aggregations and data queries</p>
-        </div>
+    <div className="space-y-6 max-w-5xl mx-auto text-left">
+      <div className="flex justify-between items-center pb-2 text-left">
+        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">
+          Saved Reports
+        </h1>
         <button
           onClick={() => {
             resetDesigner();
             setShowDesigner(true);
           }}
-          style={{ backgroundColor: 'rgb(var(--color-primary))' }}
-          className="px-4 py-2 text-white rounded-lg text-sm font-medium transition-all hover:brightness-110 flex items-center gap-1.5 shadow-md"
+          className="btn-primary-premium flex items-center gap-1.5"
         >
           <Icons.Plus className="w-4 h-4" /> Create Report
         </button>
@@ -139,29 +135,29 @@ export default function ReportsList() {
         {reports.map((rep) => (
           <div
             key={rep._id}
-            className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 hover-card-trigger relative text-left flex flex-col justify-between"
+            className="card-premium text-left flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center gap-2">
-                <div className="p-2 bg-indigo-500/10 rounded-lg text-primary">
+                <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
                   {rep.chartType === 'table' ? (
-                    <Icons.Table className="w-4 h-4" />
+                    <Icons.Table className="w-4 h-4" strokeWidth={2} />
                   ) : (
-                    <Icons.BarChart2 className="w-4 h-4" />
+                    <Icons.BarChart2 className="w-4 h-4" strokeWidth={2} />
                   )}
                 </div>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                <span className="text-[9px] font-[800] text-slate-400 uppercase tracking-wider">
                   {rep.moduleId?.pluralLabel || 'Custom'} Module
                 </span>
               </div>
 
-              <h3 className="font-bold text-slate-800 dark:text-white text-sm mt-3">{rep.name}</h3>
+              <h3 className="font-bold text-slate-850 text-sm mt-3">{rep.name}</h3>
               <p className="text-xs text-slate-400 mt-1 truncate">{rep.description || 'No description.'}</p>
             </div>
 
             <Link
               to={`/reports/${rep._id}`}
-              className="mt-6 w-full py-2 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50 hover:bg-primary hover:text-white rounded-lg text-center text-xs font-semibold tracking-wide text-slate-700 dark:text-slate-350 block transition-all"
+              className="btn-secondary-premium w-full text-center h-10 mt-6"
             >
               Run Report
             </Link>
@@ -169,7 +165,7 @@ export default function ReportsList() {
         ))}
 
         {reports.length === 0 && (
-          <div className="col-span-3 py-12 text-center border border-dashed border-slate-300 dark:border-slate-700 rounded-xl text-slate-500">
+          <div className="col-span-3 py-12 text-center border border-dashed border-slate-200 rounded-2xl text-slate-400 font-medium">
             No saved reports found. Click "Create Report" to launch designer.
           </div>
         )}
@@ -178,41 +174,41 @@ export default function ReportsList() {
       {/* Report Designer Modal */}
       {showDesigner && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+          <div className="bg-slate-50 border border-[#E8ECF4] rounded-[24px] w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             {/* Header */}
-            <div className="px-6 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
-              <h3 className="font-bold text-lg text-slate-800 dark:text-white">Visual Report Designer</h3>
+            <div className="px-6 py-5 bg-white border-b border-slate-100 flex justify-between items-center">
+              <h3 className="font-[800] text-slate-800 text-base uppercase tracking-wider">Visual Report Designer</h3>
               <button onClick={() => setShowDesigner(false)} className="text-slate-400 hover:text-slate-600">
                 <Icons.X className="w-6 h-6" />
               </button>
             </div>
 
             {/* Canvas Body */}
-            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-8 text-left text-sm">
+            <div className="flex-1 overflow-y-auto p-6 grid grid-cols-1 md:grid-cols-12 gap-6 text-left text-sm">
               {/* Left Settings Panel */}
-              <div className="md:col-span-5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 space-y-4">
-                <h4 className="font-bold text-xs text-slate-450 uppercase tracking-wider">Aggregation Config</h4>
+              <div className="md:col-span-5 bg-white border border-[#E8ECF4] rounded-[20px] p-6 space-y-4 shadow-sm">
+                <h4 className="font-[800] text-[10px] text-slate-400 uppercase tracking-wider">Aggregation Config</h4>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Report Name</label>
+                  <label className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block mb-1.5">Report Name</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none"
+                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                     placeholder="E.g., Students by Grade"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-1.5">Query Module</label>
+                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Query Module</label>
                   <select
                     value={moduleId}
                     onChange={(e) => {
                       setModuleId(e.target.value);
                       setSelectedColumns([]);
                     }}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none"
+                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                   >
                     <option value="">Select source module...</option>
                     {modules.map((m) => (
@@ -225,11 +221,11 @@ export default function ReportsList() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Chart Type</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Chart Type</label>
                     <select
                       value={chartType}
                       onChange={(e) => setChartType(e.target.value as any)}
-                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none"
+                      className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                     >
                       <option value="bar">Bar Chart</option>
                       <option value="line">Line Chart</option>
@@ -239,11 +235,11 @@ export default function ReportsList() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Group By (X-Axis)</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Group By</label>
                     <select
                       value={groupByField}
                       onChange={(e) => setGroupByField(e.target.value)}
-                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none"
+                      className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                     >
                       <option value="">No grouping...</option>
                       {selectedModuleFields.map((f) => (
@@ -257,11 +253,11 @@ export default function ReportsList() {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Formula Metric</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Formula Metric</label>
                     <select
                       value={aggregation}
                       onChange={(e) => setAggregation(e.target.value as any)}
-                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none"
+                      className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                     >
                       <option value="count">Count Rows</option>
                       <option value="sum">Sum Metric</option>
@@ -269,12 +265,12 @@ export default function ReportsList() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">Metric Field (Y-Axis)</label>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Metric Field</label>
                     <select
                       value={metricField}
                       onChange={(e) => setMetricField(e.target.value)}
                       disabled={aggregation === 'count'}
-                      className="w-full px-3 py-2 text-sm bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:outline-none disabled:opacity-50"
+                      className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer disabled:opacity-50"
                     >
                       <option value="">Select number field...</option>
                       {selectedModuleFields
@@ -293,12 +289,12 @@ export default function ReportsList() {
               <div className="md:col-span-7 space-y-6">
                 
                 {/* Filters */}
-                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 space-y-3">
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-bold text-xs text-slate-450 uppercase tracking-wider">Matching Filters</h4>
+                <div className="bg-white border border-[#E8ECF4] rounded-[20px] p-6 space-y-4 shadow-sm">
+                  <div className="flex justify-between items-center pb-1">
+                    <h4 className="font-[800] text-[10px] text-slate-450 uppercase tracking-wider">Matching Filters</h4>
                     <button
                       onClick={handleAddFilter}
-                      className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+                      className="text-[10px] font-[800] uppercase tracking-wider text-indigo-650 hover:underline flex items-center gap-1"
                     >
                       <Icons.Plus className="w-3.5 h-3.5" /> Add Filter
                     </button>
@@ -313,7 +309,7 @@ export default function ReportsList() {
                           updated[idx].field = e.target.value;
                           setFilters(updated);
                         }}
-                        className="px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:outline-none"
+                        className="h-9 px-3 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                       >
                         <option value="">Field...</option>
                         {selectedModuleFields.map((field) => (
@@ -329,7 +325,7 @@ export default function ReportsList() {
                           updated[idx].operator = e.target.value;
                           setFilters(updated);
                         }}
-                        className="px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:outline-none"
+                        className="h-9 px-3 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer"
                       >
                         <option value="equals">equals</option>
                         <option value="not_equals">not equals</option>
@@ -344,25 +340,25 @@ export default function ReportsList() {
                           setFilters(updated);
                         }}
                         placeholder="match value"
-                        className="px-2.5 py-1.5 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:outline-none"
+                        className="h-9 px-3.5 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
                       />
                     </div>
                   ))}
-                  {filters.length === 0 && <p className="text-xs text-slate-500">Query all records.</p>}
+                  {filters.length === 0 && <p className="text-xs text-slate-400 font-semibold italic">Query all records.</p>}
                 </div>
 
                 {/* Columns Selection */}
-                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-5 space-y-3">
-                  <h4 className="font-bold text-xs text-slate-450 uppercase tracking-wider">Report Columns Table (Select to show)</h4>
+                <div className="bg-white border border-[#E8ECF4] rounded-[20px] p-6 space-y-4 shadow-sm">
+                  <h4 className="font-[800] text-[10px] text-slate-450 uppercase tracking-wider">Report Columns Table (Select to show)</h4>
                   <div className="flex gap-2 flex-wrap">
                     {selectedModuleFields.map((f) => (
                       <button
                         key={f.name}
                         onClick={() => handleToggleColumn(f.name)}
-                        className={`px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                        className={`px-3.5 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider border transition-all ${
                           selectedColumns.includes(f.name)
-                            ? 'bg-primary/10 text-primary border-primary'
-                            : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                            ? 'bg-indigo-50 text-indigo-650 border-indigo-200 shadow-sm'
+                            : 'border-slate-200 text-slate-450 bg-white hover:bg-slate-50'
                         }`}
                       >
                         {f.label}
@@ -374,17 +370,16 @@ export default function ReportsList() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 flex justify-end gap-3">
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex justify-end gap-3">
               <button
                 onClick={() => setShowDesigner(false)}
-                className="px-4 py-2 border border-slate-200 dark:border-slate-750 bg-white dark:bg-slate-850 hover:bg-slate-50 rounded-lg text-sm font-medium text-slate-700"
+                className="btn-secondary-premium h-10 px-5 text-xs font-bold"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveReport}
-                style={{ backgroundColor: 'rgb(var(--color-primary))' }}
-                className="px-5 py-2 text-white rounded-lg text-sm font-medium hover:brightness-110 transition-all shadow-md"
+                className="btn-primary-premium h-10 px-5 text-xs font-bold"
               >
                 Save Report Template
               </button>

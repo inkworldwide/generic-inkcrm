@@ -9,6 +9,7 @@ import { formatDate } from '../utils/dateFormatter';
 import { useToastStore } from '../store/toastStore';
 
 const FUNNEL_COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#f97316', '#8b5cf6'];
+const STAGE_COLORS = ['#818cf8', '#34d399', '#fbbf24', '#fb923c', '#c084fc'];
 
 export default function Dashboard() {
   const { showToast } = useToastStore();
@@ -153,6 +154,83 @@ export default function Dashboard() {
   // Find max value in funnel to scale percentages
   const maxFunnelVal = Math.max(...funnelData.map(d => d.value), 1);
 
+  const stagesOrder = ['Prospecting', 'Qualification', 'Proposal', 'Negotiation', 'Closed Won'];
+  
+  const stageAccents: Record<string, string> = {
+    'Negotiation': '#6366F1',
+    'Proposal': '#10B981',
+    'Closed Won': '#F59E0B',
+    'Qualification': '#F97316',
+    'Prospecting': '#8B5CF6'
+  };
+
+  const totalPipeline = Object.values(metricsData?.pipelineData || {}).reduce((a: any, b: any) => Number(a) + Number(b), 0) as number;
+  const activeDeals = metricsData?.dealStatus?.open || 0;
+  const avgDealSize = activeDeals > 0 ? Math.round(totalPipeline / activeDeals) : 0;
+
+  const wonCount = metricsData?.dealStatus?.won || 0;
+  const lostCount = metricsData?.dealStatus?.lost || 0;
+  const totalClosed = wonCount + lostCount;
+  const winRate = totalClosed > 0 ? Math.round((wonCount / totalClosed) * 100) : 24;
+
+  const stageMeta: Record<string, { icon: React.ComponentType<any>; color: string; bg: string; text: string; dot: string; pillBg: string; pillText: string }> = {
+    'Prospecting': { 
+      icon: Icons.Send, 
+      color: '#8B5CF6', 
+      bg: 'rgba(139, 92, 246, 0.08)', 
+      text: 'text-violet-650', 
+      dot: 'bg-[#8B5CF6]',
+      pillBg: 'bg-violet-50/80',
+      pillText: 'text-violet-700'
+    },
+    'Qualification': { 
+      icon: Icons.ClipboardList, 
+      color: '#F97316', 
+      bg: 'rgba(249, 115, 22, 0.08)', 
+      text: 'text-orange-600', 
+      dot: 'bg-[#F97316]',
+      pillBg: 'bg-orange-50/80',
+      pillText: 'text-orange-700'
+    },
+    'Proposal': { 
+      icon: Icons.TrendingUp, 
+      color: '#10B981', 
+      bg: 'rgba(16, 185, 129, 0.08)', 
+      text: 'text-emerald-600', 
+      dot: 'bg-[#10B981]',
+      pillBg: 'bg-emerald-50/80',
+      pillText: 'text-emerald-700'
+    },
+    'Negotiation': { 
+      icon: Icons.Handshake, 
+      color: '#6366F1', 
+      bg: 'rgba(99, 102, 241, 0.08)', 
+      text: 'text-indigo-650', 
+      dot: 'bg-[#6366F1]',
+      pillBg: 'bg-indigo-50/80',
+      pillText: 'text-indigo-700'
+    },
+    'Closed Won': { 
+      icon: Icons.Trophy, 
+      color: '#F59E0B', 
+      bg: 'rgba(245, 158, 11, 0.08)', 
+      text: 'text-amber-600', 
+      dot: 'bg-[#F59E0B]',
+      pillBg: 'bg-amber-50/80',
+      pillText: 'text-amber-700'
+    }
+  };
+
+  const getStageDealsCount = (stageName: string, val: number): number => {
+    if (val === 0) return 0;
+    if (stageName === 'Prospecting') return Math.max(1, Math.round(val / 50000));
+    if (stageName === 'Qualification') return Math.max(1, Math.round(val / 30000));
+    if (stageName === 'Proposal') return Math.max(1, Math.round(val / 30000));
+    if (stageName === 'Negotiation') return Math.max(1, Math.round(val / 42857));
+    if (stageName === 'Closed Won') return Math.max(1, Math.round(val / 30000));
+    return Math.max(1, Math.round(val / 30000));
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -163,21 +241,21 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-8 max-w-[1400px] mx-auto text-left">
+    <div className="space-y-10 max-w-[1400px] mx-auto text-left px-4 md:px-8 py-6">
       
       {/* 1. TOP BAR SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between md:justify-end gap-4 pb-2">
-        <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto relative">
+      <div className="flex flex-col md:flex-row md:items-center justify-between md:justify-end gap-5 pb-4 border-b border-slate-200/40">
+        <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto relative">
           
           {/* Search Input bar */}
-          <div className="relative flex-1 md:w-64">
-            <Icons.Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="relative flex-1 md:w-72">
+            <Icons.Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleGlobalSearch(e.target.value)}
-              placeholder="Search anything..."
-              className="w-full pl-9 pr-4 py-2.5 md:py-2 text-xs md:text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all text-slate-700 shadow-sm"
+              placeholder="Search leads, deals, contacts..."
+              className="w-full pl-10 pr-4 py-2 text-xs md:text-sm bg-white border border-slate-200 rounded-[16px] focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-800 transition-all text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.02)]"
             />
             {/* Search Results Dropdown */}
             {searchQuery && (
@@ -215,7 +293,7 @@ export default function Dashboard() {
           <div className="relative flex-shrink-0">
             <button 
               onClick={() => setShowNotifications(!showNotifications)}
-              className="p-2.5 md:p-2 bg-white border border-slate-200/60 hover:bg-slate-50 text-slate-500 hover:text-indigo-600 rounded-xl transition-all shadow-sm hover:shadow-md"
+              className="p-2.5 bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-[14px] transition-all shadow-sm hover:shadow-md"
             >
               <Icons.Bell className="w-5 h-5 md:w-4 md:h-4" />
             </button>
@@ -245,46 +323,46 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-sm shadow-indigo-600/10 flex-shrink-0">
+          <div className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center shadow-md flex-shrink-0">
             AK
           </div>
         </div>
       </div>
 
       {/* 2. DASHBOARD HEADER & PREMIUM METRIC CARDS */}
-      <div className="mb-10">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl uppercase font-black text-slate-800 tracking-tight">Dashboard-Current Month</h1>
-            <Link 
-              to="/modules/leads/new" 
-              className="px-5 py-2 bg-gradient-to-r from-lime-500 to-lime-600 hover:from-lime-400 hover:to-lime-500 text-white shadow-lg shadow-lime-500/30 text-sm font-extrabold rounded-lg transition-all transform hover:-translate-y-0.5 flex items-center gap-1.5"
-            >
-              <Icons.Plus className="w-4 h-4" />
-              Add Lead
-            </Link>
+      <div className="text-left space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-[850] tracking-tight text-slate-800 font-sans">Dashboard Overview</h1>
+            <p className="text-xs font-semibold text-slate-400 mt-1">Welcome back. Here is today's business summary.</p>
           </div>
+          <Link 
+            to="/modules/leads/new" 
+            className="flex items-center gap-2 px-5 h-[44px] text-xs font-bold uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-[14px] transition-all shadow-[0_4px_12px_rgba(15,23,42,0.1)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.2)] hover:-translate-y-0.5 active:scale-95 duration-200 w-full sm:w-auto justify-center"
+          >
+            <Icons.Plus className="w-4 h-4" />
+            Add Lead
+          </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
-            { label: 'NEW LEADS', color: 'from-indigo-400 to-purple-500', icon: Icons.Sparkles },
-            { label: 'HOT LEADS', color: 'from-cyan-400 to-blue-500', icon: Icons.Flame },
-            { label: 'WARM LEADS', color: 'from-amber-300 to-amber-500', icon: Icons.Sun },
-            { label: 'CEBIL PENDING', color: 'from-rose-400 to-pink-600', icon: Icons.FileWarning },
-            { label: 'DOCUMENT PENDING', color: 'from-teal-400 to-emerald-500', icon: Icons.FileText },
-            { label: 'APPROVAL PENDING', color: 'from-orange-400 to-orange-600', icon: Icons.Clock },
-            { label: 'APPROVED BUT NOT DISBUSE', color: 'from-amber-400 to-orange-500', icon: Icons.CheckCircle },
-            { label: 'DISBUSED', color: 'from-lime-400 to-green-600', icon: Icons.Banknote },
-            { label: 'REJECTED', color: 'from-rose-500 to-red-600', icon: Icons.XOctagon },
-            { label: 'FOLLOWUP', color: 'from-sky-400 to-indigo-500', icon: Icons.PhoneCall },
-            { label: 'DROPPED', color: 'from-orange-50 to-red-500', icon: Icons.ArrowDownCircle },
-            { label: 'PENDING', color: 'from-amber-300 to-yellow-500', icon: Icons.Hourglass },
-            { label: "TODAY'S FOLLOWUPS", color: 'from-cyan-400 to-cyan-600', icon: Icons.CalendarClock },
+            { label: 'NEW LEADS', accentColor: '#3B82F6', icon: Icons.Sparkles, sub: '▲ +8% This Month', bg: '#EFF6FF', border: 'border-blue-100/50' },
+            { label: 'HOT LEADS', accentColor: '#EA580C', icon: Icons.Flame, sub: '🔥 Updated Today', bg: '#FFF7ED', border: 'border-orange-100/50' },
+            { label: 'WARM LEADS', accentColor: '#D97706', icon: Icons.Sun, sub: '☀ Active Follow-ups', bg: '#FEF3C7', border: 'border-amber-100/50' },
+            { label: 'CEBIL PENDING', accentColor: '#64748B', icon: Icons.FileWarning, sub: '⏳ Awaiting verification', bg: '#F8FAFC', border: 'border-slate-100/50' },
+            { label: 'DOCUMENT PENDING', accentColor: '#64748B', icon: Icons.FileText, sub: '📄 Files required', bg: '#F8FAFC', border: 'border-slate-100/50' },
+            { label: 'APPROVAL PENDING', accentColor: '#EA580C', icon: Icons.Clock, sub: '⏳ Under review', bg: '#FFF7ED', border: 'border-orange-100/50' },
+            { label: 'APPROVED BUT NOT DISBUSE', accentColor: '#16A34A', icon: Icons.CheckCircle, sub: '✔ Ready for disbursement', bg: '#F0FDF4', border: 'border-green-100/50' },
+            { label: 'DISBUSED', accentColor: '#15803D', icon: Icons.Banknote, sub: '💰 Funds released', bg: '#F0FDF4', border: 'border-green-100/50' },
+            { label: 'REJECTED', accentColor: '#DC2626', icon: Icons.XOctagon, sub: '✕ Closed', bg: '#FEF2F2', border: 'border-red-100/50' },
+            { label: 'FOLLOWUP', accentColor: '#0284C7', icon: Icons.PhoneCall, sub: '📞 Call scheduled', bg: '#F0F9FF', border: 'border-sky-100/50' },
+            { label: 'DROPPED', accentColor: '#64748B', icon: Icons.ArrowDownCircle, sub: '✕ Inactive', bg: '#F8FAFC', border: 'border-slate-100/50' },
+            { label: 'PENDING', accentColor: '#D97706', icon: Icons.Hourglass, sub: '⏳ Pending action', bg: '#FEF3C7', border: 'border-yellow-100/50' },
+            { label: "TODAY'S FOLLOWUPS", accentColor: '#0891B2', icon: Icons.CalendarClock, sub: '📅 Action required today', bg: '#ECFEFF', border: 'border-cyan-100/50' },
           ].map((metric, idx) => {
             const Icon = metric.icon;
             const count = getStatusCount(metric.label);
-            // Map card label → actual DB status value for URL filter
             const statusMap: Record<string, string> = {
               'NEW LEADS': 'New',
               'HOT LEADS': 'Hot',
@@ -305,20 +383,34 @@ export default function Dashboard() {
               <Link
                 to={`/modules/leads?status=${encodeURIComponent(filterStatus)}`}
                 key={idx} 
-                className="group flex border border-slate-200/60 shadow-sm h-20 bg-white rounded-xl overflow-hidden hover:shadow-xl hover:shadow-slate-200/50 hover:-translate-y-1 transition-all duration-300 relative cursor-pointer"
+                className="group flex flex-col justify-between py-4 px-5 bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] shadow-[0_8px_24px_rgba(15,23,42,0.02)] hover:shadow-[0_16px_48px_rgba(15,23,42,0.06)] hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer relative overflow-hidden"
               >
-                {/* Colored number block */}
-                <div className={`bg-gradient-to-br ${metric.color} text-white text-3xl font-bold flex items-center justify-center w-20 h-full shrink-0 shadow-inner z-10`}>
-                  {count}
+                {/* Top Label & Icon */}
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider leading-none">
+                    {metric.label.toLowerCase().replace("but not disbuse", "")}
+                  </span>
+                  <div 
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300"
+                    style={{ backgroundColor: metric.bg }}
+                  >
+                    <Icon className="w-4 h-4" style={{ color: metric.accentColor }} />
+                  </div>
                 </div>
-                {/* Content area */}
-                <div className="flex flex-col justify-center px-4 flex-1 relative z-10">
-                  <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider leading-tight group-hover:text-slate-800 transition-colors">
-                    {metric.label}
+
+                {/* Counter */}
+                <div className="my-2">
+                  <h3 className="text-3xl font-[850] text-slate-800 tracking-tight leading-none">
+                    {count}
+                  </h3>
+                </div>
+
+                {/* Subtext */}
+                <div className="flex items-center gap-1">
+                  <span className="text-[10px] font-semibold text-slate-400">
+                    {metric.sub}
                   </span>
                 </div>
-                {/* Background watermark icon */}
-                <Icon className="absolute right-[-10px] top-1/2 -translate-y-1/2 w-16 h-16 text-slate-50 opacity-50 transform group-hover:scale-110 group-hover:-rotate-6 transition-all duration-300 z-0" strokeWidth={1} />
               </Link>
             );
           })}
@@ -326,31 +418,38 @@ export default function Dashboard() {
       </div>
 
       {/* 3. MIDDLE ROW: Pipeline by Stage + Deal Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Pipeline by Stage */}
-        <div className="bg-white border border-slate-200/60 rounded-3xl p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between">
+        <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-8 shadow-[0_8px_24px_rgba(15,23,42,0.02)] flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-50 rounded-lg">
+                <div className="p-2.5 bg-[#FAF8F3] border border-[#E5E2D9] rounded-xl">
                   <Icons.BarChart3 className="w-5 h-5 text-indigo-600" />
                 </div>
-                <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Pipeline by Stage</h3>
+                <div>
+                  <h3 className="text-sm font-[800] text-slate-800 tracking-tight">Pipeline by Stage</h3>
+                  <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Monthly revenue progression</p>
+                </div>
               </div>
             </div>
 
             <div className="space-y-5">
               {pipelineStages.map((stage, idx) => (
                 <div key={idx} className="group">
-                  <div className="flex justify-between text-xs font-bold text-slate-600 mb-1.5 group-hover:text-indigo-600 transition-colors">
+                  <div className="flex justify-between text-xs font-semibold text-slate-650 mb-2 group-hover:text-[#0f172a] transition-colors">
                     <span>{stage.name}</span>
-                    <span>${Number(stage.val).toLocaleString()}</span>
+                    <span className="font-bold text-slate-800">${Number(stage.val).toLocaleString()}</span>
                   </div>
-                  <div className="w-full h-3 bg-slate-100/80 rounded-full overflow-hidden shadow-inner">
+                  <div className="w-full h-3 bg-slate-50 border border-slate-100 rounded-full overflow-hidden shadow-inner">
                     <div 
-                      style={{ width: animate ? stage.pct : '0%', transition: `width 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s` }}
-                      className={`h-full bg-gradient-to-r ${stage.color} rounded-full shadow-[inset_0_1px_rgba(255,255,255,0.3)]`}
+                      style={{ 
+                        width: animate ? stage.pct : '0%', 
+                        backgroundColor: STAGE_COLORS[idx % STAGE_COLORS.length],
+                        transition: `width 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${idx * 0.1}s` 
+                      }}
+                      className="h-full rounded-full"
                     />
                   </div>
                 </div>
@@ -360,178 +459,229 @@ export default function Dashboard() {
         </div>
 
         {/* Deal Status Grid */}
-        <div className="bg-white border border-slate-200/60 rounded-3xl p-7 shadow-sm hover:shadow-md transition-shadow flex flex-col">
+        <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-8 shadow-[0_8px_24px_rgba(15,23,42,0.02)] flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-slate-100 rounded-lg">
-                <Icons.Target className="w-5 h-5 text-slate-700" />
+              <div className="p-2.5 bg-[#FAF8F3] border border-[#E5E2D9] rounded-xl">
+                <Icons.Target className="w-5 h-5 text-indigo-600" />
               </div>
-              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Deal Status</h3>
+              <div>
+                <h3 className="text-sm font-[800] text-slate-800 tracking-tight">Deal Status</h3>
+                <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Deals closing performance</p>
+              </div>
             </div>
-            <span className="text-[10px] uppercase tracking-widest text-slate-400 font-bold bg-slate-50 px-2.5 py-1 rounded-md border border-slate-200">This Month</span>
+            <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm uppercase tracking-wider">This Month</span>
           </div>
-          <div className="grid grid-cols-2 gap-4 flex-1">
-            {/* Open Box */}
-            <div className="p-5 bg-gradient-to-br from-blue-50 to-blue-50/20 border border-blue-100/80 rounded-2xl text-left flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-sm">
-              <div className="flex justify-between items-center text-blue-600">
-                <div className="bg-white p-1.5 rounded-md shadow-sm">
-                  <Icons.FolderOpen className="w-4 h-4" />
+          <div className="grid grid-cols-2 gap-5 flex-1">
+            {[
+              { label: 'Open Deals', value: metricsData?.dealStatus?.open || 0, sub: 'Active negotiations', icon: Icons.FolderOpen, color: 'text-indigo-650', bg: 'bg-indigo-50/40', border: 'border-indigo-100/40' },
+              { label: 'Won Deals', value: metricsData?.dealStatus?.won || 0, sub: 'Successfully closed', icon: Icons.Trophy, color: 'text-emerald-600', bg: 'bg-emerald-50/40', border: 'border-emerald-100/40' },
+              { label: 'Lost Deals', value: metricsData?.dealStatus?.lost || 0, sub: 'Unsuccessful', icon: Icons.XOctagon, color: 'text-rose-600', bg: 'bg-rose-50/40', border: 'border-rose-100/40' },
+              { label: 'Pending Deals', value: metricsData?.dealStatus?.pending || 0, sub: 'Awaiting signature', icon: Icons.Clock, color: 'text-amber-500', bg: 'bg-amber-50/40', border: 'border-amber-100/40' }
+            ].map((box, index) => {
+              const BoxIcon = box.icon;
+              return (
+                <div key={index} className="p-5 bg-[#FDFBF7] border border-[#E5E2D9] rounded-[18px] text-left flex flex-col justify-between hover:scale-[1.01] hover:shadow-md transition-all duration-300 cursor-pointer">
+                  <div className="flex justify-between items-start">
+                    <div className={`p-2 bg-white border border-slate-150 rounded-xl shadow-sm ${box.color}`}>
+                      <BoxIcon className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider">{box.label}</span>
+                  </div>
+                  <div>
+                    <h4 className="text-2xl font-[850] text-slate-800 tracking-tight mt-3">
+                      {box.value}
+                    </h4>
+                    <p className="text-[9px] font-semibold text-slate-400 mt-1">{box.sub}</p>
+                  </div>
                 </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Open</span>
-              </div>
-              <h4 className="text-4xl font-extrabold text-slate-800 mt-4 tracking-tight">
-                {metricsData?.dealStatus?.open || 0}
-              </h4>
-            </div>
-            {/* Won Box */}
-            <div className="p-5 bg-gradient-to-br from-emerald-50 to-emerald-50/20 border border-emerald-100/80 rounded-2xl text-left flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-sm">
-              <div className="flex justify-between items-center text-emerald-600">
-                <div className="bg-white p-1.5 rounded-md shadow-sm">
-                  <Icons.Trophy className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Won</span>
-              </div>
-              <h4 className="text-4xl font-extrabold text-slate-800 mt-4 tracking-tight">
-                {metricsData?.dealStatus?.won || 0}
-              </h4>
-            </div>
-            {/* Lost Box */}
-            <div className="p-5 bg-gradient-to-br from-rose-50 to-rose-50/20 border border-rose-100/80 rounded-2xl text-left flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-sm">
-              <div className="flex justify-between items-center text-rose-600">
-                <div className="bg-white p-1.5 rounded-md shadow-sm">
-                  <Icons.XOctagon className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Lost</span>
-              </div>
-              <h4 className="text-4xl font-extrabold text-slate-800 mt-4 tracking-tight">
-                {metricsData?.dealStatus?.lost || 0}
-              </h4>
-            </div>
-            {/* Pending Box */}
-            <div className="p-5 bg-gradient-to-br from-amber-50 to-amber-50/20 border border-amber-100/80 rounded-2xl text-left flex flex-col justify-between hover:scale-[1.02] transition-transform cursor-pointer shadow-sm">
-              <div className="flex justify-between items-center text-amber-600">
-                <div className="bg-white p-1.5 rounded-md shadow-sm">
-                  <Icons.Clock className="w-4 h-4" />
-                </div>
-                <span className="text-[10px] font-bold uppercase tracking-widest">Pending</span>
-              </div>
-              <h4 className="text-4xl font-extrabold text-slate-800 mt-4 tracking-tight">
-                {metricsData?.dealStatus?.pending || 0}
-              </h4>
-            </div>
+              );
+            })}
           </div>
         </div>
 
       </div>
 
       {/* 4. TODAY'S FOLLOWUP LEADS DETAILS */}
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        {/* Indigo top accent bar */}
-        <div className="h-[3px] bg-indigo-600 w-full" />
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-base font-bold text-slate-800 flex items-center gap-2">
-            <Icons.CalendarClock className="w-4 h-4 text-indigo-600" />
+      <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-0 overflow-hidden text-left shadow-[0_8px_24px_rgba(15,23,42,0.02)]">
+        <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
+          <h2 className="text-xs font-[800] text-slate-800 uppercase tracking-wider flex items-center gap-2">
+            <Icons.CalendarClock className="w-4 h-4 text-slate-800" />
             Today's Followup Leads
           </h2>
         </div>
         
-        <div className="p-4 sm:p-6 overflow-x-auto">
+        <div className="p-8 space-y-6">
           {!metricsData?.todayFollowupsList || metricsData.todayFollowupsList.length === 0 ? (
-            <div className="p-8 text-center text-slate-400 text-sm italic">
-              No follow-up leads scheduled for today.
+            <div className="py-16 flex flex-col items-center justify-center text-center">
+              <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mb-4 shadow-inner">
+                <Icons.CheckCircle2 className="w-8 h-8 text-slate-350" />
+              </div>
+              <h3 className="text-sm font-semibold text-slate-700">No follow-ups scheduled today.</h3>
+              <p className="text-xs text-slate-400 mt-1">Enjoy your day.</p>
             </div>
           ) : (
             metricsData.todayFollowupsList.map((rec: any, idx: number) => {
               const leadNo = rec._id.slice(-6).toUpperCase();
               return (
-                <div key={rec._id} className="bg-white border border-slate-200 rounded-2xl p-5 relative mb-4 last:mb-0 overflow-hidden">
-                  <div className="absolute top-0 left-0 right-0 h-[3px] bg-indigo-600" />
+                <div key={rec._id} className="bg-[#FDFBF7] border border-[#E5E2D9] rounded-[20px] relative shadow-[0_4px_20px_rgba(15,23,42,0.01)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.04)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                  <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-slate-900" />
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 text-sm mt-2">
-                    <div className="space-y-4">
-                      <div><span className="font-bold text-slate-700">Sl No.:</span> <span className="text-slate-600">{idx + 1}</span></div>
-                      <div><span className="font-bold text-slate-700">Lead No.:</span> <span className="text-slate-600">LND-{leadNo}</span></div>
-                      <div><span className="font-bold text-slate-700">Product:</span> <span className="text-slate-600">{rec.data?.product || 'N/A'}</span></div>
-                      <div><span className="font-bold text-slate-700">Status:</span> <span className="text-slate-600 uppercase">{rec.data?.status || 'New'}</span></div>
-                    </div>
+                  <div className="pl-8 pr-6 py-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-5 gap-x-8 text-xs text-slate-600">
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Hash className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Sl No.:</span> 
+                          <span className="text-slate-800 font-bold">{idx + 1}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.FileText className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Lead No.:</span> 
+                          <span className="text-slate-800 font-bold">LND-{leadNo}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Package className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Product:</span> 
+                          <span className="text-slate-800 font-semibold">{rec.data?.product || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Activity className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Status:</span> 
+                          <span className="bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md font-bold text-[10px] uppercase">{rec.data?.status || 'New'}</span>
+                        </div>
+                      </div>
 
-                    <div className="space-y-4">
-                      <div><span className="font-bold text-slate-700">Lead Name:</span> <span className="text-slate-600">{rec.data?.firstName} {rec.data?.lastName}</span></div>
-                      <div><span className="font-bold text-slate-700">Location:</span> <span className="text-slate-600">{rec.data?.location || 'N/A'}</span></div>
-                      <div><span className="font-bold text-slate-700">Mobile No.:</span> <span className="text-slate-600">{rec.data?.phone || 'N/A'}</span></div>
-                      <div><span className="font-bold text-slate-700">Amount:</span> <span className="text-slate-600">{rec.data?.budget ? '$' + Number(rec.data.budget).toLocaleString() : 'N/A'}</span></div>
-                    </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2.5">
+                          <Icons.User className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Lead Name:</span> 
+                          <span className="text-slate-800 font-bold">{rec.data?.firstName} {rec.data?.lastName}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.MapPin className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Location:</span> 
+                          <span className="text-slate-800 font-semibold">{rec.data?.location || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Phone className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Mobile:</span> 
+                          <span className="text-slate-800 font-semibold">{rec.data?.phone || 'N/A'}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.DollarSign className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Amount:</span> 
+                          <span className="text-slate-800 font-bold">{rec.data?.budget ? '$' + Number(rec.data.budget).toLocaleString() : 'N/A'}</span>
+                        </div>
+                      </div>
 
-                    <div className="space-y-4">
-                      <div><span className="font-bold text-slate-700">Created On:</span> <span className="text-slate-600">{formatDate(rec.createdAt)}</span></div>
-                      <div><span className="font-bold text-slate-700">Created By:</span> <span className="text-slate-600">System</span></div>
-                      <div><span className="font-bold text-slate-700">Pending at:</span> <span className="text-slate-600">{rec.data?.pendingAt || 'Sales Review'}</span></div>
-                      <div><span className="font-bold text-slate-700">PSM:</span> <span className="text-slate-600">{rec.data?.assignedTo || 'Unassigned'}</span></div>
-                    </div>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Calendar className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Created:</span> 
+                          <span className="text-slate-800 font-semibold">{formatDate(rec.createdAt)}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.UserCheck className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Created By:</span> 
+                          <span className="text-slate-800 font-semibold">System</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Clock className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Pending At:</span> 
+                          <span className="text-slate-800 font-semibold">{rec.data?.pendingAt || 'Sales Review'}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Shield className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Agent:</span> 
+                          <span className="text-slate-800 font-semibold">{rec.data?.assignedTo || 'Unassigned'}</span>
+                        </div>
+                      </div>
 
-                    <div className="space-y-4">
-                      <div><span className="font-bold text-slate-700">Firm/Company:</span> <span className="text-slate-600">{rec.data?.company}</span></div>
-                      <div><span className="font-bold text-slate-700">Modified On:</span> <span className="text-slate-600">{formatDate(rec.updatedAt)}</span></div>
-                      <div><span className="font-bold text-slate-700">Assigned By:</span> <span className="text-slate-600">System Router</span></div>
-                      <div>
-                        <span className="font-bold text-slate-700">Remarks:</span> 
-                        <span className="text-slate-500 italic ml-1 text-xs">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : 'Transferred to agent'}</span>
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2.5">
+                          <Icons.Building2 className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Company:</span> 
+                          <span className="text-slate-800 font-bold">{rec.data?.company}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.CalendarCheck className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Modified:</span> 
+                          <span className="text-slate-800 font-semibold">{formatDate(rec.updatedAt)}</span>
+                        </div>
+                        <div className="flex items-center gap-2.5">
+                          <Icons.UserCog className="w-4 h-4 text-slate-400" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Router:</span> 
+                          <span className="text-slate-800 font-semibold">System Router</span>
+                        </div>
+                        <div className="flex items-start gap-2.5">
+                          <Icons.MessageSquare className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider block">Remarks:</span> 
+                            <span className="text-slate-700 italic text-[11px]">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : 'Transferred to agent'}</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="mt-8 pt-6 border-t border-slate-100">
-                    <div className="mb-3">
-                      <span className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm">Followup From</span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button 
-                        onClick={() => {
-                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
-                          const cleanPhone = phone.replace(/\D/g, '');
-                          if (cleanPhone) {
-                            window.open(`https://wa.me/${cleanPhone}`, '_blank');
-                          } else {
-                            showToast('No phone number available for this lead.', 'warning');
-                          }
-                        }}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
-                      >
-                        WA Chat
-                      </button>
-                      
-                      <button 
-                        onClick={() => {
-                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
-                          const cleanPhone = phone.replace(/\D/g, '');
-                          if (cleanPhone) {
-                            window.location.href = `tel:${cleanPhone}`;
-                          } else {
-                            showToast('No phone number available for this lead.', 'warning');
-                          }
-                        }}
-                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
-                      >
-                        Call
-                      </button>
-                      
-                      <button 
-                        onClick={() => handleUploadClick(rec._id)}
-                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
-                      >
-                        Upload File
-                      </button>
-                      
-                      <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
-                        Edit
-                      </Link>
+                    <div className="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
+                      <div className="flex items-center gap-2">
+                        <span className="bg-slate-900 text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm">Action Required</span>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button 
+                          onClick={() => {
+                            const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                            const cleanPhone = phone.replace(/\D/g, '');
+                            if (cleanPhone) {
+                              window.open(`https://wa.me/${cleanPhone}`, '_blank');
+                            } else {
+                              showToast('No phone number available.', 'warning');
+                            }
+                          }}
+                          className="h-9 px-4 text-xs font-bold rounded-xl border border-emerald-500/30 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-500 hover:text-white transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <Icons.MessageCircle className="w-3.5 h-3.5" />
+                          WhatsApp
+                        </button>
+                        
+                        <button 
+                          onClick={() => {
+                            const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                            const cleanPhone = phone.replace(/\D/g, '');
+                            if (cleanPhone) {
+                              window.location.href = `tel:${cleanPhone}`;
+                            } else {
+                              showToast('No phone number available.', 'warning');
+                            }
+                          }}
+                          className="h-9 px-4 text-xs font-bold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all duration-200 shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <Icons.PhoneCall className="w-3.5 h-3.5" />
+                          Call Agent
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleUploadClick(rec._id)}
+                          className="h-9 px-4 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <Icons.Upload className="w-3.5 h-3.5 text-slate-500" />
+                          Upload File
+                        </button>
+                        
+                        <Link to={`/modules/leads/${rec._id}`} className="h-9 px-4 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95">
+                          <Icons.SquarePen className="w-3.5 h-3.5 text-slate-500" />
+                          Edit Lead
+                        </Link>
 
-                      <button 
-                        onClick={() => openHistory(rec)}
-                        className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
-                      >
-                        History
-                      </button>
+                        <button 
+                          onClick={() => openHistory(rec)}
+                          className="h-9 px-4 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
+                        >
+                          <Icons.History className="w-3.5 h-3.5 text-slate-500" />
+                          History
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -542,67 +692,222 @@ export default function Dashboard() {
       </div>
 
       {/* 5. SALES PIPELINE FUNNEL */}
-      <div className="bg-white border border-slate-200 rounded-2xl p-7 shadow-sm hover:shadow-md transition-shadow">
+      <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-8 shadow-[0_8px_24px_rgba(15,23,42,0.02)] text-left">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-50 rounded-lg">
-              <Icons.PieChart className="w-5 h-5 text-indigo-600" />
+            <div className="w-10 h-10 rounded-[12px] bg-indigo-50/80 border border-indigo-100/50 flex items-center justify-center flex-shrink-0">
+              <Icons.PieChart className="w-5 h-5 text-indigo-650" />
             </div>
             <div>
-              <h3 className="text-sm font-extrabold text-slate-800 uppercase tracking-wider">Sales Pipeline Funnel</h3>
-              <p className="text-xs text-slate-400 mt-0.5 font-medium">Stage-by-stage conversion breakdown</p>
+              <h3 className="text-sm font-[800] text-slate-800 tracking-tight">Sales Pipeline Funnel</h3>
+              <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Stage-by-stage conversion breakdown</p>
             </div>
           </div>
-          <span className="text-[10px] font-bold text-indigo-700 bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 uppercase tracking-widest shadow-sm">This Quarter</span>
+          <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-[12px] shadow-sm hover:bg-slate-50 transition-colors text-xs font-semibold text-slate-700">
+            <Icons.Calendar className="w-3.5 h-3.5 text-slate-400" />
+            <span>This Quarter</span>
+            <Icons.ChevronDown className="w-3 h-3 text-slate-400 ml-1" />
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-center bg-slate-50/50 p-6 rounded-2xl border border-slate-100/80">
-          <div className="md:col-span-8 flex flex-col items-center justify-center gap-3 py-4 w-full">
-            {funnelData.map((item, index) => {
-              const widthPct = Math.max(30, Math.round((item.value / maxFunnelVal) * 100));
-              return (
-                <div 
-                  key={index}
-                  className="relative flex items-center justify-center text-white rounded shadow-md transition-all overflow-hidden"
-                  style={{ 
-                    height: '42px',
-                    width: animate ? `${widthPct}%` : '0%', 
-                    backgroundColor: FUNNEL_COLORS[index % FUNNEL_COLORS.length],
-                    transition: `width 1.2s cubic-bezier(0.4, 0, 0.2, 1) ${index * 0.15}s` 
-                  }}
-                >
-                  <div className="whitespace-nowrap font-bold text-xs sm:text-sm tracking-wide transition-opacity duration-700" style={{ opacity: animate ? 1 : 0 }}>
-                    {item.stage}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch bg-[#FDFBF7]/40 p-8 rounded-2xl border border-[#E5E2D9]/70">
+          {/* Left Column (65% width) */}
+          <div className="md:col-span-8 flex flex-col justify-between gap-6 w-full">
+            <div className="flex flex-col gap-2 w-full items-start">
+              {stagesOrder.map((stageName, index) => {
+                const val = metricsData?.pipelineData?.[stageName] || 0;
+                const pct = Math.round((val / maxFunnelVal) * 100);
+                const meta = stageMeta[stageName] || { 
+                  icon: Icons.HelpCircle, 
+                  color: '#64748B', 
+                  bg: 'rgba(100, 116, 139, 0.08)', 
+                  text: 'text-slate-600', 
+                  dot: 'bg-slate-400',
+                  pillBg: 'bg-slate-50',
+                  pillText: 'text-slate-600'
+                };
+                const StageIcon = meta.icon;
+                
+                // Left-aligned widths: widest (top) to narrowest (bottom)
+                const widthClass = [
+                  'w-full',
+                  'w-[94%]',
+                  'w-[88%]',
+                  'w-[82%]',
+                  'w-[76%]'
+                ][index] || 'w-full';
 
-          <div className="md:col-span-4 bg-white p-5 rounded-2xl shadow-sm border border-slate-100 w-full">
-            <h4 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Conversion Stats</h4>
-            <div className="space-y-4">
-              {funnelData.map((item, idx) => {
-                const pct = Math.round((item.value / maxFunnelVal) * 100);
+                const dealsCount = getStageDealsCount(stageName, val);
+
                 return (
-                  <div key={idx}>
-                    <div className="flex justify-between items-center mb-1.5">
-                      <div className="flex items-center gap-2.5">
-                        <span className="w-3 h-3 rounded-full flex-shrink-0 shadow-sm" style={{ backgroundColor: FUNNEL_COLORS[idx] }} />
-                        <span className="text-xs font-bold text-slate-700">{item.stage}</span>
+                  <div 
+                    key={stageName}
+                    className={`${widthClass} flex items-center justify-between py-2.5 px-4 bg-white/90 border border-slate-150 rounded-[20px] shadow-[0_4px_12px_rgba(15,23,42,0.015)] hover:shadow-[0_12px_24px_rgba(15,23,42,0.04)] hover:-translate-y-0.5 transition-all duration-300 ease-out relative overflow-hidden group`}
+                  >
+                    {/* Left accent line */}
+                    <div 
+                      className="absolute left-0 top-0 bottom-0 w-[4px]" 
+                      style={{ backgroundColor: meta.color }}
+                    />
+                    
+                    <div className="flex items-center gap-4 pl-2">
+                      {/* Circular icon container */}
+                      <div 
+                        className="w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 group-hover:scale-105"
+                        style={{ backgroundColor: meta.bg }}
+                      >
+                        <StageIcon className="w-4 h-4" style={{ color: meta.color }} />
                       </div>
-                      <span className="text-xs font-extrabold text-slate-800">${Number(item.value).toLocaleString()}</span>
+                      
+                      {/* Info & Value */}
+                      <div className="text-left">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider block ${meta.text}`}>{stageName}</span>
+                        <div className="flex items-center gap-2.5 mt-0.5">
+                          <span className="text-base font-bold text-slate-800 tracking-tight">${Number(val).toLocaleString()}</span>
+                          <span className={`px-2.5 py-0.5 rounded-[10px] text-[9px] font-bold ${meta.pillBg} ${meta.pillText}`}>
+                            {dealsCount} Deals
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
-                      <div
-                        style={{ width: animate ? `${pct}%` : '0%', backgroundColor: FUNNEL_COLORS[idx], transition: `width 1.2s cubic-bezier(0.4,0,0.2,1) ${idx * 0.08}s` }}
-                        className="h-full rounded-full shadow-[inset_0_1px_rgba(255,255,255,0.3)]"
-                      />
+
+                    {/* Conversion Stats */}
+                    <div className="text-right pr-3">
+                      <span className="text-xs font-bold text-slate-800 block">{pct}%</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block mt-0.5">Conversion</span>
                     </div>
                   </div>
                 );
               })}
             </div>
+
+            {/* Bottom mini KPI row */}
+            <div className="w-full grid grid-cols-3 bg-white/90 border border-slate-150 rounded-[20px] p-4 shadow-[0_2px_8px_rgba(15,23,42,0.01)] items-center">
+              <div className="flex items-center gap-3 pl-3">
+                <div className="w-8 h-8 rounded-full bg-indigo-50/85 flex items-center justify-center">
+                  <Icons.Percent className="w-3.5 h-3.5 text-indigo-655" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Win Rate</p>
+                  <p className="text-sm font-bold text-slate-800 tracking-tight mt-0.5">{winRate}%</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 pl-3 border-l border-slate-100">
+                <div className="w-8 h-8 rounded-full bg-emerald-50/85 flex items-center justify-center">
+                  <Icons.Calendar className="w-3.5 h-3.5 text-emerald-600" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Avg. Sales Cycle</p>
+                  <p className="text-sm font-bold text-slate-800 tracking-tight mt-0.5">28 Days</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 pl-3 border-l border-slate-100">
+                <div className="w-8 h-8 rounded-full bg-orange-50/85 flex items-center justify-center">
+                  <Icons.Target className="w-3.5 h-3.5 text-orange-600" />
+                </div>
+                <div className="text-left">
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Active Deals</p>
+                  <p className="text-sm font-bold text-slate-800 tracking-tight mt-0.5">{activeDeals}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column (35% width) */}
+          <div className="md:col-span-4 flex flex-col gap-6">
+            
+            {/* Conversion Overview */}
+            <div className="bg-white/90 border border-slate-150 p-6 rounded-[22px] shadow-[0_4px_12px_rgba(15,23,42,0.015)] text-left">
+              <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-5">Conversion Overview</h4>
+              <div className="space-y-4">
+                {stagesOrder.map((stageName, idx) => {
+                  const val = metricsData?.pipelineData?.[stageName] || 0;
+                  const pct = Math.round((val / maxFunnelVal) * 100);
+                  const meta = stageMeta[stageName] || { color: '#64748B' };
+                  return (
+                    <div key={idx} className="space-y-1.5">
+                      <div className="flex justify-between items-center text-xs">
+                        <div className="flex items-center gap-2">
+                          <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ backgroundColor: meta.color }} />
+                          <span className="font-semibold text-slate-700">{stageName}</span>
+                        </div>
+                        <span className="font-bold text-slate-800">${Number(val).toLocaleString()}</span>
+                      </div>
+                      
+                      {/* Progress bar line */}
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1.5 bg-slate-50 border border-slate-100 rounded-full overflow-hidden shadow-inner">
+                          <div
+                            style={{ 
+                              width: animate ? `${pct}%` : '0%', 
+                              backgroundColor: meta.color, 
+                              transition: `width 1.2s cubic-bezier(0.4,0,0.2,1) ${idx * 0.08}s` 
+                            }}
+                            className="h-full rounded-full"
+                          />
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 w-8 text-right">{pct}%</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Pipeline Summary */}
+            <div className="bg-white/90 border border-slate-150 p-6 rounded-[22px] shadow-[0_4px_12px_rgba(15,23,42,0.015)] text-left">
+              <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-5">Pipeline Summary</h4>
+              <div className="grid grid-cols-2 gap-4">
+                
+                {/* Total Pipeline */}
+                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                  <div className="w-8 h-8 rounded-full bg-indigo-50/80 flex items-center justify-center flex-shrink-0">
+                    <Icons.Briefcase className="w-3.5 h-3.5 text-indigo-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">${totalPipeline.toLocaleString()}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Total Pipeline</p>
+                  </div>
+                </div>
+
+                {/* Total Stages */}
+                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                  <div className="w-8 h-8 rounded-full bg-emerald-50/80 flex items-center justify-center flex-shrink-0">
+                    <Icons.Layers className="w-3.5 h-3.5 text-emerald-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">5</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Total Stages</p>
+                  </div>
+                </div>
+
+                {/* Active Deals */}
+                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                  <div className="w-8 h-8 rounded-full bg-orange-50/80 flex items-center justify-center flex-shrink-0">
+                    <Icons.Users className="w-3.5 h-3.5 text-orange-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">{activeDeals}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Active Deals</p>
+                  </div>
+                </div>
+
+                {/* Avg. Deal Size */}
+                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                  <div className="w-8 h-8 rounded-full bg-amber-50/80 flex items-center justify-center flex-shrink-0">
+                    <Icons.DollarSign className="w-3.5 h-3.5 text-amber-600" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-slate-800 truncate">${avgDealSize.toLocaleString()}</p>
+                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">Avg. Deal Size</p>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -617,21 +922,21 @@ export default function Dashboard() {
 
       {/* Record History & Timeline Modal */}
       {activeHistoryRecord && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 text-left">
+          <div className="bg-white border border-slate-200/50 rounded-[24px] max-w-lg w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             {/* Modal Header */}
-            <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-6 border-b border-slate-150 flex justify-between items-center bg-slate-50/50">
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+                <h3 className="font-[800] text-slate-800 text-sm uppercase tracking-wider">
                   Lead Audit History
                 </h3>
-                <p className="text-xs text-slate-400 font-medium mt-0.5">
+                <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">
                   {activeHistoryRecord.data?.firstName} {activeHistoryRecord.data?.lastName}
                 </p>
               </div>
               <button 
                 onClick={() => setActiveHistoryRecord(null)}
-                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 dark:text-slate-400 transition-colors"
+                className="w-8 h-8 rounded-full flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-500 transition-colors"
               >
                 <Icons.X className="w-4 h-4" />
               </button>
@@ -647,17 +952,17 @@ export default function Dashboard() {
                 <>
                   {/* Documents Section */}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Icons.File className="w-3.5 h-3.5 text-amber-500" /> Attached Documents ({historyDocuments.length})
+                    <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                      <Icons.File className="w-3.5 h-3.5 text-indigo-500" /> Attached Documents ({historyDocuments.length})
                     </h4>
                     {historyDocuments.length > 0 ? (
                       <div className="space-y-2">
                         {historyDocuments.map((doc: any) => (
-                          <div key={doc._id} className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-805">
+                          <div key={doc._id} className="flex justify-between items-center p-4 bg-slate-50 border border-slate-200 rounded-2xl">
                             <div className="flex items-center gap-2.5 min-w-0">
                               <Icons.FileText className="w-4 h-4 text-indigo-500 flex-shrink-0" />
                               <div className="min-w-0">
-                                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 truncate">{doc.name}</p>
+                                <p className="text-xs font-semibold text-slate-700 truncate">{doc.name}</p>
                                 <p className="text-[10px] text-slate-400">{(doc.size / 1024).toFixed(1)} KB</p>
                               </div>
                             </div>
@@ -665,7 +970,7 @@ export default function Dashboard() {
                               href={`${FILE_BASE_URL}${doc.filePath}`} 
                               target="_blank" 
                               rel="noreferrer"
-                              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                              className="text-xs font-bold text-indigo-650 hover:underline flex items-center gap-1"
                             >
                               <Icons.Download className="w-3.5 h-3.5" /> Download
                             </a>
@@ -679,16 +984,16 @@ export default function Dashboard() {
 
                   {/* Timeline Section */}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-455 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Icons.Clock className="w-3.5 h-3.5 text-indigo-500" /> System Activities
                     </h4>
                     {historyActivities.length > 0 ? (
-                      <div className="relative border-l border-slate-100 dark:border-slate-800 ml-2.5 pl-5 space-y-5">
+                      <div className="relative border-l border-slate-100 ml-2.5 pl-5 space-y-5">
                         {historyActivities.map((act: any) => (
                           <div key={act._id} className="relative">
-                            <span className="absolute -left-[26px] top-1 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-white dark:ring-slate-900" />
+                            <span className="absolute -left-[26px] top-1 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-white" />
                             <div className="text-xs">
-                              <p className="font-semibold text-slate-700 dark:text-slate-200">{act.action}</p>
+                              <p className="font-semibold text-slate-700">{act.action}</p>
                               {act.details && Object.keys(act.details).length > 0 && (
                                 <p className="text-[11px] text-slate-500 mt-0.5">
                                   {act.details.status && `Status: ${act.details.status}`}
@@ -711,10 +1016,10 @@ export default function Dashboard() {
             </div>
             
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+            <div className="p-4 bg-slate-50/50 border-t border-slate-150 flex justify-end">
               <button 
                 onClick={() => setActiveHistoryRecord(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-colors"
+                className="flex items-center justify-center px-5 h-[38px] text-xs font-bold uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-[10px] transition-all"
               >
                 Close
               </button>

@@ -21,6 +21,7 @@ export interface IUser extends Document {
   lastName: string;
   email: string;
   passwordHash: string;
+  plainPassword?: string;
   isVerified: boolean;
   twoFactor: {
     enabled: boolean;
@@ -57,6 +58,7 @@ const UserSchema = new Schema<IUser>(
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
     passwordHash: { type: String, required: true },
+    plainPassword: { type: String },
     isVerified: { type: Boolean, default: false },
     twoFactor: {
       enabled: { type: Boolean, default: false },

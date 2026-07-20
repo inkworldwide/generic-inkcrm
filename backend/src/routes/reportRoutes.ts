@@ -64,9 +64,9 @@ router.get('/:id/run', async (req: Request, res: Response): Promise<void> => {
     }
 
     // Generate chart aggregation data
-    const chartData = await ReportBuilderService.generateReport(report);
+    const chartData = await ReportBuilderService.generateReport(report, req.user as any);
     // Generate detailed table rows
-    const details = await ReportBuilderService.getReportDetails(report);
+    const details = await ReportBuilderService.getReportDetails(report, req.user as any);
 
     res.status(200).json({
       report,

@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as Icons from 'lucide-react';
@@ -167,12 +168,56 @@ export default function ModuleView() {
       }
       values.push(currentVal.trim().replace(/^["']|["']$/g, ''));
       
+      // Skip rows where all meaningful values are empty (ignore Slno/index columns)
+      const hasContent = values.some((val, idx) => {
+        const header = (headers[idx] || '').toLowerCase();
+        if (header === 'slno' || header === 'sl no' || header === 'sno' || header === 'id') return false;
+        return val.trim() !== '';
+      });
+      if (!hasContent) continue;
+
       const row: Record<string, string> = {};
       headers.forEach((header, index) => {
         row[header] = values[index] || '';
       });
       results.push(row);
     }
+    return results;
+  };
+
+  // Parse Excel (XLSX/XLS) files using SheetJS
+  const parseExcelFile = (buffer: ArrayBuffer): any[] => {
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+    
+    // Use sheet_to_json in object mode — SheetJS automatically skips truly empty rows
+    const rawRows: any[] = XLSX.utils.sheet_to_json(firstSheet, { raw: false, defval: '' });
+
+    if (rawRows.length === 0) return [];
+
+    const results: any[] = [];
+    for (let i = 0; i < rawRows.length; i++) {
+      const row = rawRows[i];
+      
+      // Check if this row has at least one non-empty value in a meaningful column
+      const keys = Object.keys(row);
+      const hasContent = keys.some((key) => {
+        const k = key.toLowerCase().trim();
+        // Skip index/serial number columns
+        if (k === 'slno' || k === 'sl no' || k === 'sno' || k === 'id' || k === 's.no' || k === 'sr no' || k === 'srno') return false;
+        return String(row[key]).trim() !== '';
+      });
+      if (!hasContent) continue;
+
+      // Normalize keys: trim whitespace
+      const cleanRow: Record<string, string> = {};
+      keys.forEach((key) => {
+        cleanRow[key.trim()] = String(row[key]).trim();
+      });
+      results.push(cleanRow);
+    }
+
+    console.log(`[parseExcelFile] Parsed ${results.length} valid rows from Excel file`);
     return results;
   };
 
@@ -192,11 +237,23 @@ export default function ModuleView() {
 
     setCaAssigning(true);
     try {
+      const fileName = caFile.name.toLowerCase();
+      const isExcel = fileName.endsWith('.xlsx') || fileName.endsWith('.xls');
+
       const reader = new FileReader();
       reader.onload = async (event) => {
         try {
-          const csvText = event.target?.result as string;
-          const parsedLeads = parseCSV(csvText);
+          let parsedLeads: any[];
+
+          if (isExcel) {
+            // Parse XLSX/XLS with SheetJS
+            const buffer = event.target?.result as ArrayBuffer;
+            parsedLeads = parseExcelFile(buffer);
+          } else {
+            // Parse CSV as text
+            const csvText = event.target?.result as string;
+            parsedLeads = parseCSV(csvText);
+          }
           
           if (parsedLeads.length === 0) {
             showToast('The uploaded file is empty or invalid.', 'warning');
@@ -214,7 +271,7 @@ export default function ModuleView() {
             leads: parsedLeads
           });
 
-          showToast(res.data.message || 'Leads assigned successfully.', 'success');
+          showToast(res.data.message || `Assigned ${parsedLeads.length} leads to ${agentNames.length} agents.`, 'success');
           setCaFile(null);
           
           queryClient.invalidateQueries({ queryKey: ['records', 'leads'] });
@@ -226,7 +283,12 @@ export default function ModuleView() {
           setCaAssigning(false);
         }
       };
-      reader.readAsText(caFile);
+
+      if (isExcel) {
+        reader.readAsArrayBuffer(caFile);
+      } else {
+        reader.readAsText(caFile);
+      }
     } catch (err) {
       console.error(err);
       showToast('Failed to read file.', 'error');

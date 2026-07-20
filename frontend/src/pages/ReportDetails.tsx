@@ -60,27 +60,26 @@ export default function ReportDetails() {
   const cols = report.columns.length > 0 ? report.columns : ['name', 'status', 'email']; // fallbacks
 
   return (
-    <div className="space-y-6 print:p-0">
+    <div className="space-y-6 max-w-6xl mx-auto text-left print:p-0">
       
       {/* Header toolbar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
-        <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 uppercase">
-          <Link to="/reports" className="hover:text-primary transition-colors">Reports</Link>
-          <Icons.ChevronRight className="w-3.5 h-3.5" />
-          <span className="text-slate-600 dark:text-slate-350">{report.name}</span>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden pb-2">
+        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-450 uppercase tracking-widest">
+          <Link to="/reports" className="hover:text-indigo-650 transition-colors">Reports</Link>
+          <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          <span className="text-slate-550">{report.name}</span>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
           <button
             onClick={handleExportCSV}
-            className="w-full sm:w-auto justify-center px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-all text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
+            className="btn-secondary-premium h-10 px-4 text-xs font-bold"
           >
             <Icons.Download className="w-4 h-4" /> Export CSV
           </button>
           <button
             onClick={handlePrint}
-            style={{ backgroundColor: 'rgb(var(--color-primary))' }}
-            className="w-full sm:w-auto justify-center px-4 py-2 text-white rounded-lg text-sm font-medium hover:brightness-110 flex items-center gap-1.5 transition-all shadow-md"
+            className="btn-primary-premium h-10 px-4 text-xs font-bold"
           >
             <Icons.Printer className="w-4 h-4" /> Export PDF / Print
           </button>
@@ -88,14 +87,14 @@ export default function ReportDetails() {
       </div>
 
       <div className="text-left">
-        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800 dark:text-white">{report.name}</h1>
-        <p className="text-sm text-slate-400 mt-1">{report.description || 'No description provided.'}</p>
+        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">{report.name}</h1>
+        <p className="text-xs text-slate-400 font-semibold mt-1.5 uppercase tracking-wider leading-relaxed">{report.description || 'No description provided.'}</p>
       </div>
 
       {/* Render Chart (except if type is table) */}
       {report.chartType !== 'table' && chartData && chartData.length > 0 && (
-        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl p-6 shadow-sm">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 text-left">Aggregated Summary</h3>
+        <div className="card-premium p-8">
+          <h3 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-6 text-left">Aggregated Summary</h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               {['bar'].includes(report.chartType) ? (
@@ -103,7 +102,7 @@ export default function ReportDetails() {
                   <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
-                  <Bar dataKey="value" fill="rgb(var(--color-primary))" radius={[4, 4, 0, 0]}>
+                  <Bar dataKey="value" fill="#4F46E5" radius={[4, 4, 0, 0]}>
                     {chartData.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -114,7 +113,7 @@ export default function ReportDetails() {
                   <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <Tooltip />
-                  <Line type="monotone" dataKey="value" stroke="rgb(var(--color-primary))" strokeWidth={3} dot={{ r: 4 }} />
+                  <Line type="monotone" dataKey="value" stroke="#4F46E5" strokeWidth={3} dot={{ r: 4 }} />
                 </LineChart>
               ) : (
                 <PieChart>
@@ -141,13 +140,13 @@ export default function ReportDetails() {
       )}
 
       {/* Row detail dataset */}
-      <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden shadow-sm">
-        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 text-left bg-slate-50/50 dark:bg-slate-900/10">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Detail Row Report</h3>
+      <div className="card-premium p-0 overflow-hidden text-left shadow-sm">
+        <div className="px-6 py-4 border-b border-slate-100 text-left bg-slate-50/50">
+          <h3 className="text-xs font-[800] text-slate-400 uppercase tracking-wider">Detail Row Report</h3>
         </div>
-        <div className="overflow-x-auto pb-2 -mx-2 px-2 sm:mx-0 sm:px-0">
-          <table className="w-full min-w-[800px] text-left text-sm text-slate-600 dark:text-slate-350">
-            <thead className="bg-slate-50 dark:bg-slate-900/50 text-xs font-semibold text-slate-500 uppercase border-b border-slate-200 dark:border-slate-750">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-slate-650">
+            <thead className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
               <tr>
                 {cols.map((colName: string) => (
                   <th key={colName} className="px-6 py-3.5">
@@ -157,22 +156,22 @@ export default function ReportDetails() {
                 <th className="px-6 py-3.5">Created Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+            <tbody className="divide-y divide-slate-100">
               {details && details.map((row: any) => (
-                <tr key={row._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-700/10 transition-colors">
+                <tr key={row._id} className="hover:bg-slate-50/30 transition-colors h-16">
                   {cols.map((colName: string) => (
-                    <td key={colName} className="px-6 py-3.5 font-medium text-slate-850 dark:text-slate-200 truncate max-w-[200px]">
+                    <td key={colName} className="px-6 py-3.5 font-semibold text-slate-700 truncate max-w-[200px]">
                       {formatDate(row.data[colName]) || '-'}
                     </td>
                   ))}
-                  <td className="px-6 py-3.5 text-xs text-slate-400">
+                  <td className="px-6 py-3.5 text-xs text-slate-400 font-semibold">
                     {formatDate(row.createdAt)}
                   </td>
                 </tr>
               ))}
               {(!details || details.length === 0) && (
                 <tr>
-                  <td colSpan={cols.length + 1} className="py-12 text-center text-slate-400">
+                  <td colSpan={cols.length + 1} className="py-12 text-center text-slate-450 font-semibold italic">
                     No matching detail row records found.
                   </td>
                 </tr>
