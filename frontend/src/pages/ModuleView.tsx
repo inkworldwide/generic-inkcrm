@@ -1324,7 +1324,11 @@ export default function ModuleView() {
 
                       <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
                         <div className="mb-3 flex items-center gap-2">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm">
+                          <span className={`${
+                            rec.data?.status?.toUpperCase() === 'HOT' 
+                              ? 'bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30' 
+                              : 'bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30'
+                          } text-[10px] font-[800] uppercase tracking-wider px-3 py-1.5 rounded-lg`}>
                             {rec.data?.status ? `${rec.data.status} Lead` : 'Lead Info'}
                           </span>
                         </div>
@@ -1339,7 +1343,7 @@ export default function ModuleView() {
                                 showToast('No phone number available for this lead.', 'warning');
                               }
                             }}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                            className="bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-150 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30 dark:hover:bg-emerald-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200"
                           >
                             WA Chat
                           </button>
@@ -1354,30 +1358,31 @@ export default function ModuleView() {
                                 showToast('No phone number available for this lead.', 'warning');
                               }
                             }}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                            className="bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-150 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30 dark:hover:bg-indigo-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200"
                           >
                             Call
                           </button>
                           
                           <button 
                             onClick={() => handleUploadClick(rec._id)}
-                            className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                            className="bg-amber-50 hover:bg-amber-100 active:bg-amber-150 text-amber-700 border border-amber-200 dark:bg-amber-950/20 dark:text-amber-400 dark:border-amber-900/30 dark:hover:bg-amber-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200"
                           >
                             Upload File
                           </button>
                           
-                          <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
+                          <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-50 hover:bg-cyan-100 active:bg-cyan-150 text-cyan-700 border border-cyan-200 dark:bg-cyan-950/20 dark:text-cyan-400 dark:border-cyan-900/30 dark:hover:bg-cyan-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200">
                             Edit
                           </Link>
                           
                           <button 
                             onClick={() => openHistory(rec)}
-                            className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                            className="bg-slate-50 hover:bg-slate-100 active:bg-slate-200 text-slate-600 border border-slate-200 dark:bg-slate-800/60 dark:text-slate-400 dark:border-slate-700/60 dark:hover:bg-slate-700/80 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200"
                           >
                             History
                           </button>
                         </div>
                       </div>
+
                     </div>
                   );
                 })}
