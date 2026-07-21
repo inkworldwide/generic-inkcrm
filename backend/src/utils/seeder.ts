@@ -116,20 +116,36 @@ async function seed() {
     permissions: createPermissions(['leads', 'deals', 'companies'])
   });
 
-  const salesAgentRole = await Role.create({
+  const partnerRole = await Role.create({
     organizationId: salesOrg._id,
-    name: 'Sales Agent',
-    description: 'Manage sales pipelines',
+    name: 'PARTNER',
+    description: 'Partner role with standard access',
     isSystem: false,
-    permissions: {
-      modules: [
-        { moduleName: 'leads', create: true, read: 'all', update: 'all', delete: 'own' },
-        { moduleName: 'deals', create: true, read: 'all', update: 'all', delete: 'none' },
-        { moduleName: 'companies', create: true, read: 'all', update: 'all', delete: 'none' }
-      ],
-      fields: [],
-      menus: ['dashboard', 'leads', 'deals', 'companies', 'reports']
-    }
+    permissions: createPermissions(['leads', 'deals', 'companies'])
+  });
+
+  const ariaManagerRole = await Role.create({
+    organizationId: salesOrg._id,
+    name: 'ARIA SALES MANAGER',
+    description: 'Area Sales Manager role',
+    isSystem: false,
+    permissions: createPermissions(['leads', 'deals', 'companies'])
+  });
+
+  const adminRole = await Role.create({
+    organizationId: salesOrg._id,
+    name: 'ADMIN',
+    description: 'Admin role',
+    isSystem: false,
+    permissions: createPermissions(['leads', 'deals', 'companies'])
+  });
+
+  const teliCallerRole = await Role.create({
+    organizationId: salesOrg._id,
+    name: 'TELI CALLER',
+    description: 'Telecaller calling team role',
+    isSystem: false,
+    permissions: createPermissions(['leads', 'deals', 'companies'])
   });
 
   // School Roles
@@ -186,7 +202,7 @@ async function seed() {
   // Seed sample Sales Agents matching standard accounts
   await User.create({
     organizationId: salesOrg._id,
-    roleId: salesAgentRole._id,
+    roleId: teliCallerRole._id,
     firstName: 'Suma',
     lastName: 'Dhar',
     email: 'agent.suma@gmail.com',
@@ -200,7 +216,7 @@ async function seed() {
 
   await User.create({
     organizationId: salesOrg._id,
-    roleId: salesAgentRole._id,
+    roleId: teliCallerRole._id,
     firstName: 'Priya',
     lastName: 'Sharma',
     email: 'agent.priya@gmail.com',
@@ -214,7 +230,7 @@ async function seed() {
 
   await User.create({
     organizationId: salesOrg._id,
-    roleId: salesAgentRole._id,
+    roleId: ariaManagerRole._id,
     firstName: 'Sunita',
     lastName: 'Devi',
     email: 'agent.sunita@gmail.com',
@@ -228,7 +244,7 @@ async function seed() {
 
   await User.create({
     organizationId: salesOrg._id,
-    roleId: salesAgentRole._id,
+    roleId: partnerRole._id,
     firstName: 'Ankit',
     lastName: 'Verma',
     email: 'agent.ankit@gmail.com',
