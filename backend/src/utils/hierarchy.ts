@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import User from '../models/User';
 import Role from '../models/Role';
+import ModuleDefinition from '../models/ModuleDefinition';
 
 export class HierarchyService {
   public static async isSuperAdmin(roleId: any): Promise<boolean> {
@@ -52,6 +53,21 @@ export class HierarchyService {
     reqUser: { id: string; roleId: string },
     orgId: string | mongoose.Types.ObjectId
   ): Promise<void> {
+    // Skip hierarchy filtering for settings/metadata modules
+    if (query.moduleId) {
+      try {
+        const moduleDef = await ModuleDefinition.findById(query.moduleId);
+        if (moduleDef && moduleDef.apiPath) {
+          const settingsPaths = ['bankmasters', 'bankingpartners', 'products', 'departments'];
+          if (settingsPaths.includes(moduleDef.apiPath.toLowerCase())) {
+            return;
+          }
+        }
+      } catch (e) {
+        // ignore and continue
+      }
+    }
+
     const isSuper = await this.isSuperAdmin(reqUser.roleId);
     if (isSuper) return;
 
@@ -144,6 +160,21 @@ export class HierarchyService {
     reqUser: { id: string; roleId: string },
     orgId: string | mongoose.Types.ObjectId
   ): Promise<boolean> {
+    // Skip hierarchy check for settings/metadata modules
+    if (record.moduleId) {
+      try {
+        const moduleDef = await ModuleDefinition.findById(record.moduleId);
+        if (moduleDef && moduleDef.apiPath) {
+          const settingsPaths = ['bankmasters', 'bankingpartners', 'products', 'departments'];
+          if (settingsPaths.includes(moduleDef.apiPath.toLowerCase())) {
+            return true;
+          }
+        }
+      } catch (e) {
+        // ignore and continue
+      }
+    }
+
     const isSuper = await this.isSuperAdmin(reqUser.roleId);
     if (isSuper) return true;
 
