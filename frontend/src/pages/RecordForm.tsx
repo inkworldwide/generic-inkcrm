@@ -216,6 +216,7 @@ export default function RecordForm() {
       activeModule.fields.forEach((f) => {
         if (f.defaultValue) defaults[f.name] = f.defaultValue;
       });
+      defaults['country'] = 'INDIA';
       if (apiPath === 'leads') {
         const loggedInName = user ? [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email.split('@')[0] : '';
         if (loggedInName) {
@@ -497,7 +498,7 @@ export default function RecordForm() {
 
     const inputBase = 'w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-slate-700 placeholder-slate-400';
 
-    const labelClass = 'text-[10px] font-[800] text-slate-400 uppercase tracking-wider block mb-1.5';
+    const labelClass = 'text-[10px] font-[800] text-slate-700 uppercase tracking-wider block mb-1.5';
 
     if (field.name === 'source' && apiPath === 'leads') {
       return (
@@ -655,6 +656,10 @@ export default function RecordForm() {
           if (loggedInName && !opts.includes(loggedInName)) {
             opts = [loggedInName, ...opts];
           }
+          const passedSource = location.state?.source;
+          if (passedSource && !opts.includes(passedSource)) {
+            opts = [passedSource, ...opts];
+          }
         }
         return (
           <div key={field.name} className="space-y-1.5 text-left">
@@ -662,7 +667,9 @@ export default function RecordForm() {
               {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
             </label>
             <select {...register(field.name)} className={inputBase}>
-              <option value="" className={isLeads ? "bg-white text-slate-500" : "bg-slate-950 text-slate-300"}>-Select One-</option>
+              {field.name !== 'country' && (
+                <option value="" className={isLeads ? "bg-white text-slate-500" : "bg-slate-950 text-slate-300"}>-Select One-</option>
+              )}
               {opts?.map((opt) => (
                 <option key={opt} value={opt} className={isLeads ? "bg-white text-slate-800" : "bg-slate-950 text-slate-200"}>
                   {opt}
@@ -920,12 +927,12 @@ export default function RecordForm() {
     <div className="space-y-6 max-w-5xl mx-auto text-left">
       
       {/* breadcrumbs */}
-      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
         <Link to={`/modules/${activeModule.apiPath}`} className="hover:text-indigo-600 transition-colors">
           {activeModule.pluralLabel}
         </Link>
-        <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-        <span className="text-slate-500">
+        <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+        <span className="text-slate-700">
           {id ? `Edit: ${recordName}` : `New ${activeModule.singularLabel}`}
         </span>
       </div>
@@ -935,7 +942,7 @@ export default function RecordForm() {
         
         {/* Header */}
         <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <h2 className="text-xs font-[800] text-slate-400 uppercase tracking-wider">
+          <h2 className="text-xs font-[800] text-slate-800 uppercase tracking-wider">
             {id ? `Edit ${activeModule.singularLabel}: ${recordName}` : `Create ${activeModule.singularLabel}`}
           </h2>
         </div>
@@ -947,7 +954,7 @@ export default function RecordForm() {
             <div key={section.title} className="p-8 border-b border-slate-100 last:border-b-0 space-y-6">
               <div className="flex items-center gap-2.5 pb-1.5 mb-2">
                 <div className="w-1.5 h-3.5 bg-indigo-600 rounded-full" />
-                <h3 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider">
+                <h3 className="text-[10px] font-[800] text-slate-800 uppercase tracking-wider">
                   {section.title}
                 </h3>
               </div>
@@ -986,7 +993,7 @@ export default function RecordForm() {
           {/* Attachments panel */}
           <div className="card-premium p-6">
             <div className="flex justify-between items-center mb-4">
-              <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+              <h4 className="text-[10px] font-[800] text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
                 <Icons.Paperclip className="w-4 h-4 text-indigo-500" /> Attachments
               </h4>
               <label className="text-[10px] font-[800] text-indigo-600 hover:underline cursor-pointer flex items-center gap-1">
@@ -1051,7 +1058,7 @@ export default function RecordForm() {
 
           {/* Activity History panel */}
           <div className="card-premium p-6">
-            <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
+            <h4 className="text-[10px] font-[800] text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-100 pb-2">
               <Icons.History className="w-4 h-4 text-indigo-500" /> Activity History
             </h4>
 

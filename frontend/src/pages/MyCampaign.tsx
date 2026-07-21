@@ -165,6 +165,7 @@ export default function MyCampaign() {
         
         navigate('/modules/leads/new', {
           state: {
+            ...lead.data,
             firstName: lead.data?.firstName || lead.data?.costomer || lead.data?.customer || '',
             lastName: lead.data?.lastName || '',
             phone: phoneVal,

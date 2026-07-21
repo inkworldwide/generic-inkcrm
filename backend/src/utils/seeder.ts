@@ -409,7 +409,8 @@ async function seed() {
         type: 'dropdown',
         required: false,
         unique: false,
-        options: ['INDIA', 'USA', 'UK']
+        defaultValue: 'INDIA',
+        options: ['INDIA']
       },
       { name: 'leadScore', label: 'Lead Score', type: 'number', required: false, unique: false, defaultValue: '50' }
     ],

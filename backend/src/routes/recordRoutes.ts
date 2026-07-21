@@ -64,7 +64,7 @@ const authorizeModuleAction = async (
 };
 
 // Helper: Validate dynamic record fields
-const validateFields = (fields: any[], data: Record<string, any>) => {
+const validateFields = (fields: any[], data: Record<string, any>, oldValues?: Record<string, any>) => {
   const errors: string[] = [];
 
   fields.forEach((field) => {
@@ -72,8 +72,11 @@ const validateFields = (fields: any[], data: Record<string, any>) => {
 
     // Check required fields
     if (field.required && (val === undefined || val === null || val === '')) {
-      errors.push(`Field '${field.label}' is required.`);
-      return;
+      const wasAlreadyEmpty = oldValues && (oldValues[field.name] === undefined || oldValues[field.name] === null || oldValues[field.name] === '');
+      if (!wasAlreadyEmpty) {
+        errors.push(`Field '${field.label}' is required.`);
+        return;
+      }
     }
 
     if (val !== undefined && val !== null && val !== '') {
@@ -287,32 +290,38 @@ router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promi
       });
     }
 
-    const result = Object.keys(campaignGroups).map(campName => {
-      const groupLeads = campaignGroups[campName];
-      const totalAssigned = groupLeads.length;
-      
-      const dialed = groupLeads.filter(l => {
-        const s = ((l.data?.get ? l.data.get('status') : l.data?.status) || '').toLowerCase();
-        return s !== 'yet to call' && s !== '';
-      }).length;
-      
-      const yetToDial = totalAssigned - dialed;
+    const result = Object.keys(campaignGroups)
+      .map(campName => {
+        const groupLeads = campaignGroups[campName];
+        const totalAssigned = groupLeads.length;
+        
+        const dialed = groupLeads.filter(l => {
+          const s = ((l.data?.get ? l.data.get('status') : l.data?.status) || '').toLowerCase();
+          return s !== 'yet to call' && s !== '';
+        }).length;
+        
+        const yetToDial = totalAssigned - dialed;
 
-      const campRecord = campaignRecords.find(c => {
-        const name = c.data?.get ? c.data.get('campaignName') : c.data?.campaignName;
-        return name === campName;
-      });
-      const createdAt = campRecord ? campRecord.createdAt : (groupLeads[0] ? groupLeads[0].createdAt : new Date());
+        const campRecord = campaignRecords.find(c => {
+          const name = (c.data?.get ? c.data.get('campaignName') : c.data?.campaignName) || '';
+          return name.toLowerCase() === campName.toLowerCase();
+        });
+        
+        // Skip it if it doesn't match an actual registered campaign record
+        if (!campRecord) return null;
 
-      return {
-        campaignName: campName,
-        totalAssigned,
-        dialed,
-        yetToDial,
-        createdAt,
-        dailyTarget: 200
-      };
-    });
+        const createdAt = campRecord.createdAt;
+
+        return {
+          campaignName: campName,
+          totalAssigned,
+          dialed,
+          yetToDial,
+          createdAt,
+          dailyTarget: 200
+        };
+      })
+      .filter((c): c is any => c !== null);
 
     res.status(200).json({ campaigns: result });
   } catch (error) {
@@ -646,7 +655,7 @@ router.put('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
       ...oldValues,
       ...updateData
     };
-    const validationErrors = validateFields(moduleDef.fields, mergedData);
+    const validationErrors = validateFields(moduleDef.fields, mergedData, oldValues);
     if (validationErrors.length > 0) {
       res.status(400).json({ error: 'Validation failed', details: validationErrors });
       return;
