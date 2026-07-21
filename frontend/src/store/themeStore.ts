@@ -87,12 +87,46 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
 
   applyTheme: (settings) => {
     const root = document.documentElement;
+    const sidebarBg = settings.sidebarBg || '#121214';
     
     // Apply CSS Variables
     root.style.setProperty('--color-primary', settings.primaryColor || '79 70 229');
-    root.style.setProperty('--sidebar-bg', settings.sidebarBg || '#0f172a');
+    root.style.setProperty('--sidebar-bg', sidebarBg);
     root.style.setProperty('--header-bg', settings.headerBg || '#ffffff');
     root.style.setProperty('--font-family', `${settings.fontFamily || 'Inter'}, sans-serif`);
+
+    // Detect brightness of sidebarBg
+    const hex = sidebarBg.replace('#', '');
+    let isLight = false;
+    if (hex.length === 3) {
+      const r = parseInt(hex[0] + hex[0], 16);
+      const g = parseInt(hex[1] + hex[1], 16);
+      const b = parseInt(hex[2] + hex[2], 16);
+      isLight = ((r * 299) + (g * 587) + (b * 114)) / 1000 >= 128;
+    } else if (hex.length === 6) {
+      const r = parseInt(hex.slice(0, 2), 16);
+      const g = parseInt(hex.slice(2, 4), 16);
+      const b = parseInt(hex.slice(4, 6), 16);
+      isLight = ((r * 299) + (g * 587) + (b * 114)) / 1000 >= 128;
+    }
+
+    if (isLight) {
+      root.style.setProperty('--sidebar-text', '#18181b');
+      root.style.setProperty('--sidebar-text-muted', '#52525b');
+      root.style.setProperty('--sidebar-text-muted-more', '#8c8c93');
+      root.style.setProperty('--sidebar-border', 'rgba(0, 0, 0, 0.06)');
+      root.style.setProperty('--sidebar-hover', 'rgba(0, 0, 0, 0.03)');
+      root.style.setProperty('--sidebar-active-bg', 'rgba(0, 0, 0, 0.05)');
+      root.style.setProperty('--sidebar-indicator', '#4f46e5');
+    } else {
+      root.style.setProperty('--sidebar-text', '#ffffff');
+      root.style.setProperty('--sidebar-text-muted', 'rgba(255, 255, 255, 0.65)');
+      root.style.setProperty('--sidebar-text-muted-more', 'rgba(255, 255, 255, 0.45)');
+      root.style.setProperty('--sidebar-border', 'rgba(255, 255, 255, 0.08)');
+      root.style.setProperty('--sidebar-hover', 'rgba(255, 255, 255, 0.04)');
+      root.style.setProperty('--sidebar-active-bg', 'rgba(255, 255, 255, 0.08)');
+      root.style.setProperty('--sidebar-indicator', '#ffffff');
+    }
 
     // Apply dark/light class based on user override or branding defaults
     const isDark = localStorage.getItem('theme') === 'dark' || (localStorage.getItem('theme') === null && settings.mode === 'dark');
