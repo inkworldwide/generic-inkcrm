@@ -46,7 +46,7 @@ export const SidebarItem = ({ to, label, icon, colorClass, onClick, indent = fal
   const isActive = location.pathname + location.search === to || (to !== '/' && location.pathname.startsWith(to.split('?')[0]) && location.search === (to.includes('?') ? '?' + to.split('?')[1] : ''));
 
   return (
-    <Link to={to} onClick={onClick} className="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-lime-400 rounded-2xl">
+    <Link to={to} onClick={onClick} className="block w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-white/20 rounded-2xl">
       <motion.div
         whileHover={{ scale: 1.015, y: -2 }}
         whileTap={{ scale: 0.98 }}
@@ -60,7 +60,7 @@ export const SidebarItem = ({ to, label, icon, colorClass, onClick, indent = fal
         {isActive && (
           <motion.div 
             layoutId="active-indicator"
-            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-[#97ff00] to-[#6cd400] shadow-[0_0_12px_rgba(151,255,0,0.5)]"
+            className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-white to-slate-200 shadow-[0_0_12px_rgba(255,255,255,0.4)]"
           />
         )}
         
@@ -89,7 +89,7 @@ export const SidebarAccordion = ({ label, icon, colorClass, children, defaultOpe
   const [isOpen, setIsOpen] = useState(defaultOpen);
 
   return (
-    <div className="flex flex-col mb-1 focus-within:ring-2 focus-within:ring-lime-400/50 rounded-2xl">
+    <div className="flex flex-col mb-1 focus-within:ring-2 focus-within:ring-white/10 rounded-2xl">
       <motion.button
         whileHover={{ scale: 1.015, y: -2 }}
         whileTap={{ scale: 0.98 }}
@@ -205,7 +205,7 @@ export const SidebarProfile = () => {
       >
         <div className="flex items-center gap-3 p-3 cursor-pointer">
           <div className="relative">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg">
               {initials}
             </div>
             <div className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-[#0f172a] rounded-full shadow-[0_0_8px_rgba(16,185,129,0.5)]" />

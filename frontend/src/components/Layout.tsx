@@ -99,13 +99,13 @@ export default function Layout({ children }: LayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#fdfbf7] dark:bg-[#0f1115] text-slate-800 dark:text-white selection:bg-lime-500/30 selection:text-lime-200">
+    <div className="min-h-screen relative overflow-hidden bg-[#FAF8F5] dark:bg-[#0f1115] text-slate-800 dark:text-white selection:bg-indigo-500/30 selection:text-indigo-900">
       
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full animate-blob1" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-blob2" />
-        <div className="absolute top-[30%] right-[20%] w-[30%] h-[30%] bg-lime-500/10 blur-[100px] rounded-full animate-blob3" />
+        <div className="absolute top-[30%] right-[20%] w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full animate-blob3" />
         
         {/* Subtle noise texture */}
         <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
@@ -129,7 +129,7 @@ export default function Layout({ children }: LayoutProps) {
         {/* Floating Sidebar */}
         <aside className={cn(
           "fixed inset-y-2 sm:inset-y-5 left-2 sm:left-5 z-50 lg:relative lg:inset-0",
-          "flex-shrink-0 w-[290px] rounded-[26px] bg-[#0f172a] dark:bg-[#0f1115]/95 border border-[#1e293b] shadow-[0_4px_30px_rgba(0,0,0,0.15)] flex flex-col transition-transform duration-300",
+          "flex-shrink-0 w-[290px] rounded-[26px] bg-[#121214] dark:bg-[#0b0c0e] border border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.15)] flex flex-col transition-transform duration-300",
           sidebarOpen ? "translate-x-0" : "-translate-x-[120%]",
           "lg:translate-x-0"
         )}>
@@ -303,7 +303,7 @@ export default function Layout({ children }: LayoutProps) {
               </div>
               <h2 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
                 Overview
-                <span className="px-2 py-0.5 rounded-full bg-lime-100 dark:bg-lime-950/40 text-lime-700 dark:text-lime-400 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
+                <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
               </h2>
             </div>
 

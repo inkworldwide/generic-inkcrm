@@ -383,7 +383,7 @@ export default function Dashboard() {
               <Link
                 to={`/modules/leads?status=${encodeURIComponent(filterStatus)}`}
                 key={idx} 
-                className="group flex flex-col justify-between py-4 px-5 bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] shadow-[0_8px_24px_rgba(15,23,42,0.02)] hover:shadow-[0_16px_48px_rgba(15,23,42,0.06)] hover:-translate-y-1 transition-all duration-300 ease-out cursor-pointer relative overflow-hidden"
+                className="group flex flex-col justify-between py-4 px-5 bg-white border border-[#EBE8E0]/60 rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all duration-250 ease-out cursor-pointer relative overflow-hidden"
               >
                 {/* Top Label & Icon */}
                 <div className="flex items-center justify-between gap-4">
@@ -391,16 +391,15 @@ export default function Dashboard() {
                     {metric.label.toLowerCase().replace("but not disbuse", "")}
                   </span>
                   <div 
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all duration-300"
-                    style={{ backgroundColor: metric.bg }}
+                    className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 group-hover:text-indigo-600 group-hover:bg-indigo-50/50 group-hover:border-indigo-150/50 transition-all duration-250"
                   >
-                    <Icon className="w-4 h-4" style={{ color: metric.accentColor }} />
+                    <Icon className="w-4 h-4" />
                   </div>
                 </div>
 
                 {/* Counter */}
                 <div className="my-2">
-                  <h3 className="text-3xl font-[850] text-slate-800 tracking-tight leading-none">
+                  <h3 className="text-3xl font-[850] text-[#18181b] tracking-tight leading-none">
                     {count}
                   </h3>
                 </div>
@@ -421,7 +420,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Pipeline by Stage */}
-        <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-8 shadow-[0_8px_24px_rgba(15,23,42,0.02)] flex flex-col justify-between">
+        <div className="bg-white border border-[#EBE8E0]/60 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_3px_rgb(0,0,0,0.01)] flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
@@ -459,7 +458,7 @@ export default function Dashboard() {
         </div>
 
         {/* Deal Status Grid */}
-        <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-8 shadow-[0_8px_24px_rgba(15,23,42,0.02)] flex flex-col">
+        <div className="bg-white border border-[#EBE8E0]/60 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_3px_rgb(0,0,0,0.01)] flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
               <div className="p-2.5 bg-[#FAF8F3] border border-[#E5E2D9] rounded-xl">
@@ -481,9 +480,9 @@ export default function Dashboard() {
             ].map((box, index) => {
               const BoxIcon = box.icon;
               return (
-                <div key={index} className="p-5 bg-[#FDFBF7] border border-[#E5E2D9] rounded-[18px] text-left flex flex-col justify-between hover:scale-[1.01] hover:shadow-md transition-all duration-300 cursor-pointer">
+                <div key={index} className="p-5 bg-white border border-[#EBE8E0]/60 rounded-2xl text-left flex flex-col justify-between hover:shadow-[0_8px_20px_rgba(0,0,0,0.02)] hover:-translate-y-0.5 transition-all duration-200 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                   <div className="flex justify-between items-start">
-                    <div className={`p-2 bg-white border border-slate-150 rounded-xl shadow-sm ${box.color}`}>
+                    <div className={`p-2 bg-slate-50 border border-slate-100 rounded-xl ${box.color}`}>
                       <BoxIcon className="w-4 h-4" />
                     </div>
                     <span className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider">{box.label}</span>
@@ -503,7 +502,7 @@ export default function Dashboard() {
       </div>
 
       {/* 4. TODAY'S FOLLOWUP LEADS DETAILS */}
-      <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-0 overflow-hidden text-left shadow-[0_8px_24px_rgba(15,23,42,0.02)]">
+      <div className="bg-white border border-[#EBE8E0]/60 rounded-2xl p-0 overflow-hidden text-left shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_3px_rgb(0,0,0,0.01)]">
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
           <h2 className="text-xs font-[800] text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <Icons.CalendarClock className="w-4 h-4 text-slate-800" />
@@ -526,8 +525,8 @@ export default function Dashboard() {
             metricsData.todayFollowupsList.map((rec: any, idx: number) => {
               const leadNo = rec._id.slice(-6).toUpperCase();
               return (
-                <div key={rec._id} className="bg-[#FDFBF7] border border-[#E5E2D9] rounded-[20px] relative shadow-[0_4px_20px_rgba(15,23,42,0.01)] hover:shadow-[0_12px_36px_rgba(15,23,42,0.04)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-[4px] bg-slate-900" />
+                <div key={rec._id} className="bg-white border border-[#EBE8E0]/60 rounded-2xl relative shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.025)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
+                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-650" />
                   
                   <div className="pl-8 pr-6 py-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-5 gap-x-8 text-xs text-slate-600">
@@ -696,7 +695,7 @@ export default function Dashboard() {
       </div>
 
       {/* 5. SALES PIPELINE FUNNEL */}
-      <div className="bg-[#FAF8F3]/60 backdrop-blur-md border border-[#E5E2D9] rounded-[22px] p-8 shadow-[0_8px_24px_rgba(15,23,42,0.02)] text-left">
+      <div className="bg-white border border-[#EBE8E0]/60 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_3px_rgb(0,0,0,0.01)] text-left">
         <div className="flex justify-between items-center mb-8">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-[12px] bg-indigo-50/80 border border-indigo-100/50 flex items-center justify-center flex-shrink-0">
@@ -714,7 +713,7 @@ export default function Dashboard() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch bg-[#FDFBF7]/40 p-8 rounded-2xl border border-[#E5E2D9]/70">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-stretch bg-slate-50/50 p-6 md:p-8 rounded-2xl border border-[#EBE8E0]/60">
           {/* Left Column (65% width) */}
           <div className="md:col-span-8 flex flex-col justify-between gap-6 w-full">
             <div className="flex flex-col gap-2 w-full items-start">
@@ -861,14 +860,14 @@ export default function Dashboard() {
             </div>
 
             {/* Pipeline Summary */}
-            <div className="bg-white/90 border border-slate-150 p-6 rounded-[22px] shadow-[0_4px_12px_rgba(15,23,42,0.015)] text-left">
+            <div className="bg-white border border-[#EBE8E0]/60 p-6 rounded-2xl shadow-[0_4px_16px_rgba(0,0,0,0.01)] text-left">
               <h4 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-5">Pipeline Summary</h4>
               <div className="grid grid-cols-2 gap-4">
                 
                 {/* Total Pipeline */}
-                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                <div className="p-4 bg-[#FCFAF6] border border-[#EBE8E0]/60 rounded-xl flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                   <div className="w-8 h-8 rounded-full bg-indigo-50/80 flex items-center justify-center flex-shrink-0">
-                    <Icons.Briefcase className="w-3.5 h-3.5 text-indigo-600" />
+                    <Icons.Briefcase className="w-3.5 h-3.5 text-indigo-650" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-slate-800 truncate">${totalPipeline.toLocaleString()}</p>
@@ -877,7 +876,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Total Stages */}
-                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                <div className="p-4 bg-[#FCFAF6] border border-[#EBE8E0]/60 rounded-xl flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                   <div className="w-8 h-8 rounded-full bg-emerald-50/80 flex items-center justify-center flex-shrink-0">
                     <Icons.Layers className="w-3.5 h-3.5 text-emerald-600" />
                   </div>
@@ -888,7 +887,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Active Deals */}
-                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                <div className="p-4 bg-[#FCFAF6] border border-[#EBE8E0]/60 rounded-xl flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                   <div className="w-8 h-8 rounded-full bg-orange-50/80 flex items-center justify-center flex-shrink-0">
                     <Icons.Users className="w-3.5 h-3.5 text-orange-600" />
                   </div>
@@ -899,7 +898,7 @@ export default function Dashboard() {
                 </div>
 
                 {/* Avg. Deal Size */}
-                <div className="p-4 bg-[#FDFBF7] border border-slate-150 rounded-[18px] flex items-center gap-3 shadow-[0_2px_6px_rgba(15,23,42,0.01)]">
+                <div className="p-4 bg-[#FCFAF6] border border-[#EBE8E0]/60 rounded-xl flex items-center gap-3 shadow-[0_1px_2px_rgba(0,0,0,0.01)]">
                   <div className="w-8 h-8 rounded-full bg-amber-50/80 flex items-center justify-center flex-shrink-0">
                     <Icons.DollarSign className="w-3.5 h-3.5 text-amber-600" />
                   </div>
