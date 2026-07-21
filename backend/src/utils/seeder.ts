@@ -778,20 +778,28 @@ async function seed() {
 
   // Seed settings custom records (Departments, Products, Bank Masters, Banking Partners)
   console.log('Seeding settings module custom records...');
-  await CustomRecord.create({
-    organizationId: salesOrg._id,
-    moduleId: departmentModule._id,
-    data: { name: 'Sales & Marketing', code: 'SALES' },
-    createdBy: salesAdmin._id,
-    updatedBy: salesAdmin._id
-  });
-  await CustomRecord.create({
-    organizationId: salesOrg._id,
-    moduleId: departmentModule._id,
-    data: { name: 'Finance & Underwriting', code: 'FINANCE' },
-    createdBy: salesAdmin._id,
-    updatedBy: salesAdmin._id
-  });
+  const defaultDepts = [
+    { name: 'Telemarketing', code: 'TELEMARKETING' },
+    { name: 'Management', code: 'MANAGEMENT' },
+    { name: 'SALES MANAGER', code: 'SALES_MANAGER' },
+    { name: 'Accounts', code: 'ACCOUNTS' },
+    { name: 'RELATIONSHIP MANAGER', code: 'RELATIONSHIP_MANAGER' },
+    { name: 'PRODUCTS SALES MANAGER', code: 'PRODUCTS_SALES_MANAGER' },
+    { name: 'AREA SALES MANAGER', code: 'AREA_SALES_MANAGER' },
+    { name: 'PARTNER', code: 'PARTNER' },
+    { name: 'BUSINESS CORRESPONDENT', code: 'BUSINESS_CORRESPONDENT' },
+    { name: 'SPOKE', code: 'SPOKE' }
+  ];
+
+  for (const dept of defaultDepts) {
+    await CustomRecord.create({
+      organizationId: salesOrg._id,
+      moduleId: departmentModule._id,
+      data: { name: dept.name, code: dept.code },
+      createdBy: salesAdmin._id,
+      updatedBy: salesAdmin._id
+    });
+  }
 
   await CustomRecord.create({
     organizationId: salesOrg._id,
