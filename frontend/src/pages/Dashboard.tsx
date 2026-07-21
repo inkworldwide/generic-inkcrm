@@ -507,7 +507,7 @@ export default function Dashboard() {
         <div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
           <h2 className="text-xs font-[800] text-slate-800 uppercase tracking-wider flex items-center gap-2">
             <Icons.CalendarClock className="w-4 h-4 text-slate-800" />
-            Today's Followup Leads
+            {metricsData?.isUpcoming ? "Upcoming Followup Leads" : "Today's Followup Leads"}
           </h2>
         </div>
         
@@ -517,7 +517,9 @@ export default function Dashboard() {
               <div className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center mb-4 shadow-inner">
                 <Icons.CheckCircle2 className="w-8 h-8 text-slate-350" />
               </div>
-              <h3 className="text-sm font-semibold text-slate-700">No follow-ups scheduled today.</h3>
+              <h3 className="text-sm font-semibold text-slate-700">
+                {metricsData?.isUpcoming ? "No upcoming follow-ups scheduled." : "No follow-ups scheduled today."}
+              </h3>
               <p className="text-xs text-slate-400 mt-1">Enjoy your day.</p>
             </div>
           ) : (
@@ -582,9 +584,11 @@ export default function Dashboard() {
                           <span className="text-slate-800 font-semibold">{formatDate(rec.createdAt)}</span>
                         </div>
                         <div className="flex items-center gap-2.5">
-                          <Icons.UserCheck className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Created By:</span> 
-                          <span className="text-slate-800 font-semibold">System</span>
+                          <Icons.CalendarClock className="w-4 h-4 text-indigo-500" />
+                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Followup:</span> 
+                          <span className="text-indigo-700 font-bold bg-indigo-50 border border-indigo-150/50 px-2 py-0.5 rounded-lg text-[10.5px]">
+                            {rec.data?.followUpDate ? formatDate(rec.data.followUpDate) : 'N/A'}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2.5">
                           <Icons.Clock className="w-4 h-4 text-slate-400" />

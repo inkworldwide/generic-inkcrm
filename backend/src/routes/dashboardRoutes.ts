@@ -159,6 +159,39 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
       
       todayFollowupsCount = await CustomRecord.countDocuments(followUpQuery);
       todayFollowupsList = await CustomRecord.find(followUpQuery).limit(5);
+
+      if (todayFollowupsList.length === 0) {
+        const upcomingQuery: any = {
+          ...leadQuery
+        };
+        const futureFilter = {
+          $or: [
+            { 'data.followUpDate': { $gt: endOfToday } },
+            { 'data.followUpDate': { $gt: endOfToday.toISOString().split('T')[0] } }
+          ]
+        };
+        if (upcomingQuery.$or) {
+          const existingOr = upcomingQuery.$or;
+          delete upcomingQuery.$or;
+          upcomingQuery.$and = [
+            { $or: existingOr },
+            futureFilter
+          ];
+        } else if (upcomingQuery.$and) {
+          upcomingQuery.$and.push(futureFilter);
+        } else {
+          Object.assign(upcomingQuery, futureFilter);
+        }
+
+        // Find upcoming followups sorted by date ascending (closest first)
+        todayFollowupsList = await CustomRecord.find(upcomingQuery)
+          .sort({ 'data.followUpDate': 1 })
+          .limit(5);
+        
+        if (todayFollowupsList.length > 0) {
+          (req as any).isUpcomingFollowups = true;
+        }
+      }
     }
 
     if (dealModule) {
@@ -227,6 +260,7 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
       dealStatus,
       todayFollowupsCount,
       todayFollowupsList,
+      isUpcoming: (req as any).isUpcomingFollowups || false,
       totalLeads,
       recentActivities
     });
