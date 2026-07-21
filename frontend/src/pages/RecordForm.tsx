@@ -91,7 +91,7 @@ export default function RecordForm() {
             api.get('/records/bankmasters'),
             api.get('/records/products'),
             api.get('/records/departments'),
-            api.get('/auth/users')
+            api.get('/auth/users?purpose=dropdown')
           ]);
           
           setBankPartnerMappings(resBP.data?.records || resBP.data || []);

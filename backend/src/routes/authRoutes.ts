@@ -892,8 +892,10 @@ router.post('/face/disable', authenticate, async (req: Request, res: Response): 
 router.get('/users', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const query: Record<string, any> = { organizationId: req.organizationId };
-    await HierarchyService.modifyUserQuery(query, req.user as any, req.organizationId!);
-
+    if (req.query.purpose !== 'dropdown') {
+      await HierarchyService.modifyUserQuery(query, req.user as any, req.organizationId!);
+    }
+ 
     const users = await User.find(query)
       .populate('roleId', 'name')
       .populate('reportingManager', 'firstName lastName email')

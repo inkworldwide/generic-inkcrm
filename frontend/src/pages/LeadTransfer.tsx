@@ -37,7 +37,7 @@ export default function LeadTransfer() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const usersRes = await api.get('/auth/users');
+      const usersRes = await api.get('/auth/users?purpose=dropdown');
       setUsers(usersRes.data);
       const leadsRes = await api.get('/records/leads?limit=10000');
       setLeads(leadsRes.data.records || leadsRes.data || []);

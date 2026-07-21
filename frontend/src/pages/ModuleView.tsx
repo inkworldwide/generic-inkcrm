@@ -127,7 +127,7 @@ export default function ModuleView() {
     }
     setCaLoadingAgents(true);
     try {
-      const res = await api.get('/auth/users');
+      const res = await api.get('/auth/users?purpose=dropdown');
       const allUsers = res.data || [];
       const filtered = allUsers.filter((u: any) => u.roleId?._id === caSelectedRole && u.isActive !== false);
       setCaAgents(filtered);
