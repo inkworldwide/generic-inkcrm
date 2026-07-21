@@ -118,13 +118,8 @@ export class HierarchyService {
     reqUser: { id: string; roleId: string },
     orgId: string | mongoose.Types.ObjectId
   ): Promise<void> {
-    const isSuper = await this.isSuperAdmin(reqUser.roleId);
-    if (isSuper) return;
-
-    const descendants = await this.getSubordinateUserIds(reqUser.id, orgId);
-    const allowedUserIds = [new mongoose.Types.ObjectId(reqUser.id), ...descendants];
-
-    query._id = { $in: allowedUserIds };
+    // Show all users in the organization to everyone (for assignments and management)
+    return;
   }
 
   public static async modifyAuditLogQuery(
