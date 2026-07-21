@@ -279,7 +279,10 @@ export default function RecordForm() {
     let list = rawUsersList.filter((u: any) => u.isActive !== false);
     const selectedTeam = watchedValues?.assignToTeam;
     if (selectedTeam) {
-      list = list.filter((u: any) => String(u.department || '').trim().toLowerCase() === selectedTeam.trim().toLowerCase());
+      const filtered = list.filter((u: any) => String(u.department || '').trim().toLowerCase() === selectedTeam.trim().toLowerCase());
+      if (filtered.length > 0) {
+        list = filtered;
+      }
     }
     return list.map((u: any) => [u.firstName, u.lastName].filter(Boolean).join(' ')).filter(Boolean);
   }, [rawUsersList, watchedValues?.assignToTeam]);

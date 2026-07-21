@@ -191,6 +191,7 @@ async function seed() {
     email: 'ink@crm.com',
     passwordHash,
     isVerified: true,
+    department: 'Management',
     twoFactor: { enabled: false },
     faceRecognition: {
       enabled: true,
@@ -209,6 +210,7 @@ async function seed() {
     passwordHash,
     isVerified: true,
     userCode: 'AGE-SUMA',
+    department: 'Telemarketing',
     skipFace: true,
     skipLocation: true,
     isActive: true
@@ -223,6 +225,7 @@ async function seed() {
     passwordHash,
     isVerified: true,
     userCode: 'AGE-PRIYA',
+    department: 'Telemarketing',
     skipFace: true,
     skipLocation: true,
     isActive: true
@@ -237,6 +240,7 @@ async function seed() {
     passwordHash,
     isVerified: true,
     userCode: 'AGE-SUNITA',
+    department: 'AREA SALES MANAGER',
     skipFace: true,
     skipLocation: true,
     isActive: true
@@ -251,6 +255,7 @@ async function seed() {
     passwordHash,
     isVerified: true,
     userCode: 'AGE-ANKIT',
+    department: 'PARTNER',
     skipFace: true,
     skipLocation: true,
     isActive: true
