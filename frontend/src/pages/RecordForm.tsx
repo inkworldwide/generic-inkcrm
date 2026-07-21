@@ -789,6 +789,7 @@ export default function RecordForm() {
                 placeholder="dd/mm/yyyy"
                 maxLength={10}
                 className={`${inputBase} pr-10`}
+                autoComplete="new-password"
               />
               {/* Hidden native date picker */}
               <input
@@ -830,6 +831,7 @@ export default function RecordForm() {
               {...register(field.name)}
               placeholder={field.label}
               className={inputBase}
+              autoComplete="new-password"
             />
             {errors[field.name] && (
               <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
@@ -951,7 +953,7 @@ export default function RecordForm() {
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmitForm)}>
+        <form onSubmit={handleSubmit(onSubmitForm)} autoComplete="off">
           
           {sections.map((section) => (
             <div key={section.title} className="p-8 border-b border-slate-100 last:border-b-0 space-y-6">
