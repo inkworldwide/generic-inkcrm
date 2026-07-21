@@ -525,166 +525,103 @@ export default function Dashboard() {
             metricsData.todayFollowupsList.map((rec: any, idx: number) => {
               const leadNo = rec._id.slice(-6).toUpperCase();
               return (
-                <div key={rec._id} className="bg-white border border-[#EBE8E0]/60 rounded-2xl relative shadow-[0_2px_8px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.025)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
-                  <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-indigo-650" />
+                <div key={rec._id} className="border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 bg-white dark:bg-slate-800 relative mb-6 last:mb-0 text-left shadow-sm">
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-green-500 rounded-t-2xl" />
                   
-                  <div className="pl-8 pr-6 py-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-5 gap-x-8 text-xs text-slate-600">
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Hash className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Sl No.:</span> 
-                          <span className="text-slate-800 font-bold">{idx + 1}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.FileText className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Lead No.:</span> 
-                          <span className="text-slate-800 font-bold">LND-{leadNo}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Package className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Product:</span> 
-                          <span className="text-slate-800 font-semibold">{rec.data?.product || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Activity className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Status:</span> 
-                          <span className="bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-0.5 rounded-md font-bold text-[10px] uppercase">{rec.data?.status || 'New'}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2.5">
-                          <Icons.User className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Lead Name:</span> 
-                          <span className="text-slate-800 font-bold">{rec.data?.firstName} {rec.data?.lastName}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.MapPin className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Location:</span> 
-                          <span className="text-slate-800 font-semibold">{rec.data?.location || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Phone className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Mobile:</span> 
-                          <span className="text-slate-800 font-semibold">{rec.data?.phone || 'N/A'}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.DollarSign className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Amount:</span> 
-                          <span className="text-slate-800 font-bold">{rec.data?.budget ? '$' + Number(rec.data.budget).toLocaleString() : 'N/A'}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Calendar className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Created:</span> 
-                          <span className="text-slate-800 font-semibold">{formatDate(rec.createdAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.CalendarClock className="w-4 h-4 text-indigo-500" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Followup:</span> 
-                          <span className="text-indigo-700 font-bold bg-indigo-50 border border-indigo-150/50 px-2 py-0.5 rounded-lg text-[10.5px]">
-                            {rec.data?.followUpDate ? formatDate(rec.data.followUpDate) : 'N/A'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Clock className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Pending At:</span> 
-                          <span className="text-slate-800 font-semibold">{rec.data?.pendingAt || 'Sales Review'}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Shield className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Agent:</span> 
-                          <span className="text-slate-800 font-semibold">{rec.data?.assignedTo || 'Unassigned'}</span>
-                        </div>
-                      </div>
-
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2.5">
-                          <Icons.Building2 className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Company:</span> 
-                          <span className="text-slate-800 font-bold">{rec.data?.company}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.CalendarCheck className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Modified:</span> 
-                          <span className="text-slate-800 font-semibold">{formatDate(rec.updatedAt)}</span>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <Icons.UserCog className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider">Router:</span> 
-                          <span className="text-slate-800 font-semibold">System Router</span>
-                        </div>
-                        <div className="flex items-start gap-2.5">
-                          <Icons.MessageSquare className="w-4 h-4 text-slate-400 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <span className="font-semibold text-slate-400 text-[10px] uppercase tracking-wider block">Remarks:</span> 
-                            <span className="text-slate-700 italic text-[11px]">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : 'Transferred to agent'}</span>
-                          </div>
-                        </div>
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-6 gap-x-8 text-sm mt-2">
+                    {/* Column 1 */}
+                    <div className="space-y-4">
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Sl No.:</span> <span className="text-slate-600 dark:text-slate-400">{idx + 1}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead No.:</span> <span className="text-slate-600 dark:text-slate-400">LND-{leadNo}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Product:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.loanType || 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Status:</span> <span className="text-slate-600 dark:text-slate-400 uppercase">{rec.data?.status || 'New'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Bank Partner:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.businessPartner || 'N/A'}</span></div>
                     </div>
 
-                    <div className="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-slate-900 text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm">Action Required</span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-3">
-                        <button 
-                          onClick={() => {
-                            const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
-                            const cleanPhone = phone.replace(/\D/g, '');
-                            if (cleanPhone) {
-                              window.open(`https://wa.me/${cleanPhone}`, '_blank');
-                            } else {
-                              showToast('No phone number available.', 'warning');
-                            }
-                          }}
-                          className="h-9 px-4 text-xs font-bold rounded-xl border border-emerald-500/30 bg-emerald-50/50 text-emerald-700 hover:bg-emerald-500 hover:text-white transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
-                        >
-                          <Icons.MessageCircle className="w-3.5 h-3.5" />
-                          WhatsApp
-                        </button>
-                        
-                        <button 
-                          onClick={() => {
-                            const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
-                            const cleanPhone = phone.replace(/\D/g, '');
-                            if (cleanPhone) {
-                              window.location.href = `tel:${cleanPhone}`;
-                            } else {
-                              showToast('No phone number available.', 'warning');
-                            }
-                          }}
-                          className="h-9 px-4 text-xs font-bold rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-all duration-200 shadow-sm flex items-center gap-1.5 cursor-pointer active:scale-95"
-                        >
-                          <Icons.PhoneCall className="w-3.5 h-3.5" />
-                          Call Agent
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleUploadClick(rec._id)}
-                          className="h-9 px-4 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
-                        >
-                          <Icons.Upload className="w-3.5 h-3.5 text-slate-500" />
-                          Upload File
-                        </button>
-                        
-                        <Link to={`/modules/leads/${rec._id}`} className="h-9 px-4 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95">
-                          <Icons.SquarePen className="w-3.5 h-3.5 text-slate-500" />
-                          Edit Lead
-                        </Link>
+                    {/* Column 2 */}
+                    <div className="space-y-4">
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead Name:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.firstName} {rec.data?.lastName}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Location:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.location || 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Mobile No.:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.phone || 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Amount:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.budget ? '$' + Number(rec.data.budget).toLocaleString() : 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Case Details:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.caseDetails || 'N/A'}</span></div>
+                    </div>
 
-                        <button 
-                          onClick={() => openHistory(rec)}
-                          className="h-9 px-4 text-xs font-bold rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-all duration-200 flex items-center gap-1.5 cursor-pointer active:scale-95"
-                        >
-                          <Icons.History className="w-3.5 h-3.5 text-slate-500" />
-                          History
-                        </button>
+                    {/* Column 3 */}
+                    <div className="space-y-4">
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Created On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.createdAt)}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Followup Date:</span> <span className="text-indigo-650 font-bold bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100/50 px-2 py-0.5 rounded-lg text-xs">{rec.data?.followUpDate ? formatDate(rec.data.followUpDate) : 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Pending at:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignToTeam || 'Sales Review'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">PSM:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignedTo || 'Unassigned'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Data Code:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.dataCode || 'N/A'}</span></div>
+                    </div>
+
+                    {/* Column 4 */}
+                    <div className="space-y-4">
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Firm/Company:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.company || 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Modified On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.updatedAt)}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Assigned By:</span> <span className="text-slate-600 dark:text-slate-400">System Router</span></div>
+                      <div>
+                        <span className="font-bold text-slate-700 dark:text-slate-350">Remarks:</span> 
+                        <span className="text-slate-500 italic ml-1 text-xs">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : 'Transferred to agent'}</span>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
+                    <div className="mb-3 flex items-center gap-2">
+                      <span className="bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm">
+                        {rec.data?.status ? `${rec.data.status} Lead` : 'Lead Info'}
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button 
+                        onClick={() => {
+                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                          const cleanPhone = phone.replace(/\D/g, '');
+                          if (cleanPhone) {
+                            window.open(`https://wa.me/${cleanPhone}`, '_blank');
+                          } else {
+                            showToast('No phone number available for this lead.', 'warning');
+                          }
+                        }}
+                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        WA Chat
+                      </button>
+                      
+                      <button 
+                        onClick={() => {
+                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
+                          const cleanPhone = phone.replace(/\D/g, '');
+                          if (cleanPhone) {
+                            window.location.href = `tel:${cleanPhone}`;
+                          } else {
+                            showToast('No phone number available for this lead.', 'warning');
+                          }
+                        }}
+                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        Call
+                      </button>
+                      
+                      <button 
+                        onClick={() => handleUploadClick(rec._id)}
+                        className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        Upload File
+                      </button>
+                      
+                      <Link to={`/modules/leads/${rec._id}`} className="bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm">
+                        Edit
+                      </Link>
+
+                      <button 
+                        onClick={() => openHistory(rec)}
+                        className="bg-slate-600 hover:bg-slate-700 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                      >
+                        History
+                      </button>
                     </div>
                   </div>
                 </div>
