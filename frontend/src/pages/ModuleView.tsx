@@ -298,18 +298,18 @@ export default function ModuleView() {
 
   const renderCampaignAssignments = () => {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 text-left">
         {/* Header Title */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-left">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-650 dark:text-indigo-400 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center justify-center">
-              <Icons.Target className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <div className="p-3 bg-[#F8F5F1] dark:bg-slate-800 text-[#17223B] dark:text-navy-100 rounded-2xl border border-[#EAE4DA] dark:border-slate-700 shadow-sm flex items-center justify-center">
+              <Icons.Target className="w-6 h-6 text-[#17223B] dark:text-white" />
             </div>
             <div>
-              <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800 dark:text-white leading-tight">
+              <h1 className="text-2xl uppercase font-bold tracking-tight text-[#0F172A] dark:text-white leading-tight">
                 Assign Campaigns
               </h1>
-              <p className="text-xs font-semibold text-slate-450 dark:text-slate-500 mt-1">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
                 Allocate leads and upload contact files for team members
               </p>
             </div>
@@ -317,19 +317,17 @@ export default function ModuleView() {
         </div>
 
         {/* Top Control Card */}
-        <div className="card-premium p-6 relative overflow-hidden bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-sm">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-650" />
-          
+        <div className="card-premium p-6 relative overflow-hidden bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             <div className="text-left">
-              <label className="block text-xs font-bold text-slate-450 dark:text-slate-350 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Icons.Layers className="w-3.5 h-3.5 text-indigo-500" />
+              <label className="label-premium flex items-center gap-1.5">
+                <Icons.Layers className="w-3.5 h-3.5 text-[#17223B]" />
                 Select Campaign
               </label>
               <select 
                 value={caSelectedCampaign} 
                 onChange={e => setCaSelectedCampaign(e.target.value)} 
-                className="w-full px-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-550 transition-all cursor-pointer"
+                className="w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl text-[#0F172A] dark:text-white focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all cursor-pointer"
               >
                 <option value="">Select Campaign</option>
                 {caCampaigns.map((c: any) => {
@@ -340,14 +338,14 @@ export default function ModuleView() {
             </div>
 
             <div className="text-left">
-              <label className="block text-xs font-bold text-slate-450 dark:text-slate-350 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Icons.Users2 className="w-3.5 h-3.5 text-indigo-500" />
+              <label className="label-premium flex items-center gap-1.5">
+                <Icons.Users2 className="w-3.5 h-3.5 text-[#17223B]" />
                 Agent Type (Role)
               </label>
               <select 
                 value={caSelectedRole} 
                 onChange={e => setCaSelectedRole(e.target.value)} 
-                className="w-full px-3.5 py-2.5 bg-slate-50/50 dark:bg-slate-900/30 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-550 transition-all cursor-pointer"
+                className="w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl text-[#0F172A] dark:text-white focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all cursor-pointer"
               >
                 <option value="">Select Role</option>
                 {caRoles.map((r: any) => (
@@ -360,7 +358,7 @@ export default function ModuleView() {
               <button 
                 type="button" 
                 onClick={handleLoadAgents}
-                className="flex-1 h-11 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                className="btn-primary-premium flex-1 h-11 text-xs uppercase font-bold tracking-wider"
                 disabled={caLoadingAgents}
               >
                 {caLoadingAgents ? (
@@ -374,19 +372,19 @@ export default function ModuleView() {
               
               <Link 
                 to="/modules/campaigns"
-                className="flex items-center justify-center h-11 text-xs font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50/50 dark:bg-indigo-950/40 hover:bg-indigo-100/60 dark:hover:bg-indigo-900/40 border border-indigo-100 dark:border-indigo-950 px-4 rounded-xl transition-all"
+                className="btn-secondary-premium h-11 px-4 text-xs uppercase font-bold tracking-wider flex items-center justify-center"
               >
                 View Details
               </Link>
             </div>
           </div>
 
-          <div className="border-t border-slate-100 dark:border-slate-800/60 my-6"></div>
+          <div className="border-t border-[#EAE4DA] dark:border-slate-700 my-6"></div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             <div className="md:col-span-2 text-left">
-              <label className="block text-xs font-bold text-slate-450 dark:text-slate-350 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <Icons.FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+              <label className="label-premium flex items-center gap-1.5">
+                <Icons.FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                 Upload Excel / CSV File
               </label>
               
@@ -394,8 +392,8 @@ export default function ModuleView() {
                 onClick={() => document.getElementById('ca-file-input')?.click()}
                 className={`border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
                   caFile 
-                    ? 'border-emerald-300 dark:border-emerald-800 bg-emerald-50/10 dark:bg-emerald-950/5' 
-                    : 'border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-800 bg-slate-50/20 dark:bg-slate-900/10'
+                    ? 'border-emerald-400 bg-emerald-50/20 dark:bg-emerald-950/20' 
+                    : 'border-[#EAE4DA] dark:border-slate-700 hover:border-[#17223B] bg-[#FDFBF7] dark:bg-slate-900/40'
                 }`}
               >
                 <input 
@@ -407,12 +405,12 @@ export default function ModuleView() {
                 />
                 {caFile ? (
                   <div className="flex items-center gap-3 w-full">
-                    <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                    <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-xl">
                       <Icons.FileSpreadsheet className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <p className="text-sm font-bold text-slate-750 dark:text-slate-200 truncate">{caFile.name}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 font-medium">{(caFile.size / 1024).toFixed(1)} KB • Ready to assign</p>
+                      <p className="text-sm font-bold text-[#0F172A] dark:text-slate-200 truncate">{caFile.name}</p>
+                      <p className="text-xs text-slate-500 font-medium">{(caFile.size / 1024).toFixed(1)} KB • Ready to assign</p>
                     </div>
                     <button 
                       type="button" 
@@ -420,19 +418,20 @@ export default function ModuleView() {
                         e.stopPropagation();
                         setCaFile(null);
                       }}
-                      className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors"
-                      title="Remove file"
+                      className="p-2 text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                     >
-                      <Icons.Trash2 className="w-4 h-4" />
+                      <Icons.X className="w-4 h-4" />
                     </button>
                   </div>
                 ) : (
-                  <div className="space-y-1 text-center">
-                    <Icons.UploadCloud className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto" />
-                    <div className="text-xs text-slate-600 dark:text-slate-400">
-                      <span className="font-bold text-indigo-600 dark:text-indigo-455">Click to upload</span> or drag and drop
+                  <div className="flex items-center gap-3 py-1">
+                    <div className="p-2.5 bg-[#F8F5F1] dark:bg-slate-800 text-[#17223B] dark:text-slate-300 rounded-xl border border-[#EAE4DA] dark:border-slate-700">
+                      <Icons.UploadCloud className="w-5 h-5" />
                     </div>
-                    <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500">Supports .CSV, .XLSX, or .XLS lists</p>
+                    <div className="text-left">
+                      <p className="text-xs font-bold text-[#0F172A] dark:text-white">Click to select file (.csv, .xlsx, .xls)</p>
+                      <p className="text-[10px] text-slate-500 font-medium">File data will be allocated to selected employees</p>
+                    </div>
                   </div>
                 )}
               </div>
@@ -442,14 +441,14 @@ export default function ModuleView() {
               <button 
                 type="button" 
                 onClick={handleAssignData}
-                className="w-full h-[70px] bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold text-sm shadow-sm transition-all flex items-center justify-center gap-2"
+                className="w-full h-11 bg-[#17223B] hover:bg-[#24324A] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-[0_2px_6px_rgba(23,34,59,0.12)] hover:shadow-[0_4px_12px_rgba(23,34,59,0.2)] transition-all flex items-center justify-center gap-2"
                 disabled={caAssigning}
               >
                 {caAssigning ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <Icons.CheckCircle2 className="w-5 h-5" /> Assign Data
+                    <Icons.CheckCircle2 className="w-4 h-4" /> Assign Data
                   </>
                 )}
               </button>
@@ -458,15 +457,13 @@ export default function ModuleView() {
         </div>
 
         {/* Employee Allocation Table Card */}
-        <div className="card-premium p-6 space-y-4 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-2xl shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
-          
+        <div className="card-premium p-6 space-y-4 bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl shadow-[0_2px_8px_rgba(23,34,59,0.02)] relative overflow-hidden">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h2 className="text-lg font-bold text-slate-800 dark:text-white text-left">
+            <h2 className="text-base font-bold text-[#0F172A] dark:text-white text-left uppercase tracking-tight">
               Assign Campaigns for Below Employees
             </h2>
             {caAgents.length > 0 && (
-              <span className="text-xs font-bold text-indigo-650 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/40 px-3 py-1 rounded-full border border-indigo-100/50 dark:border-indigo-900/50">
+              <span className="text-[10px] font-bold text-[#17223B] dark:text-navy-100 bg-[#F8F5F1] dark:bg-navy-900/40 px-3 py-1 rounded-full border border-[#EAE4DA] dark:border-navy-800/50 uppercase tracking-wider">
                 Selected: {caSelectedAgents.length} of {caAgents.length} Agents
               </span>
             )}
@@ -964,44 +961,49 @@ export default function ModuleView() {
         <div className="space-y-6">
           {/* Header Title */}
           <div className="text-left">
-            <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-700 dark:text-white">
+            <h1 className="text-2xl uppercase font-bold tracking-tight text-[#0F172A] dark:text-white">
               Campaigns
             </h1>
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
+              Create and manage marketing campaign records
+            </p>
           </div>
 
           {/* Inline Campaign Creation Form */}
-          <form onSubmit={handleSaveCampaign} className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl p-6 shadow-sm relative">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-[#22c55e] rounded-t-xl" />
+          <form onSubmit={handleSaveCampaign} className="card-premium bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl p-6 shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex-1 text-left">
-                <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
+                <label className="label-premium">
                   Campaign Name
                 </label>
                 <input
                   type="text"
                   value={campaignNameInput}
                   onChange={(e) => setCampaignNameInput(e.target.value)}
-                  placeholder="Campaign Name"
-                  className="w-full md:w-96 px-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:outline-none focus:ring-1 focus:ring-primary text-slate-800 dark:text-white"
+                  placeholder="Enter Campaign Name..."
+                  className="w-full md:w-96 h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl text-[#0F172A] dark:text-white focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all"
                 />
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setCampaignNameInput('');
-                    setEditCampaignId(null);
-                  }}
-                  className="bg-[#dc2626] hover:bg-[#b91c1c] text-white font-semibold text-xs px-5 py-2 rounded shadow transition-all uppercase tracking-wide"
-                >
-                  Cancel
-                </button>
+                {editCampaignId && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setCampaignNameInput('');
+                      setEditCampaignId(null);
+                    }}
+                    className="btn-secondary-premium h-11 px-5 text-xs uppercase font-bold tracking-wider"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button
                   type="submit"
                   disabled={isSubmittingCampaign}
-                  className="bg-[#22c55e] hover:bg-[#16a34a] text-white font-semibold text-xs px-5 py-2 rounded shadow transition-all uppercase tracking-wide disabled:opacity-50"
+                  className="btn-primary-premium h-11 px-6 text-xs uppercase font-bold tracking-wider"
                 >
-                  {editCampaignId ? 'Update' : 'Save'}
+                  {isSubmittingCampaign && <Icons.Loader className="w-4 h-4 animate-spin" />}
+                  {editCampaignId ? 'Update Campaign' : 'Create Campaign'}
                 </button>
               </div>
             </div>
@@ -1199,20 +1201,19 @@ export default function ModuleView() {
           {viewMode === 'table' && (
             apiPath === 'campaigns' ? (
               <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl overflow-hidden shadow-sm relative">
-                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-amber-600 rounded-t-xl" />
+                <div className="bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(23,34,59,0.02)] relative">
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[800px] text-left text-sm text-slate-600 dark:text-slate-350">
-                      <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-xs uppercase tracking-wider">
+                    <table className="w-full min-w-[800px] text-left text-xs text-[#0F172A] dark:text-slate-300">
+                      <thead className="table-header-premium">
                         <tr>
-                          <th className="px-6 py-4">Campaign Name</th>
-                          <th className="px-6 py-4">Created Date</th>
-                          <th className="px-6 py-4">Total Allocated Numbers</th>
-                          <th className="px-6 py-4">Total Dialed Numbers</th>
-                          <th className="px-6 py-4 text-right">Action</th>
+                          <th className="px-6 py-3.5">Campaign Name</th>
+                          <th className="px-6 py-3.5">Created Date</th>
+                          <th className="px-6 py-3.5">Total Allocated Numbers</th>
+                          <th className="px-6 py-3.5">Total Dialed Numbers</th>
+                          <th className="px-6 py-3.5 text-right">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+                      <tbody className="divide-y divide-[#EAE4DA] dark:divide-slate-700">
                         {data?.records.map((rec: any) => {
                           const name = rec.data?.campaignName || 'Unnamed Campaign';
                           const createdDateStr = formatDate(rec.createdAt) + ' ' + new Date(rec.createdAt).toLocaleTimeString('en-US', {
@@ -1222,40 +1223,40 @@ export default function ModuleView() {
                           });
 
                           return (
-                            <tr key={rec._id} className="hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors">
-                              <td className="px-6 py-4 font-semibold text-slate-900 dark:text-white">
+                            <tr key={rec._id} className="hover:bg-[#F8F5F1]/50 dark:hover:bg-slate-700/20 transition-colors">
+                              <td className="px-6 py-4 font-bold text-[#0F172A] dark:text-white">
                                 {name}
                               </td>
-                              <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
+                              <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">
                                 {createdDateStr}
                               </td>
-                              <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">
+                              <td className="px-6 py-4 text-slate-700 dark:text-slate-400 font-bold">
                                 {getAllocatedNumbers(name).toLocaleString()}
                               </td>
-                              <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">
+                              <td className="px-6 py-4 text-slate-700 dark:text-slate-400 font-bold">
                                 {getDialedNumbers(name).toLocaleString()}
                               </td>
                               <td className="px-6 py-4 text-right space-x-2">
                                 <button
                                   onClick={() => handleDownloadCampaign(rec)}
-                                  className="bg-[#60a5fa] hover:bg-[#3b82f6] text-white p-1.5 rounded transition-all inline-flex items-center justify-center shadow-sm"
-                                  title="Download"
+                                  className="btn-secondary-premium p-2 rounded-xl inline-flex items-center justify-center"
+                                  title="Download CSV"
                                 >
-                                  <Icons.Download className="w-3.5 h-3.5" />
+                                  <Icons.Download className="w-3.5 h-3.5 text-[#17223B]" />
                                 </button>
                                 <button
                                   onClick={() => handleEditClick(rec)}
-                                  className="bg-[#38bdf8] hover:bg-[#0284c7] text-white p-1.5 rounded transition-all inline-flex items-center justify-center shadow-sm"
-                                  title="Edit"
+                                  className="btn-edit-premium p-2 rounded-xl inline-flex items-center justify-center"
+                                  title="Edit Campaign"
                                 >
-                                  <Icons.Edit3 className="w-3.5 h-3.5" />
+                                  <Icons.Edit3 className="w-3.5 h-3.5 text-slate-700" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(rec._id)}
-                                  className="bg-[#f87171] hover:bg-[#ef4444] text-white p-1.5 rounded transition-all inline-flex items-center justify-center shadow-sm"
-                                  title="Delete"
+                                  className="btn-delete-premium p-2 rounded-xl inline-flex items-center justify-center"
+                                  title="Delete Campaign"
                                 >
-                                  <Icons.Trash2 className="w-3.5 h-3.5" />
+                                  <Icons.Trash2 className="w-3.5 h-3.5 text-rose-600" />
                                 </button>
                               </td>
                             </tr>
