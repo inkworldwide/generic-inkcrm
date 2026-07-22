@@ -499,9 +499,9 @@ export default function RecordForm() {
       }
     }
 
-    const inputBase = 'w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all text-slate-700 placeholder-slate-400';
+    const inputBase = 'w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] border border-[#EAE4DA] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#1F2937] placeholder-slate-400';
 
-    const labelClass = 'text-[10px] font-[800] text-slate-700 uppercase tracking-wider block mb-1.5';
+    const labelClass = 'text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5';
 
     if (field.name === 'source' && apiPath === 'leads') {
       return (
@@ -946,8 +946,8 @@ export default function RecordForm() {
       <div className="card-premium p-0 overflow-hidden relative">
         
         {/* Header */}
-        <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-          <h2 className="text-xs font-[800] text-slate-800 uppercase tracking-wider">
+        <div className="px-8 py-5 border-b border-[#EAE4DA] bg-[#F8F5F1]/60 flex justify-between items-center">
+          <h2 className="text-xs font-[800] text-[#1F2937] uppercase tracking-wider">
             {id ? `Edit ${activeModule.singularLabel}: ${recordName}` : `Create ${activeModule.singularLabel}`}
           </h2>
         </div>
@@ -956,10 +956,10 @@ export default function RecordForm() {
         <form onSubmit={handleSubmit(onSubmitForm)} autoComplete="off">
           
           {sections.map((section) => (
-            <div key={section.title} className="p-8 border-b border-slate-100 last:border-b-0 space-y-6">
+            <div key={section.title} className="p-8 border-b border-[#EAE4DA] last:border-b-0 space-y-6">
               <div className="flex items-center gap-2.5 pb-1.5 mb-2">
-                <div className="w-1.5 h-3.5 bg-indigo-600 rounded-full" />
-                <h3 className="text-[10px] font-[800] text-slate-800 uppercase tracking-wider">
+                <div className="w-1.5 h-3.5 bg-[#17223B] rounded-full" />
+                <h3 className="text-[10px] font-[800] text-[#1F2937] uppercase tracking-wider">
                   {section.title}
                 </h3>
               </div>
@@ -971,7 +971,7 @@ export default function RecordForm() {
           ))}
 
           {/* Centered actions footer */}
-          <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex items-center justify-center gap-4">
+          <div className="p-6 bg-[#F8F5F1]/60 border-t border-[#EAE4DA] flex items-center justify-center gap-4">
             <Link
               to={`/modules/${activeModule.apiPath}`}
               className="btn-secondary-premium h-10 px-5 text-xs font-bold"
@@ -981,7 +981,7 @@ export default function RecordForm() {
             <button
               type="submit"
               disabled={saving}
-              className="btn-primary-premium h-10 px-5 text-xs font-bold shadow-md shadow-indigo-600/10 flex items-center gap-1.5"
+              className="btn-primary-premium h-10 px-5 text-xs font-bold flex items-center gap-1.5"
             >
               {saving && <Icons.Loader className="w-3.5 h-3.5 animate-spin" />}
               Save

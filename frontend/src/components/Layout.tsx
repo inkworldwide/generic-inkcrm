@@ -99,7 +99,7 @@ export default function Layout({ children }: LayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#FAF8F5] dark:bg-[#0f1115] text-slate-800 dark:text-white selection:bg-indigo-500/30 selection:text-indigo-900">
+    <div className="min-h-screen relative overflow-hidden bg-[#F8F5F1] dark:bg-[#0f1115] text-[#1F2937] dark:text-white selection:bg-navy-800/20 selection:text-navy-800">
       
       {/* Animated Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
@@ -283,10 +283,10 @@ export default function Layout({ children }: LayoutProps) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 rounded-[26px] bg-white dark:bg-slate-900 shadow-[0_0_40px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col relative border border-white/20">
+        <main className="flex-1 rounded-[26px] bg-white dark:bg-slate-900 shadow-[0_4px_24px_rgba(23,34,59,0.04)] overflow-hidden flex flex-col relative border border-[#EAE4DA]">
           
           {/* Dashboard Header */}
-          <header className="h-[70px] sm:h-[80px] bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 transition-colors duration-300">
+          <header className="h-[70px] sm:h-[80px] bg-[#FDFBF7]/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#EAE4DA] dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 transition-colors duration-300">
             <div className="flex flex-col">
               <div className="flex items-center gap-2 sm:gap-3 mb-1">
                 <button 
@@ -301,9 +301,9 @@ export default function Layout({ children }: LayoutProps) {
                   <span>Dashboard</span>
                 </div>
               </div>
-              <h2 className="text-xl font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
+              <h2 className="text-xl font-bold text-[#1F2937] dark:text-white tracking-tight flex items-center gap-2">
                 Overview
-                <span className="px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
+                <span className="px-2.5 py-0.5 rounded-full bg-navy-800/5 dark:bg-navy-800/40 text-[#17223B] dark:text-navy-100 border border-[#17223B]/10 dark:border-navy-800/50 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
               </h2>
             </div>
 

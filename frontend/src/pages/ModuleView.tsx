@@ -1110,13 +1110,13 @@ export default function ModuleView() {
             <div className="flex items-center gap-2 w-full sm:w-auto">
               <button
                 onClick={handleExportCSV}
-                className="flex-1 sm:flex-none justify-center px-4 py-2 border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-sm font-medium transition-all text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
+                className="flex-1 sm:flex-none justify-center px-4 py-2 border border-[#EAE4DA] bg-white hover:bg-[#F8F5F1] rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-[#1F2937] flex items-center gap-1.5 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
               >
                 <Icons.Download className="w-4 h-4" /> Export CSV
               </button>
               <Link
                 to={`/modules/${activeModule.apiPath}/new`}
-                className="flex-1 sm:flex-none justify-center px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-all hover:brightness-110 flex items-center gap-1.5 shadow-md shadow-primary/10"
+                className="flex-1 sm:flex-none justify-center px-5 py-2 bg-[#17223B] hover:bg-[#24324A] text-white rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-[0_2px_6px_rgba(23,34,59,0.12)] hover:shadow-[0_4px_12px_rgba(23,34,59,0.2)]"
               >
                 <Icons.Plus className="w-4 h-4" /> Add {activeModule.singularLabel}
               </Link>
@@ -1126,15 +1126,15 @@ export default function ModuleView() {
           {/* Tabs View Selector + Filtering Controls */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700/50 pb-4">
             {/* Toggle Mode Buttons */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start overflow-x-auto max-w-full w-full sm:w-auto hide-scrollbar snap-x">
+            <div className="flex items-center gap-1 bg-[#F8F5F1] border border-[#EAE4DA] p-1 rounded-xl self-start overflow-x-auto max-w-full w-full sm:w-auto hide-scrollbar snap-x">
               {(['table', 'kanban', 'calendar', 'timeline'] as ViewMode[]).map((mode) => (
                 <button
                   key={mode}
                   onClick={() => setViewMode(mode)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 snap-start flex-shrink-0 flex-1 sm:flex-none ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 snap-start flex-shrink-0 flex-1 sm:flex-none ${
                     viewMode === mode
-                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'
+                      ? 'bg-[#17223B] text-white shadow-sm'
+                      : 'text-slate-500 hover:text-[#17223B]'
                   }`}
                 >
                   {mode === 'table' && <Icons.Table className="w-3.5 h-3.5" />}

@@ -338,7 +338,7 @@ export default function Dashboard() {
           </div>
           <Link 
             to="/modules/leads/new" 
-            className="flex items-center gap-2 px-5 h-[44px] text-xs font-bold uppercase tracking-wider bg-slate-900 hover:bg-slate-800 text-white rounded-[14px] transition-all shadow-[0_4px_12px_rgba(15,23,42,0.1)] hover:shadow-[0_8px_20px_rgba(15,23,42,0.2)] hover:-translate-y-0.5 active:scale-95 duration-200 w-full sm:w-auto justify-center"
+            className="flex items-center gap-2 px-5 h-[44px] text-xs font-bold uppercase tracking-wider bg-[#17223B] hover:bg-[#24324A] text-white rounded-[14px] transition-all shadow-[0_4px_12px_rgba(23,34,59,0.12)] hover:shadow-[0_8px_20px_rgba(23,34,59,0.2)] hover:-translate-y-0.5 active:scale-95 duration-200 w-full sm:w-auto justify-center"
           >
             <Icons.Plus className="w-4 h-4" />
             Add Lead
@@ -383,7 +383,7 @@ export default function Dashboard() {
               <Link
                 to={`/modules/leads?status=${encodeURIComponent(filterStatus)}`}
                 key={idx} 
-                className="group flex flex-col justify-between py-4 px-5 bg-white border border-[#EBE8E0]/60 rounded-2xl shadow-[0_2px_6px_rgba(0,0,0,0.01)] hover:shadow-[0_12px_24px_rgba(0,0,0,0.03)] hover:-translate-y-0.5 transition-all duration-250 ease-out cursor-pointer relative overflow-hidden"
+                className="group flex flex-col justify-between py-4 px-5 bg-white border border-[#EAE4DA] rounded-2xl shadow-[0_2px_8px_rgba(23,34,59,0.02)] hover:shadow-[0_12px_28px_rgba(23,34,59,0.05)] hover:-translate-y-0.5 transition-all duration-250 ease-out cursor-pointer relative overflow-hidden"
               >
                 {/* Top Label & Icon */}
                 <div className="flex items-center justify-between gap-4">
@@ -391,7 +391,7 @@ export default function Dashboard() {
                     {metric.label.toLowerCase().replace("but not disbuse", "")}
                   </span>
                   <div 
-                    className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 group-hover:text-indigo-600 group-hover:bg-indigo-50/50 group-hover:border-indigo-150/50 transition-all duration-250"
+                    className="w-9 h-9 rounded-xl bg-[#F8F5F1] border border-[#EAE4DA] flex items-center justify-center text-[#17223B] group-hover:text-[#17223B] group-hover:bg-[#17223B]/10 group-hover:border-[#17223B]/20 transition-all duration-250"
                   >
                     <Icon className="w-4 h-4" />
                   </div>
@@ -420,15 +420,15 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Pipeline by Stage */}
-        <div className="bg-white border border-[#EBE8E0]/60 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_3px_rgb(0,0,0,0.01)] flex flex-col justify-between">
+        <div className="bg-white border border-[#EAE4DA] rounded-2xl p-6 md:p-8 shadow-[0_2px_8px_rgba(23,34,59,0.02)] flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-8">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-[#FAF8F3] border border-[#E5E2D9] rounded-xl">
-                  <Icons.BarChart3 className="w-5 h-5 text-indigo-600" />
+                <div className="p-2.5 bg-[#F8F5F1] border border-[#EAE4DA] rounded-xl text-[#17223B]">
+                  <Icons.BarChart3 className="w-5 h-5 text-[#17223B]" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-[800] text-slate-800 tracking-tight">Pipeline by Stage</h3>
+                  <h3 className="text-sm font-[800] text-[#1F2937] tracking-tight">Pipeline by Stage</h3>
                   <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Monthly revenue progression</p>
                 </div>
               </div>
@@ -437,11 +437,11 @@ export default function Dashboard() {
             <div className="space-y-5">
               {pipelineStages.map((stage, idx) => (
                 <div key={idx} className="group">
-                  <div className="flex justify-between text-xs font-semibold text-slate-650 mb-2 group-hover:text-[#0f172a] transition-colors">
+                  <div className="flex justify-between text-xs font-semibold text-slate-600 mb-2 group-hover:text-[#17223B] transition-colors">
                     <span>{stage.name}</span>
-                    <span className="font-bold text-slate-800">${Number(stage.val).toLocaleString()}</span>
+                    <span className="font-bold text-[#1F2937]">${Number(stage.val).toLocaleString()}</span>
                   </div>
-                  <div className="w-full h-3 bg-slate-50 border border-slate-100 rounded-full overflow-hidden shadow-inner">
+                  <div className="w-full h-3 bg-[#F8F5F1] border border-[#EAE4DA] rounded-full overflow-hidden shadow-inner">
                     <div 
                       style={{ 
                         width: animate ? stage.pct : '0%', 
@@ -458,18 +458,18 @@ export default function Dashboard() {
         </div>
 
         {/* Deal Status Grid */}
-        <div className="bg-white border border-[#EBE8E0]/60 rounded-2xl p-6 md:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015),0_1px_3px_rgb(0,0,0,0.01)] flex flex-col">
+        <div className="bg-white border border-[#EAE4DA] rounded-2xl p-6 md:p-8 shadow-[0_2px_8px_rgba(23,34,59,0.02)] flex flex-col">
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-[#FAF8F3] border border-[#E5E2D9] rounded-xl">
-                <Icons.Target className="w-5 h-5 text-indigo-600" />
+              <div className="p-2.5 bg-[#F8F5F1] border border-[#EAE4DA] rounded-xl text-[#17223B]">
+                <Icons.Target className="w-5 h-5 text-[#17223B]" />
               </div>
               <div>
-                <h3 className="text-sm font-[800] text-slate-800 tracking-tight">Deal Status</h3>
+                <h3 className="text-sm font-[800] text-[#1F2937] tracking-tight">Deal Status</h3>
                 <p className="text-[11px] text-slate-400 font-semibold mt-0.5">Deals closing performance</p>
               </div>
             </div>
-            <span className="text-[10px] font-bold text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm uppercase tracking-wider">This Month</span>
+            <span className="text-[10px] font-bold text-slate-500 bg-[#F8F5F1] px-3 py-1.5 rounded-lg border border-[#EAE4DA] shadow-sm uppercase tracking-wider">This Month</span>
           </div>
           <div className="grid grid-cols-2 gap-5 flex-1">
             {[
