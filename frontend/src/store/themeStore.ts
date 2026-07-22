@@ -93,7 +93,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
     root.style.setProperty('--color-primary', settings.primaryColor || '79 70 229');
     root.style.setProperty('--sidebar-bg', sidebarBg);
     root.style.setProperty('--header-bg', settings.headerBg || '#ffffff');
-    root.style.setProperty('--font-family', `${settings.fontFamily || 'Inter'}, sans-serif`);
+    root.style.setProperty('--font-family', `'Geist', ${settings.fontFamily || 'Inter'}, sans-serif`);
 
     // Detect brightness of sidebarBg
     const hex = sidebarBg.replace('#', '');

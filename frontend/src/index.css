@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
   :root {
     /* Enterprise Luxury Design System Palette */
@@ -19,21 +19,22 @@
     --color-glass: rgba(255, 255, 255, 0.75);
     --color-border: #EAE4DA; /* Warm Gray Border */
     
-    --text-primary: #1F2937; /* Charcoal primary text */
-    --text-secondary: #6B7280; /* Muted gray text */
-    --text-muted: #9CA3AF; /* Light gray text */
+    --text-primary: #0F172A; /* Darker charcoal black text */
+    --text-secondary: #374151; /* Darker secondary gray text */
+    --text-muted: #6B7280; /* Clear muted gray text */
 
     --radius-sm: 8px;
     --radius-md: 12px;
     --radius-lg: 16px;
 
-    --font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-family: 'Geist', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   }
 
   body {
     font-family: var(--font-family);
     background-color: #F8F5F1 !important;
-    @apply text-[#1F2937] antialiased;
+    font-size: 14px;
+    @apply text-[#0F172A] antialiased;
   }
 }
 
@@ -105,23 +106,23 @@
 }
 
 .input-premium {
-  @apply bg-[#FDFBF7] border border-[#EAE4DA] rounded-xl px-4 py-2.5 text-xs font-semibold text-[#1F2937] placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all duration-200;
+  @apply bg-[#FDFBF7] border border-[#EAE4DA] rounded-xl px-4 py-2.5 text-xs font-semibold text-[#0F172A] placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all duration-200;
 }
 
 .label-premium {
-  @apply text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5;
+  @apply text-[11px] font-bold text-slate-700 uppercase tracking-widest block mb-1.5;
 }
 
 .btn-primary-premium {
-  @apply h-[40px] px-5 text-[11px] font-bold uppercase tracking-wider bg-[#17223B] hover:bg-[#24324A] active:bg-[#0F172A] text-white rounded-xl transition-all duration-200 shadow-[0_2px_6px_rgba(23,34,59,0.12)] hover:shadow-[0_4px_12px_rgba(23,34,59,0.2)] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer;
+  @apply h-[40px] px-5 text-xs font-bold uppercase tracking-wider bg-[#17223B] hover:bg-[#24324A] active:bg-[#0F172A] text-white rounded-xl transition-all duration-200 shadow-[0_2px_6px_rgba(23,34,59,0.12)] hover:shadow-[0_4px_12px_rgba(23,34,59,0.2)] disabled:opacity-50 disabled:pointer-events-none flex items-center justify-center gap-2 cursor-pointer;
 }
 
 .btn-secondary-premium {
-  @apply h-[40px] px-4 text-[11px] font-bold uppercase tracking-wider bg-white hover:bg-[#F8F5F1] active:bg-[#F0EBE1] text-[#1F2937] rounded-xl border border-[#EAE4DA] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)];
+  @apply h-[40px] px-4 text-xs font-bold uppercase tracking-wider bg-white hover:bg-[#F8F5F1] active:bg-[#F0EBE1] text-[#0F172A] rounded-xl border border-[#EAE4DA] transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer shadow-[0_1px_2px_rgba(0,0,0,0.02)];
 }
 
 .btn-edit-premium {
-  @apply p-2 bg-[#F8F5F1] hover:bg-[#F0EBE1] text-slate-700 border border-[#EAE4DA] rounded-xl transition-all duration-200 disabled:opacity-50;
+  @apply p-2 bg-[#F8F5F1] hover:bg-[#F0EBE1] text-slate-800 border border-[#EAE4DA] rounded-xl transition-all duration-200 disabled:opacity-50;
 }
 
 .btn-delete-premium {
@@ -129,15 +130,15 @@
 }
 
 .status-active-premium {
-  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-700 border-emerald-100;
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-emerald-50 text-emerald-800 border-emerald-200;
 }
 
 .status-inactive-premium {
-  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider border bg-slate-50 text-slate-500 border-slate-100;
+  @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border bg-slate-100 text-slate-700 border-slate-200;
 }
 
 .table-header-premium {
-  @apply border-b border-[#EAE4DA] text-[10px] font-bold text-slate-500 uppercase tracking-wider h-11 bg-[#F8F5F1]/80;
+  @apply border-b border-[#EAE4DA] text-[11px] font-bold text-slate-700 uppercase tracking-wider h-11 bg-[#F8F5F1]/80;
 }
 
 .checkbox-premium {
