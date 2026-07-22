@@ -135,14 +135,18 @@ export default function Layout({ children }: LayoutProps) {
         )}>
           
           {/* Logo Area */}
-          <div className="p-6 pb-2">
-            <div className="flex items-center gap-4 p-3 rounded-[18px] bg-white/[0.05] border border-white/[0.08] shadow-[0_10px_40px_rgba(255,170,0,0.15)] relative overflow-hidden group hover:shadow-[0_15px_50px_rgba(255,170,0,0.25)] transition-all duration-500">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <div className="relative w-12 h-12 rounded-[14px] bg-white flex items-center justify-center p-1 shadow-md flex-shrink-0">
-                <img src={branding?.logoUrl || loginLogo} alt="Ink CRM" className="w-full h-full object-contain" style={{ imageRendering: 'crisp-edges' }} />
+          <div className="p-5 pb-3">
+            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] relative overflow-hidden group transition-all duration-300">
+              <div className="relative w-[56px] h-[56px] rounded-xl bg-white border border-white/10 flex items-center justify-center p-1.5 shadow-sm flex-shrink-0">
+                <img 
+                  src={branding?.logoUrl || loginLogo} 
+                  alt="Ink CRM" 
+                  className="max-w-[90%] max-h-[90%] w-auto h-auto object-contain" 
+                  style={{ imageRendering: 'crisp-edges' }} 
+                />
               </div>
-              <div className="flex flex-col min-w-0">
-                <h1 className="text-lg sm:text-xl font-[800] tracking-tight bg-gradient-to-r from-orange-400 to-amber-300 text-transparent bg-clip-text leading-tight uppercase line-clamp-2 max-w-[170px]">
+              <div className="flex flex-col min-w-0 justify-center text-left">
+                <h1 className="text-sm font-bold tracking-tight text-white leading-snug uppercase line-clamp-2 break-words">
                   {branding?.name || 'INK CRM'}
                 </h1>
               </div>
