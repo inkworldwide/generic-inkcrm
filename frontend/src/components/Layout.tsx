@@ -101,15 +101,8 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F8F5F1] dark:bg-[#0f1115] text-[#1F2937] dark:text-white selection:bg-navy-800/20 selection:text-navy-800">
       
-      {/* Animated Background Blobs */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/10 blur-[120px] rounded-full animate-blob1" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-blob2" />
-        <div className="absolute top-[30%] right-[20%] w-[30%] h-[30%] bg-indigo-500/5 blur-[100px] rounded-full animate-blob3" />
-        
-        {/* Subtle noise texture */}
-        <div className="absolute inset-0 opacity-[0.03] mix-blend-overlay pointer-events-none" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }}></div>
-      </div>
+      {/* Clean Subtle Background Layer */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#F8F5F1] dark:bg-[#0f1115]" />
 
       <div className="relative z-10 flex h-screen p-2 sm:p-5 gap-5">
         

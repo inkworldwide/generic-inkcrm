@@ -54,7 +54,7 @@
   background: rgba(23, 34, 59, 0.2);
 }
 
-/* Shimmer animation for loading states */
+/* Lightweight Clean Shimmer for loading states */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
@@ -63,41 +63,6 @@
   background: linear-gradient(90deg, #f8f5f1 25%, #eae4da 50%, #f8f5f1 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-}
-
-/* Animated Floating Blobs for the Background */
-@keyframes blob1 {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(30px, -50px) scale(1.05); }
-  66% { transform: translate(-20px, 20px) scale(0.95); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-@keyframes blob2 {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(-50px, 30px) scale(0.95); }
-  66% { transform: translate(20px, -20px) scale(1.05); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-@keyframes blob3 {
-  0% { transform: translate(0px, 0px) scale(1); }
-  33% { transform: translate(20px, 20px) scale(1.05); }
-  66% { transform: translate(-40px, -30px) scale(0.9); }
-  100% { transform: translate(0px, 0px) scale(1); }
-}
-
-.animate-blob1 { animation: blob1 25s infinite ease-in-out; }
-.animate-blob2 { animation: blob2 32s infinite ease-in-out; }
-.animate-blob3 { animation: blob3 38s infinite ease-in-out; }
-
-/* 5-second shine sweep on active items */
-@keyframes sweep {
-  0% { left: -100%; opacity: 0; }
-  2% { opacity: 0.5; }
-  10% { left: 100%; opacity: 0; }
-  100% { left: 100%; opacity: 0; }
-}
-.animate-sweep {
-  animation: sweep 5s infinite;
 }
 
 /* Premium Design System Utilities */

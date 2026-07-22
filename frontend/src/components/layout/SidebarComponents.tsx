@@ -29,8 +29,7 @@ export const SidebarIcon = ({ icon: Icon, colorClass, active }: { icon: any, col
 
 export const SidebarGlow = () => (
   <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
-    <div className="absolute top-0 w-full h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-    <div className="absolute -left-1/2 top-0 bottom-0 w-[50%] animate-sweep bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-[-20deg]" />
+    <div className="absolute top-0 w-full h-[1px] bg-[#FAF8F5]/10" />
   </div>
 );
 
@@ -60,8 +59,6 @@ export const SidebarItem = ({ to, label, icon, colorClass, onClick, indent = fal
             className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-7 rounded-r-full bg-white shadow-none"
           />
         )}
-        
-        {isActive && <SidebarGlow />}
 
         <SidebarIcon icon={icon} colorClass={colorClass} active={isActive} />
         
