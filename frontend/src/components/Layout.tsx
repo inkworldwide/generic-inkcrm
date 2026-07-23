@@ -291,10 +291,14 @@ export default function Layout({ children }: LayoutProps) {
               >
                 <Icons.Menu className="w-5 h-5 dark:text-slate-400" />
               </button>
-              <h2 className="text-lg font-bold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-2.5">
-                Dashboard
-                <span className="px-2.5 py-0.5 rounded-full bg-[#17223B]/5 dark:bg-navy-800/40 text-[#17223B] dark:text-navy-100 border border-[#17223B]/10 text-[10px] font-bold uppercase tracking-wider">Production</span>
-              </h2>
+              <div className="flex flex-col text-left">
+                <h2 className="text-lg font-bold text-[#0F172A] dark:text-white tracking-tight leading-snug">
+                  Dashboard Overview
+                </h2>
+                <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  Welcome back. Here is today's business summary.
+                </p>
+              </div>
             </div>
 
             <div className="flex items-center gap-5 relative">
