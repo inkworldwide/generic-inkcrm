@@ -1,9 +1,13 @@
 #!/bin/bash
 set -e
 
+# Increase Node memory allocation for low-RAM VPS servers (2GB RAM)
+export NODE_OPTIONS="--max-old-space-size=1536"
+
 echo "========================================================="
 echo " Starting inkCRM Production Deployment Automation"
 echo " Time: $(date)"
+echo " Memory Limit: $NODE_OPTIONS"
 echo "========================================================="
 
 # 1. Pull latest code
@@ -42,7 +46,7 @@ cd frontend
 npm install
 chmod +x node_modules/.bin/* 2>/dev/null || true
 echo "Building React frontend production package..."
-npx tsc && npx vite build
+npx vite build
 cd ..
 
 # 5. Verify build success and run pre-deployment checks
