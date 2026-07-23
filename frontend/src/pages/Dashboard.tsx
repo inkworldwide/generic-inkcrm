@@ -243,28 +243,37 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 max-w-[1400px] mx-auto text-left px-4 md:px-8 py-6">
       
-      {/* 1. TOP CONTROLS BAR (Search & Add Lead) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pb-4 border-b border-[#EAE4DA] dark:border-slate-800">
-        {/* Global Search Bar */}
-        <div className="relative w-full sm:w-80">
-          <Icons.Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => handleGlobalSearch(e.target.value)}
-            placeholder="Search leads, deals, contacts..."
-            className="w-full h-11 pl-10 pr-4 text-xs bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#0F172A] dark:text-white font-medium"
-          />
+      {/* 1. TOP ACTION & CONTROLS BAR */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-[#EAE4DA] dark:border-slate-800">
+        
+        {/* Command Search Bar - Ultra Premium Linear/Stripe style */}
+        <div className="relative flex-1 max-w-xl">
+          <div className="relative flex items-center">
+            <Icons.Search className="absolute left-4 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleGlobalSearch(e.target.value)}
+              placeholder="Search leads, deals, contacts, campaigns..."
+              className="w-full h-11 pl-11 pr-20 text-xs bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#0F172A] dark:text-white font-medium shadow-[0_2px_8px_rgba(23,34,59,0.03)] placeholder:text-slate-400"
+            />
+            <div className="absolute right-3.5 flex items-center gap-1 pointer-events-none">
+              <kbd className="hidden sm:inline-block text-[10px] font-mono font-bold text-slate-400 bg-[#F8F5F1] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 px-1.5 py-0.5 rounded shadow-2xs">
+                ⌘K
+              </kbd>
+            </div>
+          </div>
+
           {/* Search Results Dropdown */}
           {searchQuery && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 shadow-xl rounded-xl overflow-hidden max-h-80 overflow-y-auto z-50">
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 shadow-2xl rounded-2xl overflow-hidden max-h-80 overflow-y-auto z-50">
               {searchResults.length === 0 ? (
-                <div className="p-4 text-center text-xs text-slate-400">No records found.</div>
+                <div className="p-5 text-center text-xs text-slate-400 font-medium">No matching records found.</div>
               ) : (
                 searchResults.map(({ module, records }) => (
-                  <div key={module._id} className="border-b border-[#EAE4DA] dark:border-slate-700 last:border-0">
-                    <div className="px-4 py-1.5 bg-[#F8F5F1] dark:bg-slate-900 text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                      <DynamicIcon name={module.icon} className="w-3.5 h-3.5" />
+                  <div key={module._id} className="border-b border-[#EAE4DA]/60 dark:border-slate-700 last:border-0">
+                    <div className="px-4 py-2 bg-[#F8F5F1] dark:bg-slate-900 text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                      <DynamicIcon name={module.icon} className="w-3.5 h-3.5 text-[#17223B]" />
                       {module.pluralLabel}
                     </div>
                     {records.map((rec: any) => (
@@ -272,7 +281,7 @@ export default function Dashboard() {
                         key={rec._id}
                         to={`/modules/${module.apiPath}/${rec._id}`}
                         onClick={() => setSearchQuery('')}
-                        className="block px-6 py-2 hover:bg-[#F8F5F1] dark:hover:bg-slate-700 text-xs transition-colors text-[#0F172A] dark:text-slate-200"
+                        className="block px-6 py-2.5 hover:bg-[#F8F5F1] dark:hover:bg-slate-700/50 text-xs transition-colors text-[#0F172A] dark:text-slate-200"
                       >
                         <span className="font-bold text-[#17223B] dark:text-white">
                           {rec.data.fullName || rec.data.companyName || rec.data.dealName || rec.data.title || rec.data.firstName || rec._id}
@@ -287,14 +296,30 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Add Lead Button */}
-        <Link 
-          to="/modules/leads/new" 
-          className="btn-primary-premium h-11 px-5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
-        >
-          <Icons.Plus className="w-4 h-4" />
-          Add Lead
-        </Link>
+        {/* Right Controls & Quick Actions */}
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap justify-between sm:justify-end">
+          {/* Quick Filter Badges */}
+          <div className="hidden md:flex items-center gap-1.5 bg-[#F8F5F1] dark:bg-slate-800 p-1 rounded-xl border border-[#EAE4DA] dark:border-slate-700">
+            <span className="px-3 py-1.5 text-[11px] font-bold text-[#17223B] dark:text-white bg-white dark:bg-slate-700 rounded-lg shadow-2xs uppercase tracking-wider">
+              Overview
+            </span>
+            <span className="px-3 py-1.5 text-[11px] font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 cursor-pointer transition-colors uppercase tracking-wider">
+              Pipeline
+            </span>
+            <span className="px-3 py-1.5 text-[11px] font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 cursor-pointer transition-colors uppercase tracking-wider">
+              Follow-ups
+            </span>
+          </div>
+
+          {/* Add Lead Button */}
+          <Link 
+            to="/modules/leads/new" 
+            className="btn-primary-premium h-11 px-5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_2px_8px_rgba(23,34,59,0.12)] hover:shadow-[0_4px_16px_rgba(23,34,59,0.2)] transition-all"
+          >
+            <Icons.Plus className="w-4 h-4" />
+            Add Lead
+          </Link>
+        </div>
       </div>
 
       {/* 2. PREMIUM METRIC CARDS */}
