@@ -284,23 +284,16 @@ export default function Layout({ children }: LayoutProps) {
           
           {/* Dashboard Header */}
           <header className="h-[70px] sm:h-[80px] bg-[#FDFBF7]/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#EAE4DA] dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 transition-colors duration-300">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2 sm:gap-3 mb-1">
-                <button 
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-1.5 -ml-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
-                >
-                  <Icons.Menu className="w-5 h-5 dark:text-slate-400" />
-                </button>
-                <div className="flex items-center gap-2 text-[10px] sm:text-[11px] font-semibold tracking-wider text-slate-400 uppercase">
-                  <Icons.Home className="w-3 h-3 hidden sm:block" />
-                  <span className="hidden sm:block">/</span>
-                  <span>Dashboard</span>
-                </div>
-              </div>
-              <h2 className="text-xl font-bold text-[#1F2937] dark:text-white tracking-tight flex items-center gap-2">
-                Overview
-                <span className="px-2.5 py-0.5 rounded-full bg-navy-800/5 dark:bg-navy-800/40 text-[#17223B] dark:text-navy-100 border border-[#17223B]/10 dark:border-navy-800/50 text-[10px] font-bold uppercase tracking-wider ml-2">Production</span>
+            <div className="flex items-center gap-3">
+              <button 
+                onClick={() => setSidebarOpen(true)}
+                className="lg:hidden p-2 text-slate-600 hover:bg-[#F8F5F1] dark:hover:bg-slate-800 rounded-xl transition-colors -ml-2"
+              >
+                <Icons.Menu className="w-5 h-5 dark:text-slate-400" />
+              </button>
+              <h2 className="text-lg font-bold text-[#0F172A] dark:text-white tracking-tight flex items-center gap-2.5">
+                Dashboard
+                <span className="px-2.5 py-0.5 rounded-full bg-[#17223B]/5 dark:bg-navy-800/40 text-[#17223B] dark:text-navy-100 border border-[#17223B]/10 text-[10px] font-bold uppercase tracking-wider">Production</span>
               </h2>
             </div>
 

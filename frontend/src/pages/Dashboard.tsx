@@ -241,31 +241,35 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-10 max-w-[1400px] mx-auto text-left px-4 md:px-8 py-6">
+    <div className="space-y-8 max-w-[1400px] mx-auto text-left px-4 md:px-8 py-6">
       
-      {/* 1. TOP BAR SECTION */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between md:justify-end gap-5 pb-4 border-b border-slate-200/40">
-        <div className="flex items-center justify-between md:justify-end gap-5 w-full md:w-auto relative">
-          
-          {/* Search Input bar */}
-          <div className="relative flex-1 md:w-72">
+      {/* 1. TOP HEADER & CONTROLS BAR */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 pb-6 border-b border-[#EAE4DA] dark:border-slate-800">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#0F172A] dark:text-white">Dashboard Overview</h1>
+          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">Welcome back. Here is today's business summary.</p>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          {/* Global Search Bar */}
+          <div className="relative w-full sm:w-80">
             <Icons.Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => handleGlobalSearch(e.target.value)}
               placeholder="Search leads, deals, contacts..."
-              className="w-full pl-10 pr-4 py-2 text-xs md:text-sm bg-white border border-slate-200 rounded-[16px] focus:outline-none focus:ring-4 focus:ring-slate-900/5 focus:border-slate-800 transition-all text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.02)]"
+              className="w-full h-11 pl-10 pr-4 text-xs bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#0F172A] dark:text-white font-medium"
             />
             {/* Search Results Dropdown */}
             {searchQuery && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden max-h-80 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 shadow-xl rounded-xl overflow-hidden max-h-80 overflow-y-auto z-50">
                 {searchResults.length === 0 ? (
-                  <div className="p-4 text-center text-sm text-slate-500">No records found.</div>
+                  <div className="p-4 text-center text-xs text-slate-400">No records found.</div>
                 ) : (
                   searchResults.map(({ module, records }) => (
-                    <div key={module._id} className="border-b border-slate-100 last:border-0">
-                      <div className="px-4 py-1.5 bg-slate-50 text-[10px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <div key={module._id} className="border-b border-[#EAE4DA] dark:border-slate-700 last:border-0">
+                      <div className="px-4 py-1.5 bg-[#F8F5F1] dark:bg-slate-900 text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                         <DynamicIcon name={module.icon} className="w-3.5 h-3.5" />
                         {module.pluralLabel}
                       </div>
@@ -274,12 +278,12 @@ export default function Dashboard() {
                           key={rec._id}
                           to={`/modules/${module.apiPath}/${rec._id}`}
                           onClick={() => setSearchQuery('')}
-                          className="block px-6 py-2 hover:bg-slate-50 text-sm transition-colors text-slate-700"
+                          className="block px-6 py-2 hover:bg-[#F8F5F1] dark:hover:bg-slate-700 text-xs transition-colors text-[#0F172A] dark:text-slate-200"
                         >
-                          <span className="font-medium text-indigo-650">
+                          <span className="font-bold text-[#17223B] dark:text-white">
                             {rec.data.fullName || rec.data.companyName || rec.data.dealName || rec.data.title || rec.data.firstName || rec._id}
                           </span>
-                          {rec.data.email && <span className="text-slate-400 text-xs ml-3">({rec.data.email})</span>}
+                          {rec.data.email && <span className="text-slate-400 text-xs ml-2">({rec.data.email})</span>}
                         </Link>
                       ))}
                     </div>
@@ -289,61 +293,19 @@ export default function Dashboard() {
             )}
           </div>
 
-          {/* Notification bell */}
-          <div className="relative flex-shrink-0">
-            <button 
-              onClick={() => setShowNotifications(!showNotifications)}
-              className="p-2.5 bg-white border border-slate-200/80 hover:bg-slate-50 text-slate-500 hover:text-slate-900 rounded-[14px] transition-all shadow-sm hover:shadow-md"
-            >
-              <Icons.Bell className="w-5 h-5 md:w-4 md:h-4" />
-            </button>
-            <span className="absolute top-1 right-1 w-2.5 h-2.5 bg-rose-500 border-2 border-white rounded-full animate-pulse"></span>
-            
-            {showNotifications && (
-              <div className="absolute right-0 mt-3 w-80 bg-white border border-slate-200 shadow-xl rounded-xl overflow-hidden z-50">
-                <div className="px-4 py-3 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
-                  <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">System Activity</span>
-                  <button onClick={() => setNotifications([])} className="text-[10px] text-rose-500 hover:underline">Clear</button>
-                </div>
-                <div className="max-h-64 overflow-y-auto divide-y divide-slate-100">
-                  {notifications.length === 0 ? (
-                    <div className="p-4 text-center text-xs text-slate-400">No activity logs.</div>
-                  ) : (
-                    notifications.map((n) => (
-                      <div key={n._id} className="p-3 hover:bg-slate-50 transition-colors text-xs text-left">
-                        <p className="text-slate-700">
-                          <span className="font-semibold">{n.userId?.firstName || 'System'}</span> triggered a {n.type || n.action} event.
-                        </p>
-                        <p className="text-[10px] text-slate-400 mt-1">{new Date(n.createdAt).toLocaleTimeString()}</p>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="w-10 h-10 md:w-9 md:h-9 rounded-full bg-slate-900 text-white font-bold text-sm flex items-center justify-center shadow-md flex-shrink-0">
-            AK
-          </div>
-        </div>
-      </div>
-
-      {/* 2. DASHBOARD HEADER & PREMIUM METRIC CARDS */}
-      <div className="text-left space-y-8">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-[850] tracking-tight text-slate-800 font-sans">Dashboard Overview</h1>
-            <p className="text-xs font-semibold text-slate-400 mt-1">Welcome back. Here is today's business summary.</p>
-          </div>
+          {/* Add Lead Button */}
           <Link 
             to="/modules/leads/new" 
-            className="flex items-center gap-2 px-5 h-[44px] text-xs font-bold uppercase tracking-wider bg-[#17223B] hover:bg-[#24324A] text-white rounded-[14px] transition-all shadow-[0_4px_12px_rgba(23,34,59,0.12)] hover:shadow-[0_8px_20px_rgba(23,34,59,0.2)] hover:-translate-y-0.5 active:scale-95 duration-200 w-full sm:w-auto justify-center"
+            className="btn-primary-premium h-11 px-5 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
           >
             <Icons.Plus className="w-4 h-4" />
             Add Lead
           </Link>
         </div>
+      </div>
+
+      {/* 2. PREMIUM METRIC CARDS */}
+      <div className="space-y-6">
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
