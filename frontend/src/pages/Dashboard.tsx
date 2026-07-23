@@ -263,17 +263,17 @@ export default function Dashboard() {
         {/* Command Search Bar - Ultra Premium Linear/Stripe style */}
         <div className="relative flex-1 max-w-xl">
           <div className="relative flex items-center">
-            <Icons.Search className="absolute left-4 w-4 h-4 text-slate-400 pointer-events-none" />
+            <Icons.Search className="absolute left-4 w-4.5 h-4.5 text-[#17223B] dark:text-slate-200 pointer-events-none stroke-[2.2]" />
             <input
               ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => handleGlobalSearch(e.target.value)}
               placeholder="Search leads, deals, contacts, campaigns..."
-              className="w-full h-11 pl-11 pr-20 text-xs bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#0F172A] dark:text-white font-medium shadow-[0_2px_8px_rgba(23,34,59,0.03)] placeholder:text-slate-400"
+              className="w-full h-11 pl-11 pr-20 text-xs md:text-sm bg-white dark:bg-slate-800 border-2 border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#0F172A] dark:text-white font-semibold shadow-[0_2px_8px_rgba(23,34,59,0.03)] placeholder:text-slate-600 dark:placeholder:text-slate-400"
             />
             <div className="absolute right-3.5 flex items-center gap-1 pointer-events-none">
-              <kbd className="hidden sm:inline-block text-[10px] font-mono font-bold text-slate-400 bg-[#F8F5F1] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 px-1.5 py-0.5 rounded shadow-2xs">
+              <kbd className="hidden sm:inline-block text-[10px] font-mono font-bold text-[#17223B] dark:text-slate-300 bg-[#F8F5F1] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 px-1.5 py-0.5 rounded shadow-2xs">
                 ⌘K
               </kbd>
             </div>
