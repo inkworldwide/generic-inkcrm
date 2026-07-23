@@ -1,84 +1,178 @@
 [
   {
-    "_id": "6a50b1b63d61e35dc9ea138c",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "roleId": "6a50b1b63d61e35dc9ea1376",
+    "_id": "6a59d8dd6c9afd6bf4af6aef",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5f6",
     "firstName": "Ink",
     "lastName": "CRM",
     "email": "ink@crm.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
     },
     "faceRecognition": {
       "enabled": true,
-      "encryptedEmbedding": "6256d109c675aa81e9b92ab0388bf962:8cb027cac8ce4c547ba1dcfb4647e93373647ac53cac697beeac27517fc1ac95c796a3155034985215c212382b3caa7461e79a6a18368db6b3823b04159711e68075671bd6eb17e2ffb06d98b03489d5d0615f97953d93b120ce57c1005907860b4ef53073b8e989dd122b211d6e78b0f1f0fe676d2f89fef348102e97941633bec844e7519c89e99b47fa056b35907774a434552d595482cef22a35e62c7820208e4e95e2ec90ddc87d3517b26e0bbd63633d9cda4b31869142ba64606bfb324f6428ebdd6508700920d2b24ab3fb6058fbd0a5ec7d9b536f6405f05c7160daff992a51289a75a4fd13b03629bb20296927f1341f5353283443854025eecaa40457434c0d9e8b959cb20bb45b6efc167f496e021bc6c40b0b50d0c3e34624cad99a35d832e962609a9cd9352591351cc2f6c093f4abe6da9c49da720859c3e5011557fcac0006d0461cd0685fa01b5fb4c459a2d1d23b1bdc16bf07ba3dce4b68b460ad5213de35fd457f5523a38ce2edca73a2c590abab897f69601903f6e39b2d5ecb4c5b34791fdf737f89a1d1ed81b881d53124e8b9f6fd7f973760a39956586cc4ae357104d42b661cdbab9e1b35a2e1d0f6c43de62acb3dcca7761089651f0c668f11840369583a66f4d15205a0c973f96a99ef29a9b0b4415d253d4fbbafb0128d673de1eb8ae1e913df809d340564b729a808f5bc5d84ab43ef447478a41a5ea79dbe2188af86fac2c4367cebe011c792183e471507b1bb76ce0c5dc22e1eb7d9d7a7b31f6c824f4ae1a2b198a927ac6bc3388fdd04370598b5224bd51e4488365ea0c44f0d1946cc1ea8d9b069a6c50121fe00271385384c306a57d799c9d7908ebb6278ff37e0ddfd64beab0b01e580f91d03e55015614ca96fe8cd1e6eda705b12f85008c117495a4f8d94f222349bddb7de0f7f848ba634b65a0edf57beac637229041ce37289d24a879adf517b689dc306724d8e14afe7eebb73be64bb6c1004bdb6a885e3fa7caeb054fb097ad7c7b066767220caea30f0f06421e92e035f33425fb660b66766228bf477addcf7ce9f10190ac1fc41e672d29aa5da13e0a2df85ba088e53f833371c485203217eb5e413a7e5b88730118a883f208c3115c598a2d06aa488efcfc05130c350ddcf004fbb17b587bab937abbeb67ce4f1058f24738ff85f31c27f2228748a9cf63e609fd0d053d8a3b0a838f9d43f28f659235e96fecb0a2046d6ac9dc1d92a8b0e456d49caed0affe91d4a8d1d49edaad77f827a4ec3746f89e05f98c343f6c3dd48303871cc45dcbc0e3fba669e726c5f00dbf60e1d1a8ec8c640bc93f1bd711b35a806af21c43ea3cea01f9484a030d934e39c31b8e4bbc8328e27877971af42535c1a26db9a70c17c644ac6c24790a8a297c08ebf76a6acfbf5adae9834315e3ec6b71e8066a771cf904233c399d241f0e6e6c661e65472d20b3f18d29a70d7168395602c067ee21bebc2943c3064309fa6d62975d6835ce434ea479d913827462410737e5eedc0711e2e3ee58be7fa199f0b23419fb3397cfd6d1ecd5c1c8423e5a2e0a7253ca63b6a8ffd9627d74425286ea58a0c1f9df83a5080ad9c040ed1d52c14f6227c67043d3bb95566c1a621b8fdeebb202588395556ae4b44169c0abff2ec43cd8158efad5bcd03ca0f62e4972fec6ff93d2ae349224ed245e29afeea2599c9fea13b392cf22ec63b9ca1cab1affab86c3987f3764720dde93694aecd5dd01f68ee2c747a3a5a6932ff8ef14357bfa6bf40c96c7bafa5e12de9ae7143b3ffc3bd2c0ca6606eef53ba841fb15de662258bfe999bd1f2264946d504608dbbaee2c65757559ad2b746bc209cd7f7ec8df859cc03cc8a3484b7671fe3ed3bddd4abb1e411ebccd749980958fa851d5204e042c18cb936a9ef15fc0e106dd0268884d124054d3e9edc9a39239ada1f1be2d343ef7a721b27bffa86fe0a61678fb526f8aac63853f55d42c8ea03e382026bb0fd40af38ef668fc1fe6b7e640c8a2e5a8ea697e0f79fde7df37d20c2bebbf5e7e493d42753011a152af99fab0cd4604479abb9bccf2203110339bbd2f10ffa61d8488bf5ea2597e47426668042cdd24453ff63ec58f48b23e895ec9ff3e76e5415d5af07e2b36001d1f1f71b0afb653173b29f3acc57725f9a0a20c23ddca51a3852f11eaac0afe1a473f34e8026b4635e4252caf0406af3a6b9ad29a19c453887a9b04cb1edbec0170f2a76a2d246fdbac55e7c5f07d0e96b0f4b58a98d0b1dba033c75543609c54f6d7c5efacca314378980454a4e102f3d6bae67373de8f9b7d6b3ec22faa9545c11eb40fd3d00c233d6f13373683d06906ddb6a8238c68cbe43d443713442efb3a512250832ed1e103259b93c0050e1bf31932aedf729931712bc961d084eab7148aa8d0b124c123c99c7d40cff557a65e84e057ef232a8eae12f2614aee423dfa157f8500f21984fd0682fb8a92ceb494b4c8125c09693006acd685d260f43725e938844cf24c714cb66c5af2e7277d9599ffc878be8ce01b6e8320cd2097b3f3dd04f412f527f1a320cad81d9d7bf257df6d251adc08bae5b4c45b6f1cd80dae5775f74577b0861f00df870f37050a6988ea9d9e91092a10ab8392f4d27e3a95b7819397c1637a4461e748fe8982f84529cf50e55c7130e3ba594035294868bab203fe5fcf74139652d04e9d3b915c4397a38f31cf201920d825fa7211d5babd512bfc6fa2ddded01a636fb48bcddbb393250a10e1869af951facc4287c1d9809db519e3170cf61b47853e29cf2372d5e93b4f15d0d5d72d18f1233c81070520d15b29633a51ac4924a858d32d3f2f2a4a71d33bbe5ee4d96b56c357931bb91b2b99ce7d4afc11185ce3a144cda85e1533db3f3a4d660b84010bee900109586b648ce3193769f8fd1b714b7543b1800a5a1d95e25117c0c8af25e6cd4ed9409a5976c67bd4aa2e0d952441d91af0294c444bf935d5edee8ec09a21b4417ad8d59adfd59ef0c1805f444583c2938d08b2493882df41566f4274055d9f2fa681f6e16b9f64fad30cd3fa84de2e56bfe83f66432afe32a2ed9f891992edb652279bf08ac98d1679c90ad057762d3c58b11d6ac8e0c6281747d710780e91f247d830cfa25dd47640d2fd6ea0bc866c6c9a4de409e7a0622630bed99bfd29008423ba9397baf9f218a8b7731fef7388792f4b2af6e5c1bdef748294f34c5cf75157382dbe954a75c78338113e80b0cd82a847eaa9524476f5410d6b1b8f5b52c12dfa813897ec7bf0e419b839b7c19862a3012dfe41d38b8070a6417866c038ed888138f27498b656c65797c021f80fd59b27b43a48990127695fbe32b7500838473622296763995d71b0c6e98a1a17b1c61bd16ae6587af5aee6272700fc88475e1ce454914bef4755057143aa810dbbb4f68c2073db19d13fc2aa10514bb7f8b4929a59f0b2ebbba73575f10bd05d01fcd8dc058efdf8898979faf9b290ed505fe21a5614b687016f1aa0007116e987256d264662b2584f2d77f19c50dcda0069a5ecd96a67739610100a193fd722a3637a6fb6dbb05041e5c1d18ef167dae052f8eb23cf8868a80080d67278a9a5a87e75044a50d1781dbbb03253efb9b955e1aa1350b78ceefa6dd22c889d3848cd8ece95ece09c2de5e3550e6b2fa2a054b56a612077c1bcfdf01df5aef5bf3eec64d13b9d1d3a452b7c0665a0ee53e",
-      "enrolledAt": "2026-07-10T09:01:07.259Z"
+      "encryptedEmbedding": "25b0939454f088364d1a0d030cbca099:2bd82e2f8daf3058758cb6fb95c62f362d00c6f650f76362031d5f4612b5185408c51f6fbbd8b44644bebc95e71d6d4bac44f4291a84ea90ab6218cd65c3fd88d405ceb7468ac1d295a19af5c7d6cd36f870ac3202b39e282c76ece8f45289d7f6e98d683057d60af622a36b316cf40a4cc3769d0064135ecef8e3f644eb43d0ae0ca1749d52a2b6d03be44244eacbbc065468a36ab69ae12a12a1c63701f9cf600298508454e98ff442ef8fad6a39e9d5824e5f58eaf1398cc8ac7d204b15fc05ded4927d4e9ed164bc5212cef709963203c45e137fe34522d3845149af1762353903182f6caaa8363b706875584692a646c9901efe7599cfc3e6b47c5624fde314f9b7cfc1dd96a9edf55af65537b5ca915f21bff675817115dfc588fb6d4b2f6ed0d8231a316df54664ca8c56387d739cf9e782b4ed6391bfe80f1b8fb3741b972613335bfe53b9c6e52aeeed872b5a3adf2d1ebe9627f8da8a6709680e02484dd63504e3c480eb73c3aef4a9bbe5df2be29cec21e77adacf6b86412fed88045e4a13c5acb289cc5e9842dc7ec5003e9a008d7e3bfadebe309c0d19de5723654b39ee0faf581935c780940b110842903e889136de82ae990f7c2949a69a38552801e8fe36b2dca1ff8874ec4b0e98522a003063206be661fac84e6cc4eb1568837f0e4406093e64d9e845f7902c2343f08011569117da72ac67ea75646bc904ba585b31ca6a97d46cffa4b6dc7b0c70e70af104d1de1c425de93c665e21381496f461d02ba15eafe1f9a010490a8cfaf8116dbb9967f3e858c6a86212d818847ef57d39f581d3f754d03cda88105afb8975e66919229ff1f6fc191ce0387fc5a9270492617fba4b5682bd0dc342a42c80c734007482683d1181dcff9999d2a7a0218414b8323d318a33fc80f530966f0137050ae6f86a79c8527850cebcff6444c92e8ffd9d53fbc38942c4766fc0d8027875ad84a379eae78e4a7e798bed87b9f2cfce6aedb36557d1064d68d134cc4fc6e42c1814ede2ca3742e926461fced160a1f8541d175234c1c094649be551366c7418e1c0aea261526f2b297d18adfc072a10eb8dcd8d86cca3e75926f5c8f3202d3c04d4aabc40f22edd7dee053021c6b4f98640bb04d6740c30b7e2ae267f03691d19fb23f8272f80a9cd9c162c1926ee2082e31c73142317e7404c0a19408e26cabdc87c3ccdd2c2dce50264107f493fb4507dbfbbd986f656223b633880accc3e40466e8c4d794af9628f6a16a98515c0a723f5fe1909fb8b31e3490e4f41cb94c0acf6c0e7099d662dd2df180b0105f2e219a689472c7e83e487d40dab0ca1c984bb2082264e772966c9172e15acf2397b06910b5aca3b0560881b9449fbfb75638266716b1b0a755233c664f5055783f5db7ddbefac1ace373e2c1980a768db930b4191c9e8900e6274244013cc8500c6d3298003ed8b3e5d92dcc94126813e4165a945f7b04bffa06342b9ec0f41758b76df44e79c6d2d2c6c35a63380185ed01ed948c874489d1d607c3daac59be25ee75f2f8f146f959bf2784b65df6d1afa1b4ab781c9f540856376232c8fee5e3edb6c7fbefb0ad0ad9934ea1a253a7e3511e13d87a3d77211de51f4ffb008e7f4ee78bfdf60c461509d560f28048fbcc4012be2b77de174a252084fb1f21476543e1f612da0bf260b0e15119eb2392bc97edcf1dd8381e42ce663d2505e967ec9aa2173590c68a8f92a5c8f8bf4bb1659ba7014de6d23249ea5e25bed0a1be79add8d3dfc9975330de857bbadf34e255cb0292770bb6a5309175c3c51d2605a0696763505feaf05b35e87e816e6f272cf733c84a1fc8fdf8d19e66ee2b2c15b489da9a5fd8900fb393418b5295cdbaa30a3150100f5be9a695893df34a57f5582cb99935d4d5929b52110e501e57f1989420d420f77acf0c9c90731f3600096e22c6f001a6b83d7f02f5a204e136dacd8aaf4b7adeae4536f65a5456dfe2ba80754a21dfd4dab4749418f96c8d50f3b8de858de24c170f643795fe119e2f58faa79868d26ce92b81c9186a85c17c10cad00743c6556228511cdba952786b226742bc5d4a34c4a1ea25d0823b580a0afd85f6965ec05c229107ccb9af0f74b8f8c4e7c9d9b38bba56da25cd5ae65fe7f6b0628a850dfc67bcda5ffebe347496529da611964639e172fdd18f7f5b7bfc1e8d8b27971233883a05bb0b5e18e65aec1b0df70b54d7e6ecae5525ca587f908642fa8d4579a5d78fd46d5cb43bd55e29ad88dabf70384d6f1b91b17e3a06b2e9ce795297ea6d33ac58af74fcf637c24f41694edc82cc2f04bad7b30b4b387ba206cead192671a78a37f5407fd742d293e78f36e765345d628bd54635959bf44b642b1dd076c785a304477887e4ce1f2cb88f7e1bc370ad0d8b1d4f77759c2bf85dc1ff035a45366bcc415663e533b76ece6efa7ff8195974194fd0fe969a0864a48fd9640bef3863e8db40ad144e43d471c23b3730e9b94075467ca06e24a10f1259dcd464ef5ba9ca49dc8664123a2eca2064afedf36fddd732a1f80f79b7bcfc27d872e9304ab74622187e16a20cc165e326ce16412e86a453eada94567464b420ff9a9fb6dfbdb5e7af33bc2ea1447970d6e9db07ee47e23de79de138c012654e1376799aa71923b81904fca772bbbe4bc655997fd5aefdd287c79bcdc90aba24e2ac1afde89167f4c570305676ab031c9caf7be98ea70e909d193c0ce403b91f6cf3ceb2229332b5497bcd3618d2147391df3c40f3c4fb18ff1574ec61f586fb1b3e62ae93330d199dfff44e05a0529bd954b86b4d04bd7578a445380eb72fbfd05749c0b79b4549f44708a0a8b4bd1ba4b7e8c8ee1bae87dca3902fce16f57d93dbe45b54b7b3a128db7f22535220d15eb5ef4d76b26554bcef4034316162c5763135fbde1112b633616f0a97dff0f28325f90fd82347742a5ae43b8db7081138ec6536ee0ba721653b0f02d9e4a302672ed0b320f35e2d3ebf34be779a5ac1fc33e0ec591ce16f0a412354c5146ff44ff3af2e5f873f0c6d0e2511104f78478503608d9340c55f666d08497ff56448ad31df6d27a727b6ac1089ad0a74e99a4ea5f9b59c23a811fbd6aba05e785c9716ed264fd43164f923d22028a23aaf67716cac6f82a7f798be38ce44171e91b9b739a1bbd3f9e015172690e7580e5f89b6cc454116d374b61e59cc65f29b3ece0946e8d652667063fced3dd0eeffdddd3bf437eb1961b37bc7d2fffe1c0f4e096aa82485260bf858824671e52a9834f3a0ea96db72762a05a2e3efc36a9a9c39057a258239eefa3987c68a617acc0ce2df3f62a2078312df98967caee2c57966afb00ae5919c0946017f594a15479ea06ea215bfe3e8fbf6b4787cd20ad076fbb9cccb6cb3c95574dd112e5257b134fe1a893a31c1179e9330ba91e408130c32bc3dc365f41546dc14764b4471ad32dcd38713459df4d31ae28a55d9c04458ae5364ca479ad3254de3d5db194326e085adae454b920f01d7593a7a34f2ca30da84bea183bbfebf30c2e6bd545ebc6c99d7cef894f4d8b8600ba384fcbd7996b12c33816a19fc895e78c2386cccc7cf2cb79fc6b1de6a9a528dd2d3351392cc7f21153f2c5288e2d2210cb8ceb787f055b38509e6c82b9553e035c633b987649d8b38401f63ebc7a66daa9c833b36813fff064949059d2f713d381935e46d485cd9295626aa878430d46d847b100996be0c6044028613bdf6c",
+      "enrolledAt": "2026-07-17T07:29:43.158Z"
     },
     "locationRadius": 100,
     "refreshTokens": [
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTBiMWI2M2Q2MWUzNWRjOWVhMTM4YyIsImVtYWlsIjoiaW5rQGNybS5jb20iLCJpYXQiOjE3ODM2NzQwNjcsImV4cCI6MTc4NDI3ODg2N30.mFG2_VXv8ZNGZ6cGnaiMx8iC6aO6WXZHwbBz3hF7qg4"
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFlZiIsImVtYWlsIjoiaW5rQGNybS5jb20iLCJpYXQiOjE3ODQ2MjQyMDUsImV4cCI6MTc4NTIyOTAwNX0.7jCzQR_xuFgnW5ur3kj7r9x8T-hxRrIX5S-8b0k15wk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFlZiIsImVtYWlsIjoiaW5rQGNybS5jb20iLCJpYXQiOjE3ODQ2MjQyMDUsImV4cCI6MTc4NTIyOTAwNX0.7jCzQR_xuFgnW5ur3kj7r9x8T-hxRrIX5S-8b0k15wk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFlZiIsImVtYWlsIjoiaW5rQGNybS5jb20iLCJpYXQiOjE3ODQ2MjQyMDUsImV4cCI6MTc4NTIyOTAwNX0.7jCzQR_xuFgnW5ur3kj7r9x8T-hxRrIX5S-8b0k15wk",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFlZiIsImVtYWlsIjoiaW5rQGNybS5jb20iLCJpYXQiOjE3ODQ3MDE4NDgsImV4cCI6MTc4NTMwNjY0OH0.Qruzci-SFyx8P2ynpQil24rPzia-u4Q5lJV-BJmmpd0",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFlZiIsImVtYWlsIjoiaW5rQGNybS5jb20iLCJpYXQiOjE3ODQ3MDE4NDgsImV4cCI6MTc4NTMwNjY0OH0.Qruzci-SFyx8P2ynpQil24rPzia-u4Q5lJV-BJmmpd0"
     ],
     "failedLoginAttempts": 0,
     "skipFace": false,
-    "skipLocation": false,
+    "skipLocation": true,
     "isActive": true,
     "activeDevices": [
       {
-        "deviceId": "a5xl976kbod",
+        "deviceId": "5pkou8ecaau",
         "browser": "Google Chrome",
         "os": "Windows",
         "ip": "::1",
-        "lastActive": "2026-07-10T09:01:07.267Z",
-        "_id": "6a50b4d3f173553c1013e871"
+        "lastActive": "2026-07-21T08:56:45.224Z",
+        "_id": "6a5f344d95026eb72ef41779"
+      },
+      {
+        "deviceId": "hmjnt3d8lqn",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T08:56:45.335Z",
+        "_id": "6a5f344d95026eb72ef41782"
+      },
+      {
+        "deviceId": "jpt9q2k1ltc",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T08:56:45.770Z",
+        "_id": "6a5f344d95026eb72ef4178b"
+      },
+      {
+        "deviceId": "rc0rx83h7j",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-22T06:30:48.216Z",
+        "_id": "6a6063989d983baa35a8e538"
+      },
+      {
+        "deviceId": "f7kl8oyzwf",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-22T06:30:48.333Z",
+        "_id": "6a6063989d983baa35a8e541"
       }
     ],
-    "createdAt": "2026-07-10T08:47:50.411Z",
-    "updatedAt": "2026-07-10T09:57:38.304Z",
-    "__v": 1,
+    "createdAt": "2026-07-17T07:25:17.002Z",
+    "updatedAt": "2026-07-22T06:30:48.336Z",
+    "__v": 19,
     "registrationLocation": {
-      "latitude": 13.038957795928795,
-      "longitude": 77.57685810695637,
-      "capturedAt": "2026-07-10T09:01:07.255Z"
+      "latitude": 13.038996712112239,
+      "longitude": 77.57696596337271,
+      "capturedAt": "2026-07-17T07:29:43.153Z"
     },
-    "userCode": "ADM-INK"
+    "plainPassword": "password",
+    "department": "Management"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea138e",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "roleId": "6a50b1b63d61e35dc9ea137b",
+    "_id": "6a59d8dd6c9afd6bf4af6af1",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5fa",
     "firstName": "Suma",
     "lastName": "Dhar",
     "email": "agent.suma@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
     },
     "faceRecognition": {
-      "enabled": false
+      "enabled": true,
+      "encryptedEmbedding": "42a9b95b6f3aae1014b760f4491c4a4e:ac7244d2d309caf52b0d9bf7e9b466c8ad4ff81b8ea4267accf9b6483d19e3e2a17fb8da4523c38bacb0959e30c4c23dd5232fad37a11d952663c9d86d892372339dddd6b0c4e5cf90d1c71119775c985f6039d405531f3df42232bf52c721f89cc1ed5f097a40657d257664e1a7afb2d6809ea05ea6ed88b30743e0277462f0dbc0056d57ffdfd8eb515ee1dcf3f407e13c5b4b49f817b2203e21a5aa13628dfac5b96f5c2b7b2df5c4c2f8147c222071d862a83af69f48123eaf40c59459d7fdaac46aae4ea114829012c3f53c294b3b7d37d437fc911d52d7bf3aaa89a40adde95368f9bf9a3661d0939608f2487cad772c6eb6251d5fb62b18acc60a5f0a8c1cd000fd0f8d114f73642e374bd0695854f28981290b9dac87fdb4cd2aa0a1b5287806f71288adf65bedf62d948afd06afb0c759f4575b94a83159e6c60e3a03d109b68e3803abfe5a3ba0824eae269eb0a0b945cd77796c1db514797c1bd484a48882c5e970ebfd4ea1086fe2986fea878869c6638049faecbc0c1e28020e34a5af6fcad2882c3a26e7ddd625184afbb8868832071aad807d85cbba9326530580ea58a855737b505f4e67130bf5a1db738933ccaa39029f58296d40aea8c2c64da71bc9ea31e6b641f4661a709e4b62082a9266cd9c188e7cda1c22b4091b1b79e51d6a513363bf9373409e2fa353ab0a27a2f890fab3108e10963943f4a4d1391921526d8038fb1885856f338871499058bcf667f2996600f20f8ee924825abcf10eb2b07366b0d67b26b9cc159ad2e64d8035e1f6a7d635ae1f20bc3484a6094794ec9a821d146c6d9464616831355c42f347373f225a5e0af41f0af70e11427adc61de4be67a9e7c2c43ff89f5a4bfa0a4922d99a56c3b1b61ef63379054bfba4e3ac7fa8068c8cfef39e37d0bb13051d319de37ec8e420107198b1a5f8ce07494a8714a32ea99ff293f0babdc1aa87c36bea363f56777a8f1d341f5f16fef977da3c85c22049075439141cfc1e540a1cb69c34071928cd0ca712fd39a9d051b41bac09a0f030135d8d15d5ca14e8ec14147c201e9786ab888bc2a807915b1e49a80ea1fa16be1ebd4857c9da57e594d81abdc0ec4a4f472e5e61e6e3ed3e1ee47812e0ec82a637b2ec0008483328cac4b93e773d615dbddd866fac529613eafd09c8a6af1a1d1f28002ad8cc85582619747baf50bfadaada794aacb2baabc80bef34d047056c23b026651dcb1319bdd999f0e1119f6e553f507b2ce7687bae6d049bb0cfe8bdd4f636d0a7c86fe8e74b475a1b8ed46b91474ef61f5739f30dd39832eb59c9b04601abefe87a83869575a3c9e900bec4abaa3cf198d9d62818cb6980dd074fa6303482a5bd7e02348e2509d48cfd55c49e726475c2bf2bd831255a0b787ddede3872005ec9be2bef95c5fac27a38605f56cd67c9ecf7b3623ca678fc2c7efbf4c2b333282b8100d971d9c63b2bbe5d73e6fc1e65a4d4a93319720a87a6abab2c496aa69a843af49f3301448d430dd041e262fb46653d96a7030e3b94cbb4f75045974d0da64b8242fe8871694b96d97cc7a7d0094ef7e500f2c45d5b63ca09ca5c1b0e7bd72a259ae469a99e0f53a4aabc0330bf34c0bb2b189aa510e30118030d6b5fe918923ed5219549db5361d0e2df8b2a48109815e466d4e31408ec30946e60fcd67cc391aabe834d4776f6cdcf1a4b6b22879a5eb22467c2cd05c601f1a393ba96e97271fa2079e1bd88538c12adb628cefc3f451fb40ac52e5946bfbfbdf1c626737cf0384df42606f4e8e7bb91530312ce5a9773f04e4ec46752f30109a5fb804ee151157ae31b8963436436487e6a4295274d0900722e01cef6d9118bd4f2ecc843bdcfd7fd90e45306db8aed695892baad16270fd017f4000385f6687fb8299e5f5f2e939b61ee355bbe93ab5baf2aef83897297dfaf1554719561acf8b9f18fd64e29a7791d09a4482b8f6de10c0d63033fb0927be24001c75af1c02fe9008aadcd99b17d88c9c3901a3dc212fdff138eaa099935b304ae7e859eb44310f00ab861e057ddfa0486e9144bf5d4a9b146550d8f73bade4b7d637aa8ff7b35db38b06a4073dc9ebe7807e7f2c29146b428052d08ce0e1f0f3d975f6bf0fab219bc1c5d4fb84a0dc26a2363b1e154b67fac1872333f51a6dc23db282af0d5efd0e447c0a15eb848a4e36f20df73497ff96fdda0092396e5cadfa9c909862cb4499e2cea95fcab98377eda3db358ad56b40c3453e37e64e2044952695a7ea5336559983cdd5ee28a5c2a7419830e9affd62b3b8d1b33cb63d6731b743ae2365950b32100996d0251943a31b5df328ebf7f9ae18739e484fedb1eb4188d8baab6d60d2ce0f600b991ddacc46e85c3a7a34254e8bc183e9dd8d96866e6916c9ec045528b25e9c38d9b565a6ed08fd150c8049b68881609e63bbf7d81dafaa99d6f587b3d2001c04f2e5e23b86caf8c3c75697c31c45b5c15fb616773779410dfc7c4ca8011675aead4226c5a6482fa5937da9bef8f43e93b1de07b502484302e5014f9dc462f7f049629d7d4417715bb28cd856e35462116723a0ff0168f02b85690c97aa81867718cc39eee0281d8eea6e00390181e5954580531603dfb7f8efc4ab522d1dbfe486070a1e0006c37c08f38a3e88f388dbe876e30ea183e3273185f6eee55a1c075c401f8d5380d2cbe4212b36a5010c156fd92a833a90851f396f465e2ca24422e7fea39324d70f76605fdab2382519009eee8b9942ad29e12e7e3e09143bd8f362a3a75fc3394289f56976cc386971de622239131cd7c18e0025150735d6a7c99205830aa8387ccfef79ec820fbaa16546261278c659d62f81f350d46478fbdd55619b8b5e1bf2e896d516c1b59ded624f7633c02b02a54c878b420d87f7a8c73aca4bd400564811484bf1a49f0a4e269b448eead4edac1690861fc27c852bcacf877d8efbf3f80c45ec22cca391393be7cdb88b19e1ed7382364d25560323cf9a6ad0ce7e8cceb874e25fdc00473c41ed491022820a89fcf4f7e92c78f937b537f5b3b54a3ee1c7c8b7aad7049943a9bcf06cc97c15a5e22f42555132cf2b59a37d0360ac26085313e4798d87344ae5aca439e0ed3e8a95f0009d7eee2549a71763a83bd0e9cc27d8f51d83f298fa17c01845c1f37411f2b5ef137c36fc581b11a287b9d0ef778ddaa27a4eff2959df1e08d0b5d72ed303fd89b0675df026439f9235e4c2f9ac5c2a6b6f3a66c94e0b4f6666a8f952971297f6225ad1298fd598d6c2d8f5f5fc682e35443ef51b07dcfd6f8338fa31864f94f837c2cd41470ba47bc08e48eed0c45766a250b31f6c312239ca40aa130f3a1a6ad44ee9b9f9eb03755e6013672be899e20a8323dc7abfb7e8b58e568bfac1ff3ea9a1796b3ab85772cc7a62d72097b519ca65d753ea8ea4f6aad3a95018884f8752d5bde14ceb0460a7bbf0b45cd6bfee3907c72b0f9066350e9b6c0f93ded0857cdae69cd56f837ea35dae2536a0b3f7c58459b2bfd43d9e9deef2c560953f28ec621d8c8ec26f8ace709dc8eb2bafcc93093616e8724d6566ace830a4c022f22c5e5d3300edff773fa300f9ef10fa3bee9f4e287155a79b38879f0692d7f913f27a4a6f87036a97e3b0e213cb91437396c738d93c8f8d5fadfd7625aad860c471972e8e134e854446adf245a9ad3400bdd29dcf7c66d2c7b9fecada8324a69a858ee1",
+      "enrolledAt": "2026-07-20T09:22:14.784Z"
     },
     "locationRadius": 100,
-    "refreshTokens": [],
+    "refreshTokens": [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmMSIsImVtYWlsIjoiYWdlbnQuc3VtYUBnbWFpbC5jb20iLCJpYXQiOjE3ODQ1NDY0NzQsImV4cCI6MTc4NTE1MTI3NH0.M3IFI2TCM_FGsSPQoevKaIl_25oBB5q7u9JMyONvRhw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmMSIsImVtYWlsIjoiYWdlbnQuc3VtYUBnbWFpbC5jb20iLCJpYXQiOjE3ODQ1NDY0NzQsImV4cCI6MTc4NTE1MTI3NH0.M3IFI2TCM_FGsSPQoevKaIl_25oBB5q7u9JMyONvRhw",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmMSIsImVtYWlsIjoiYWdlbnQuc3VtYUBnbWFpbC5jb20iLCJpYXQiOjE3ODQ1NDY1MTgsImV4cCI6MTc4NTE1MTMxOH0.C4V5AWgM5P-NjL8Ufbl6oQY7fFVr-9JPROncj_1iA3Y",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmMSIsImVtYWlsIjoiYWdlbnQuc3VtYUBnbWFpbC5jb20iLCJpYXQiOjE3ODQ1NDY1MTgsImV4cCI6MTc4NTE1MTMxOH0.C4V5AWgM5P-NjL8Ufbl6oQY7fFVr-9JPROncj_1iA3Y",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmMSIsImVtYWlsIjoiYWdlbnQuc3VtYUBnbWFpbC5jb20iLCJpYXQiOjE3ODQ1NDY1MTgsImV4cCI6MTc4NTE1MTMxOH0.C4V5AWgM5P-NjL8Ufbl6oQY7fFVr-9JPROncj_1iA3Y"
+    ],
     "failedLoginAttempts": 0,
     "userCode": "AGE-SUMA",
     "skipFace": false,
     "skipLocation": false,
     "isActive": true,
-    "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.416Z",
-    "updatedAt": "2026-07-10T09:43:22.520Z",
-    "__v": 0
+    "activeDevices": [
+      {
+        "deviceId": "ny0l7v2zs1c",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-20T11:21:14.234Z",
+        "_id": "6a5e04aa31a8d87f11d5326c"
+      },
+      {
+        "deviceId": "qsm6vyvnux",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-20T11:21:14.355Z",
+        "_id": "6a5e04aa31a8d87f11d53276"
+      },
+      {
+        "deviceId": "lus9z8nmir",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-20T11:21:58.422Z",
+        "_id": "6a5e04d631a8d87f11d53508"
+      },
+      {
+        "deviceId": "ttyqu1641tb",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-20T11:21:58.553Z",
+        "_id": "6a5e04d631a8d87f11d53512"
+      },
+      {
+        "deviceId": "x6vxj00uegh",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-20T11:21:58.638Z",
+        "_id": "6a5e04d631a8d87f11d5351c"
+      }
+    ],
+    "createdAt": "2026-07-17T07:25:17.008Z",
+    "updatedAt": "2026-07-20T11:22:49.964Z",
+    "__v": 14,
+    "plainPassword": "password",
+    "registrationLocation": {
+      "latitude": 13.038996712112239,
+      "longitude": 77.57696596337271,
+      "capturedAt": "2026-07-20T09:22:14.782Z"
+    },
+    "reportingManager": "6a59d8dd6c9afd6bf4af6aef",
+    "department": "Telemarketing"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1390",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "roleId": "6a50b1b63d61e35dc9ea137b",
+    "_id": "6a59d8dd6c9afd6bf4af6af3",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5fa",
     "firstName": "Priya",
     "lastName": "Sharma",
     "email": "agent.priya@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -94,18 +188,21 @@
     "skipLocation": false,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.420Z",
-    "updatedAt": "2026-07-10T09:43:23.812Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.011Z",
+    "updatedAt": "2026-07-20T11:22:54.880Z",
+    "__v": 0,
+    "plainPassword": "password",
+    "reportingManager": "6a59d8dd6c9afd6bf4af6af1",
+    "department": "Telemarketing"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1392",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "roleId": "6a50b1b63d61e35dc9ea137b",
+    "_id": "6a59d8dd6c9afd6bf4af6af5",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5f8",
     "firstName": "Sunita",
     "lastName": "Devi",
     "email": "agent.sunita@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -121,45 +218,105 @@
     "skipLocation": false,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.423Z",
-    "updatedAt": "2026-07-10T09:43:29.042Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.015Z",
+    "updatedAt": "2026-07-20T11:23:00.412Z",
+    "__v": 0,
+    "plainPassword": "password",
+    "reportingManager": "6a59d8dd6c9afd6bf4af6af3",
+    "department": "AREA SALES MANAGER"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1394",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "roleId": "6a50b1b63d61e35dc9ea137b",
+    "_id": "6a59d8dd6c9afd6bf4af6af7",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5f7",
     "firstName": "Ankit",
     "lastName": "Verma",
     "email": "agent.ankit@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
     },
     "faceRecognition": {
-      "enabled": false
+      "enabled": true,
+      "encryptedEmbedding": "f121910df14bb500a8df950427a8d78a:9d5bc0ec837436beeb64bc96b9c09a17638e5eb726162c5315bbae68023bcb7964c8d26d9384ad81aa0214b71cab3d1c5c8814e67d2711e7a3aa1aaf78bf6c02ce6e1a04312ed5c1405d54a07f9560f65d5128ddf7c8028eb90230e5614eec5eb1f2ab096bc02f753200d6d9da7b877d1783821ad0e074a403d91170e699effaf590524a83d7a08e9b5e4d9f7af7153ae22e886e53e3b4c74da196a4ab6bb25d82c6c8f9a172ac8196a55f0df367de1b3a464c198956590181092de19c8641048c5e4a3b7851c225044c4b7c546107e52052c47c3fb681ca6537dae2d7f64f07f6d9352fab7ff86a4fc095a9a0da8129aa3d41192eae23a5a26caea4c0cbaae6d826c9f25dd615f15f9893c821a63bbd680301a1a4bdc4ecbf7eaef53d2bfa35f94eac4eb32268fe6c7eed619dd8140ded136cf1aa9f21b68aa18a3a11ab584dcf7a7032b9b805075e312d43a94f42d931220ed93011131647ba72bae4d615b3f893585ea8b556730a5892ae1c8661680fce0eea5f7382ad22db609097b5d0a5a342d894c9873d3f1a781e3214b6ac49916f7c87c53bd4121206f4e1a3fd31ad4a0a6f4b285605ef16d4cc17df2540eeb3b8d649136627b690980a13571116824ae722fdf6f4a61ccb9c7cd3f7c459169100ed1e21cd717892208db74be532ecd9ba6cd9f108dd3fe89bb4e41c66a0b374bbf8110dd105be983b531f35419303cd9d34d69e617551f483cb60992f286243309c07c9b16033838ad82a043e37303c64073d85dc225f31084d9cbe3aa9125c746e0268706c370636f25dced1397b9caf0a45107296bc2ff0dcba12dcf05b8cad202f777ae19aafc0d2efb404c51172e5ac419ca922934ede65fe66601ad2a4cc49f797ed36370d5f85f113d22987db40c3807246e19b86d83842695eb4a1650e563acae6dc590e1f6dea5f1a3ae1677165aaedd3d41f0b2b127077b8321d8b8a92bee1744815e03287a43c575fc1cc26a244809ecaee0f01b00ab16852d01854b814c30f8084a89808faf3ce08c2fa09a1360b02b37612ff8d0115622c62d62f3c2ba5a67f8dfcef7e147c951491dffb4210bd44a7fc6832afd5a3549b0798e308b41c5d737d3c88ab8d55892612dd6b2acc8c7e9cfe8ce0d489faa07833d30c432df5b21475bdbe634ce9812c177dc4329d77df2cf166503b5c366bc23a1763c2cb4d61032da24ddfa3f6cecfdfbd11143d4dcc44b8665720b2f99565e834d1c73a278d4c59e5379b8e26d06130dc01117371fae191f5a982f0f9687548e7c8caa6c06fe2de306cffdf6a784c5dcab13f071834e0396074e2ae539011fe03166b74692e97c5385b2189e7ee95f98d8e9b2ba67a737b171dd4043b66cc34b66df2693e519eb344944b397d8dc70c5994a11422e08a351c6b0bdf6c693108030fb0c84ce1cd683410908415c89b13e2d4492175a6bfc5ce0e062f7e34573accd7b68813ead0eb75c68678752500905baef42667f9b51ffa4eec9f556efe549aca002221f93541bc6698ea207d0df1d519c1211b88fd78415fe3f01a91d8a002b58f652df7e8161a2199605d52139326c8e04ca39065f6e3751ff6928d7006704531deeb96e21c0b8a94c7a7f5fca39cd2127b65f0893ccb281def8b2a438f7a7e69a60e65f2f3e2243668243136be495d42e51fd6fb54bf563dae27f8fe61caef03d4a44cc0dd85fa2c1c7dec16ceb14288bb354dfad74ac1b86f97431358c04d82e922c453098c6e6dd2e77e3e9f44d9ca5ec213483f3276cbfa1d1386c7ee2117323f0b6fdb825e06409d8aa8ca5ad1d549c749fc2dd2f0337f7ff0fa1e2bcd6c1255692fc394409fc85c42a8b1355e30402eaf435a03b63f6a9d6191c98a244e2468eacd6b6cf653648f82b656d912a561fee0c6ddf40042d768b063c8752c25b818318fde224df3f61dd16843b4b30af717864a16c4f440c3825f7db346ce7e696b23c0b6f2fdb9b9bf80d3cc9277f6747154dce3d249d273e30d5860958124de262b688d17a660e6111d5a8d0f9ad9bb75a88f2812665fd9867ea275d447a4f5ec9663223714c5f32f701502909269b2b1c8e177772f774cdb74d43aa97449f4ea61f1ae3b3feea13e580bd25af0011ec75ee9e0d3ed1e461f0ec3cf8857a7b869222d49af963dd6078f6d173aa0a2b22d414d2b51ad1e4ea3aac8faa827c73403706ef4820750ccab3d7d155fb592d517693cd07cdca19b7911b5a535f7e81e54ef09de6b99a6e6f9385f43d5bc9f1bdabfceb557801979dfb234539c2feb5b0fb5e991ffe185f0c2917866a95e4d3417857f8f9bf420bde33775dae5731cab290cac6d72c2ddedb010d0a404d404dfe638f333ec38a69763d8d31734c35661714434c1b6484f5ce33adf22d2ccdbc89d3221020d10d1115b1d691e24985e79635f2d17beb1075168133d5ba75af985cb9ef4b1047ba90deee11f3f236518159f6f50df6ea10a035b21f6b596751858204d9dde9f06f940f22e5643fe101476a6ab8e8dbc33d1142468a7506c99661ebf2a5fe5df599e688918d224b22b46f0cd8ffb6aaf6638bf40c862033b40e324ef074b19fcc5ca0e40389ec4ba90c3c00954d6556c619c7029f608e41c92fd98d157a223954257c67cc45d4ef7823a636459e5810cad9ecec570ecc5743bbd68f44741eb3473c8d4e5d2b218f79a3ba7adbda656e686d088b69884293965ffa0975474b7519000fa4a7b9dd57cd2b18eee63f4c2a9ecf2e48416a95ea09bfbf673f9bb5bfd767c50bc640c52944dee609c24a0f303c17bf601bee7b275946347da66dde145b7203803e6b24124c0c1aa68e35238e51d9951090e601834e126d681ae09ee4973fd884cdff48abf7608699f8d5f68e52c5f1582d140ce5f8f3d62da285d937ff731290a374ac83605aa1fe2e339052b1cd94cfa597c07b0daf2649acda8d24a871cb67bbad159331e4f993ba4b70cb16ccaf8efc1f67dec429d713a46636ed9bd640ae4b665cc5a36796a2d533b21fe3088d48d2e21223003037717f4def7b081cc5476afdbff33af2ee4d95c43ec503564772907fde6a41b5840a18b391197b34b890441c039f64c80cc14609a08a6f861b232da297a75b30b0941cc728ea6d3c3ab1a95e8773df3d0d4c9c6c4727fa77fd4688339ec2bdcb10810ad7cf10428b07843c1c9aa744fe835f29814a54185c9dafd1de2519666a2ac6edfbfddbbf6bae6db3ffd976f93e0238798f719fc9f5fcbdce6340026ee1403b4c572fe90216000f38ce409d38f0a8714a9cf19748798bb641ec02ee99b982e3b54d2c0a3db588b7d43cc46254c10f492913375c6addbdeb2902bf006844e7dc3b783a4678e1bf0cdf0c991ca370aba2dae0e4ad6f5304ff869397a5eb65a7fdd85a101c247abd913740213e3675829a8b76c02223b995352704a8bc62786bdc557e69e768175ca37e8de7f2919d1eb403cd026ad599c90e8eb2d1e4291bd402be1ba3998e94a820d2caa00564cd12e5831c8ed88a22e293110100acf68ac84903bfba300ee9eeca5b187fc0a2baf15bab1318ff1bc0e6a81e9b700c3282414ff7c87169ea4542c5811f72066cf6c48c4db3752f53d441dfdde8a76229078cf57093a07ebce9c18740f6e7319aef57b73c9c875e777e512e04eea30ed5d0159ceb0d22416bbf069d5ed75894f3e51963b42ff0b8efaed6a89a7c0fcfb664f46b432a7dcb0baee0b63df4e3b",
+      "enrolledAt": "2026-07-21T07:18:04.850Z"
     },
     "locationRadius": 100,
-    "refreshTokens": [],
+    "refreshTokens": [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmNyIsImVtYWlsIjoiYWdlbnQuYW5raXRAZ21haWwuY29tIiwiaWF0IjoxNzg0NjE4MzM0LCJleHAiOjE3ODUyMjMxMzR9.Z0DpbrQvNwqYtZ4jS02Gd3QarIoJXSUfUbaSMDlIMA8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmNyIsImVtYWlsIjoiYWdlbnQuYW5raXRAZ21haWwuY29tIiwiaWF0IjoxNzg0NjE4MzM0LCJleHAiOjE3ODUyMjMxMzR9.Z0DpbrQvNwqYtZ4jS02Gd3QarIoJXSUfUbaSMDlIMA8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmNyIsImVtYWlsIjoiYWdlbnQuYW5raXRAZ21haWwuY29tIiwiaWF0IjoxNzg0NjE4MzM0LCJleHAiOjE3ODUyMjMxMzR9.Z0DpbrQvNwqYtZ4jS02Gd3QarIoJXSUfUbaSMDlIMA8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmNyIsImVtYWlsIjoiYWdlbnQuYW5raXRAZ21haWwuY29tIiwiaWF0IjoxNzg0NjE4MzM0LCJleHAiOjE3ODUyMjMxMzR9.Z0DpbrQvNwqYtZ4jS02Gd3QarIoJXSUfUbaSMDlIMA8",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNTlkOGRkNmM5YWZkNmJmNGFmNmFmNyIsImVtYWlsIjoiYWdlbnQuYW5raXRAZ21haWwuY29tIiwiaWF0IjoxNzg0NjE4NDc2LCJleHAiOjE3ODUyMjMyNzZ9.24paq-icgfKctH4kBs9fkVU2t-tIbRftBrT_L2UnzSc"
+    ],
     "failedLoginAttempts": 0,
     "userCode": "AGE-ANKIT",
     "skipFace": false,
     "skipLocation": false,
     "isActive": true,
-    "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.425Z",
-    "updatedAt": "2026-07-10T09:43:30.168Z",
-    "__v": 0
+    "activeDevices": [
+      {
+        "deviceId": "pfntfncalv",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T07:18:54.669Z",
+        "_id": "6a5f1d5e6a4807118834771e"
+      },
+      {
+        "deviceId": "hxessmaq1d",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T07:18:54.681Z",
+        "_id": "6a5f1d5e6a48071188347721"
+      },
+      {
+        "deviceId": "qud3nijos1m",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T07:18:54.798Z",
+        "_id": "6a5f1d5e6a48071188347729"
+      },
+      {
+        "deviceId": "wlq3p3jew4",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T07:18:54.986Z",
+        "_id": "6a5f1d5e6a48071188347731"
+      },
+      {
+        "deviceId": "d1687he2w2f",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T07:21:16.804Z",
+        "_id": "6a5f1dec6a48071188347967"
+      }
+    ],
+    "createdAt": "2026-07-17T07:25:17.018Z",
+    "updatedAt": "2026-07-21T07:21:16.806Z",
+    "__v": 6,
+    "plainPassword": "password",
+    "reportingManager": "6a59d8dd6c9afd6bf4af6af1",
+    "registrationLocation": {
+      "latitude": 13.038996712112239,
+      "longitude": 77.57696596337271,
+      "capturedAt": "2026-07-21T07:18:04.846Z"
+    },
+    "department": "PARTNER"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1396",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
-    "roleId": "6a50b1b63d61e35dc9ea1380",
+    "_id": "6a59d8dd6c9afd6bf4af6af9",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
+    "roleId": "6a59d8dc6c9afd6bf4af6ae3",
     "firstName": "Albus",
     "lastName": "Dumbledore",
     "email": "admin@school.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -174,18 +331,19 @@
     "skipLocation": false,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.427Z",
-    "updatedAt": "2026-07-10T08:47:50.427Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.022Z",
+    "updatedAt": "2026-07-17T07:25:17.022Z",
+    "__v": 0,
+    "plainPassword": "password"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1398",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
-    "roleId": "6a50b1b63d61e35dc9ea1384",
+    "_id": "6a59d8dd6c9afd6bf4af6afb",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
+    "roleId": "6a59d8dc6c9afd6bf4af6ae7",
     "firstName": "Teacher",
     "lastName": "Suma",
     "email": "suma@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -201,18 +359,19 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.431Z",
-    "updatedAt": "2026-07-10T08:47:50.431Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.025Z",
+    "updatedAt": "2026-07-17T07:25:17.025Z",
+    "__v": 0,
+    "plainPassword": "password"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea139a",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
-    "roleId": "6a50b1b63d61e35dc9ea1384",
+    "_id": "6a59d8dd6c9afd6bf4af6afd",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
+    "roleId": "6a59d8dc6c9afd6bf4af6ae7",
     "firstName": "Priya",
     "lastName": "Sharma",
     "email": "priya@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -228,18 +387,19 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.434Z",
-    "updatedAt": "2026-07-10T08:47:50.434Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.028Z",
+    "updatedAt": "2026-07-17T07:25:17.028Z",
+    "__v": 0,
+    "plainPassword": "password"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea139c",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
-    "roleId": "6a50b1b63d61e35dc9ea1384",
+    "_id": "6a59d8dd6c9afd6bf4af6aff",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
+    "roleId": "6a59d8dc6c9afd6bf4af6ae7",
     "firstName": "Sunita",
     "lastName": "Devi",
     "email": "sunita@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -255,18 +415,19 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.436Z",
-    "updatedAt": "2026-07-10T08:47:50.436Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.032Z",
+    "updatedAt": "2026-07-17T07:25:17.032Z",
+    "__v": 0,
+    "plainPassword": "password"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea139e",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
-    "roleId": "6a50b1b63d61e35dc9ea1384",
+    "_id": "6a59d8dd6c9afd6bf4af6b01",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
+    "roleId": "6a59d8dc6c9afd6bf4af6ae7",
     "firstName": "Ankit",
     "lastName": "Verma",
     "email": "ankit@gmail.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -282,18 +443,19 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.439Z",
-    "updatedAt": "2026-07-10T08:47:50.439Z",
-    "__v": 0
+    "createdAt": "2026-07-17T07:25:17.036Z",
+    "updatedAt": "2026-07-17T07:25:17.036Z",
+    "__v": 0,
+    "plainPassword": "password"
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea13a0",
-    "organizationId": "6a50b1b63d61e35dc9ea1374",
-    "roleId": "6a50b1b63d61e35dc9ea1388",
+    "_id": "6a59d8dd6c9afd6bf4af6b03",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad7",
+    "roleId": "6a59d8dc6c9afd6bf4af6aeb",
     "firstName": "Gregory",
     "lastName": "House",
     "email": "admin@hospital.com",
-    "passwordHash": "$2a$10$1bv/f4vszldU6Mq2p/2RYu3WDG8rFKocmhYqiaIZQmnrOvpiiBKxu",
+    "passwordHash": "$2a$10$I0ookM4kX2rz.FV7GoLK7eEDLDAm27kHy7J..NfBQAK.1jnv7YSCi",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -308,8 +470,161 @@
     "skipLocation": false,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-10T08:47:50.442Z",
-    "updatedAt": "2026-07-10T08:47:50.442Z",
+    "createdAt": "2026-07-17T07:25:17.039Z",
+    "updatedAt": "2026-07-17T07:25:17.039Z",
+    "__v": 0,
+    "plainPassword": "password"
+  },
+  {
+    "_id": "6a5f32ca95026eb72ef40565",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5fa",
+    "firstName": "ink",
+    "lastName": "sharfu",
+    "email": "ink@sharfu",
+    "passwordHash": "$2a$10$SjJgS4bfO1EfowjdpmMZAOruViiBSlr4KDSEA6L6KlzqfSx.qCKSm",
+    "plainPassword": "inksharfu123",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNWYzMmNhOTUwMjZlYjcyZWY0MDU2NSIsImVtYWlsIjoiaW5rQHNoYXJmdSIsImlhdCI6MTc4NDYyODk5MywiZXhwIjoxNzg1MjMzNzkzfQ.n0nZJFLsfp-Esk1uaQWNzRt2hO1mbNaRZX62Gh9QvoM"
+    ],
+    "failedLoginAttempts": 0,
+    "userCode": "TEL-INK",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [
+      {
+        "deviceId": "q7tm547embd",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T10:16:33.138Z",
+        "_id": "6a5f470185a33d15ee693716"
+      }
+    ],
+    "createdAt": "2026-07-21T08:50:18.555Z",
+    "updatedAt": "2026-07-21T10:16:33.141Z",
+    "__v": 1,
+    "reportingManager": "6a5f32f095026eb72ef40767"
+  },
+  {
+    "_id": "6a5f32f095026eb72ef40767",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5fa",
+    "firstName": "ink",
+    "lastName": "naushad",
+    "email": "ink@naushad.com",
+    "passwordHash": "$2a$10$05IPXMbyajUMRCs6Z/M4XeNLdof4xy0MV6NQ34qTeGiNQtuPuDJ2G",
+    "plainPassword": "inknaushad123",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNWYzMmYwOTUwMjZlYjcyZWY0MDc2NyIsImVtYWlsIjoiaW5rQG5hdXNoYWQuY29tIiwiaWF0IjoxNzg0NzAxOTc4LCJleHAiOjE3ODUzMDY3Nzh9.R8XTlejWBYlZ0gECGQTM-SMpepA3xvlomwhMuYw3hD0"
+    ],
+    "failedLoginAttempts": 0,
+    "userCode": "TEL-INK",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [
+      {
+        "deviceId": "bg0p25at4xc",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-22T06:32:58.803Z",
+        "_id": "6a60641a9d983baa35a8f22b"
+      }
+    ],
+    "createdAt": "2026-07-21T08:50:56.299Z",
+    "updatedAt": "2026-07-22T06:32:58.804Z",
+    "__v": 1,
+    "reportingManager": "6a5f337495026eb72ef40dde"
+  },
+  {
+    "_id": "6a5f332795026eb72ef40a2d",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5fa",
+    "firstName": "ink",
+    "lastName": "hashmat",
+    "email": "ink@hashmat",
+    "passwordHash": "$2a$10$mvzAQSNp3IkRBGR0R4vp9OG2PFs86Mfxjv35gCJ7j8xvkfclvV8RS",
+    "plainPassword": "inkhashmat123",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjZhNWYzMzI3OTUwMjZlYjcyZWY0MGEyZCIsImVtYWlsIjoiaW5rQGhhc2htYXQiLCJpYXQiOjE3ODQ2MjQyNzMsImV4cCI6MTc4NTIyOTA3M30.A-KK9A-jIlVJ74SSE4PXs9ACXqydVBhpEjJquQaiweo"
+    ],
+    "failedLoginAttempts": 0,
+    "userCode": "TEL-INK",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [
+      {
+        "deviceId": "58eqywpyrgf",
+        "browser": "Google Chrome",
+        "os": "Windows",
+        "ip": "::1",
+        "lastActive": "2026-07-21T08:57:53.375Z",
+        "_id": "6a5f349195026eb72ef41cfc"
+      }
+    ],
+    "createdAt": "2026-07-21T08:51:51.011Z",
+    "updatedAt": "2026-07-21T08:57:53.376Z",
+    "__v": 1,
+    "reportingManager": "6a5f32ca95026eb72ef40565"
+  },
+  {
+    "_id": "6a5f337495026eb72ef40dde",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "roleId": "6a5f31efe416e3393083e5fa",
+    "firstName": "ink",
+    "lastName": "rajabaksha",
+    "email": "ink@rajabaksha.com",
+    "passwordHash": "$2a$10$MsfYhwwblLKkyTKxvr7qZuuT30yD36L2l4kLGzTbWc8Btix2P5pXa",
+    "plainPassword": "inkrajabaksha123",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [],
+    "failedLoginAttempts": 0,
+    "userCode": "TEL-INK",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [],
+    "createdAt": "2026-07-21T08:53:08.708Z",
+    "updatedAt": "2026-07-21T08:53:29.451Z",
     "__v": 0
   }
 ]

@@ -1,3 +1,4 @@
+// inkCRM Enterprise Production Server
 import app from './app';
 import { connectDB, disconnectDB } from './config/db';
 import Organization from './models/Organization';

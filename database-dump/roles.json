@@ -1,103 +1,7 @@
 [
   {
-    "_id": "6a50b1b63d61e35dc9ea1376",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "name": "Super Admin",
-    "description": "Full organizational access",
-    "isSystem": true,
-    "isActive": true,
-    "permissions": {
-      "modules": [
-        {
-          "moduleName": "leads",
-          "create": true,
-          "read": "all",
-          "update": "all",
-          "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1377"
-        },
-        {
-          "moduleName": "deals",
-          "create": true,
-          "read": "all",
-          "update": "all",
-          "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1378"
-        },
-        {
-          "moduleName": "companies",
-          "create": true,
-          "read": "all",
-          "update": "all",
-          "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1379"
-        }
-      ],
-      "fields": [],
-      "menus": [
-        "dashboard",
-        "leads",
-        "deals",
-        "companies",
-        "workflows",
-        "reports",
-        "settings"
-      ]
-    },
-    "createdAt": "2026-07-10T08:47:50.210Z",
-    "updatedAt": "2026-07-10T08:47:50.210Z",
-    "__v": 0
-  },
-  {
-    "_id": "6a50b1b63d61e35dc9ea137b",
-    "organizationId": "6a50b1b63d61e35dc9ea1370",
-    "name": "Sales Agent",
-    "description": "Manage sales pipelines",
-    "isSystem": false,
-    "isActive": true,
-    "permissions": {
-      "modules": [
-        {
-          "moduleName": "leads",
-          "create": true,
-          "read": "all",
-          "update": "all",
-          "delete": "own",
-          "_id": "6a50b1b63d61e35dc9ea137c"
-        },
-        {
-          "moduleName": "deals",
-          "create": true,
-          "read": "all",
-          "update": "all",
-          "delete": "none",
-          "_id": "6a50b1b63d61e35dc9ea137d"
-        },
-        {
-          "moduleName": "companies",
-          "create": true,
-          "read": "all",
-          "update": "all",
-          "delete": "none",
-          "_id": "6a50b1b63d61e35dc9ea137e"
-        }
-      ],
-      "fields": [],
-      "menus": [
-        "dashboard",
-        "leads",
-        "deals",
-        "companies",
-        "reports"
-      ]
-    },
-    "createdAt": "2026-07-10T08:47:50.219Z",
-    "updatedAt": "2026-07-10T08:47:50.219Z",
-    "__v": 0
-  },
-  {
-    "_id": "6a50b1b63d61e35dc9ea1380",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "_id": "6a59d8dc6c9afd6bf4af6ae3",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
     "name": "Super Admin",
     "description": "School Administrator",
     "isSystem": true,
@@ -110,7 +14,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1381"
+          "_id": "6a59d8dc6c9afd6bf4af6ae4"
         },
         {
           "moduleName": "courses",
@@ -118,7 +22,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1382"
+          "_id": "6a59d8dc6c9afd6bf4af6ae5"
         }
       ],
       "fields": [],
@@ -131,13 +35,13 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-10T08:47:50.226Z",
-    "updatedAt": "2026-07-10T08:47:50.226Z",
+    "createdAt": "2026-07-17T07:25:16.783Z",
+    "updatedAt": "2026-07-17T07:25:16.783Z",
     "__v": 0
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1384",
-    "organizationId": "6a50b1b63d61e35dc9ea1372",
+    "_id": "6a59d8dc6c9afd6bf4af6ae7",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
     "name": "Teacher",
     "description": "Faculty members",
     "isSystem": false,
@@ -150,7 +54,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1385"
+          "_id": "6a59d8dc6c9afd6bf4af6ae8"
         },
         {
           "moduleName": "courses",
@@ -158,7 +62,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1386"
+          "_id": "6a59d8dc6c9afd6bf4af6ae9"
         }
       ],
       "fields": [],
@@ -171,13 +75,13 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-10T08:47:50.232Z",
-    "updatedAt": "2026-07-10T08:47:50.232Z",
+    "createdAt": "2026-07-17T07:25:16.789Z",
+    "updatedAt": "2026-07-17T07:25:16.789Z",
     "__v": 0
   },
   {
-    "_id": "6a50b1b63d61e35dc9ea1388",
-    "organizationId": "6a50b1b63d61e35dc9ea1374",
+    "_id": "6a59d8dc6c9afd6bf4af6aeb",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad7",
     "name": "Super Admin",
     "description": "Hospital Administrator",
     "isSystem": true,
@@ -190,7 +94,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea1389"
+          "_id": "6a59d8dc6c9afd6bf4af6aec"
         },
         {
           "moduleName": "appointments",
@@ -198,7 +102,7 @@
           "read": "all",
           "update": "all",
           "delete": "all",
-          "_id": "6a50b1b63d61e35dc9ea138a"
+          "_id": "6a59d8dc6c9afd6bf4af6aed"
         }
       ],
       "fields": [],
@@ -211,8 +115,473 @@
         "settings"
       ]
     },
-    "createdAt": "2026-07-10T08:47:50.237Z",
-    "updatedAt": "2026-07-10T08:47:50.237Z",
+    "createdAt": "2026-07-17T07:25:16.794Z",
+    "updatedAt": "2026-07-17T07:25:16.794Z",
     "__v": 0
+  },
+  {
+    "_id": "6a5f31efe416e3393083e5f6",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "name": "Super Admin",
+    "description": "Full organizational access",
+    "isSystem": true,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "bankmasters",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "bankingpartners",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaigns",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaignassignments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "departments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "products",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "bankmasters",
+        "bankingpartners",
+        "campaigns",
+        "campaignassignments",
+        "companies",
+        "deals",
+        "departments",
+        "leads",
+        "products",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-21T08:46:39.385Z",
+    "updatedAt": "2026-07-21T08:46:39.385Z"
+  },
+  {
+    "_id": "6a5f31efe416e3393083e5f7",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "name": "PARTNER",
+    "description": "Partner role with standard access",
+    "isSystem": false,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "bankmasters",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "bankingpartners",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaigns",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaignassignments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "departments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "products",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "bankmasters",
+        "bankingpartners",
+        "campaigns",
+        "campaignassignments",
+        "companies",
+        "deals",
+        "departments",
+        "leads",
+        "products",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-21T08:46:39.385Z",
+    "updatedAt": "2026-07-21T08:46:39.385Z"
+  },
+  {
+    "_id": "6a5f31efe416e3393083e5f8",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "name": "ARIA SALES MANAGER",
+    "description": "Area Sales Manager role",
+    "isSystem": false,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "bankmasters",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "bankingpartners",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaigns",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaignassignments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "departments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "products",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "bankmasters",
+        "bankingpartners",
+        "campaigns",
+        "campaignassignments",
+        "companies",
+        "deals",
+        "departments",
+        "leads",
+        "products",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-21T08:46:39.385Z",
+    "updatedAt": "2026-07-21T08:46:39.385Z"
+  },
+  {
+    "_id": "6a5f31efe416e3393083e5f9",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "name": "ADMIN",
+    "description": "Admin role",
+    "isSystem": false,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "bankmasters",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "bankingpartners",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaigns",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaignassignments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "departments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "products",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "bankmasters",
+        "bankingpartners",
+        "campaigns",
+        "campaignassignments",
+        "companies",
+        "deals",
+        "departments",
+        "leads",
+        "products",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-21T08:46:39.385Z",
+    "updatedAt": "2026-07-21T08:46:39.385Z"
+  },
+  {
+    "_id": "6a5f31efe416e3393083e5fa",
+    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
+    "name": "TELI CALLER",
+    "description": "Telecaller calling team role",
+    "isSystem": false,
+    "isActive": true,
+    "permissions": {
+      "modules": [
+        {
+          "moduleName": "bankmasters",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "bankingpartners",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaigns",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "campaignassignments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "companies",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "deals",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "departments",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "leads",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        },
+        {
+          "moduleName": "products",
+          "create": true,
+          "read": "all",
+          "update": "all",
+          "delete": "all"
+        }
+      ],
+      "fields": [],
+      "menus": [
+        "dashboard",
+        "bankmasters",
+        "bankingpartners",
+        "campaigns",
+        "campaignassignments",
+        "companies",
+        "deals",
+        "departments",
+        "leads",
+        "products",
+        "workflows",
+        "reports",
+        "settings"
+      ]
+    },
+    "createdAt": "2026-07-21T08:46:39.385Z",
+    "updatedAt": "2026-07-21T08:46:39.385Z"
   }
 ]
