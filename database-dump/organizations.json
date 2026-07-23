@@ -1,9 +1,9 @@
 [
   {
-    "_id": "6a59d8dc6c9afd6bf4af6ad3",
-    "name": "INKCRM             inkkworlwide",
+    "_id": "6a61ecdffc734de7a7b177f6",
+    "name": "inkSales Enterprises",
     "subdomain": "sales",
-    "logoUrl": "http://localhost:5000/uploads/1784712866088-519906021.png",
+    "logoUrl": "/logo.png",
     "faviconUrl": "/favicon.ico",
     "themeSettings": {
       "primaryColor": "79 70 229",
@@ -25,37 +25,14 @@
     "subscription": {
       "plan": "enterprise",
       "status": "active",
-      "expiresAt": "2027-07-17T07:25:16.692Z"
+      "expiresAt": "2027-07-23T10:28:47.069Z"
     },
-    "createdAt": "2026-07-17T07:25:16.716Z",
-    "updatedAt": "2026-07-23T07:06:09.168Z",
-    "__v": 0,
-    "address": "",
-    "adminDetails": {
-      "firstName": "",
-      "lastName": "",
-      "username": "",
-      "password": "",
-      "financialYear": "",
-      "roleType": ""
-    },
-    "city": "",
-    "companyCode": "",
-    "companyDocUrl": "",
-    "country": "India",
-    "email": "",
-    "endDate": "",
-    "fax": "",
-    "mobile": "",
-    "phoneNumber": "",
-    "postalCode": "",
-    "registrationId": "",
-    "startDate": "",
-    "state": "",
-    "website": ""
+    "createdAt": "2026-07-23T10:28:47.095Z",
+    "updatedAt": "2026-07-23T10:28:47.095Z",
+    "__v": 0
   },
   {
-    "_id": "6a59d8dc6c9afd6bf4af6ad5",
+    "_id": "6a61ecdffc734de7a7b177f8",
     "name": "Acme International School",
     "subdomain": "school",
     "logoUrl": "/logo.png",
@@ -78,14 +55,14 @@
     "subscription": {
       "plan": "growth",
       "status": "active",
-      "expiresAt": "2027-01-13T07:25:16.728Z"
+      "expiresAt": "2027-01-19T10:28:47.103Z"
     },
-    "createdAt": "2026-07-17T07:25:16.732Z",
-    "updatedAt": "2026-07-17T07:25:16.732Z",
+    "createdAt": "2026-07-23T10:28:47.107Z",
+    "updatedAt": "2026-07-23T10:28:47.107Z",
     "__v": 0
   },
   {
-    "_id": "6a59d8dc6c9afd6bf4af6ad7",
+    "_id": "6a61ecdffc734de7a7b177fa",
     "name": "Metro Care Hospital",
     "subdomain": "hospital",
     "logoUrl": "/logo.png",
@@ -108,10 +85,10 @@
     "subscription": {
       "plan": "enterprise",
       "status": "active",
-      "expiresAt": "2027-07-17T07:25:16.736Z"
+      "expiresAt": "2027-07-23T10:28:47.110Z"
     },
-    "createdAt": "2026-07-17T07:25:16.737Z",
-    "updatedAt": "2026-07-17T07:25:16.737Z",
+    "createdAt": "2026-07-23T10:28:47.112Z",
+    "updatedAt": "2026-07-23T10:28:47.112Z",
     "__v": 0
   }
 ]

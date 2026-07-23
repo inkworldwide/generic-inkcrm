@@ -53,7 +53,13 @@ cd ..
 echo "Running Pre-deployment Validation Checks..."
 node predeploy.js
 
-# 6. PM2 worker configurations & startup
+# 6. Auto-seed MongoDB with full record data
+echo "Populating complete database record set..."
+cd backend
+npx ts-node src/utils/seeder.ts || true
+cd ..
+
+# 7. PM2 worker configurations & startup
 echo "Configuring and reloading PM2 cluster processes..."
 pm2 reload ecosystem.config.cjs --env production || pm2 start ecosystem.config.cjs --env production
 

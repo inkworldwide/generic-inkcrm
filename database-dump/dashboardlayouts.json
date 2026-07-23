@@ -1,8 +1,8 @@
 [
   {
-    "_id": "6a59d8dd6c9afd6bf4af6c18",
-    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
-    "userId": "6a59d8dd6c9afd6bf4af6aef",
+    "_id": "6a61ecdffc734de7a7b1795e",
+    "organizationId": "6a61ecdffc734de7a7b177f6",
+    "userId": "6a61ecdffc734de7a7b17821",
     "name": "Sales Overview",
     "isDefault": true,
     "widgets": [
@@ -15,7 +15,7 @@
         "w": 4,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c19"
+        "_id": "6a61ecdffc734de7a7b1795f"
       },
       {
         "id": "widget_2",
@@ -26,7 +26,7 @@
         "w": 4,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c1a"
+        "_id": "6a61ecdffc734de7a7b17960"
       },
       {
         "id": "widget_3",
@@ -37,7 +37,7 @@
         "w": 4,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c1b"
+        "_id": "6a61ecdffc734de7a7b17961"
       },
       {
         "id": "widget_4",
@@ -48,7 +48,7 @@
         "w": 8,
         "h": 4,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c1c"
+        "_id": "6a61ecdffc734de7a7b17962"
       },
       {
         "id": "widget_5",
@@ -59,17 +59,17 @@
         "w": 4,
         "h": 4,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c1d"
+        "_id": "6a61ecdffc734de7a7b17963"
       }
     ],
-    "createdAt": "2026-07-17T07:25:17.396Z",
-    "updatedAt": "2026-07-17T07:25:17.396Z",
+    "createdAt": "2026-07-23T10:28:47.691Z",
+    "updatedAt": "2026-07-23T10:28:47.691Z",
     "__v": 0
   },
   {
-    "_id": "6a59d8dd6c9afd6bf4af6c1f",
-    "organizationId": "6a59d8dc6c9afd6bf4af6ad5",
-    "userId": "6a59d8dd6c9afd6bf4af6af9",
+    "_id": "6a61ecdffc734de7a7b17965",
+    "organizationId": "6a61ecdffc734de7a7b177f8",
+    "userId": "6a61ecdffc734de7a7b1782b",
     "name": "School Portal Dashboard",
     "isDefault": true,
     "widgets": [
@@ -82,7 +82,7 @@
         "w": 6,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c20"
+        "_id": "6a61ecdffc734de7a7b17966"
       },
       {
         "id": "sch_widget_2",
@@ -93,17 +93,17 @@
         "w": 6,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c21"
+        "_id": "6a61ecdffc734de7a7b17967"
       }
     ],
-    "createdAt": "2026-07-17T07:25:17.400Z",
-    "updatedAt": "2026-07-17T07:25:17.400Z",
+    "createdAt": "2026-07-23T10:28:47.695Z",
+    "updatedAt": "2026-07-23T10:28:47.695Z",
     "__v": 0
   },
   {
-    "_id": "6a59d8dd6c9afd6bf4af6c23",
-    "organizationId": "6a59d8dc6c9afd6bf4af6ad7",
-    "userId": "6a59d8dd6c9afd6bf4af6b03",
+    "_id": "6a61ecdffc734de7a7b17969",
+    "organizationId": "6a61ecdffc734de7a7b177fa",
+    "userId": "6a61ecdffc734de7a7b17835",
     "name": "Clinical Operations Dashboard",
     "isDefault": true,
     "widgets": [
@@ -116,7 +116,7 @@
         "w": 6,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c24"
+        "_id": "6a61ecdffc734de7a7b1796a"
       },
       {
         "id": "hosp_widget_2",
@@ -127,11 +127,11 @@
         "w": 6,
         "h": 2,
         "config": {},
-        "_id": "6a59d8dd6c9afd6bf4af6c25"
+        "_id": "6a61ecdffc734de7a7b1796b"
       }
     ],
-    "createdAt": "2026-07-17T07:25:17.404Z",
-    "updatedAt": "2026-07-17T07:25:17.404Z",
+    "createdAt": "2026-07-23T10:28:47.699Z",
+    "updatedAt": "2026-07-23T10:28:47.699Z",
     "__v": 0
   }
 ]

@@ -1,8 +1,8 @@
 [
   {
-    "_id": "6a59d8dd6c9afd6bf4af6c13",
-    "organizationId": "6a59d8dc6c9afd6bf4af6ad3",
-    "moduleId": "6a59d8dd6c9afd6bf4af6b05",
+    "_id": "6a61ecdffc734de7a7b17959",
+    "organizationId": "6a61ecdffc734de7a7b177f6",
+    "moduleId": "6a61ecdffc734de7a7b17837",
     "name": "Qualified Lead Automation",
     "trigger": {
       "event": "update",
@@ -13,7 +13,7 @@
         "field": "status",
         "operator": "equals",
         "value": "Qualified",
-        "_id": "6a59d8dd6c9afd6bf4af6c14"
+        "_id": "6a61ecdffc734de7a7b1795a"
       }
     ],
     "actions": [
@@ -25,7 +25,7 @@
           "priority": "High"
         },
         "delayMinutes": 0,
-        "_id": "6a59d8dd6c9afd6bf4af6c15"
+        "_id": "6a61ecdffc734de7a7b1795b"
       },
       {
         "type": "notification",
@@ -34,12 +34,12 @@
           "message": "Lead status changed to Qualified. Lead Score updated."
         },
         "delayMinutes": 0,
-        "_id": "6a59d8dd6c9afd6bf4af6c16"
+        "_id": "6a61ecdffc734de7a7b1795c"
       }
     ],
     "isEnabled": true,
-    "createdAt": "2026-07-17T07:25:17.387Z",
-    "updatedAt": "2026-07-17T07:25:17.387Z",
+    "createdAt": "2026-07-23T10:28:47.685Z",
+    "updatedAt": "2026-07-23T10:28:47.685Z",
     "__v": 0
   }
 ]
