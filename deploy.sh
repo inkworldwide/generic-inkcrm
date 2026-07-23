@@ -1,11 +1,12 @@
 #!/bin/bash
+set -e
 
 echo "========================================================="
 echo " Starting inkCRM Production Deployment Automation"
 echo " Time: $(date)"
 echo "========================================================="
 
-# 1. Pull latest code (if not already handled by CI runner)
+# 1. Pull latest code
 echo "Checking git status..."
 git status
 
@@ -22,40 +23,35 @@ if [ ! -f "frontend/.env" ]; then
   echo "VITE_FILE_BASE_URL=" >> frontend/.env
 fi
 
+# Clean old build artifacts to force fresh compilation
+echo "Cleaning old build artifacts..."
+rm -rf backend/dist frontend/dist
+
 # 3. Install backend dependencies and build
 echo "Installing backend dependencies..."
 cd backend
-npm install --omit=dev
+npm install
+chmod +x node_modules/.bin/* 2>/dev/null || true
 echo "Compiling TypeScript backend..."
-npm run build
+npx tsc
 cd ..
 
 # 4. Install frontend dependencies and build
 echo "Installing frontend dependencies..."
 cd frontend
 npm install
+chmod +x node_modules/.bin/* 2>/dev/null || true
 echo "Building React frontend production package..."
-npm run build
+npx tsc && npx vite build
 cd ..
 
 # 5. Verify build success and run pre-deployment checks
 echo "Running Pre-deployment Validation Checks..."
 node predeploy.js
-if [ $? -ne 0 ]; then
-  echo "❌ Error: Pre-deployment validation failed! Aborting reload."
-  exit 1
-fi
 
 # 6. PM2 worker configurations & startup
 echo "Configuring and reloading PM2 cluster processes..."
-pm2 reload ecosystem.config.cjs --env production
-
-if [ $? -eq 0 ]; then
-  echo "✅ PM2 cluster processes reloaded successfully."
-else
-  echo "PM2 process config not found. Starting new PM2 processes..."
-  pm2 start ecosystem.config.cjs --env production
-fi
+pm2 reload ecosystem.config.cjs --env production || pm2 start ecosystem.config.cjs --env production
 
 # Save PM2 process list to persist across OS reboots
 pm2 save
