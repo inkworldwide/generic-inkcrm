@@ -17,16 +17,30 @@ export default function Dashboard() {
   const [animate, setAnimate] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<'overview' | 'pipeline' | 'followups'>('overview');
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
-  // File upload and History timeline states
+  // File upload, Search input ref and History timeline states
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [uploadingRecordId, setUploadingRecordId] = useState<string | null>(null);
   const [activeHistoryRecord, setActiveHistoryRecord] = useState<any | null>(null);
   const [historyActivities, setHistoryActivities] = useState<any[]>([]);
   const [historyDocuments, setHistoryDocuments] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Cmd+K / Ctrl+K Keyboard Shortcut Listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleUploadClick = (recordId: string) => {
     setUploadingRecordId(recordId);
@@ -251,6 +265,7 @@ export default function Dashboard() {
           <div className="relative flex items-center">
             <Icons.Search className="absolute left-4 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
+              ref={searchInputRef}
               type="text"
               value={searchQuery}
               onChange={(e) => handleGlobalSearch(e.target.value)}
@@ -300,15 +315,39 @@ export default function Dashboard() {
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap justify-between sm:justify-end">
           {/* Quick Filter Badges */}
           <div className="hidden md:flex items-center gap-1.5 bg-[#F8F5F1] dark:bg-slate-800 p-1 rounded-xl border border-[#EAE4DA] dark:border-slate-700">
-            <span className="px-3 py-1.5 text-[11px] font-bold text-[#17223B] dark:text-white bg-white dark:bg-slate-700 rounded-lg shadow-2xs uppercase tracking-wider">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all rounded-lg font-bold ${
+                activeTab === 'overview'
+                  ? 'text-[#17223B] dark:text-white bg-white dark:bg-slate-700 shadow-2xs'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+              }`}
+            >
               Overview
-            </span>
-            <span className="px-3 py-1.5 text-[11px] font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 cursor-pointer transition-colors uppercase tracking-wider">
+            </button>
+            <button
+              onClick={() => {
+                setActiveTab('pipeline');
+                document.getElementById('pipeline-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all rounded-lg ${
+                activeTab === 'pipeline'
+                  ? 'text-[#17223B] dark:text-white bg-white dark:bg-slate-700 shadow-2xs font-bold'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 font-semibold'
+              }`}
+            >
               Pipeline
-            </span>
-            <span className="px-3 py-1.5 text-[11px] font-semibold text-slate-500 hover:text-slate-900 dark:text-slate-400 cursor-pointer transition-colors uppercase tracking-wider">
+            </button>
+            <button
+              onClick={() => setActiveTab('followups')}
+              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all rounded-lg ${
+                activeTab === 'followups'
+                  ? 'text-[#17223B] dark:text-white bg-white dark:bg-slate-700 shadow-2xs font-bold'
+                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 font-semibold'
+              }`}
+            >
               Follow-ups
-            </span>
+            </button>
           </div>
 
           {/* Add Lead Button */}
@@ -327,20 +366,25 @@ export default function Dashboard() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {[
-            { label: 'NEW LEADS', accentColor: '#3B82F6', icon: Icons.Sparkles, sub: '▲ +8% This Month', bg: '#EFF6FF', border: 'border-blue-100/50' },
-            { label: 'HOT LEADS', accentColor: '#EA580C', icon: Icons.Flame, sub: '🔥 Updated Today', bg: '#FFF7ED', border: 'border-orange-100/50' },
-            { label: 'WARM LEADS', accentColor: '#D97706', icon: Icons.Sun, sub: '☀ Active Follow-ups', bg: '#FEF3C7', border: 'border-amber-100/50' },
-            { label: 'CEBIL PENDING', accentColor: '#64748B', icon: Icons.FileWarning, sub: '⏳ Awaiting verification', bg: '#F8FAFC', border: 'border-slate-100/50' },
-            { label: 'DOCUMENT PENDING', accentColor: '#64748B', icon: Icons.FileText, sub: '📄 Files required', bg: '#F8FAFC', border: 'border-slate-100/50' },
-            { label: 'APPROVAL PENDING', accentColor: '#EA580C', icon: Icons.Clock, sub: '⏳ Under review', bg: '#FFF7ED', border: 'border-orange-100/50' },
-            { label: 'APPROVED BUT NOT DISBUSE', accentColor: '#16A34A', icon: Icons.CheckCircle, sub: '✔ Ready for disbursement', bg: '#F0FDF4', border: 'border-green-100/50' },
-            { label: 'DISBUSED', accentColor: '#15803D', icon: Icons.Banknote, sub: '💰 Funds released', bg: '#F0FDF4', border: 'border-green-100/50' },
-            { label: 'REJECTED', accentColor: '#DC2626', icon: Icons.XOctagon, sub: '✕ Closed', bg: '#FEF2F2', border: 'border-red-100/50' },
-            { label: 'FOLLOWUP', accentColor: '#0284C7', icon: Icons.PhoneCall, sub: '📞 Call scheduled', bg: '#F0F9FF', border: 'border-sky-100/50' },
-            { label: 'DROPPED', accentColor: '#64748B', icon: Icons.ArrowDownCircle, sub: '✕ Inactive', bg: '#F8FAFC', border: 'border-slate-100/50' },
-            { label: 'PENDING', accentColor: '#D97706', icon: Icons.Hourglass, sub: '⏳ Pending action', bg: '#FEF3C7', border: 'border-yellow-100/50' },
-            { label: "TODAY'S FOLLOWUPS", accentColor: '#0891B2', icon: Icons.CalendarClock, sub: '📅 Action required today', bg: '#ECFEFF', border: 'border-cyan-100/50' },
-          ].map((metric, idx) => {
+            { label: 'NEW LEADS', category: 'overview', accentColor: '#3B82F6', icon: Icons.Sparkles, sub: '▲ +8% This Month', bg: '#EFF6FF', border: 'border-blue-100/50' },
+            { label: 'HOT LEADS', category: 'pipeline', accentColor: '#EA580C', icon: Icons.Flame, sub: '🔥 Updated Today', bg: '#FFF7ED', border: 'border-orange-100/50' },
+            { label: 'WARM LEADS', category: 'pipeline', accentColor: '#D97706', icon: Icons.Sun, sub: '☀ Active Follow-ups', bg: '#FEF3C7', border: 'border-amber-100/50' },
+            { label: 'CEBIL PENDING', category: 'pipeline', accentColor: '#64748B', icon: Icons.FileWarning, sub: '⏳ Awaiting verification', bg: '#F8FAFC', border: 'border-slate-100/50' },
+            { label: 'DOCUMENT PENDING', category: 'pipeline', accentColor: '#64748B', icon: Icons.FileText, sub: '📄 Files required', bg: '#F8FAFC', border: 'border-slate-100/50' },
+            { label: 'APPROVAL PENDING', category: 'pipeline', accentColor: '#EA580C', icon: Icons.Clock, sub: '⏳ Under review', bg: '#FFF7ED', border: 'border-orange-100/50' },
+            { label: 'APPROVED BUT NOT DISBUSE', category: 'pipeline', accentColor: '#16A34A', icon: Icons.CheckCircle, sub: '✔ Ready for disbursement', bg: '#F0FDF4', border: 'border-green-100/50' },
+            { label: 'DISBUSED', category: 'pipeline', accentColor: '#15803D', icon: Icons.Banknote, sub: '💰 Funds released', bg: '#F0FDF4', border: 'border-green-100/50' },
+            { label: 'REJECTED', category: 'overview', accentColor: '#DC2626', icon: Icons.XOctagon, sub: '✕ Closed', bg: '#FEF2F2', border: 'border-red-100/50' },
+            { label: 'FOLLOWUP', category: 'followups', accentColor: '#0284C7', icon: Icons.PhoneCall, sub: '📞 Call scheduled', bg: '#F0F9FF', border: 'border-sky-100/50' },
+            { label: 'DROPPED', category: 'overview', accentColor: '#64748B', icon: Icons.ArrowDownCircle, sub: '✕ Inactive', bg: '#F8FAFC', border: 'border-slate-100/50' },
+            { label: 'PENDING', category: 'followups', accentColor: '#D97706', icon: Icons.Hourglass, sub: '⏳ Pending action', bg: '#FEF3C7', border: 'border-yellow-100/50' },
+            { label: "TODAY'S FOLLOWUPS", category: 'followups', accentColor: '#0891B2', icon: Icons.CalendarClock, sub: '📅 Action required today', bg: '#ECFEFF', border: 'border-cyan-100/50' },
+          ].filter(m => {
+            if (activeTab === 'overview') return true;
+            if (activeTab === 'pipeline') return m.category === 'pipeline' || m.label === 'HOT LEADS' || m.label === 'WARM LEADS';
+            if (activeTab === 'followups') return m.category === 'followups' || m.label.includes('FOLLOWUP') || m.label === 'WARM LEADS';
+            return true;
+          }).map((metric, idx) => {
             const Icon = metric.icon;
             const count = getStatusCount(metric.label);
             const statusMap: Record<string, string> = {
@@ -397,7 +441,7 @@ export default function Dashboard() {
       </div>
 
       {/* 3. MIDDLE ROW: Pipeline by Stage + Deal Status */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div id="pipeline-section" className="grid grid-cols-1 lg:grid-cols-2 gap-8 scroll-mt-24">
         
         {/* Pipeline by Stage */}
         <div className="bg-white border border-[#EAE4DA] rounded-2xl p-6 md:p-8 shadow-[0_2px_8px_rgba(23,34,59,0.02)] flex flex-col justify-between">
