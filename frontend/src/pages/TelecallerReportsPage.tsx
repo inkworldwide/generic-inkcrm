@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
+import MultiSelectDropdown from '../components/MultiSelectDropdown';
 
 export default function TelecallerReportsPage() {
   const { showToast } = useToastStore();
@@ -9,18 +10,18 @@ export default function TelecallerReportsPage() {
   const [users, setUsers] = useState<any[]>([]);
   const [leads, setLeads] = useState<any[]>([]);
 
-  // Filters matching Image 3
-  const [selectedMonth, setSelectedMonth] = useState('July');
-  const [selectedYear, setSelectedYear] = useState('2026');
-  const [selectedRoleType, setSelectedRoleType] = useState('-Select Role Type-');
-  const [selectedAgent, setSelectedAgent] = useState('-Select One-');
+  // Multi-Select Filters
+  const [selectedMonths, setSelectedMonths] = useState<string[]>(['July']);
+  const [selectedYears, setSelectedYears] = useState<string[]>(['2026']);
+  const [selectedRoleTypes, setSelectedRoleTypes] = useState<string[]>([]);
+  const [selectedAgents, setSelectedAgents] = useState<string[]>([]);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
   const years = ['2024', '2025', '2026', '2027'];
-  const roleTypes = ['-Select Role Type-', 'Telecaller', 'Sales Manager', 'Team Lead', 'Admin'];
+  const roleTypes = ['Telecaller', 'Sales Manager', 'Team Lead', 'Admin'];
 
   useEffect(() => {
     fetchInitialData();
@@ -43,10 +44,6 @@ export default function TelecallerReportsPage() {
     }
   };
 
-  const handleFilterClick = () => {
-    showToast(`Generating report for ${selectedAgent === '-Select One-' ? 'All Agents' : selectedAgent} (${selectedMonth} ${selectedYear})`, 'info');
-  };
-
   // Mock list of telecaller agents if users is empty
   const telecallersList = users.length > 0 ? users : [
     { _id: 'u1', name: 'Rajabaksh Ilyala', role: 'Telecaller', email: 'rajabaksh@inkcrm.com' },
@@ -54,6 +51,12 @@ export default function TelecallerReportsPage() {
     { _id: 'u3', name: 'Mohammed Sameer', role: 'Team Lead', email: 'sameer@inkcrm.com' },
     { _id: 'u4', name: 'Priya Sharma', role: 'Sales Manager', email: 'priya@inkcrm.com' },
   ];
+
+  const agentNames = telecallersList.map(u => u.name);
+
+  const handleFilterClick = () => {
+    showToast(`Generating report for ${selectedAgents.length === 0 ? 'All Agents' : selectedAgents.join(', ')}`, 'info');
+  };
 
   const exportCSV = () => {
     const headers = ['Agent Name', 'Role', 'Assigned Leads', 'Calls Connected', 'Converted Deals', 'Conversion Rate %', 'Disbursed Amount'];
@@ -70,7 +73,7 @@ export default function TelecallerReportsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Telecaller_Report_${selectedMonth}_${selectedYear}.csv`);
+    link.setAttribute('download', `Telecaller_Report_${selectedMonths.join('_')}_${selectedYears.join('_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -99,8 +102,8 @@ export default function TelecallerReportsPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL CARD (Matching Image 3 Design) */}
-      <div className="card-premium p-6 relative overflow-hidden border-2 border-[#17223B]/10">
+      {/* FILTER CONTROL CARD WITH CHECKBOX MULTI-SELECT */}
+      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
           <Icons.SlidersHorizontal className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
           <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
@@ -110,69 +113,40 @@ export default function TelecallerReportsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {/* Select Month */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Select Month
-            </label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {months.map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectDropdown
+            label="Select Month"
+            options={months}
+            selectedValues={selectedMonths}
+            onChange={setSelectedMonths}
+            placeholder="Select Months..."
+          />
 
           {/* Select Year */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Select Year
-            </label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {years.map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectDropdown
+            label="Select Year"
+            options={years}
+            selectedValues={selectedYears}
+            onChange={setSelectedYears}
+            placeholder="Select Years..."
+          />
 
           {/* Load Agents Types */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Load Agents Types
-            </label>
-            <select
-              value={selectedRoleType}
-              onChange={(e) => setSelectedRoleType(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {roleTypes.map(rt => (
-                <option key={rt} value={rt}>{rt}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectDropdown
+            label="Load Agents Types"
+            options={roleTypes}
+            selectedValues={selectedRoleTypes}
+            onChange={setSelectedRoleTypes}
+            placeholder="-All Role Types-"
+          />
 
           {/* Calling Agent */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Calling Agent
-            </label>
-            <select
-              value={selectedAgent}
-              onChange={(e) => setSelectedAgent(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              <option value="-Select One-">-Select One-</option>
-              {telecallersList.map(u => (
-                <option key={u._id || u.name} value={u.name}>{u.name}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectDropdown
+            label="Calling Agent"
+            options={agentNames}
+            selectedValues={selectedAgents}
+            onChange={setSelectedAgents}
+            placeholder="-All Calling Agents-"
+          />
         </div>
 
         {/* View Detail Report Action */}
@@ -195,7 +169,7 @@ export default function TelecallerReportsPage() {
               Telecaller Productivity & Conversion Ledger
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Performance statistics for {selectedMonth} {selectedYear}
+              Performance statistics for {selectedMonths.length > 0 ? selectedMonths.join(', ') : 'All Months'} {selectedYears.length > 0 ? selectedYears.join(', ') : 'All Years'}
             </p>
           </div>
         </div>
@@ -216,8 +190,8 @@ export default function TelecallerReportsPage() {
             </thead>
             <tbody className="divide-y divide-[#EAE4DA]/60 dark:divide-slate-800">
               {telecallersList
-                .filter(u => selectedAgent === '-Select One-' || u.name === selectedAgent)
-                .filter(u => selectedRoleType === '-Select Role Type-' || (u.role || 'Telecaller').toLowerCase() === selectedRoleType.toLowerCase())
+                .filter(u => selectedAgents.length === 0 || selectedAgents.includes(u.name))
+                .filter(u => selectedRoleTypes.length === 0 || selectedRoleTypes.map(r => r.toLowerCase()).includes((u.role || 'Telecaller').toLowerCase()))
                 .map((ag, idx) => {
                   const assigned = 24 + idx * 8;
                   const connected = 18 + idx * 6;

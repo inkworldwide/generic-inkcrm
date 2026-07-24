@@ -84,19 +84,100 @@ export default function Layout({ children }: LayoutProps) {
     navigate('/login');
   };
 
-  useEffect(() => {
-    fetchModules();
-    
-    // Global keyboard shortcut for search
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        // focus search input logic
-      }
+  const getPageHeaderInfo = () => {
+    const path = location.pathname;
+    if (path.startsWith('/reports/lead-reports')) {
+      return {
+        title: 'Lead Reports',
+        subtitle: 'Comprehensive lead distribution and audit analytics.'
+      };
+    }
+    if (path.startsWith('/reports/telecaller-reports')) {
+      return {
+        title: "Telecaller's Reports",
+        subtitle: 'Agent call performance, lead allocations, and conversion metrics.'
+      };
+    }
+    if (path.startsWith('/reports/telecaller-monthly')) {
+      return {
+        title: "Telecaller's Monthly",
+        subtitle: 'Monthly target tracking and agent performance ranking.'
+      };
+    }
+    if (path.startsWith('/reports')) {
+      return {
+        title: 'Saved Reports',
+        subtitle: 'Custom visual reports and analytical queries.'
+      };
+    }
+    if (path.startsWith('/modules/leads')) {
+      return {
+        title: 'Leads Management',
+        subtitle: 'View, filter, and assign incoming sales leads.'
+      };
+    }
+    if (path.startsWith('/modules/deals')) {
+      return {
+        title: 'Deals Pipeline',
+        subtitle: 'Track active sales opportunities and revenue stages.'
+      };
+    }
+    if (path.startsWith('/modules/companies')) {
+      return {
+        title: 'Companies Directory',
+        subtitle: 'Manage client accounts and enterprise partners.'
+      };
+    }
+    if (path.startsWith('/modules/tasks')) {
+      return {
+        title: 'Tasks & Activities',
+        subtitle: 'Follow-ups, phone calls, and team to-dos.'
+      };
+    }
+    if (path.startsWith('/modules/campaigns')) {
+      return {
+        title: 'Marketing Campaigns',
+        subtitle: 'Cold call drives, promo campaigns, and outreach.'
+      };
+    }
+    if (path.startsWith('/modules/campaignassignments')) {
+      return {
+        title: 'Campaign Assignments',
+        subtitle: 'Allocate campaign leads to telecaller agents.'
+      };
+    }
+    if (path.startsWith('/users-management')) {
+      return {
+        title: 'Users Management',
+        subtitle: 'Manage organization team members, roles, and access.'
+      };
+    }
+    if (path.startsWith('/settings')) {
+      return {
+        title: 'System Settings',
+        subtitle: 'Branding, modules, security, and global defaults.'
+      };
+    }
+    if (path.startsWith('/access-privilege')) {
+      return {
+        title: 'Access Privilege',
+        subtitle: 'Role permissions and menu visibility.'
+      };
+    }
+    if (path.startsWith('/lead-transfer')) {
+      return {
+        title: 'Lead Transfer',
+        subtitle: 'Reassign leads across agents and teams.'
+      };
+    }
+
+    return {
+      title: 'Dashboard Overview',
+      subtitle: "Welcome back. Here is today's business summary."
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  };
+
+  const headerInfo = getPageHeaderInfo();
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-[#F8F5F1] dark:bg-[#0f1115] text-[#1F2937] dark:text-white selection:bg-navy-800/20 selection:text-navy-800">
@@ -252,45 +333,17 @@ export default function Layout({ children }: LayoutProps) {
                   />
                 );
               })}
-
-              {/* 4. Campaigns accordion */}
-              {modules.some(m => m.apiPath === 'campaigns') && (!branding || branding.enabledModules.includes('leads') || branding.enabledModules.includes('campaigns')) && (
-                <SidebarAccordion label="CAMPAIGNS" icon={Icons.Megaphone} colorClass="text-orange-400">
-                  <SidebarItem to="/modules/campaigns" label="Campaign List" icon={Icons.Target} colorClass="text-orange-400" indent />
-                  <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent />
-                </SidebarAccordion>
-              )}
-
-              {/* 5. Reports accordion (Image 1 feature) */}
-              <SidebarAccordion label="REPORTS" icon={Icons.BarChart3} colorClass="text-emerald-400">
-                <SidebarItem to="/reports/lead-reports" label="Lead Reports" icon={Icons.ListFilter} colorClass="text-emerald-400" indent />
-                <SidebarItem to="/reports/telecaller-reports" label="Telecaller's Reports" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent />
-                <SidebarItem to="/reports/telecaller-monthly" label="Telecaller's Monthly" icon={Icons.Calendar} colorClass="text-emerald-400" indent />
-              </SidebarAccordion>
-
-
-              {/* 8. Setting */}
-              <SidebarItem to="/settings" label="SETTING" icon={Icons.Settings} colorClass="text-amber-400" />
-
-              {/* 9. Security */}
-              <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400">
-                <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent />
-                <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent />
-              </SidebarAccordion>
-
-              {/* 10. Users Management */}
-              <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-500" />
             </div>
           </div>
 
           <SidebarProfile />
         </aside>
 
-        {/* Main Content Area */}
-        <main className="flex-1 rounded-[26px] bg-white dark:bg-slate-900 shadow-[0_4px_24px_rgba(23,34,59,0.04)] overflow-hidden flex flex-col relative border border-[#EAE4DA]">
-          
-          {/* Dashboard Header */}
-          <header className="h-[70px] sm:h-[80px] bg-[#FDFBF7]/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#EAE4DA] dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 transition-colors duration-300">
+      {/* 3. Main Body Viewport */}
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-[260px]">
+        {/* Top Header Navigation */}
+        <header className="sticky top-0 z-30 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#EAE4DA] dark:border-slate-800/80 px-6 py-4 transition-colors">
+          <div className="flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setSidebarOpen(true)}
@@ -300,15 +353,14 @@ export default function Layout({ children }: LayoutProps) {
               </button>
               <div className="flex flex-col text-left">
                 <h2 className="text-lg font-bold text-[#0F172A] dark:text-white tracking-tight leading-snug">
-                  Dashboard Overview
+                  {headerInfo.title}
                 </h2>
                 <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Welcome back. Here is today's business summary.
+                  {headerInfo.subtitle}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-5 relative">
               {/* Backdrops to close popovers when clicking outside */}
               {(showNotifications || showUserDropdown) && (
                 <div 
@@ -479,7 +531,7 @@ export default function Layout({ children }: LayoutProps) {
               <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
             </div>
           </footer>
-        </main>
+        </div>
       </div>
 
       {/* Premium Toast Notifications Overlay */}

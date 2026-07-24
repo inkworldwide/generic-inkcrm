@@ -2,17 +2,18 @@ import React, { useState, useEffect } from 'react';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
+import MultiSelectDropdown from '../components/MultiSelectDropdown';
 
 export default function LeadReportsPage() {
   const { showToast } = useToastStore();
   const [loading, setLoading] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
 
-  // Filter States (matching Image 2)
-  const [selectedMonth, setSelectedMonth] = useState('July');
-  const [selectedYear, setSelectedYear] = useState('2026');
-  const [selectedStatus, setSelectedStatus] = useState('-All-');
-  const [selectedLoanType, setSelectedLoanType] = useState('-All-');
+  // Multi-Select Filter States with Checkboxes
+  const [selectedMonths, setSelectedMonths] = useState<string[]>(['July']);
+  const [selectedYears, setSelectedYears] = useState<string[]>(['2026']);
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [selectedLoanTypes, setSelectedLoanTypes] = useState<string[]>([]);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -21,12 +22,12 @@ export default function LeadReportsPage() {
   const years = ['2024', '2025', '2026', '2027'];
   
   const statusOptions = [
-    '-All-', 'New', 'Hot', 'Warm', 'Cedil Pending', 'Document Pending',
+    'New', 'Hot', 'Warm', 'Cedil Pending', 'Document Pending',
     'Approval Pending', 'Approved', 'Disbursed', 'Rejected', 'Followup', 'Dropped', 'Pending'
   ];
 
   const loanTypes = [
-    '-All-', 'Personal Loan', 'Business Loan', 'Home Loan', 'Education Loan',
+    'Personal Loan', 'Business Loan', 'Home Loan', 'Education Loan',
     'Auto Loan', 'Gold Loan', 'Loan Against Property'
   ];
 
@@ -50,22 +51,16 @@ export default function LeadReportsPage() {
 
   const handleFilterClick = () => {
     fetchReportData();
-    showToast(`Filtering report for ${selectedMonth} ${selectedYear}`, 'info');
+    showToast(`Filtering report parameters`, 'info');
   };
 
-  // Filter leads based on selected criteria
+  // Multi-select filtered leads based on selected checkbox arrays
   const filteredLeads = leads.filter((item) => {
     const data = item.data || {};
-    const statusMatch = selectedStatus === '-All-' || (data.status || '').toLowerCase() === selectedStatus.toLowerCase();
-    const loanMatch = selectedLoanType === '-All-' || (data.loanType || data.serviceType || '').toLowerCase() === selectedLoanType.toLowerCase();
+    const statusMatch = selectedStatuses.length === 0 || selectedStatuses.map(s => s.toLowerCase()).includes((data.status || '').toLowerCase());
+    const loanMatch = selectedLoanTypes.length === 0 || selectedLoanTypes.map(t => t.toLowerCase()).includes((data.loanType || data.serviceType || '').toLowerCase());
     return statusMatch && loanMatch;
   });
-
-  // Calculate Metrics
-  const totalLeads = filteredLeads.length;
-  const disbursedCount = filteredLeads.filter(l => (l.data?.status || '').toLowerCase() === 'disbursed' || (l.data?.status || '').toLowerCase() === 'approved').length;
-  const totalDisbursedValue = filteredLeads.reduce((acc, curr) => acc + (Number(curr.data?.amount || curr.data?.loanAmount) || 250000), 0);
-  const conversionRate = totalLeads > 0 ? Math.round((disbursedCount / totalLeads) * 100) : 34;
 
   const exportCSV = () => {
     if (filteredLeads.length === 0) return;
@@ -84,7 +79,7 @@ export default function LeadReportsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Lead_Report_${selectedMonth}_${selectedYear}.csv`);
+    link.setAttribute('download', `Lead_Report_${selectedMonths.join('_')}_${selectedYears.join('_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -113,8 +108,8 @@ export default function LeadReportsPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL CARD (Matching Image 2 Design) */}
-      <div className="card-premium p-6 relative overflow-hidden border-2 border-[#17223B]/10">
+      {/* FILTER CONTROL CARD WITH CHECKBOX MULTI-SELECT */}
+      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
           <Icons.Filter className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
           <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
@@ -123,69 +118,41 @@ export default function LeadReportsPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Select Month */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Select Month
-            </label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {months.map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-          </div>
+          {/* Select Month Multi-Select */}
+          <MultiSelectDropdown
+            label="Select Month"
+            options={months}
+            selectedValues={selectedMonths}
+            onChange={setSelectedMonths}
+            placeholder="Select Months..."
+          />
 
-          {/* Select Year */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Select Year
-            </label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {years.map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
+          {/* Select Year Multi-Select */}
+          <MultiSelectDropdown
+            label="Select Year"
+            options={years}
+            selectedValues={selectedYears}
+            onChange={setSelectedYears}
+            placeholder="Select Years..."
+          />
 
-          {/* Lead Status */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Lead Status
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {statusOptions.map(s => (
-                <option key={s} value={s}>{s}</option>
-              ))}
-            </select>
-          </div>
+          {/* Lead Status Multi-Select */}
+          <MultiSelectDropdown
+            label="Lead Status"
+            options={statusOptions}
+            selectedValues={selectedStatuses}
+            onChange={setSelectedStatuses}
+            placeholder="-All Statuses-"
+          />
 
-          {/* Loan Type */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Loan Type
-            </label>
-            <select
-              value={selectedLoanType}
-              onChange={(e) => setSelectedLoanType(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {loanTypes.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
+          {/* Loan Type Multi-Select */}
+          <MultiSelectDropdown
+            label="Loan Type"
+            options={loanTypes}
+            selectedValues={selectedLoanTypes}
+            onChange={setSelectedLoanTypes}
+            placeholder="-All Loan Types-"
+          />
         </div>
 
         {/* View Detail Report Action */}
@@ -208,7 +175,7 @@ export default function LeadReportsPage() {
               Detailed Lead Audit Matrix
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Showing {filteredLeads.length} record entries for {selectedMonth} {selectedYear}
+              Showing {filteredLeads.length} record entries for {selectedMonths.length > 0 ? selectedMonths.join(', ') : 'All Months'} {selectedYears.length > 0 ? selectedYears.join(', ') : 'All Years'}
             </p>
           </div>
         </div>
@@ -279,7 +246,7 @@ export default function LeadReportsPage() {
                         ₹{Number(amount).toLocaleString('en-IN')}
                       </td>
                       <td className="py-3.5 px-6 font-medium text-slate-500 text-[11px]">
-                        {selectedMonth} {selectedYear}
+                        {selectedMonths.length > 0 ? selectedMonths[0] : 'All'} {selectedYears.length > 0 ? selectedYears[0] : '2026'}
                       </td>
                       <td className="py-3.5 px-6 font-semibold text-slate-700 dark:text-slate-300">
                         {agent}

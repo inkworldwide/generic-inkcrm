@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import * as Icons from 'lucide-react';
 import { useToastStore } from '../store/toastStore';
+import MultiSelectDropdown from '../components/MultiSelectDropdown';
 
 export default function TelecallerMonthlyPage() {
   const { showToast } = useToastStore();
-  const [selectedMonth, setSelectedMonth] = useState('July');
-  const [selectedYear, setSelectedYear] = useState('2026');
+  const [selectedMonths, setSelectedMonths] = useState<string[]>(['July']);
+  const [selectedYears, setSelectedYears] = useState<string[]>(['2026']);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -14,7 +15,7 @@ export default function TelecallerMonthlyPage() {
   const years = ['2024', '2025', '2026', '2027'];
 
   const handleFilterClick = () => {
-    showToast(`Loading monthly telecaller performance report for ${selectedMonth} ${selectedYear}`, 'info');
+    showToast(`Loading monthly performance report for ${selectedMonths.join(', ')} ${selectedYears.join(', ')}`, 'info');
   };
 
   const monthlyAgents = [
@@ -41,7 +42,7 @@ export default function TelecallerMonthlyPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Monthly_Telecaller_Summary_${selectedMonth}_${selectedYear}.csv`);
+    link.setAttribute('download', `Monthly_Telecaller_Summary_${selectedMonths.join('_')}_${selectedYears.join('_')}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -70,8 +71,8 @@ export default function TelecallerMonthlyPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL CARD (Matching Image 4 Design) */}
-      <div className="card-premium p-6 relative overflow-hidden border-2 border-[#17223B]/10">
+      {/* FILTER CONTROL CARD WITH CHECKBOX MULTI-SELECT */}
+      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
           <Icons.CalendarDays className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
           <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
@@ -81,36 +82,22 @@ export default function TelecallerMonthlyPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 max-w-xl">
           {/* Select Month */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Select Month
-            </label>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {months.map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectDropdown
+            label="Select Month"
+            options={months}
+            selectedValues={selectedMonths}
+            onChange={setSelectedMonths}
+            placeholder="Select Months..."
+          />
 
           {/* Select Year */}
-          <div>
-            <label className="text-[11px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-wider block mb-2">
-              Select Year
-            </label>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="input-premium w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl cursor-pointer"
-            >
-              {years.map(y => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
-          </div>
+          <MultiSelectDropdown
+            label="Select Year"
+            options={years}
+            selectedValues={selectedYears}
+            onChange={setSelectedYears}
+            placeholder="Select Years..."
+          />
         </div>
 
         {/* View Detail Report Action */}
@@ -133,7 +120,7 @@ export default function TelecallerMonthlyPage() {
               Telecaller Monthly Ranking & Target Matrix
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Aggregated statistics for {selectedMonth} {selectedYear}
+              Aggregated statistics for {selectedMonths.length > 0 ? selectedMonths.join(', ') : 'All Months'} {selectedYears.length > 0 ? selectedYears.join(', ') : 'All Years'}
             </p>
           </div>
         </div>
