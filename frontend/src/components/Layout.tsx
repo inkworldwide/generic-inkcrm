@@ -261,6 +261,13 @@ export default function Layout({ children }: LayoutProps) {
                 </SidebarAccordion>
               )}
 
+              {/* 5. Reports accordion (Image 1 feature) */}
+              <SidebarAccordion label="REPORTS" icon={Icons.BarChart3} colorClass="text-emerald-400">
+                <SidebarItem to="/reports/lead-reports" label="Lead Reports" icon={Icons.ListFilter} colorClass="text-emerald-400" indent />
+                <SidebarItem to="/reports/telecaller-reports" label="Telecaller's Reports" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent />
+                <SidebarItem to="/reports/telecaller-monthly" label="Telecaller's Monthly" icon={Icons.Calendar} colorClass="text-emerald-400" indent />
+              </SidebarAccordion>
+
 
               {/* 8. Setting */}
               <SidebarItem to="/settings" label="SETTING" icon={Icons.Settings} colorClass="text-amber-400" />

@@ -18,6 +18,9 @@ import UsersManagement from './pages/UsersManagement';
 import WorkflowsList from './pages/WorkflowsList';
 import ReportsList from './pages/ReportsList';
 import ReportDetails from './pages/ReportDetails';
+import LeadReportsPage from './pages/LeadReportsPage';
+import TelecallerReportsPage from './pages/TelecallerReportsPage';
+import TelecallerMonthlyPage from './pages/TelecallerMonthlyPage';
 import Status from './pages/Status';
 import MyCampaign from './pages/MyCampaign';
 
@@ -105,6 +108,30 @@ export default function App() {
           element={
             <ProtectedRoute>
               <ReportsList />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/lead-reports"
+          element={
+            <ProtectedRoute>
+              <LeadReportsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/telecaller-reports"
+          element={
+            <ProtectedRoute>
+              <TelecallerReportsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/telecaller-monthly"
+          element={
+            <ProtectedRoute>
+              <TelecallerMonthlyPage />
             </ProtectedRoute>
           }
         />
