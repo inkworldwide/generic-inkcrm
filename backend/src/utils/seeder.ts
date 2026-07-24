@@ -202,10 +202,10 @@ async function seed() {
     }
   });
 
-  // Create Rajabaksh Ilyala (Reporting Manager: Ink CRM)
+  // Create Rajabaksh Ilyala (Super Admin, Reporting Manager: Ink CRM)
   const rajabakshaUser = await User.create({
     organizationId: salesOrg._id,
-    roleId: adminRole._id,
+    roleId: salesAdminRole._id,
     firstName: 'Rajabaksh',
     lastName: 'Ilyala',
     email: 'ink@rajabaksha.com',
