@@ -51,14 +51,14 @@ export default function LeadReportsPage() {
 
   const handleFilterClick = () => {
     fetchReportData();
-    showToast(`Filtering report parameters`, 'info');
+    showToast('Applied multi-select filter conditions.', 'info');
   };
 
-  // Multi-select filtered leads based on selected checkbox arrays
+  // Filter leads based on selected criteria
   const filteredLeads = leads.filter((item) => {
     const data = item.data || {};
-    const statusMatch = selectedStatuses.length === 0 || selectedStatuses.map(s => s.toLowerCase()).includes((data.status || '').toLowerCase());
-    const loanMatch = selectedLoanTypes.length === 0 || selectedLoanTypes.map(t => t.toLowerCase()).includes((data.loanType || data.serviceType || '').toLowerCase());
+    const statusMatch = selectedStatuses.length === 0 || selectedStatuses.some(s => (data.status || '').toLowerCase() === s.toLowerCase());
+    const loanMatch = selectedLoanTypes.length === 0 || selectedLoanTypes.some(l => (data.loanType || data.serviceType || '').toLowerCase() === l.toLowerCase());
     return statusMatch && loanMatch;
   });
 
@@ -79,7 +79,7 @@ export default function LeadReportsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Lead_Report_${selectedMonths.join('_')}_${selectedYears.join('_')}.csv`);
+    link.setAttribute('download', `Lead_Report.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -108,8 +108,8 @@ export default function LeadReportsPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL CARD WITH CHECKBOX MULTI-SELECT */}
-      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10">
+      {/* FILTER CONTROL CARD (With Multi-Select Checkboxes) */}
+      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10 z-20">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
           <Icons.Filter className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
           <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
@@ -118,25 +118,25 @@ export default function LeadReportsPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {/* Select Month Multi-Select */}
+          {/* Select Month */}
           <MultiSelectDropdown
             label="Select Month"
             options={months}
             selectedValues={selectedMonths}
             onChange={setSelectedMonths}
-            placeholder="Select Months..."
+            placeholder="-All Months-"
           />
 
-          {/* Select Year Multi-Select */}
+          {/* Select Year */}
           <MultiSelectDropdown
             label="Select Year"
             options={years}
             selectedValues={selectedYears}
             onChange={setSelectedYears}
-            placeholder="Select Years..."
+            placeholder="-All Years-"
           />
 
-          {/* Lead Status Multi-Select */}
+          {/* Lead Status */}
           <MultiSelectDropdown
             label="Lead Status"
             options={statusOptions}
@@ -145,7 +145,7 @@ export default function LeadReportsPage() {
             placeholder="-All Statuses-"
           />
 
-          {/* Loan Type Multi-Select */}
+          {/* Loan Type */}
           <MultiSelectDropdown
             label="Loan Type"
             options={loanTypes}
@@ -175,7 +175,7 @@ export default function LeadReportsPage() {
               Detailed Lead Audit Matrix
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Showing {filteredLeads.length} record entries for {selectedMonths.length > 0 ? selectedMonths.join(', ') : 'All Months'} {selectedYears.length > 0 ? selectedYears.join(', ') : 'All Years'}
+              Showing {filteredLeads.length} record entries
             </p>
           </div>
         </div>
@@ -246,7 +246,7 @@ export default function LeadReportsPage() {
                         ₹{Number(amount).toLocaleString('en-IN')}
                       </td>
                       <td className="py-3.5 px-6 font-medium text-slate-500 text-[11px]">
-                        {selectedMonths.length > 0 ? selectedMonths[0] : 'All'} {selectedYears.length > 0 ? selectedYears[0] : '2026'}
+                        July 2026
                       </td>
                       <td className="py-3.5 px-6 font-semibold text-slate-700 dark:text-slate-300">
                         {agent}

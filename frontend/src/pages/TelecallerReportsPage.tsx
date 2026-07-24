@@ -8,7 +8,6 @@ export default function TelecallerReportsPage() {
   const { showToast } = useToastStore();
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
-  const [leads, setLeads] = useState<any[]>([]);
 
   // Multi-Select Filters
   const [selectedMonths, setSelectedMonths] = useState<string[]>(['July']);
@@ -30,18 +29,18 @@ export default function TelecallerReportsPage() {
   const fetchInitialData = async () => {
     setLoading(true);
     try {
-      const [usersRes, leadsRes] = await Promise.all([
-        api.get('/users').catch(() => ({ data: [] })),
-        api.get('/records/leads').catch(() => ({ data: { records: [] } }))
-      ]);
+      const usersRes = await api.get('/users').catch(() => ({ data: [] }));
       setUsers(usersRes.data || []);
-      setLeads(leadsRes.data?.records || leadsRes.data || []);
     } catch (err) {
       console.error(err);
       showToast('Failed to load telecaller report data.', 'error');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleFilterClick = () => {
+    showToast('Applied telecaller multi-select report parameters.', 'info');
   };
 
   // Mock list of telecaller agents if users is empty
@@ -52,11 +51,7 @@ export default function TelecallerReportsPage() {
     { _id: 'u4', name: 'Priya Sharma', role: 'Sales Manager', email: 'priya@inkcrm.com' },
   ];
 
-  const agentNames = telecallersList.map(u => u.name);
-
-  const handleFilterClick = () => {
-    showToast(`Generating report for ${selectedAgents.length === 0 ? 'All Agents' : selectedAgents.join(', ')}`, 'info');
-  };
+  const agentNamesList = telecallersList.map(u => u.name);
 
   const exportCSV = () => {
     const headers = ['Agent Name', 'Role', 'Assigned Leads', 'Calls Connected', 'Converted Deals', 'Conversion Rate %', 'Disbursed Amount'];
@@ -73,7 +68,7 @@ export default function TelecallerReportsPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Telecaller_Report_${selectedMonths.join('_')}_${selectedYears.join('_')}.csv`);
+    link.setAttribute('download', `Telecaller_Report.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -102,8 +97,8 @@ export default function TelecallerReportsPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL CARD WITH CHECKBOX MULTI-SELECT */}
-      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10">
+      {/* FILTER CONTROL CARD (With Multi-Select Checkboxes) */}
+      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10 z-20">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
           <Icons.SlidersHorizontal className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
           <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
@@ -118,7 +113,7 @@ export default function TelecallerReportsPage() {
             options={months}
             selectedValues={selectedMonths}
             onChange={setSelectedMonths}
-            placeholder="Select Months..."
+            placeholder="-All Months-"
           />
 
           {/* Select Year */}
@@ -127,7 +122,7 @@ export default function TelecallerReportsPage() {
             options={years}
             selectedValues={selectedYears}
             onChange={setSelectedYears}
-            placeholder="Select Years..."
+            placeholder="-All Years-"
           />
 
           {/* Load Agents Types */}
@@ -136,13 +131,13 @@ export default function TelecallerReportsPage() {
             options={roleTypes}
             selectedValues={selectedRoleTypes}
             onChange={setSelectedRoleTypes}
-            placeholder="-All Role Types-"
+            placeholder="-All Agent Roles-"
           />
 
           {/* Calling Agent */}
           <MultiSelectDropdown
             label="Calling Agent"
-            options={agentNames}
+            options={agentNamesList}
             selectedValues={selectedAgents}
             onChange={setSelectedAgents}
             placeholder="-All Calling Agents-"
@@ -169,7 +164,7 @@ export default function TelecallerReportsPage() {
               Telecaller Productivity & Conversion Ledger
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Performance statistics for {selectedMonths.length > 0 ? selectedMonths.join(', ') : 'All Months'} {selectedYears.length > 0 ? selectedYears.join(', ') : 'All Years'}
+              Performance statistics report
             </p>
           </div>
         </div>
@@ -191,7 +186,7 @@ export default function TelecallerReportsPage() {
             <tbody className="divide-y divide-[#EAE4DA]/60 dark:divide-slate-800">
               {telecallersList
                 .filter(u => selectedAgents.length === 0 || selectedAgents.includes(u.name))
-                .filter(u => selectedRoleTypes.length === 0 || selectedRoleTypes.map(r => r.toLowerCase()).includes((u.role || 'Telecaller').toLowerCase()))
+                .filter(u => selectedRoleTypes.length === 0 || selectedRoleTypes.some(r => (u.role || 'Telecaller').toLowerCase() === r.toLowerCase()))
                 .map((ag, idx) => {
                   const assigned = 24 + idx * 8;
                   const connected = 18 + idx * 6;

@@ -15,7 +15,7 @@ export default function TelecallerMonthlyPage() {
   const years = ['2024', '2025', '2026', '2027'];
 
   const handleFilterClick = () => {
-    showToast(`Loading monthly performance report for ${selectedMonths.join(', ')} ${selectedYears.join(', ')}`, 'info');
+    showToast('Applied monthly multi-select parameters.', 'info');
   };
 
   const monthlyAgents = [
@@ -42,7 +42,7 @@ export default function TelecallerMonthlyPage() {
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Monthly_Telecaller_Summary_${selectedMonths.join('_')}_${selectedYears.join('_')}.csv`);
+    link.setAttribute('download', `Monthly_Telecaller_Summary.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -71,8 +71,8 @@ export default function TelecallerMonthlyPage() {
         </button>
       </div>
 
-      {/* FILTER CONTROL CARD WITH CHECKBOX MULTI-SELECT */}
-      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10">
+      {/* FILTER CONTROL CARD (With Multi-Select Checkboxes) */}
+      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10 z-20">
         <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
           <Icons.CalendarDays className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
           <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
@@ -87,7 +87,7 @@ export default function TelecallerMonthlyPage() {
             options={months}
             selectedValues={selectedMonths}
             onChange={setSelectedMonths}
-            placeholder="Select Months..."
+            placeholder="-All Months-"
           />
 
           {/* Select Year */}
@@ -96,7 +96,7 @@ export default function TelecallerMonthlyPage() {
             options={years}
             selectedValues={selectedYears}
             onChange={setSelectedYears}
-            placeholder="Select Years..."
+            placeholder="-All Years-"
           />
         </div>
 
@@ -120,7 +120,7 @@ export default function TelecallerMonthlyPage() {
               Telecaller Monthly Ranking & Target Matrix
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Aggregated statistics for {selectedMonths.length > 0 ? selectedMonths.join(', ') : 'All Months'} {selectedYears.length > 0 ? selectedYears.join(', ') : 'All Years'}
+              Aggregated monthly statistics
             </p>
           </div>
         </div>
