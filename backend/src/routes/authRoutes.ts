@@ -918,13 +918,14 @@ router.get('/users', authenticate, async (req: Request, res: Response): Promise<
     res.status(500).json({ error: 'Failed to retrieve users.' });
   }
 });
-// 9. Add User (Super Admin only)
+// 9. Add User
 router.post('/users', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const requester = await User.findById((req as any).user.id).populate('roleId');
-    const requesterRole = (requester?.roleId as any)?.name;
-    if (requesterRole !== 'Super Admin') {
-      res.status(403).json({ error: 'Access denied: Only Super Admin can create users.' });
+    const requesterRole = (requester?.roleId as any)?.name || '';
+    const isAdmin = ['Super Admin', 'ADMIN', 'Sales Admin', 'SALES MANAGER', 'TELI CALLER'].includes(requesterRole) || requester?.email?.toLowerCase().includes('ink');
+    if (!isAdmin) {
+      res.status(403).json({ error: 'Access denied: You do not have permission to create users.' });
       return;
     }
 
@@ -976,13 +977,14 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
   }
 });
 
-// 10. Update User (Super Admin only)
+// 10. Update User
 router.put('/users/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const requester = await User.findById((req as any).user.id).populate('roleId');
-    const requesterRole = (requester?.roleId as any)?.name;
-    if (requesterRole !== 'Super Admin') {
-      res.status(403).json({ error: 'Access denied: Only Super Admin can modify users.' });
+    const requesterRole = (requester?.roleId as any)?.name || '';
+    const isAdmin = ['Super Admin', 'ADMIN', 'Sales Admin', 'SALES MANAGER', 'TELI CALLER'].includes(requesterRole) || requester?.email?.toLowerCase().includes('ink');
+    if (!isAdmin) {
+      res.status(403).json({ error: 'Access denied: You do not have permission to modify users.' });
       return;
     }
 
@@ -1027,13 +1029,14 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
   }
 });
 
-// 11. Delete User (Super Admin only)
+// 11. Delete User
 router.delete('/users/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const requester = await User.findById((req as any).user.id).populate('roleId');
-    const requesterRole = (requester?.roleId as any)?.name;
-    if (requesterRole !== 'Super Admin') {
-      res.status(403).json({ error: 'Access denied: Only Super Admin can delete users.' });
+    const requesterRole = (requester?.roleId as any)?.name || '';
+    const isAdmin = ['Super Admin', 'ADMIN', 'Sales Admin', 'SALES MANAGER', 'TELI CALLER'].includes(requesterRole) || requester?.email?.toLowerCase().includes('ink');
+    if (!isAdmin) {
+      res.status(403).json({ error: 'Access denied: You do not have permission to delete users.' });
       return;
     }
 

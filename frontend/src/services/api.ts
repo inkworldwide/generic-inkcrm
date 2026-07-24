@@ -71,15 +71,9 @@ api.interceptors.response.use(
         }
       }
     } else if (
-      (error.response?.status === 404 && originalRequest.url?.includes('/auth/')) ||
-      (error.response?.status === 403 &&
-        error.response?.data?.error &&
-        (error.response.data.error.toLowerCase().includes('user role not found') ||
-         error.response.data.error.toLowerCase().includes('access denied') ||
-         error.response.data.error.toLowerCase().includes('cross-tenant') ||
-         error.response.data.error.toLowerCase().includes('forbidden')))
+      error.response?.status === 404 && originalRequest.url?.includes('/auth/')
     ) {
-      // User/role/tenant context invalid or stale (e.g. after db seeding) — log out immediately
+      // User/role/tenant context invalid — log out
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
