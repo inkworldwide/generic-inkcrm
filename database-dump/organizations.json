@@ -1,6 +1,6 @@
 [
   {
-    "_id": "6a630823c52625efaf347f5a",
+    "_id": "6a631643b694a524223b8995",
     "name": "inkSales Enterprises",
     "subdomain": "sales",
     "logoUrl": "/logo.png",
@@ -25,14 +25,14 @@
     "subscription": {
       "plan": "enterprise",
       "status": "active",
-      "expiresAt": "2027-07-24T06:37:23.647Z"
+      "expiresAt": "2027-07-24T07:37:39.704Z"
     },
-    "createdAt": "2026-07-24T06:37:23.670Z",
-    "updatedAt": "2026-07-24T06:37:23.670Z",
+    "createdAt": "2026-07-24T07:37:39.729Z",
+    "updatedAt": "2026-07-24T07:37:39.729Z",
     "__v": 0
   },
   {
-    "_id": "6a630823c52625efaf347f5c",
+    "_id": "6a631643b694a524223b8997",
     "name": "Acme International School",
     "subdomain": "school",
     "logoUrl": "/logo.png",
@@ -55,14 +55,14 @@
     "subscription": {
       "plan": "growth",
       "status": "active",
-      "expiresAt": "2027-01-20T06:37:23.679Z"
+      "expiresAt": "2027-01-20T07:37:39.737Z"
     },
-    "createdAt": "2026-07-24T06:37:23.681Z",
-    "updatedAt": "2026-07-24T06:37:23.681Z",
+    "createdAt": "2026-07-24T07:37:39.740Z",
+    "updatedAt": "2026-07-24T07:37:39.740Z",
     "__v": 0
   },
   {
-    "_id": "6a630823c52625efaf347f5e",
+    "_id": "6a631643b694a524223b8999",
     "name": "Metro Care Hospital",
     "subdomain": "hospital",
     "logoUrl": "/logo.png",
@@ -85,10 +85,10 @@
     "subscription": {
       "plan": "enterprise",
       "status": "active",
-      "expiresAt": "2027-07-24T06:37:23.684Z"
+      "expiresAt": "2027-07-24T07:37:39.742Z"
     },
-    "createdAt": "2026-07-24T06:37:23.686Z",
-    "updatedAt": "2026-07-24T06:37:23.686Z",
+    "createdAt": "2026-07-24T07:37:39.743Z",
+    "updatedAt": "2026-07-24T07:37:39.743Z",
     "__v": 0
   }
 ]

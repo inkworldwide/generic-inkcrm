@@ -192,6 +192,8 @@ async function seed() {
     passwordHash,
     isVerified: true,
     department: 'Management',
+    skipFace: true,
+    skipLocation: true,
     twoFactor: { enabled: false },
     faceRecognition: {
       enabled: true,
@@ -200,7 +202,75 @@ async function seed() {
     }
   });
 
-  // Seed sample Sales Agents matching standard accounts
+  // Create Rajabaksh Ilyala (Reporting Manager: Ink CRM)
+  const rajabakshaUser = await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Rajabaksh',
+    lastName: 'Ilyala',
+    email: 'ink@rajabaksha.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-RAJA',
+    department: 'SALES MANAGER',
+    reportingManager: salesAdmin._id,
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  // Create Ink Naushad (Reporting Manager: Rajabaksh Ilyala)
+  const naushadUser = await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Ink',
+    lastName: 'Naushad',
+    email: 'ink@naushad.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-NAUSHAD',
+    department: 'SALES MANAGER',
+    reportingManager: rajabakshaUser._id,
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  // Create Ink Sharfu (Reporting Manager: Ink Naushad)
+  const sharfuUser = await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Ink',
+    lastName: 'Sharfu',
+    email: 'ink@sharfu',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-SHARFU',
+    department: 'SALES MANAGER',
+    reportingManager: naushadUser._id,
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  // Create Mohammed Hashmat (Reporting Manager: Ink Sharfu)
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Mohammed',
+    lastName: 'Hashmat',
+    email: 'ink@hashmat',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-HASHMAT',
+    department: 'SALES MANAGER',
+    reportingManager: sharfuUser._id,
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  // Seed sample Sales Agents reporting to Ink CRM
   await User.create({
     organizationId: salesOrg._id,
     roleId: teliCallerRole._id,
@@ -211,6 +281,7 @@ async function seed() {
     isVerified: true,
     userCode: 'AGE-SUMA',
     department: 'Telemarketing',
+    reportingManager: salesAdmin._id,
     skipFace: true,
     skipLocation: true,
     isActive: true
@@ -226,6 +297,7 @@ async function seed() {
     isVerified: true,
     userCode: 'AGE-PRIYA',
     department: 'Telemarketing',
+    reportingManager: salesAdmin._id,
     skipFace: true,
     skipLocation: true,
     isActive: true
@@ -241,6 +313,7 @@ async function seed() {
     isVerified: true,
     userCode: 'AGE-SUNITA',
     department: 'AREA SALES MANAGER',
+    reportingManager: salesAdmin._id,
     skipFace: true,
     skipLocation: true,
     isActive: true
@@ -256,67 +329,7 @@ async function seed() {
     isVerified: true,
     userCode: 'AGE-ANKIT',
     department: 'PARTNER',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  // Seed Custom Users requested by User (Hashmat, Sharfu, Naushad, Rajabaksh)
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: adminRole._id,
-    firstName: 'Mohammed',
-    lastName: 'Hashmat',
-    email: 'ink@hashmat',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-HASHMAT',
-    department: 'SALES MANAGER',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: adminRole._id,
-    firstName: 'Ink',
-    lastName: 'Sharfu',
-    email: 'ink@sharfu',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-SHARFU',
-    department: 'SALES MANAGER',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: adminRole._id,
-    firstName: 'Ink',
-    lastName: 'Naushad',
-    email: 'ink@naushad.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-NAUSHAD',
-    department: 'SALES MANAGER',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: salesAdminRole._id,
-    firstName: 'Rajabaksh',
-    lastName: 'Ilyala',
-    email: 'ink@rajabaksha.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-RAJA',
-    department: 'SALES MANAGER',
+    reportingManager: salesAdmin._id,
     skipFace: true,
     skipLocation: true,
     isActive: true
