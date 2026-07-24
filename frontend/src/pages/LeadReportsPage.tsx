@@ -200,51 +200,6 @@ export default function LeadReportsPage() {
         </div>
       </div>
 
-      {/* METRIC SUMMARY CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="card-premium p-5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Filtered Leads</span>
-            <h4 className="text-2xl font-[850] text-[#0F172A] dark:text-white">{totalLeads}</h4>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100">
-            <Icons.Layers className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="card-premium p-5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Disbursed / Approved</span>
-            <h4 className="text-2xl font-[850] text-emerald-600 dark:text-emerald-400">{disbursedCount}</h4>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100">
-            <Icons.CheckCircle2 className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="card-premium p-5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Total Portfolio Value</span>
-            <h4 className="text-2xl font-[850] text-[#0F172A] dark:text-white">
-              ₹{(totalDisbursedValue / 100000).toFixed(1)}L
-            </h4>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100">
-            <Icons.Banknote className="w-5 h-5" />
-          </div>
-        </div>
-
-        <div className="card-premium p-5 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Conversion Rate</span>
-            <h4 className="text-2xl font-[850] text-sky-600 dark:text-sky-400">{conversionRate}%</h4>
-          </div>
-          <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100">
-            <Icons.TrendingUp className="w-5 h-5" />
-          </div>
-        </div>
-      </div>
-
       {/* DETAILED DATA TABLE */}
       <div className="card-premium overflow-hidden border border-[#EAE4DA] dark:border-slate-800">
         <div className="p-6 border-b border-[#EAE4DA] dark:border-slate-800 flex items-center justify-between">
