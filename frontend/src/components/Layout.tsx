@@ -13,7 +13,6 @@ import {
   SidebarItem,
   SidebarAccordion,
   SidebarGroup,
-  SidebarSearch,
   SidebarProfile,
   cn
 } from './layout/SidebarComponents';
@@ -42,6 +41,8 @@ export default function Layout({ children }: LayoutProps) {
   });
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
     if (darkMode) {
@@ -104,7 +105,7 @@ export default function Layout({ children }: LayoutProps) {
       {/* Clean Subtle Background Layer */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#F8F5F1] dark:bg-[#0f1115]" />
 
-      <div className="relative z-10 flex h-screen p-2 sm:p-5 gap-5">
+      <div className="relative z-10 flex h-screen p-2 sm:p-4 gap-4">
         
         {/* Mobile Backdrop */}
         <AnimatePresence>
@@ -119,47 +120,80 @@ export default function Layout({ children }: LayoutProps) {
           )}
         </AnimatePresence>
 
-        {/* Floating Sidebar */}
+        {/* Pure White Light Sidebar with Rich Elevation Shadow */}
         <aside className={cn(
-          "fixed inset-y-2 sm:inset-y-5 left-2 sm:left-5 z-50 lg:relative lg:inset-0",
-          "flex-shrink-0 w-[290px] rounded-[26px] bg-[#121214] dark:bg-[#0b0c0e] border border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.15)] flex flex-col transition-transform duration-300",
+          "fixed inset-y-2 sm:inset-y-4 left-2 sm:left-4 z-50 lg:relative lg:inset-0",
+          "flex-shrink-0 rounded-2xl bg-white !bg-white border border-[#E5E7EB] shadow-[0_4px_25px_rgba(0,0,0,0.08),4px_0_15px_rgba(0,0,0,0.05)] flex flex-col transition-all duration-250 ease-in-out",
+          isCollapsed ? "w-[68px]" : "w-[250px]",
           sidebarOpen ? "translate-x-0" : "-translate-x-[120%]",
           "lg:translate-x-0"
         )}>
           
-          {/* Logo Area */}
-          <div className="p-5 pb-3">
-            <div className="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white/[0.03] border border-white/[0.06] relative overflow-hidden group transition-all duration-300">
-              <div className="relative w-[56px] h-[56px] rounded-xl bg-white border border-white/10 flex items-center justify-center p-1.5 shadow-sm flex-shrink-0">
+          {/* Clean Enterprise Logo Area (Pure White Theme) */}
+          <div className="p-3.5 pb-3 border-b border-[#E5E7EB] flex items-center justify-between">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-[#E5E7EB]">
                 <img 
                   src={branding?.logoUrl || loginLogo} 
-                  alt="Ink CRM" 
-                  className="max-w-[90%] max-h-[90%] w-auto h-auto object-contain" 
-                  style={{ imageRendering: 'crisp-edges' }} 
+                  alt="Logo" 
+                  className="max-w-full max-h-full w-auto h-auto object-contain" 
                 />
               </div>
-              <div className="flex flex-col min-w-0 justify-center text-left">
-                <h1 className="text-sm font-bold tracking-tight text-white leading-snug uppercase line-clamp-2 break-words">
-                  {branding?.name || 'INK CRM'}
-                </h1>
-              </div>
+              {!isCollapsed && (
+                <span className="text-sm font-bold text-[#111827] tracking-tight truncate font-sans">
+                  {branding?.name || 'inkSales Enterprises'}
+                </span>
+              )}
             </div>
+
+            {/* Desktop Collapse Toggle */}
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="hidden lg:flex p-1 text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-colors"
+              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              {isCollapsed ? (
+                <Icons.PanelLeftOpen className="w-4 h-4" />
+              ) : (
+                <Icons.PanelLeftClose className="w-4 h-4" />
+              )}
+            </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar py-4 px-2 mt-2">
-            <div className="space-y-1 px-3 mt-4">
-              {/* 1. Create Lead */}
+          {/* Navigation Items Area */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
+            
+            {/* Group 1: Quick Actions */}
+            <SidebarGroup title="Quick Actions" isCollapsed={isCollapsed}>
               {(!branding || branding.enabledModules.includes('leads')) && (
-                <SidebarItem to="/modules/leads/new" label="CREATE LEAD" icon={Icons.UserPlus} colorClass="text-emerald-400" />
+                <SidebarItem 
+                  to="/modules/leads/new" 
+                  label="Create Lead" 
+                  icon={Icons.UserPlus} 
+                  colorClass="text-emerald-400"
+                  isCollapsed={isCollapsed}
+                />
               )}
-              
-              {/* 1.5 My Campaign */}
-              <SidebarItem to="/my-campaign" label="MY CAMPAIGN" icon={Icons.Megaphone} colorClass="text-orange-400" />
-              
-              {/* 2. Dashboard */}
-              <SidebarItem to="/" label="DASHBOARD" icon={Icons.LayoutDashboard} colorClass="text-indigo-400" />
+              <SidebarItem 
+                to="/my-campaign" 
+                label="My Campaign" 
+                icon={Icons.Megaphone} 
+                colorClass="text-orange-400"
+                isCollapsed={isCollapsed}
+              />
+            </SidebarGroup>
 
-              {/* 3. Core Modules (Dynamic) */}
+            {/* Group 2: Main Menu */}
+            <SidebarGroup title="Main Menu" isCollapsed={isCollapsed}>
+              <SidebarItem 
+                to="/" 
+                label="Dashboard" 
+                icon={Icons.LayoutDashboard} 
+                colorClass="text-indigo-400"
+                isCollapsed={isCollapsed}
+              />
+
+              {/* Dynamic Modules */}
               {modules.filter(m => {
                 const hiddenSettingsModules = ['departments', 'products', 'bankmasters', 'bankingpartners', 'companies', 'deals'];
                 if (hiddenSettingsModules.includes(m.apiPath.toLowerCase())) return false;
@@ -203,8 +237,23 @@ export default function Layout({ children }: LayoutProps) {
 
                 if (path === 'leads') {
                   return (
-                    <SidebarAccordion key={m._id} label="LEADS PROCESS" icon={icon} colorClass={colorClass} defaultOpen={true}>
-                      <SidebarItem to="/modules/leads" label="All Leads" icon={Icons.Layers} colorClass="text-indigo-400" indent badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} />
+                    <SidebarAccordion 
+                      key={m._id} 
+                      label="Leads Process" 
+                      icon={icon} 
+                      colorClass={colorClass} 
+                      defaultOpen={true}
+                      isCollapsed={isCollapsed}
+                    >
+                      <SidebarItem 
+                        to="/modules/leads" 
+                        label="All Leads" 
+                        icon={Icons.Layers} 
+                        colorClass="text-indigo-400" 
+                        indent 
+                        badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} 
+                        isCollapsed={isCollapsed}
+                      />
                       {(() => {
                         const statusCategories = [
                           { label: 'New', icon: Icons.Sparkles, color: 'text-indigo-400' },
@@ -234,6 +283,7 @@ export default function Layout({ children }: LayoutProps) {
                               colorClass={cat.color}
                               indent
                               badge={count}
+                              isCollapsed={isCollapsed}
                             />
                           );
                         });
@@ -246,44 +296,45 @@ export default function Layout({ children }: LayoutProps) {
                   <SidebarItem 
                     key={m._id} 
                     to={`/modules/${m.apiPath}`} 
-                    label={m.pluralLabel.toUpperCase()} 
+                    label={m.pluralLabel} 
                     icon={icon} 
-                    colorClass={colorClass} 
+                    colorClass={colorClass}
+                    isCollapsed={isCollapsed}
                   />
                 );
               })}
 
-              {/* 4. Campaigns accordion */}
+              {/* Campaigns accordion */}
               {modules.some(m => m.apiPath === 'campaigns') && (!branding || branding.enabledModules.includes('leads') || branding.enabledModules.includes('campaigns')) && (
-                <SidebarAccordion label="CAMPAIGNS" icon={Icons.Megaphone} colorClass="text-orange-400">
-                  <SidebarItem to="/modules/campaigns" label="Campaign List" icon={Icons.Target} colorClass="text-orange-400" indent />
-                  <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent />
+                <SidebarAccordion label="Campaigns" icon={Icons.Megaphone} colorClass="text-orange-400" isCollapsed={isCollapsed}>
+                  <SidebarItem to="/modules/campaigns" label="Campaign List" icon={Icons.Target} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
+                  <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
                 </SidebarAccordion>
               )}
 
-              {/* 5. Reports accordion (Image 1 feature) */}
-              <SidebarAccordion label="REPORTS" icon={Icons.BarChart3} colorClass="text-emerald-400">
-                <SidebarItem to="/reports/lead-reports" label="Lead Reports" icon={Icons.ListFilter} colorClass="text-emerald-400" indent />
-                <SidebarItem to="/reports/telecaller-reports" label="Telecaller's Reports" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent />
-                <SidebarItem to="/reports/telecaller-monthly" label="Telecaller's Monthly" icon={Icons.Calendar} colorClass="text-emerald-400" indent />
+              {/* Reports accordion */}
+              <SidebarAccordion label="Reports & Analytics" icon={Icons.BarChart3} colorClass="text-emerald-400" isCollapsed={isCollapsed}>
+                <SidebarItem to="/reports/lead-reports" label="Lead Reports" icon={Icons.ListFilter} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/reports/telecaller-reports" label="Telecaller's Reports" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/reports/telecaller-monthly" label="Telecaller's Monthly" icon={Icons.Calendar} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+              </SidebarAccordion>
+            </SidebarGroup>
+
+            {/* Group 3: Administration */}
+            <SidebarGroup title="Administration" isCollapsed={isCollapsed}>
+              <SidebarItem to="/settings" label="Settings" icon={Icons.Settings} colorClass="text-amber-400" isCollapsed={isCollapsed} />
+
+              <SidebarAccordion label="Security" icon={Icons.ShieldCheck} colorClass="text-red-400" isCollapsed={isCollapsed}>
+                <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
               </SidebarAccordion>
 
-
-              {/* 8. Setting */}
-              <SidebarItem to="/settings" label="SETTING" icon={Icons.Settings} colorClass="text-amber-400" />
-
-              {/* 9. Security */}
-              <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400">
-                <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent />
-                <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent />
-              </SidebarAccordion>
-
-              {/* 10. Users Management */}
-              <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-500" />
-            </div>
+              <SidebarItem to="/users-management" label="Users Management" icon={Icons.Users} colorClass="text-pink-400" isCollapsed={isCollapsed} />
+            </SidebarGroup>
           </div>
 
-          <SidebarProfile />
+          {/* Single Row Profile Footer */}
+          <SidebarProfile isCollapsed={isCollapsed} />
         </aside>
 
         {/* Main Content Area */}

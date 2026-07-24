@@ -87,7 +87,7 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
 
   applyTheme: (settings) => {
     const root = document.documentElement;
-    const sidebarBg = settings.sidebarBg || '#121214';
+    const sidebarBg = settings.sidebarBg || '#FFFFFF';
     
     // Apply CSS Variables
     root.style.setProperty('--color-primary', settings.primaryColor || '79 70 229');
