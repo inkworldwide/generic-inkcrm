@@ -261,6 +261,67 @@ async function seed() {
     isActive: true
   });
 
+  // Seed Custom Users requested by User (Hashmat, Sharfu, Naushad, Rajabaksh)
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Mohammed',
+    lastName: 'Hashmat',
+    email: 'ink@hashmat',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-HASHMAT',
+    department: 'SALES MANAGER',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Ink',
+    lastName: 'Sharfu',
+    email: 'ink@sharfu',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-SHARFU',
+    department: 'SALES MANAGER',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: adminRole._id,
+    firstName: 'Ink',
+    lastName: 'Naushad',
+    email: 'ink@naushad.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-NAUSHAD',
+    department: 'SALES MANAGER',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
+  await User.create({
+    organizationId: salesOrg._id,
+    roleId: salesAdminRole._id,
+    firstName: 'Rajabaksh',
+    lastName: 'Ilyala',
+    email: 'ink@rajabaksha.com',
+    passwordHash,
+    isVerified: true,
+    userCode: 'AGE-RAJA',
+    department: 'SALES MANAGER',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true
+  });
+
   const schoolAdmin = await User.create({
     organizationId: schoolOrg._id,
     roleId: schoolAdminRole._id,

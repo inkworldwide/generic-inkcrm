@@ -1,20 +1,20 @@
 [
   {
-    "_id": "6a61ecdffc734de7a7b17821",
-    "organizationId": "6a61ecdffc734de7a7b177f6",
-    "roleId": "6a61ecdffc734de7a7b177fc",
+    "_id": "6a630823c52625efaf347f85",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f60",
     "firstName": "Ink",
     "lastName": "CRM",
     "email": "ink@crm.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
     },
     "faceRecognition": {
       "enabled": true,
-      "encryptedEmbedding": "8bfc3cb46f7584437f51c38432ef6786:baf4a7ed3731256ae909d42616bf78efee5c8726461652ba05d616bc1445a260fabc68816219b645157697d55eea6f3a88241ef8aebddc3f3273fe433c22e0c72a0c5c0110963981b1db68704178222dcfd28fdc37b409818625440ad075494f11b5a95a109ac464bbee559adda737051e6748e6a30dd64713da3f95e1401efb7edf1b17e4db2644e8c8e5a01c393713ab58df31a1755aec78b3894fe849340aac3388fe6a94d2dded541bc2d53c03938ba1b910b3e2c444d44bf74693b2113f92ba6040d8298bbe6a7b69fadd265ecef39ac71f532f9db797f0bc9af61a463d64ad680d4bd14b6014bfaf6ca651041fb50124488f83e276aec84644a0c2ddf5dae419de8d26da8ecaaf29a4ab28d03c5d88f1945ec3b928b9728398de39310fb75d03b1c4e547e48504e0cd809a9fe995062c332397b55a7a4d4a49ec76c14290d29b16f6df8993d27f9cd6b7d738e109833c45e646d5a2c7a723ae587dba3bea8edddf703e7c902ca86054825eb92a2c978c029a5648da544579cc0e56c90f985dc077206400aacf322f64546277cdbbbf34e289bc3489ec6f480ae7f2bba62dcc7d1dd21536e1c21a6b73f0b3e06b34bd28649617e8277b45cd230211407b44b2c89b5cfc5b240e93321f5083955218d88c4a57f216ecf719a6c25b1815a79e8f045d0d6cd1abd90b1ca713f3699cd6aef4b7a1745fe810ad301f3df70cca63f7988fda8718f0f3a1358a1e6a4c9f",
-      "enrolledAt": "2026-07-23T10:28:47.335Z"
+      "encryptedEmbedding": "edd59a135cc03050574f4634665dda06:340fff35cb80d685a1f4fd2b4c8764ff3080daf3640d1d6938bf139f984348a6eec3bcbdc9cb0c41a142c5ede6dacf5d47e49ef9f8de46aee3f3ab7710173174af1085c9b47c6351fac7d031a6a1097a146013a12f3db14119b143b06bf0c51931116578af9f98e437f4f49c6e903572f96be3c6ca51b0e8cb663be4d9b67258ba694eaa0f5330f8b8183f1cfdd7d2a17f93df19f32b3b416d046110f625331b2d6069ef9778d29cfe745d1d50ab812b1ea7c552b0486ed3671ba7fc7977565f85e08182fde389a59ad0b6cd29e60df99dc7451a9c7765fcaa7bd83d74a901ada86dd2e86b79d45df1c794ae02b74c3e01d862740f080a7c61cc769e21a9d0791390cafe1d949fb147c6ef2410e5e122a81e76b8596f16c5ceccfa4696ce306063216beb8f766d35df338d323efd9cbcdb055d8b156bbd88f0d1f5a43faca96a235a62ab1ce762b332fa82e9a69d07deef292cacb339900cea450e2108420d661a5edf15c034c7fdb19575c0c1eb70ae4a20025c42aa8c78f24be0c253093c1069d219888d9bca45e0a89d1dd132cbb431f751a2e028f6192b4c506b9869d8978be6f10930305819f6d2c2ce943d6ec57be9353218890d1b8e9ebb80afbd3c9cdc2b01cea64be215918fd659fc296c576d6870562902adcaebf2e214d02ca0e3076a8b1fb7b672abb71ab8205e507da4ceec9f9e46329deb561d39659554c9639817ea98d2d99c038fca48d83f5af536",
+      "enrolledAt": "2026-07-24T06:37:23.916Z"
     },
     "locationRadius": 100,
     "refreshTokens": [],
@@ -24,18 +24,18 @@
     "isActive": true,
     "department": "Management",
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.338Z",
-    "updatedAt": "2026-07-23T10:28:47.338Z",
+    "createdAt": "2026-07-24T06:37:23.919Z",
+    "updatedAt": "2026-07-24T06:37:23.919Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17823",
-    "organizationId": "6a61ecdffc734de7a7b177f6",
-    "roleId": "6a61ecdffc734de7a7b17810",
+    "_id": "6a630823c52625efaf347f87",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f74",
     "firstName": "Suma",
     "lastName": "Dhar",
     "email": "agent.suma@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -52,18 +52,18 @@
     "isActive": true,
     "department": "Telemarketing",
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.342Z",
-    "updatedAt": "2026-07-23T10:28:47.342Z",
+    "createdAt": "2026-07-24T06:37:23.924Z",
+    "updatedAt": "2026-07-24T06:37:23.924Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17825",
-    "organizationId": "6a61ecdffc734de7a7b177f6",
-    "roleId": "6a61ecdffc734de7a7b17810",
+    "_id": "6a630823c52625efaf347f89",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f74",
     "firstName": "Priya",
     "lastName": "Sharma",
     "email": "agent.priya@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -80,18 +80,18 @@
     "isActive": true,
     "department": "Telemarketing",
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.345Z",
-    "updatedAt": "2026-07-23T10:28:47.345Z",
+    "createdAt": "2026-07-24T06:37:23.927Z",
+    "updatedAt": "2026-07-24T06:37:23.927Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17827",
-    "organizationId": "6a61ecdffc734de7a7b177f6",
-    "roleId": "6a61ecdffc734de7a7b17806",
+    "_id": "6a630823c52625efaf347f8b",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f6a",
     "firstName": "Sunita",
     "lastName": "Devi",
     "email": "agent.sunita@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -108,18 +108,18 @@
     "isActive": true,
     "department": "AREA SALES MANAGER",
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.348Z",
-    "updatedAt": "2026-07-23T10:28:47.348Z",
+    "createdAt": "2026-07-24T06:37:23.930Z",
+    "updatedAt": "2026-07-24T06:37:23.930Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17829",
-    "organizationId": "6a61ecdffc734de7a7b177f6",
-    "roleId": "6a61ecdffc734de7a7b17801",
+    "_id": "6a630823c52625efaf347f8d",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f65",
     "firstName": "Ankit",
     "lastName": "Verma",
     "email": "agent.ankit@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -136,18 +136,130 @@
     "isActive": true,
     "department": "PARTNER",
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.351Z",
-    "updatedAt": "2026-07-23T10:28:47.351Z",
+    "createdAt": "2026-07-24T06:37:23.933Z",
+    "updatedAt": "2026-07-24T06:37:23.933Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b1782b",
-    "organizationId": "6a61ecdffc734de7a7b177f8",
-    "roleId": "6a61ecdffc734de7a7b17815",
+    "_id": "6a630823c52625efaf347f8f",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f6f",
+    "firstName": "Mohammed",
+    "lastName": "Hashmat",
+    "email": "ink@hashmat",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [],
+    "failedLoginAttempts": 0,
+    "userCode": "AGE-HASHMAT",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [],
+    "createdAt": "2026-07-24T06:37:23.940Z",
+    "updatedAt": "2026-07-24T06:37:23.940Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a630823c52625efaf347f91",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f6f",
+    "firstName": "Ink",
+    "lastName": "Sharfu",
+    "email": "ink@sharfu",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [],
+    "failedLoginAttempts": 0,
+    "userCode": "AGE-SHARFU",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [],
+    "createdAt": "2026-07-24T06:37:23.943Z",
+    "updatedAt": "2026-07-24T06:37:23.943Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a630823c52625efaf347f93",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f6f",
+    "firstName": "Ink",
+    "lastName": "Naushad",
+    "email": "ink@naushad.com",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [],
+    "failedLoginAttempts": 0,
+    "userCode": "AGE-NAUSHAD",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [],
+    "createdAt": "2026-07-24T06:37:23.946Z",
+    "updatedAt": "2026-07-24T06:37:23.946Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a630823c52625efaf347f95",
+    "organizationId": "6a630823c52625efaf347f5a",
+    "roleId": "6a630823c52625efaf347f60",
+    "firstName": "Rajabaksh",
+    "lastName": "Ilyala",
+    "email": "ink@rajabaksha.com",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
+    "isVerified": true,
+    "twoFactor": {
+      "enabled": false
+    },
+    "faceRecognition": {
+      "enabled": false
+    },
+    "locationRadius": 100,
+    "refreshTokens": [],
+    "failedLoginAttempts": 0,
+    "userCode": "AGE-RAJA",
+    "skipFace": true,
+    "skipLocation": true,
+    "isActive": true,
+    "department": "SALES MANAGER",
+    "activeDevices": [],
+    "createdAt": "2026-07-24T06:37:23.949Z",
+    "updatedAt": "2026-07-24T06:37:23.949Z",
+    "__v": 0
+  },
+  {
+    "_id": "6a630823c52625efaf347f97",
+    "organizationId": "6a630823c52625efaf347f5c",
+    "roleId": "6a630823c52625efaf347f79",
     "firstName": "Albus",
     "lastName": "Dumbledore",
     "email": "admin@school.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -162,18 +274,18 @@
     "skipLocation": false,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.354Z",
-    "updatedAt": "2026-07-23T10:28:47.354Z",
+    "createdAt": "2026-07-24T06:37:23.953Z",
+    "updatedAt": "2026-07-24T06:37:23.953Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b1782d",
-    "organizationId": "6a61ecdffc734de7a7b177f8",
-    "roleId": "6a61ecdffc734de7a7b17819",
+    "_id": "6a630823c52625efaf347f99",
+    "organizationId": "6a630823c52625efaf347f5c",
+    "roleId": "6a630823c52625efaf347f7d",
     "firstName": "Teacher",
     "lastName": "Suma",
     "email": "suma@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -189,18 +301,18 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.358Z",
-    "updatedAt": "2026-07-23T10:28:47.358Z",
+    "createdAt": "2026-07-24T06:37:23.956Z",
+    "updatedAt": "2026-07-24T06:37:23.956Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b1782f",
-    "organizationId": "6a61ecdffc734de7a7b177f8",
-    "roleId": "6a61ecdffc734de7a7b17819",
+    "_id": "6a630823c52625efaf347f9b",
+    "organizationId": "6a630823c52625efaf347f5c",
+    "roleId": "6a630823c52625efaf347f7d",
     "firstName": "Priya",
     "lastName": "Sharma",
     "email": "priya@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -216,18 +328,18 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.361Z",
-    "updatedAt": "2026-07-23T10:28:47.361Z",
+    "createdAt": "2026-07-24T06:37:23.959Z",
+    "updatedAt": "2026-07-24T06:37:23.959Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17831",
-    "organizationId": "6a61ecdffc734de7a7b177f8",
-    "roleId": "6a61ecdffc734de7a7b17819",
+    "_id": "6a630823c52625efaf347f9d",
+    "organizationId": "6a630823c52625efaf347f5c",
+    "roleId": "6a630823c52625efaf347f7d",
     "firstName": "Sunita",
     "lastName": "Devi",
     "email": "sunita@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -243,18 +355,18 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.363Z",
-    "updatedAt": "2026-07-23T10:28:47.363Z",
+    "createdAt": "2026-07-24T06:37:23.961Z",
+    "updatedAt": "2026-07-24T06:37:23.961Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17833",
-    "organizationId": "6a61ecdffc734de7a7b177f8",
-    "roleId": "6a61ecdffc734de7a7b17819",
+    "_id": "6a630823c52625efaf347f9f",
+    "organizationId": "6a630823c52625efaf347f5c",
+    "roleId": "6a630823c52625efaf347f7d",
     "firstName": "Ankit",
     "lastName": "Verma",
     "email": "ankit@gmail.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -270,18 +382,18 @@
     "skipLocation": true,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.366Z",
-    "updatedAt": "2026-07-23T10:28:47.366Z",
+    "createdAt": "2026-07-24T06:37:23.964Z",
+    "updatedAt": "2026-07-24T06:37:23.964Z",
     "__v": 0
   },
   {
-    "_id": "6a61ecdffc734de7a7b17835",
-    "organizationId": "6a61ecdffc734de7a7b177fa",
-    "roleId": "6a61ecdffc734de7a7b1781d",
+    "_id": "6a630823c52625efaf347fa1",
+    "organizationId": "6a630823c52625efaf347f5e",
+    "roleId": "6a630823c52625efaf347f81",
     "firstName": "Gregory",
     "lastName": "House",
     "email": "admin@hospital.com",
-    "passwordHash": "$2a$10$cfgAHnV0ZgzpJPSm8gpLPOnrt7zXYhcTh4qEwZ8/e4LQbUTAUh9SK",
+    "passwordHash": "$2a$10$lKPXpmBWd5zoOqYfL/a3s.RYw1dnJ.Td.G0rtfHI0eMwtgKf3fl3u",
     "isVerified": true,
     "twoFactor": {
       "enabled": false
@@ -296,8 +408,8 @@
     "skipLocation": false,
     "isActive": true,
     "activeDevices": [],
-    "createdAt": "2026-07-23T10:28:47.369Z",
-    "updatedAt": "2026-07-23T10:28:47.369Z",
+    "createdAt": "2026-07-24T06:37:23.966Z",
+    "updatedAt": "2026-07-24T06:37:23.966Z",
     "__v": 0
   }
 ]
