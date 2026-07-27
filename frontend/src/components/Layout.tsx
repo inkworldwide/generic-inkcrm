@@ -130,34 +130,19 @@ export default function Layout({ children }: LayoutProps) {
         )}>
           
           {/* Clean Enterprise Logo Area (Pure White Theme) */}
-          <div className="p-3.5 pb-3 border-b border-[#E5E7EB] flex items-center justify-between">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-8 h-8 rounded-lg bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-[#E5E7EB]">
-                <img 
-                  src={branding?.logoUrl || loginLogo} 
-                  alt="Logo" 
-                  className="max-w-full max-h-full w-auto h-auto object-contain" 
-                />
-              </div>
-              {!isCollapsed && (
-                <span className="text-sm font-bold text-[#111827] tracking-tight truncate font-sans">
-                  {branding?.name || 'inkSales Enterprises'}
-                </span>
-              )}
+          <div className="p-3.5 pb-3 border-b border-[#E5E7EB] flex items-center gap-3 min-w-0">
+            <div className="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-[#E5E7EB] overflow-hidden">
+              <img 
+                src={branding?.logoUrl || loginLogo} 
+                alt="Logo" 
+                className="w-full h-full object-contain" 
+              />
             </div>
-
-            {/* Desktop Collapse Toggle */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden lg:flex p-1 text-[#6B7280] hover:text-[#111827] hover:bg-[#F3F4F6] rounded-md transition-colors"
-              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-            >
-              {isCollapsed ? (
-                <Icons.PanelLeftOpen className="w-4 h-4" />
-              ) : (
-                <Icons.PanelLeftClose className="w-4 h-4" />
-              )}
-            </button>
+            {!isCollapsed && (
+              <span className="text-base font-bold text-[#111827] tracking-tight truncate font-sans">
+                {branding?.name || 'inkSales Enterprises'}
+              </span>
+            )}
           </div>
 
           {/* Navigation Items Area */}
