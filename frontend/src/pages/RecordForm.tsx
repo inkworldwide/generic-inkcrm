@@ -12,20 +12,20 @@ import { useAuthStore } from '../store/authStore';
 
 // Normalization helper for bank names
 const normalizeBankForSubmit = (bankName: string): string => {
+  if (!bankName) return '';
   const name = bankName.trim().toLowerCase();
-  if (name === 'sbi') return 'state bank of india';
-  if (name === 'state bank of india') return 'state bank of india';
+  if (name === 'sbi' || name === 'state bank of india') return 'state bank of india';
   return name;
 };
 
 // Normalization helper for loan types
 const normalizeLoanForSubmit = (loanType: string): string => {
-  const type = loanType.trim().toLowerCase();
-  if (type === 'lap' || type === 'loan against property loan' || type === 'loan against property') {
-    return 'loan against property';
-  }
-  if (type === 'salaried personal loan' || type === 'personal loan') {
-    return 'personal loan';
+  if (!loanType) return '';
+  let type = loanType.trim().toLowerCase();
+  if (type === 'lap' || type.includes('loan against property')) return 'loan against property';
+  if (type.includes('salaried personal') || type === 'personal loan') return 'personal loan';
+  if (type.endsWith(' loan') && !['personal loan', 'home loan', 'business loan'].includes(type)) {
+    type = type.replace(/\s+loan$/, '').trim();
   }
   return type;
 };
@@ -427,7 +427,12 @@ export default function RecordForm() {
         }
       });
     } catch (err: any) {
-      showToast(err.response?.data?.error || 'Failed to submit form.', 'error');
+      const serverData = err.response?.data;
+      let msg = serverData?.error || 'Failed to submit form.';
+      if (serverData?.details && Array.isArray(serverData.details) && serverData.details.length > 0) {
+        msg = `${msg}: ${serverData.details.join(' ')}`;
+      }
+      showToast(msg, 'error');
     } finally {
       setSaving(false);
     }
@@ -499,9 +504,9 @@ export default function RecordForm() {
       }
     }
 
-    const inputBase = 'w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] border border-[#EAE4DA] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#1F2937] placeholder-slate-400';
+    const inputBase = 'w-full h-11 px-4 text-xs font-semibold bg-white border border-[#EAE4DA] rounded-xl focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all text-[#111827] placeholder-slate-400';
 
-    const labelClass = 'text-[10px] font-bold text-slate-500 uppercase tracking-widest block mb-1.5';
+    const labelClass = 'text-[11px] font-bold text-[#1F2937] uppercase tracking-wider block mb-1.5';
 
     if (field.name === 'source' && apiPath === 'leads') {
       return (
@@ -514,7 +519,7 @@ export default function RecordForm() {
             readOnly
             placeholder={field.label}
             {...register(field.name)}
-            className={`${inputBase} bg-slate-50/50 text-slate-400 cursor-not-allowed border-[#E8ECF4]`}
+            className={`${inputBase} bg-slate-100/80 text-[#111827] font-semibold cursor-not-allowed border-[#EAE4DA]`}
           />
         </div>
       );
@@ -535,7 +540,7 @@ export default function RecordForm() {
             rows={calculatedRows}
             placeholder={field.label}
             {...register(field.name)}
-            className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-50/50 border border-[#E8ECF4] rounded-xl text-slate-400 focus:outline-none cursor-not-allowed resize-none transition-all duration-200"
+            className="w-full px-4 py-2.5 text-xs font-semibold bg-slate-100/80 border border-[#EAE4DA] rounded-xl text-[#111827] focus:outline-none cursor-not-allowed resize-none transition-all duration-200"
           />
           {psmWarningMessage && (
             <p className="text-[11px] text-amber-600 font-bold mt-1 leading-normal">{psmWarningMessage}</p>
@@ -628,9 +633,9 @@ export default function RecordForm() {
             {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
           </label>
           <select {...register(field.name)} className={inputBase}>
-            <option value="" className={isLeads ? "bg-white text-slate-500" : "bg-slate-950 text-slate-300"}>-Select Agent-</option>
+            <option value="" className="bg-white text-slate-500 font-semibold">-Select Agent-</option>
             {filteredUsers.map((userOpt) => (
-              <option key={userOpt} value={userOpt} className={isLeads ? "bg-white text-slate-800" : "bg-slate-950 text-slate-200"}>
+              <option key={userOpt} value={userOpt} className="bg-white text-[#111827] font-bold">
                 {userOpt}
               </option>
             ))}
@@ -671,10 +676,10 @@ export default function RecordForm() {
             </label>
             <select {...register(field.name)} className={inputBase}>
               {field.name !== 'country' && (
-                <option value="" className={isLeads ? "bg-white text-slate-500" : "bg-slate-950 text-slate-300"}>-Select One-</option>
+                <option value="" className="bg-white text-slate-500 font-semibold">-Select One-</option>
               )}
               {opts?.map((opt) => (
-                <option key={opt} value={opt} className={isLeads ? "bg-white text-slate-800" : "bg-slate-950 text-slate-200"}>
+                <option key={opt} value={opt} className="bg-white text-[#111827] font-bold">
                   {opt}
                 </option>
               ))}
@@ -932,12 +937,12 @@ export default function RecordForm() {
     <div className="space-y-6 max-w-5xl mx-auto text-left">
       
       {/* breadcrumbs */}
-      <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+      <div className="flex items-center gap-2 text-[11px] font-bold text-[#374151] uppercase tracking-wider">
         <Link to={`/modules/${activeModule.apiPath}`} className="hover:text-indigo-600 transition-colors">
           {activeModule.pluralLabel}
         </Link>
         <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-500" />
-        <span className="text-slate-700">
+        <span className="text-[#111827] font-bold">
           {id ? `Edit: ${recordName}` : `New ${activeModule.singularLabel}`}
         </span>
       </div>
@@ -947,7 +952,7 @@ export default function RecordForm() {
         
         {/* Header */}
         <div className="px-8 py-5 border-b border-[#EAE4DA] bg-[#F8F5F1]/60 flex justify-between items-center">
-          <h2 className="text-xs font-[800] text-[#1F2937] uppercase tracking-wider">
+          <h2 className="text-sm font-bold text-[#111827] uppercase tracking-wider">
             {id ? `Edit ${activeModule.singularLabel}: ${recordName}` : `Create ${activeModule.singularLabel}`}
           </h2>
         </div>
@@ -959,7 +964,7 @@ export default function RecordForm() {
             <div key={section.title} className="p-8 border-b border-[#EAE4DA] last:border-b-0 space-y-6">
               <div className="flex items-center gap-2.5 pb-1.5 mb-2">
                 <div className="w-1.5 h-3.5 bg-[#17223B] rounded-full" />
-                <h3 className="text-[10px] font-[800] text-[#1F2937] uppercase tracking-wider">
+                <h3 className="text-xs font-bold text-[#111827] uppercase tracking-wider">
                   {section.title}
                 </h3>
               </div>

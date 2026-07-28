@@ -81,7 +81,7 @@ export const SidebarItem = ({
         <SidebarIcon icon={icon} colorClass={colorClass} active={isActive} />
 
         {!isCollapsed && (
-          <span className="truncate flex-1 text-left tracking-tight">
+          <span className="truncate flex-1 text-left tracking-tight uppercase font-semibold">
             {label}
           </span>
         )}
@@ -138,7 +138,7 @@ export const SidebarAccordion = ({
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <SidebarIcon icon={icon} colorClass={colorClass} active={isOpen} />
-          <span className="truncate tracking-tight">{label}</span>
+          <span className="truncate tracking-tight uppercase font-semibold">{label}</span>
         </div>
         <ChevronRight
           className={cn(

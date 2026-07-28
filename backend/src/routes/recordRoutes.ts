@@ -43,6 +43,12 @@ const authorizeModuleAction = async (
       return { allowed: true, scope: 'all' };
     }
 
+    // Allow reading settings/metadata modules (Departments, Bank Masters, Products, etc.)
+    const settingsModules = ['departments', 'bankmasters', 'bankingpartners', 'products'];
+    if (action === 'read' && settingsModules.includes(moduleName.toLowerCase())) {
+      return { allowed: true, scope: 'all' };
+    }
+
     const permission = role.permissions.modules.find(
       (m) => matchModuleName(m.moduleName, moduleName)
     );
@@ -474,7 +480,7 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
 router.post('/:apiPath', async (req: Request, res: Response): Promise<void> => {
   try {
     const { apiPath } = req.params;
-    const recordData = req.body;
+    const recordData = req.body.data ? req.body.data : req.body;
 
     const moduleDef = await ModuleDefinition.findOne({
       organizationId: req.organizationId,
@@ -492,6 +498,13 @@ router.post('/:apiPath', async (req: Request, res: Response): Promise<void> => {
       res.status(403).json({ error: `Access Denied: Create permission absent for module ${moduleDef.name}` });
       return;
     }
+
+    // Populate default values for missing fields
+    moduleDef.fields.forEach((field) => {
+      if (field.defaultValue && (recordData[field.name] === undefined || recordData[field.name] === null || recordData[field.name] === '')) {
+        recordData[field.name] = field.defaultValue;
+      }
+    });
 
     // Validate inputs
     const validationErrors = validateFields(moduleDef.fields, recordData);
@@ -612,7 +625,7 @@ router.get('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
 router.put('/:apiPath/:id', async (req: Request, res: Response): Promise<void> => {
   try {
     const { apiPath, id } = req.params;
-    const updateData = req.body;
+    const updateData = req.body.data ? req.body.data : req.body;
 
     const moduleDef = await ModuleDefinition.findOne({
       organizationId: req.organizationId,
@@ -879,7 +892,7 @@ router.get('/:apiPath/:id/activities', async (req: Request, res: Response): Prom
       organizationId: req.organizationId,
       recordId: new mongoose.Types.ObjectId(req.params.id)
     })
-    .populate('performedBy', 'firstName lastName email')
+    .populate('userId', 'firstName lastName email')
     .sort({ createdAt: -1 });
 
     res.status(200).json(activities);

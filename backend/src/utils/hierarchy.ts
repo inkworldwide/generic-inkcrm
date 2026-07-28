@@ -8,7 +8,7 @@ export class HierarchyService {
     if (!roleId) return false;
     try {
       const role = await Role.findById(roleId);
-      return !!(role && role.name === 'Super Admin' && role.isSystem);
+      return !!(role && role.name === 'Super Admin');
     } catch (e) {
       return false;
     }

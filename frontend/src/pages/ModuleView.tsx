@@ -593,12 +593,16 @@ export default function ModuleView() {
       if (editCampaignId) {
         // Update Campaign
         await api.put(`/records/campaigns/${editCampaignId}`, {
-          data: { campaignName: campaignNameInput }
+          data: { campaignName: campaignNameInput.trim() }
         });
       } else {
-        // Create Campaign
+        // Create Campaign with required default fields
         await api.post(`/records/campaigns`, {
-          data: { campaignName: campaignNameInput }
+          data: {
+            campaignName: campaignNameInput.trim(),
+            status: 'Planned',
+            type: 'Email'
+          }
         });
       }
       showAlertModal({
@@ -611,7 +615,12 @@ export default function ModuleView() {
       refetch();
       queryClient.invalidateQueries({ queryKey: ['records', 'campaigns'] });
     } catch (err: any) {
-      showToast(err.response?.data?.error || 'Failed to save campaign', 'error');
+      const serverData = err.response?.data;
+      let msg = serverData?.error || 'Failed to save campaign';
+      if (serverData?.details && Array.isArray(serverData.details) && serverData.details.length > 0) {
+        msg = `${msg}: ${serverData.details.join(' ')}`;
+      }
+      showToast(msg, 'error');
     } finally {
       setIsSubmittingCampaign(false);
     }
@@ -1018,27 +1027,6 @@ export default function ModuleView() {
                 {urlStatus ? `${urlStatus} Leads` : 'ALL LEADS'}
               </h1>
             </div>
-            
-            {/* Toggle Mode Buttons */}
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg self-start">
-              {(['table', 'kanban', 'calendar', 'timeline'] as ViewMode[]).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
-                    viewMode === mode
-                      ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-white shadow-sm'
-                      : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-350'
-                  }`}
-                >
-                  {mode === 'table' && <Icons.Table className="w-3.5 h-3.5" />}
-                  {mode === 'kanban' && <Icons.Kanban className="w-3.5 h-3.5" />}
-                  {mode === 'calendar' && <Icons.Calendar className="w-3.5 h-3.5" />}
-                  {mode === 'timeline' && <Icons.GitMerge className="w-3.5 h-3.5" />}
-                  {mode}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Premium White Control Bar */}
@@ -1125,28 +1113,8 @@ export default function ModuleView() {
             </div>
           </div>
 
-          {/* Tabs View Selector + Filtering Controls */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700/50 pb-4">
-            {/* Toggle Mode Buttons */}
-            <div className="flex items-center gap-1 bg-[#F8F5F1] border border-[#EAE4DA] p-1 rounded-xl self-start overflow-x-auto max-w-full w-full sm:w-auto hide-scrollbar snap-x">
-              {(['table', 'kanban', 'calendar', 'timeline'] as ViewMode[]).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setViewMode(mode)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 snap-start flex-shrink-0 flex-1 sm:flex-none ${
-                    viewMode === mode
-                      ? 'bg-[#17223B] text-white shadow-sm'
-                      : 'text-slate-500 hover:text-[#17223B]'
-                  }`}
-                >
-                  {mode === 'table' && <Icons.Table className="w-3.5 h-3.5" />}
-                  {mode === 'kanban' && <Icons.Kanban className="w-3.5 h-3.5" />}
-                  {mode === 'calendar' && <Icons.Calendar className="w-3.5 h-3.5" />}
-                  {mode === 'timeline' && <Icons.GitMerge className="w-3.5 h-3.5" />}
-                  {mode}
-                </button>
-              ))}
-            </div>
+          {/* Filtering Controls */}
+          <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 border-b border-slate-200 dark:border-slate-700/50 pb-4">
 
             {/* Inline Search / Filters */}
             <div className="flex items-center gap-3 flex-wrap">
@@ -1297,7 +1265,7 @@ export default function ModuleView() {
                         <div className="space-y-4">
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead Name:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.firstName} {rec.data?.lastName}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Location:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.location || 'N/A'}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Mobile No.:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.phone || 'N/A'}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Mobile No.:</span> <span className="text-slate-600 dark:text-slate-400 font-mono font-bold tracking-widest">xxxxxxxxxx</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Amount:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.budget ? '$' + Number(rec.data.budget).toLocaleString() : 'N/A'}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Case Details:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.caseDetails || 'N/A'}</span></div>
                         </div>
@@ -1325,12 +1293,8 @@ export default function ModuleView() {
 
                       <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700">
                         <div className="mb-3 flex items-center gap-2">
-                          <span className={`${
-                            rec.data?.status?.toUpperCase() === 'HOT' 
-                              ? 'bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30' 
-                              : 'bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30'
-                          } text-[10px] font-[800] uppercase tracking-wider px-3 py-1.5 rounded-lg`}>
-                            {rec.data?.status ? `${rec.data.status} Lead` : 'Lead Info'}
+                          <span className="text-[10px] font-[800] uppercase tracking-wider px-3 py-1.5 rounded-lg border bg-indigo-50 border-indigo-200 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30">
+                            {rec.data?.status ? rec.data.status.toUpperCase() : 'NEW'}
                           </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
@@ -1354,7 +1318,8 @@ export default function ModuleView() {
                               const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
                               const cleanPhone = phone.replace(/\D/g, '');
                               if (cleanPhone) {
-                                window.location.href = `tel:${cleanPhone}`;
+                                const leadName = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || 'Lead';
+                                showToast(`Initiating call to ${leadName}...`, 'info');
                               } else {
                                 showToast('No phone number available for this lead.', 'warning');
                               }
@@ -1538,11 +1503,11 @@ export default function ModuleView() {
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
               <div>
-                <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+                <h3 className="font-bold text-slate-800 dark:text-white text-lg uppercase tracking-tight">
                   Lead Audit History
                 </h3>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">
-                  {activeHistoryRecord.data?.firstName} {activeHistoryRecord.data?.lastName}
+                  Lead Name: <span className="text-slate-800 dark:text-white font-bold">{activeHistoryRecord.data?.firstName} {activeHistoryRecord.data?.lastName}</span> • Lead No: <span className="font-mono font-bold text-indigo-600">LND-{activeHistoryRecord._id.slice(-6).toUpperCase()}</span>
                 </p>
               </div>
               <button 
@@ -1554,7 +1519,7 @@ export default function ModuleView() {
             </div>
 
             {/* Modal Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
               {loadingHistory ? (
                 <div className="flex justify-center items-center py-12">
                   <Icons.Loader2 className="w-8 h-8 text-indigo-500 animate-spin" />
@@ -1563,7 +1528,7 @@ export default function ModuleView() {
                 <>
                   {/* Documents Section */}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-450 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
                       <Icons.File className="w-3.5 h-3.5 text-amber-500" /> Attached Documents ({historyDocuments.length})
                     </h4>
                     {historyDocuments.length > 0 ? (
@@ -1593,33 +1558,93 @@ export default function ModuleView() {
                     )}
                   </div>
 
-                  {/* Timeline Section */}
+                  {/* Comprehensive Audit & Modification History */}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-455 dark:text-slate-400 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                      <Icons.Clock className="w-3.5 h-3.5 text-indigo-500" /> System Activities
+                    <h4 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4 flex items-center gap-1.5 border-b border-slate-100 dark:border-slate-800 pb-2">
+                      <Icons.History className="w-4 h-4 text-indigo-600" /> Full Audit & Modification History ({historyActivities.length})
                     </h4>
+
                     {historyActivities.length > 0 ? (
-                      <div className="relative border-l border-slate-100 dark:border-slate-800 ml-2.5 pl-5 space-y-5">
-                        {historyActivities.map((act: any) => (
-                          <div key={act._id} className="relative">
-                            <span className="absolute -left-[26px] top-1 w-3 h-3 rounded-full bg-indigo-500 ring-4 ring-white dark:ring-slate-900" />
-                            <div className="text-xs">
-                              <p className="font-semibold text-slate-700 dark:text-slate-200">{act.action}</p>
-                              {act.details && Object.keys(act.details).length > 0 && (
-                                <p className="text-[11px] text-slate-500 mt-0.5">
-                                  {act.details.status && `Status: ${act.details.status}`}
-                                  {act.details.assignedTo && ` Assigned To: ${act.details.assignedTo}`}
-                                </p>
-                              )}
-                              <p className="text-[10px] text-slate-400 mt-1">
-                                {act.performedBy ? `${act.performedBy.firstName} ${act.performedBy.lastName}` : 'System'} • {new Date(act.createdAt).toLocaleString()}
-                              </p>
+                      <div className="relative border-l-2 border-slate-200 dark:border-slate-800 ml-3 pl-6 space-y-6">
+                        {historyActivities.map((act: any) => {
+                          const dateObj = new Date(act.createdAt);
+                          const dateStr = formatDate(act.createdAt);
+                          const timeStr = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                          const performerName = act.userId ? `${act.userId.firstName || ''} ${act.userId.lastName || ''}`.trim() : (act.performedBy ? `${act.performedBy.firstName || ''} ${act.performedBy.lastName || ''}`.trim() : 'System Router');
+                          
+                          const d = act.details || {};
+                          const fieldName = d.fieldName || '';
+                          const isStatusChange = act.type === 'status_change' || fieldName === 'status';
+                          const isAssignment = act.type === 'assignment' || fieldName === 'assignedTo';
+                          const isCreation = act.type === 'create';
+
+                          return (
+                            <div key={act._id} className="relative bg-slate-50/80 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 p-3.5 rounded-2xl space-y-2">
+                              {/* Dot Icon */}
+                              <span className={`absolute -left-[31px] top-4 w-4 h-4 rounded-full border-2 border-white dark:border-slate-900 ${
+                                isStatusChange ? 'bg-indigo-600' : isAssignment ? 'bg-emerald-600' : isCreation ? 'bg-blue-600' : 'bg-amber-500'
+                              }`} />
+
+                              {/* Header & Event Badge */}
+                              <div className="flex items-center justify-between gap-2">
+                                <span className={`text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-md border ${
+                                  isStatusChange ? 'bg-indigo-50 border-indigo-200 text-indigo-700' :
+                                  isAssignment ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                                  isCreation ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                                  'bg-amber-50 border-amber-200 text-amber-700'
+                                }`}>
+                                  {isStatusChange ? 'STATUS UPDATED' : isAssignment ? 'LEAD TRANSFERRED / ASSIGNED' : isCreation ? 'LEAD CREATED' : `EDITED (${fieldName.toUpperCase()})`}
+                                </span>
+                                <span className="text-[10px] font-bold text-slate-400">
+                                  {dateStr} • {timeStr}
+                                </span>
+                              </div>
+
+                              {/* Activity Details: Old vs New Values */}
+                              <div className="text-xs space-y-1">
+                                {isStatusChange && (
+                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                    Status Changed: <span className="line-through text-rose-500 font-bold">{d.oldValue || 'N/A'}</span> ➔ <span className="text-emerald-600 font-bold uppercase">{d.newValue || 'Updated'}</span>
+                                  </div>
+                                )}
+
+                                {isAssignment && (
+                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                    Lead Transferred To: <span className="line-through text-slate-400">{d.oldValue || 'Unassigned'}</span> ➔ <span className="text-indigo-600 font-bold">{d.newValue || 'Agent'}</span>
+                                  </div>
+                                )}
+
+                                {!isStatusChange && !isAssignment && !isCreation && (
+                                  <div className="font-semibold text-slate-800 dark:text-slate-200">
+                                    {fieldName ? `Field '${fieldName}': ` : ''}
+                                    <span className="line-through text-slate-400">{String(d.oldValue || 'N/A')}</span> ➔ <span className="text-slate-900 dark:text-white font-bold">{String(d.newValue || 'N/A')}</span>
+                                  </div>
+                                )}
+
+                                {isCreation && (
+                                  <div className="font-semibold text-slate-700 dark:text-slate-300">
+                                    Lead initially registered in system with status: <span className="font-bold text-indigo-600 uppercase">{activeHistoryRecord.data?.status || 'New'}</span>
+                                  </div>
+                                )}
+
+                                {d.commentText && (
+                                  <p className="text-[11px] text-slate-500 italic mt-1 bg-white dark:bg-slate-900 p-2 rounded-lg border border-slate-100 dark:border-slate-800">
+                                    "{d.commentText}"
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* Performed By footer */}
+                              <div className="text-[10px] text-slate-400 font-semibold pt-1 border-t border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between">
+                                <span>Action by: <span className="text-slate-700 dark:text-slate-300 font-bold">{performerName}</span></span>
+                                <span>Record ID: LND-{activeHistoryRecord._id.slice(-6).toUpperCase()}</span>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : (
-                      <p className="text-xs text-slate-400 italic">No activity log found for this record.</p>
+                      <p className="text-xs text-slate-400 italic text-center py-6">No modification history logged for this record yet.</p>
                     )}
                   </div>
                 </>
@@ -1630,7 +1655,7 @@ export default function ModuleView() {
             <div className="p-4 bg-slate-50/50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-end">
               <button 
                 onClick={() => setActiveHistoryRecord(null)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-semibold text-xs rounded-xl transition-colors"
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs rounded-xl uppercase transition-colors"
               >
                 Close
               </button>

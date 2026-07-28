@@ -313,43 +313,6 @@ export default function Dashboard() {
 
         {/* Right Controls & Quick Actions */}
         <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap justify-between sm:justify-end">
-          {/* Quick Filter Badges */}
-          <div className="hidden md:flex items-center gap-1.5 bg-[#F8F5F1] dark:bg-slate-800 p-1 rounded-xl border border-[#EAE4DA] dark:border-slate-700">
-            <button
-              onClick={() => setActiveTab('overview')}
-              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all rounded-lg font-bold ${
-                activeTab === 'overview'
-                  ? 'text-[#17223B] dark:text-white bg-white dark:bg-slate-700 shadow-2xs'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
-              }`}
-            >
-              Overview
-            </button>
-            <button
-              onClick={() => {
-                setActiveTab('pipeline');
-                document.getElementById('pipeline-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all rounded-lg ${
-                activeTab === 'pipeline'
-                  ? 'text-[#17223B] dark:text-white bg-white dark:bg-slate-700 shadow-2xs font-bold'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 font-semibold'
-              }`}
-            >
-              Pipeline
-            </button>
-            <button
-              onClick={() => setActiveTab('followups')}
-              className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-all rounded-lg ${
-                activeTab === 'followups'
-                  ? 'text-[#17223B] dark:text-white bg-white dark:bg-slate-700 shadow-2xs font-bold'
-                  : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 font-semibold'
-              }`}
-            >
-              Follow-ups
-            </button>
-          </div>
-
           {/* Add Lead Button */}
           <Link 
             to="/modules/leads/new" 
@@ -623,7 +586,8 @@ export default function Dashboard() {
                           const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
                           const cleanPhone = phone.replace(/\D/g, '');
                           if (cleanPhone) {
-                            window.location.href = `tel:${cleanPhone}`;
+                            const leadName = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || 'Lead';
+                            showToast(`Initiating call to ${leadName}...`, 'info');
                           } else {
                             showToast('No phone number available for this lead.', 'warning');
                           }

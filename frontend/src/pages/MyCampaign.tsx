@@ -201,7 +201,8 @@ export default function MyCampaign() {
       showToast('No phone number available for this lead.', 'warning');
       return;
     }
-    window.location.href = `tel:${phone}`;
+    const leadName = `${lead.data?.firstName || ''} ${lead.data?.lastName || ''}`.trim() || 'Lead';
+    showToast(`Initiating call to ${leadName}...`, 'info');
   };
 
   const handleSaveLead = async (leadId: string) => {

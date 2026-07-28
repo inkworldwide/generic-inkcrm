@@ -11,6 +11,7 @@ export default function UsersManagement() {
   const { showConfirm, showToast, showAlertModal } = useToastStore();
 
   const [users, setUsers] = useState<any[]>([]);
+  const [allManagers, setAllManagers] = useState<any[]>([]);
   const [roles, setRoles] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
   const [userForm, setUserForm] = useState({
@@ -40,12 +41,14 @@ export default function UsersManagement() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [resUsers, resRoles, resDepts] = await Promise.all([
-        api.get('/auth/users'),
-        api.get('/auth/roles'),
-        api.get('/records/departments')
+      const [resUsers, resDropdownUsers, resRoles, resDepts] = await Promise.all([
+        api.get('/auth/users').catch(() => ({ data: [] })),
+        api.get('/auth/users?purpose=dropdown').catch(() => ({ data: [] })),
+        api.get('/auth/roles').catch(() => ({ data: [] })),
+        api.get('/records/departments').catch(() => ({ data: [] }))
       ]);
       setUsers(resUsers.data || []);
+      setAllManagers(resDropdownUsers.data || []);
       setRoles(resRoles.data || []);
       setDepartments(resDepts.data?.records || resDepts.data || []);
     } catch (err) {
@@ -463,7 +466,7 @@ export default function UsersManagement() {
               Select a manager for {selectedUserForManager.firstName} {selectedUserForManager.lastName}.
             </p>
             <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
-              {users.filter(user => user._id !== selectedUserForManager._id).map(manager => (
+              {(allManagers.length > 0 ? allManagers : users).filter(user => user._id !== selectedUserForManager._id).map(manager => (
                 <button
                   key={manager._id}
                   type="button"
@@ -479,7 +482,7 @@ export default function UsersManagement() {
                   </div>
                 </button>
               ))}
-              {users.filter(user => user._id !== selectedUserForManager._id).length === 0 && (
+              {(allManagers.length > 0 ? allManagers : users).filter(user => user._id !== selectedUserForManager._id).length === 0 && (
                 <div className="text-center text-slate-500 text-xs py-4">No other users available.</div>
               )}
             </div>

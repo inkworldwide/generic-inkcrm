@@ -129,9 +129,9 @@ export default function Layout({ children }: LayoutProps) {
           "lg:translate-x-0"
         )}>
           
-          {/* Clean Enterprise Logo Area (Pure White Theme) */}
-          <div className="p-3.5 pb-3 border-b border-[#E5E7EB] flex items-center gap-3 min-w-0">
-            <div className="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm flex-shrink-0 border border-[#E5E7EB] overflow-hidden">
+          {/* Sleek Premium Enterprise Logo Header */}
+          <div className="h-[72px] px-3.5 flex items-center gap-3 border-b border-[#E5E7EB] bg-gradient-to-r from-white via-slate-50/40 to-indigo-50/20 rounded-t-2xl min-w-0 select-none">
+            <div className="w-11 h-11 rounded-xl bg-white p-1 flex items-center justify-center shadow-md shadow-indigo-950/5 flex-shrink-0 border border-slate-200/80 transition-all duration-200 overflow-hidden">
               <img 
                 src={branding?.logoUrl || loginLogo} 
                 alt="Logo" 
@@ -139,9 +139,14 @@ export default function Layout({ children }: LayoutProps) {
               />
             </div>
             {!isCollapsed && (
-              <span className="text-base font-bold text-[#111827] tracking-tight truncate font-sans">
-                {branding?.name || 'inkSales Enterprises'}
-              </span>
+              <div className="flex flex-col min-w-0 text-left">
+                <span className="text-[14px] font-extrabold text-[#111827] tracking-tight truncate leading-tight font-sans">
+                  {branding?.name || 'inkSales Enterprises'}
+                </span>
+                <span className="text-[9.5px] font-bold text-indigo-600 uppercase tracking-wider leading-none mt-1">
+                  Enterprise CRM
+                </span>
+              </div>
             )}
           </div>
 
@@ -149,11 +154,11 @@ export default function Layout({ children }: LayoutProps) {
           <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
             
             {/* Group 1: Quick Actions */}
-            <SidebarGroup title="Quick Actions" isCollapsed={isCollapsed}>
+            <SidebarGroup title="QUICK ACTIONS" isCollapsed={isCollapsed}>
               {(!branding || branding.enabledModules.includes('leads')) && (
                 <SidebarItem 
                   to="/modules/leads/new" 
-                  label="Create Lead" 
+                  label="CREATE LEAD" 
                   icon={Icons.UserPlus} 
                   colorClass="text-emerald-400"
                   isCollapsed={isCollapsed}
@@ -161,7 +166,7 @@ export default function Layout({ children }: LayoutProps) {
               )}
               <SidebarItem 
                 to="/my-campaign" 
-                label="My Campaign" 
+                label="MY CAMPAIGN" 
                 icon={Icons.Megaphone} 
                 colorClass="text-orange-400"
                 isCollapsed={isCollapsed}
@@ -169,10 +174,10 @@ export default function Layout({ children }: LayoutProps) {
             </SidebarGroup>
 
             {/* Group 2: Main Menu */}
-            <SidebarGroup title="Main Menu" isCollapsed={isCollapsed}>
+            <SidebarGroup title="MAIN MENU" isCollapsed={isCollapsed}>
               <SidebarItem 
                 to="/" 
-                label="Dashboard" 
+                label="DASHBOARD" 
                 icon={Icons.LayoutDashboard} 
                 colorClass="text-indigo-400"
                 isCollapsed={isCollapsed}
@@ -224,7 +229,7 @@ export default function Layout({ children }: LayoutProps) {
                   return (
                     <SidebarAccordion 
                       key={m._id} 
-                      label="Leads Process" 
+                      label="LEADS PROCESS" 
                       icon={icon} 
                       colorClass={colorClass} 
                       defaultOpen={true}
@@ -232,7 +237,7 @@ export default function Layout({ children }: LayoutProps) {
                     >
                       <SidebarItem 
                         to="/modules/leads" 
-                        label="All Leads" 
+                        label="ALL LEADS" 
                         icon={Icons.Layers} 
                         colorClass="text-indigo-400" 
                         indent 
@@ -241,28 +246,28 @@ export default function Layout({ children }: LayoutProps) {
                       />
                       {(() => {
                         const statusCategories = [
-                          { label: 'New', icon: Icons.Sparkles, color: 'text-indigo-400' },
-                          { label: 'Hot', icon: Icons.Flame, color: 'text-red-400' },
-                          { label: 'Warm', icon: Icons.Sun, color: 'text-amber-400' },
-                          { label: 'Cedil Pending', icon: Icons.FileWarning, color: 'text-pink-400' },
-                          { label: 'Document Pending', icon: Icons.FileText, color: 'text-teal-400' },
-                          { label: 'Approval Pending', icon: Icons.Clock, color: 'text-orange-400' },
-                          { label: 'Approved', icon: Icons.CheckCircle, color: 'text-green-400' },
-                          { label: 'Disbursed', icon: Icons.Banknote, color: 'text-lime-400' },
-                          { label: 'Rejected', icon: Icons.XOctagon, color: 'text-rose-400' },
-                          { label: 'Followup', icon: Icons.PhoneCall, color: 'text-sky-400' },
-                          { label: 'Dropped', icon: Icons.ArrowDownCircle, color: 'text-red-400' },
-                          { label: 'Pending', icon: Icons.Hourglass, color: 'text-yellow-400' },
+                          { label: 'NEW', icon: Icons.Sparkles, color: 'text-indigo-400', query: 'New' },
+                          { label: 'HOT', icon: Icons.Flame, color: 'text-red-400', query: 'Hot' },
+                          { label: 'WARM', icon: Icons.Sun, color: 'text-amber-400', query: 'Warm' },
+                          { label: 'CEDIL PENDING', icon: Icons.FileWarning, color: 'text-pink-400', query: 'Cedil Pending' },
+                          { label: 'DOCUMENT PENDING', icon: Icons.FileText, color: 'text-teal-400', query: 'Document Pending' },
+                          { label: 'APPROVAL PENDING', icon: Icons.Clock, color: 'text-orange-400', query: 'Approval Pending' },
+                          { label: 'APPROVED', icon: Icons.CheckCircle, color: 'text-green-400', query: 'Approved' },
+                          { label: 'DISBURSED', icon: Icons.Banknote, color: 'text-lime-400', query: 'Disbursed' },
+                          { label: 'REJECTED', icon: Icons.XOctagon, color: 'text-rose-400', query: 'Rejected' },
+                          { label: 'FOLLOWUP', icon: Icons.PhoneCall, color: 'text-sky-400', query: 'Followup' },
+                          { label: 'DROPPED', icon: Icons.ArrowDownCircle, color: 'text-red-400', query: 'Dropped' },
+                          { label: 'PENDING', icon: Icons.Hourglass, color: 'text-yellow-400', query: 'Pending' },
                         ];
                         const records = leadsData?.records || [];
                         return statusCategories.map((cat) => {
                           const count = records.filter((r: any) =>
-                            (r.data?.status || '').toLowerCase() === cat.label.toLowerCase()
+                            (r.data?.status || '').toLowerCase() === cat.query.toLowerCase()
                           ).length;
                           return (
                             <SidebarItem
                               key={cat.label}
-                              to={`/modules/leads?status=${encodeURIComponent(cat.label)}`}
+                              to={`/modules/leads?status=${encodeURIComponent(cat.query)}`}
                               label={cat.label}
                               icon={cat.icon}
                               colorClass={cat.color}
@@ -281,7 +286,7 @@ export default function Layout({ children }: LayoutProps) {
                   <SidebarItem 
                     key={m._id} 
                     to={`/modules/${m.apiPath}`} 
-                    label={m.pluralLabel} 
+                    label={m.pluralLabel.toUpperCase()} 
                     icon={icon} 
                     colorClass={colorClass}
                     isCollapsed={isCollapsed}
@@ -291,30 +296,30 @@ export default function Layout({ children }: LayoutProps) {
 
               {/* Campaigns accordion */}
               {modules.some(m => m.apiPath === 'campaigns') && (!branding || branding.enabledModules.includes('leads') || branding.enabledModules.includes('campaigns')) && (
-                <SidebarAccordion label="Campaigns" icon={Icons.Megaphone} colorClass="text-orange-400" isCollapsed={isCollapsed}>
-                  <SidebarItem to="/modules/campaigns" label="Campaign List" icon={Icons.Target} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
-                  <SidebarItem to="/modules/campaignassignments" label="Assign Campaign" icon={Icons.UserCheck} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
+                <SidebarAccordion label="CAMPAIGNS" icon={Icons.Megaphone} colorClass="text-orange-400" isCollapsed={isCollapsed}>
+                  <SidebarItem to="/modules/campaigns" label="CAMPAIGN LIST" icon={Icons.Target} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
+                  <SidebarItem to="/modules/campaignassignments" label="ASSIGN CAMPAIGN" icon={Icons.UserCheck} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
                 </SidebarAccordion>
               )}
 
               {/* Reports accordion */}
-              <SidebarAccordion label="Reports & Analytics" icon={Icons.BarChart3} colorClass="text-emerald-400" isCollapsed={isCollapsed}>
-                <SidebarItem to="/reports/lead-reports" label="Lead Reports" icon={Icons.ListFilter} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/reports/telecaller-reports" label="Telecaller's Reports" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/reports/telecaller-monthly" label="Telecaller's Monthly" icon={Icons.Calendar} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+              <SidebarAccordion label="REPORTS & ANALYTICS" icon={Icons.BarChart3} colorClass="text-emerald-400" isCollapsed={isCollapsed}>
+                <SidebarItem to="/reports/lead-reports" label="LEAD REPORTS" icon={Icons.ListFilter} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/reports/telecaller-reports" label="TELECALLER'S REPORTS" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/reports/telecaller-monthly" label="TELECALLER'S MONTHLY" icon={Icons.Calendar} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
               </SidebarAccordion>
             </SidebarGroup>
 
             {/* Group 3: Administration */}
-            <SidebarGroup title="Administration" isCollapsed={isCollapsed}>
-              <SidebarItem to="/settings" label="Settings" icon={Icons.Settings} colorClass="text-amber-400" isCollapsed={isCollapsed} />
+            <SidebarGroup title="ADMINISTRATION" isCollapsed={isCollapsed}>
+              <SidebarItem to="/settings" label="SETTINGS" icon={Icons.Settings} colorClass="text-amber-400" isCollapsed={isCollapsed} />
 
-              <SidebarAccordion label="Security" icon={Icons.ShieldCheck} colorClass="text-red-400" isCollapsed={isCollapsed}>
-                <SidebarItem to="/access-privilege" label="Access Privilege" icon={Icons.ShieldCheck} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/lead-transfer" label="Lead Transfer" icon={Icons.Send} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
+              <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400" isCollapsed={isCollapsed}>
+                <SidebarItem to="/access-privilege" label="ACCESS PRIVILEGE" icon={Icons.ShieldCheck} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/lead-transfer" label="LEAD TRANSFER" icon={Icons.Send} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
               </SidebarAccordion>
 
-              <SidebarItem to="/users-management" label="Users Management" icon={Icons.Users} colorClass="text-pink-400" isCollapsed={isCollapsed} />
+              <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-400" isCollapsed={isCollapsed} />
             </SidebarGroup>
           </div>
 
