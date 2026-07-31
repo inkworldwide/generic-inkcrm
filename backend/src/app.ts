@@ -19,6 +19,8 @@ import dashboardRoutes from './routes/dashboardRoutes';
 import documentRoutes from './routes/documentRoutes';
 import auditRoutes from './routes/auditRoutes';
 import statusRoutes from './routes/statusRoutes';
+import notificationRoutes from './routes/notificationRoutes';
+import searchRoutes from './routes/searchRoutes';
 
 const app = express();
 
@@ -139,6 +141,8 @@ app.use('/api/v1/dashboard', dashboardRoutes);
 app.use('/api/v1/documents', documentRoutes);
 app.use('/api/v1/audit', auditRoutes);
 app.use('/api/v1/statuses', statusRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/search', searchRoutes);
 
 // Base route
 app.get('/', (req, res) => {

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import { useModuleStore } from '../store/moduleStore';
 import { useAuthStore } from '../store/authStore';
@@ -12,6 +12,7 @@ import * as Icons from 'lucide-react';
 import {
   SidebarItem,
   SidebarAccordion,
+  SidebarSubAccordion,
   SidebarGroup,
   SidebarProfile,
   cn
@@ -42,6 +43,28 @@ export default function Layout({ children }: LayoutProps) {
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleGlobalSearch = async (val: string) => {
+    setSearchQuery(val);
+    if (!val.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const res = await api.get('/search', { params: { q: val } });
+      setSearchResults(res.data || []);
+    } catch (e) {
+      console.error('Search error:', e);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   useEffect(() => {
@@ -70,15 +93,61 @@ export default function Layout({ children }: LayoutProps) {
     refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
-  const { data: notificationsData } = useQuery({
-    queryKey: ['notifications'],
+  const queryClient = useQueryClient();
+
+  const { data: notificationsData, refetch: refetchNotifications } = useQuery({
+    queryKey: ['user-notifications'],
     queryFn: async () => {
-      const res = await api.get('/audit', { params: { limit: 5 } });
+      const res = await api.get('/notifications', { params: { limit: 20 } });
       return res.data;
     },
-    refetchInterval: (query) => (query.state.error ? false : 15000),
+    refetchInterval: (query) => (query.state.error ? false : 5000),
     enabled: !!user
   });
+
+  const { data: unreadData, refetch: refetchUnread } = useQuery({
+    queryKey: ['unread-notifications-count'],
+    queryFn: async () => {
+      const res = await api.get('/notifications/unread-count');
+      return res.data;
+    },
+    refetchInterval: (query) => (query.state.error ? false : 5000),
+    enabled: !!user
+  });
+
+  const handleMarkAsRead = async (id: string, link?: string) => {
+    try {
+      await api.put(`/notifications/${id}/read`);
+      refetchNotifications();
+      refetchUnread();
+      if (link) {
+        setShowNotifications(false);
+        navigate(link);
+      }
+    } catch (e) {
+      console.error('Failed to mark notification read', e);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await api.put('/notifications/read-all');
+      refetchNotifications();
+      refetchUnread();
+    } catch (e) {
+      console.error('Failed to mark all read', e);
+    }
+  };
+
+  const handleClearAllNotifications = async () => {
+    try {
+      await api.delete('/notifications/clear-all');
+      refetchNotifications();
+      refetchUnread();
+    } catch (e) {
+      console.error('Failed to clear notifications', e);
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -92,7 +161,7 @@ export default function Layout({ children }: LayoutProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
-        // focus search input logic
+        searchInputRef.current?.focus();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -232,7 +301,7 @@ export default function Layout({ children }: LayoutProps) {
                       label="LEADS PROCESS" 
                       icon={icon} 
                       colorClass={colorClass} 
-                      defaultOpen={true}
+                      defaultOpen={false}
                       isCollapsed={isCollapsed}
                     >
                       <SidebarItem 
@@ -308,6 +377,12 @@ export default function Layout({ children }: LayoutProps) {
                 <SidebarItem to="/reports/telecaller-reports" label="TELECALLER'S REPORTS" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
                 <SidebarItem to="/reports/telecaller-monthly" label="TELECALLER'S MONTHLY" icon={Icons.Calendar} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
               </SidebarAccordion>
+
+              {/* Separate Funnel Accordion */}
+              <SidebarAccordion label="FUNNEL" icon={Icons.Filter} colorClass="text-indigo-500" isCollapsed={isCollapsed}>
+                <SidebarItem to="/reports/funnel-monthly" label="MONTHLY FUNNEL" icon={Icons.CalendarDays} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
+                <SidebarItem to="/reports/funnel-annual" label="ANNUAL FUNNEL" icon={Icons.TrendingUp} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
+              </SidebarAccordion>
             </SidebarGroup>
 
             {/* Group 3: Administration */}
@@ -346,6 +421,9 @@ export default function Layout({ children }: LayoutProps) {
                     if (path === '/reports/lead-reports') return 'Lead Reports';
                     if (path === '/reports/telecaller-reports') return "Telecaller's Reports";
                     if (path === '/reports/telecaller-monthly') return "Telecaller's Monthly Report";
+                    if (path === '/reports/campaign-report') return 'My Campaign Report';
+                    if (path === '/reports/funnel-monthly') return 'Monthly Lead Funnel';
+                    if (path === '/reports/funnel-annual') return 'Annual Lead Funnel';
                     if (path === '/reports') return 'Reports & Analytics';
                     if (path === '/users-management') return 'Users Management';
                     if (path === '/settings') return 'Settings';
@@ -371,6 +449,109 @@ export default function Layout({ children }: LayoutProps) {
                   })()}
                 </p>
               </div>
+            </div>
+
+            {/* Header Global Search Bar */}
+            <div className="hidden md:flex items-center relative max-w-xs lg:max-w-md w-full mx-4">
+              <div className="relative w-full flex items-center">
+                <Icons.Search className="absolute left-3.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => handleGlobalSearch(e.target.value)}
+                  placeholder="Search lead no, contact no, name, firm..."
+                  className="w-full h-9 pl-9 pr-14 text-xs bg-slate-100/80 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 rounded-full focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-800 dark:text-white font-semibold placeholder:text-slate-400 transition-all shadow-2xs"
+                />
+                {searchQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery('');
+                      setSearchResults([]);
+                    }}
+                    className="absolute right-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  >
+                    <Icons.X className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <kbd className="absolute right-3 hidden lg:inline-block text-[9px] font-mono font-bold text-slate-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 px-1.5 py-0.5 rounded shadow-2xs">
+                    ⌘K
+                  </kbd>
+                )}
+              </div>
+
+              {/* Global Search Results Dropdown */}
+              <AnimatePresence>
+                {searchQuery && (
+                  <>
+                    <div className="fixed inset-0 z-30" onClick={() => setSearchQuery('')} />
+                    <motion.div 
+                      initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+                      className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-2xl rounded-2xl overflow-hidden max-h-96 overflow-y-auto z-40 p-2 space-y-2 text-left"
+                    >
+                      {isSearching ? (
+                        <div className="p-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2 font-medium">
+                          <Icons.Loader2 className="w-4 h-4 animate-spin text-indigo-500" />
+                          Searching leads...
+                        </div>
+                      ) : searchResults.length === 0 ? (
+                        <div className="p-6 text-center text-xs text-slate-400 font-medium">
+                          No lead, contact, or firm matching "{searchQuery}"
+                        </div>
+                      ) : (
+                        searchResults.map(({ module, records }) => (
+                          <div key={module._id} className="space-y-1">
+                            <div className="px-3 py-1 bg-slate-50 dark:bg-slate-800/80 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+                              <Icons.Layers className="w-3 h-3 text-indigo-500" />
+                              {module.pluralLabel} ({records.length})
+                            </div>
+                            {records.map((rec: any) => {
+                              const name = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || rec.data?.company || 'Lead Record';
+                              const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || rec.data?.contact;
+                              const code = rec.data?.dataCode || rec.data?.allocatedNo || rec.data?.leadNo || (rec._id ? `LND-${String(rec._id).slice(-6).toUpperCase()}` : '');
+                              const company = rec.data?.company || rec.data?.firmName;
+
+                              return (
+                                <button
+                                  key={rec._id}
+                                  type="button"
+                                  onClick={() => {
+                                    setSearchQuery('');
+                                    setSearchResults([]);
+                                    navigate(`/modules/${module.apiPath}/${rec._id}`);
+                                  }}
+                                  className="w-full flex items-center justify-between p-2.5 hover:bg-indigo-50/50 dark:hover:bg-slate-800 rounded-xl transition-all text-left cursor-pointer group border border-transparent hover:border-indigo-100 dark:hover:border-slate-700"
+                                >
+                                  <div className="min-w-0 flex-1 pr-2">
+                                    <div className="flex items-center gap-2">
+                                      <p className="text-xs font-bold text-slate-850 dark:text-white truncate group-hover:text-indigo-600 transition-colors">
+                                        {name}
+                                      </p>
+                                      {code && (
+                                        <span className="text-[9px] font-extrabold bg-slate-100 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 px-1.5 py-0.5 rounded uppercase flex-shrink-0">
+                                          #{code}
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center gap-3 mt-0.5 text-[10px] text-slate-400 font-medium truncate">
+                                      {company && <span>Firm: <strong className="text-slate-600 dark:text-slate-300">{company}</strong></span>}
+                                      {phone && <span>Ph: <strong className="text-slate-600 dark:text-slate-300">{phone}</strong></span>}
+                                    </div>
+                                  </div>
+                                  <Icons.ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-indigo-600 transition-colors flex-shrink-0" />
+                                </button>
+                              );
+                            })}
+                          </div>
+                        ))
+                      )}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
 
             <div className="flex items-center gap-5 relative">
@@ -407,11 +588,13 @@ export default function Layout({ children }: LayoutProps) {
                     setShowUserDropdown(false);
                   }}
                   className="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-white dark:hover:bg-slate-700 shadow-sm transition-all relative"
-                  title="View Alerts"
+                  title="View Alerts & Notifications"
                 >
                   <Icons.Bell className="w-4 h-4" />
-                  {notificationsData && notificationsData.length > 0 && (
-                    <span className="absolute top-2 right-2 w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></span>
+                  {unreadData?.unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 bg-rose-500 text-white text-[9px] font-extrabold rounded-full flex items-center justify-center animate-pulse border-2 border-white dark:border-slate-800">
+                      {unreadData.unreadCount > 9 ? '9+' : unreadData.unreadCount}
+                    </span>
                   )}
                 </button>
               </div>
@@ -423,36 +606,90 @@ export default function Layout({ children }: LayoutProps) {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 md:right-[110px] top-12 w-[calc(100vw-32px)] sm:w-80 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/80 p-4 z-40"
+                    className="absolute right-0 md:right-[110px] top-12 w-[calc(100vw-32px)] sm:w-88 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl shadow-xl shadow-slate-200/50 dark:shadow-slate-950/80 p-4 z-40"
                   >
-                    <div className="flex justify-between items-center pb-2 border-b border-slate-100 dark:border-slate-800 mb-3">
-                      <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                        <Icons.Bell className="w-3.5 h-3.5 text-indigo-500" /> Recent Actions
-                      </h4>
-                      <span className="text-[10px] bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 px-2 py-0.5 rounded-full font-semibold">Live</span>
+                    <div className="flex justify-between items-center pb-2.5 border-b border-slate-100 dark:border-slate-800 mb-3">
+                      <div className="flex items-center gap-2">
+                        <h4 className="text-xs font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                          <Icons.Bell className="w-3.5 h-3.5 text-indigo-500" /> Notifications
+                        </h4>
+                        {unreadData?.unreadCount > 0 && (
+                          <span className="text-[10px] bg-rose-50 dark:bg-rose-950 text-rose-600 dark:text-rose-400 px-2 py-0.5 rounded-full font-bold">
+                            {unreadData.unreadCount} New
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2 text-[10px]">
+                        {unreadData?.unreadCount > 0 && (
+                          <button
+                            onClick={handleMarkAllAsRead}
+                            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 font-bold hover:underline cursor-pointer"
+                          >
+                            Mark all read
+                          </button>
+                        )}
+                        {notificationsData && notificationsData.length > 0 && (
+                          <button
+                            onClick={handleClearAllNotifications}
+                            className="text-slate-400 hover:text-rose-500 font-medium cursor-pointer"
+                          >
+                            Clear
+                          </button>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-3 max-h-60 overflow-y-auto pr-1">
+                    <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                       {notificationsData && notificationsData.length > 0 ? (
                         notificationsData.map((item: any) => (
-                          <div key={item._id} className="flex gap-2.5 items-start text-xs border-b border-slate-50 dark:border-slate-800/30 pb-2.5 last:border-0 last:pb-0">
-                            <div className="p-1 rounded-lg bg-slate-50 dark:bg-slate-800 text-indigo-500 mt-0.5">
-                              <Icons.Activity className="w-3 h-3" />
+                          <div 
+                            key={item._id} 
+                            onClick={() => handleMarkAsRead(item._id, item.link)}
+                            className={`flex gap-3 items-start p-2.5 rounded-xl border transition-all cursor-pointer text-left ${
+                              !item.isRead
+                                ? 'bg-indigo-50/50 dark:bg-indigo-950/30 border-indigo-100 dark:border-indigo-900/50 hover:bg-indigo-100/50'
+                                : 'bg-white dark:bg-slate-900 border-transparent hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                            }`}
+                          >
+                            <div className={`p-1.5 rounded-xl mt-0.5 flex-shrink-0 ${
+                              item.title?.includes('Assigned') || item.title?.includes('Transferred')
+                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
+                                : item.type === 'success'
+                                  ? 'bg-emerald-500/10 text-emerald-600'
+                                  : 'bg-slate-100 dark:bg-slate-800 text-slate-500'
+                            }`}>
+                              {item.title?.includes('Assigned') || item.title?.includes('Transferred') ? (
+                                <Icons.UserCheck className="w-3.5 h-3.5" />
+                              ) : (
+                                <Icons.Sparkles className="w-3.5 h-3.5" />
+                              )}
                             </div>
-                            <div className="flex-1 text-left min-w-0">
-                              <p className="font-semibold text-slate-700 dark:text-slate-200 truncate">
-                                {item.action}
-                              </p>
-                              <p className="text-[10px] text-slate-400 mt-0.5 flex justify-between">
-                                <span>{item.performedBy?.firstName || 'System'}</span>
-                                <span>{new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-2 mb-0.5">
+                                <p className={`text-xs font-bold truncate ${
+                                  !item.isRead ? 'text-indigo-950 dark:text-white' : 'text-slate-700 dark:text-slate-300'
+                                }`}>
+                                  {item.title}
+                                </p>
+                                <span className="text-[10px] text-slate-400 flex-shrink-0 font-medium">
+                                  {new Date(item.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-snug line-clamp-2">
+                                {item.message}
                               </p>
                             </div>
+
+                            {!item.isRead && (
+                              <span className="w-2 h-2 rounded-full bg-indigo-600 flex-shrink-0 mt-1.5"></span>
+                            )}
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-6 text-slate-400 text-xs">
-                          No recent actions logged.
+                        <div className="text-center py-8 text-slate-400 text-xs">
+                          <Icons.BellOff className="w-6 h-6 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                          No notifications yet.
                         </div>
                       )}
                     </div>

@@ -1,19 +1,25 @@
 import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
 import MultiSelectDropdown from '../components/MultiSelectDropdown';
 
 export default function LeadReportsPage() {
+  const [searchParams] = useSearchParams();
+  const initialCamp = searchParams.get('campaign');
+
   const { showToast } = useToastStore();
   const [loading, setLoading] = useState(false);
   const [leads, setLeads] = useState<any[]>([]);
+  const [campaignsList, setCampaignsList] = useState<string[]>([]);
 
   // Multi-Select Filter States with Checkboxes
   const [selectedMonths, setSelectedMonths] = useState<string[]>(['July']);
   const [selectedYears, setSelectedYears] = useState<string[]>(['2026']);
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
   const [selectedLoanTypes, setSelectedLoanTypes] = useState<string[]>([]);
+  const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>(initialCamp ? [initialCamp] : []);
 
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',
@@ -41,9 +47,17 @@ export default function LeadReportsPage() {
   const fetchReportData = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/records/leads');
-      const allRecords = res.data?.records || res.data || [];
+      const [leadsRes, campRes] = await Promise.all([
+        api.get('/records/leads?limit=1000').catch(() => ({ data: [] })),
+        api.get('/records/campaigns?limit=1000').catch(() => ({ data: [] }))
+      ]);
+
+      const allRecords = leadsRes.data?.records || leadsRes.data || [];
+      const fetchedCampaigns = (campRes.data?.records || []).map((c: any) => c.data?.campaignName || c.name).filter(Boolean);
+      const leadCampaigns = allRecords.map((l: any) => l.data?.campaign || l.data?.campaignName || l.campaignName).filter(Boolean);
+
       setLeads(allRecords);
+      setCampaignsList(Array.from(new Set([...fetchedCampaigns, ...leadCampaigns])));
     } catch (err) {
       console.error(err);
       showToast('Failed to load lead report data.', 'error');
@@ -62,6 +76,10 @@ export default function LeadReportsPage() {
     const data = item.data || {};
     const statusMatch = selectedStatuses.length === 0 || selectedStatuses.some(s => (data.status || '').toLowerCase() === s.toLowerCase());
     
+    // Campaign match
+    const leadCamp = (data.campaign || data.campaignName || item.campaignName || '').trim();
+    const campaignMatch = selectedCampaigns.length === 0 || selectedCampaigns.some(c => c.toLowerCase() === leadCamp.toLowerCase() || leadCamp.toLowerCase().includes(c.toLowerCase()));
+
     // Match product/loanType with tolerance for defaults & substrings
     const rawLoan = (data.loanType || data.serviceType || data.product || 'SALARIED PERSONAL LOAN').trim().toLowerCase();
     const loanMatch = selectedLoanTypes.length === 0 || selectedLoanTypes.some(l => {
@@ -71,7 +89,7 @@ export default function LeadReportsPage() {
       return rawLoan.includes(selected) || selected.includes(rawLoan);
     });
 
-    return statusMatch && loanMatch;
+    return statusMatch && loanMatch && campaignMatch;
   });
 
   const exportCSV = () => {
@@ -117,7 +135,7 @@ export default function LeadReportsPage() {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Select Month */}
           <MultiSelectDropdown
             label="Select Month"
@@ -134,6 +152,15 @@ export default function LeadReportsPage() {
             selectedValues={selectedYears}
             onChange={setSelectedYears}
             placeholder="-All Years-"
+          />
+
+          {/* Campaign Filter */}
+          <MultiSelectDropdown
+            label="Campaign Filter"
+            options={campaignsList.length > 0 ? campaignsList : ['No Active Campaigns']}
+            selectedValues={selectedCampaigns}
+            onChange={setSelectedCampaigns}
+            placeholder="-All Campaigns-"
           />
 
           {/* Lead Status */}

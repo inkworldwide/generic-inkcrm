@@ -7,6 +7,7 @@ import Activity from '../models/Activity';
 import AuditLog from '../models/AuditLog';
 import { FormulaEvaluator } from '../services/formulaEvaluator';
 import { WorkflowEngine } from '../services/workflowEngine';
+import { createNotification } from '../utils/notificationHelper';
 import { authenticate } from '../middleware/authMiddleware';
 import { requireTenant } from '../middleware/tenantMiddleware';
 import { HierarchyService } from '../utils/hierarchy';
@@ -237,6 +238,26 @@ router.post('/campaigns/bulk-assign', async (req: Request, res: Response): Promi
         assignedCount: result.length
       }
     });
+
+    // Generate notifications for assigned agents
+    const agentCounts: Record<string, number> = {};
+    recordsToCreate.forEach((r: any) => {
+      const agent = r.data?.assignedTo;
+      if (agent) {
+        agentCounts[agent] = (agentCounts[agent] || 0) + 1;
+      }
+    });
+
+    for (const [agentName, count] of Object.entries(agentCounts)) {
+      await createNotification({
+        organizationId: orgId,
+        recipient: agentName,
+        title: 'Campaign Leads Allocated',
+        message: `${count} lead(s) from campaign '${campaignName}' were allocated to you.`,
+        type: 'info',
+        link: '/my-campaign'
+      });
+    }
 
     res.status(201).json({ message: `Successfully assigned ${result.length} leads to ${agentNames.length} agents.` });
   } catch (error: any) {
@@ -566,6 +587,19 @@ router.post('/:apiPath', async (req: Request, res: Response): Promise<void> => {
       newValue: recordData
     });
 
+    // Generate Notification if assignedTo is set
+    if (recordData.assignedTo) {
+      const name = `${recordData.firstName || ''} ${recordData.lastName || ''}`.trim() || moduleDef.singularLabel || 'Record';
+      await createNotification({
+        organizationId: req.organizationId,
+        recipient: recordData.assignedTo,
+        title: `${moduleDef.singularLabel || 'Lead'} Assigned`,
+        message: `${moduleDef.singularLabel || 'Lead'} '${name}' has been assigned to you.`,
+        type: 'info',
+        link: `/modules/${apiPath.toLowerCase()}/${newRecord._id}`
+      });
+    }
+
     // Execute Workflows
     WorkflowEngine.trigger(req.organizationId as any, moduleDef._id as any, 'create', newRecord);
 
@@ -747,6 +781,33 @@ router.put('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
       newValue: updateData
     });
 
+    // Generate Notifications for assignedTo or status changes
+    const recName = `${record.data?.firstName || ''} ${record.data?.lastName || ''}`.trim() || moduleDef.singularLabel || 'Record';
+    const userObj = req.user as any;
+    const updaterName = userObj?.firstName ? `${userObj.firstName} ${userObj.lastName || ''}`.trim() : (userObj?.email || 'System');
+
+    if (changedFields.includes('assignedTo') && updateData.assignedTo) {
+      await createNotification({
+        organizationId: req.organizationId,
+        recipient: updateData.assignedTo,
+        title: `${moduleDef.singularLabel || 'Lead'} Assigned`,
+        message: `${moduleDef.singularLabel || 'Lead'} '${recName}' was assigned to you by ${updaterName}.`,
+        type: 'info',
+        link: `/modules/${apiPath.toLowerCase()}/${record._id}`
+      });
+    }
+
+    if (changedFields.includes('status') && record.data?.assignedTo) {
+      await createNotification({
+        organizationId: req.organizationId,
+        recipient: record.data.assignedTo,
+        title: `${moduleDef.singularLabel || 'Lead'} Status Updated`,
+        message: `Status of '${recName}' was updated to '${updateData.status}' by ${updaterName}.`,
+        type: 'info',
+        link: `/modules/${apiPath.toLowerCase()}/${record._id}`
+      });
+    }
+
     // Execute Workflows
     WorkflowEngine.trigger(req.organizationId as any, moduleDef._id as any, 'update', record, changedFields);
 
@@ -865,6 +926,18 @@ router.post('/transfer/leads', async (req: Request, res: Response): Promise<void
         modifiedCount: result.modifiedCount
       }
     });
+
+    // Generate Notification for target agent
+    if (result.modifiedCount > 0) {
+      await createNotification({
+        organizationId: req.organizationId,
+        recipient: toAgentId || toAgentName,
+        title: 'Leads Transferred to You',
+        message: `${result.modifiedCount} lead(s) were transferred to you from ${fromAgentName}.`,
+        type: 'info',
+        link: '/modules/leads'
+      });
+    }
 
     res.status(200).json({ message: 'Leads transferred successfully.', modifiedCount: result.modifiedCount });
   } catch (error: any) {

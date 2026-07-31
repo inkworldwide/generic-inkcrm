@@ -30,9 +30,30 @@ export default function UsersManagement() {
   const [userModalOpen, setUserModalOpen] = useState(false);
   const [managerModalOpen, setManagerModalOpen] = useState(false);
   const [selectedUserForManager, setSelectedUserForManager] = useState<any>(null);
+  const [selectedUserForLocation, setSelectedUserForLocation] = useState<any>(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedUserForDelete, setSelectedUserForDelete] = useState<any>(null);
+  const [assignedLeadCount, setAssignedLeadCount] = useState<number>(0);
+  const [checkingLeadCount, setCheckingLeadCount] = useState<boolean>(false);
+  const [targetAgentId, setTargetAgentId] = useState<string>('');
+  const [transferringLeads, setTransferringLeads] = useState<boolean>(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState<string>('');
+  const [deletingUser, setDeletingUser] = useState<boolean>(false);
+
   const [loading, setLoading] = useState(true);
+
+  const formatDate = (dateInput: any) => {
+    if (!dateInput) return 'N/A';
+    try {
+      const d = new Date(dateInput);
+      if (isNaN(d.getTime())) return 'N/A';
+      return d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    } catch (e) {
+      return 'N/A';
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -105,24 +126,77 @@ export default function UsersManagement() {
     setUserModalOpen(true);
   };
 
-  const handleDeleteUser = (id: string) => {
-    showConfirm({
-      title: 'Remove User',
-      message: 'Are you sure you want to remove this user? This action cannot be undone.',
-      onConfirm: async () => {
-        try {
-          await api.delete(`/auth/users/${id}`);
-          showAlertModal({
-            title: 'Deleted Successfully',
-            message: 'The user account has been permanently removed.',
-            type: 'success'
-          });
-          loadData();
-        } catch (err) {
-          showToast('Failed to delete user.', 'error');
-        }
-      }
-    });
+  const handleOpenDeleteModal = async (userItem: any) => {
+    setSelectedUserForDelete(userItem);
+    setDeleteModalOpen(true);
+    setAssignedLeadCount(0);
+    setCheckingLeadCount(true);
+    setTargetAgentId('');
+    setDeleteConfirmText('');
+
+    try {
+      const res = await api.get(`/auth/users/${userItem._id}/lead-count`);
+      setAssignedLeadCount(res.data?.assignedCount || 0);
+    } catch (err) {
+      console.error('Failed to check lead count:', err);
+      setAssignedLeadCount(0);
+    } finally {
+      setCheckingLeadCount(false);
+    }
+  };
+
+  const handleTransferLeadsBeforeDelete = async () => {
+    if (!selectedUserForDelete || !targetAgentId) {
+      showToast('Please select an agent to receive the leads.', 'warning');
+      return;
+    }
+
+    const targetUser = users.find(u => u._id === targetAgentId);
+    if (!targetUser) return;
+
+    try {
+      setTransferringLeads(true);
+      const fromName = `${selectedUserForDelete.firstName || ''} ${selectedUserForDelete.lastName || ''}`.trim() || selectedUserForDelete.email;
+      const toName = `${targetUser.firstName || ''} ${targetUser.lastName || ''}`.trim() || targetUser.email;
+
+      const res = await api.post('/records/transfer/leads', {
+        fromAgentId: selectedUserForDelete._id,
+        fromAgentName: fromName,
+        toAgentId: targetUser._id,
+        toAgentName: toName
+      });
+
+      showToast(`Successfully transferred ${res.data.modifiedCount || assignedLeadCount} lead(s) to ${toName}.`, 'success');
+      setAssignedLeadCount(0);
+      setTargetAgentId('');
+    } catch (err: any) {
+      console.error('Failed to transfer leads:', err);
+      showToast(err.response?.data?.error || 'Failed to transfer leads.', 'error');
+    } finally {
+      setTransferringLeads(false);
+    }
+  };
+
+  const handleExecuteUserDelete = async () => {
+    if (!selectedUserForDelete) return;
+    if (deleteConfirmText.trim().toUpperCase() !== 'DELETE') {
+      showToast('Please type "DELETE" to confirm user removal.', 'warning');
+      return;
+    }
+
+    try {
+      setDeletingUser(true);
+      await api.delete(`/auth/users/${selectedUserForDelete._id}`);
+      showToast(`User '${selectedUserForDelete.firstName} ${selectedUserForDelete.lastName}' removed successfully.`, 'success');
+      setDeleteModalOpen(false);
+      setSelectedUserForDelete(null);
+      loadData();
+    } catch (err: any) {
+      console.error('Failed to delete user:', err);
+      showToast(err.response?.data?.error || 'Failed to delete user account.', 'error');
+    } finally {
+      setDeletingUser(false);
+    }
   };
 
   const handleToggleUserSetting = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
@@ -203,6 +277,7 @@ export default function UsersManagement() {
               <tr className="border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider h-10">
                 <th className="py-2 px-4">EMPLOYEE</th>
                 <th className="py-2 px-4">ID</th>
+                <th className="py-2 px-4">LOCATION</th>
                 <th className="py-2 px-4 text-center">SKIP FACE</th>
                 <th className="py-2 px-4 text-center">SKIP LOCATION</th>
                 <th className="py-2 px-4 text-center">ACCOUNT STATUS</th>
@@ -233,6 +308,57 @@ export default function UsersManagement() {
                     <span className="font-mono text-xs font-semibold bg-slate-50 border border-slate-200 px-2 py-1 rounded-lg text-slate-600">
                       {u.userCode || 'N/A'}
                     </span>
+                  </td>
+
+                  {/* Dynamic Location Column */}
+                  <td className="px-4 py-2 text-left cursor-pointer" onClick={() => setSelectedUserForLocation(u)}>
+                    {(() => {
+                      const isSkipped = !!(u.skipLocation || u.locationVerificationSkipped);
+                      const regLoc = u.registeredLocation || u.registrationLocation;
+                      const curLoc = u.currentLocation;
+
+                      if (isSkipped) {
+                        const hasCurLoc = curLoc && (curLoc.address || (typeof curLoc.latitude === 'number' && typeof curLoc.longitude === 'number'));
+                        const addressText = curLoc?.address || (curLoc?.latitude ? `${curLoc.latitude.toFixed(4)}°, ${curLoc.longitude.toFixed(4)}°` : 'Location Not Available');
+                        const updatedDate = curLoc?.lastUpdated ? formatDate(curLoc.lastUpdated) : null;
+
+                        return (
+                          <div className="flex flex-col gap-0.5 max-w-[190px]">
+                            <div className="flex items-center gap-1">
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1">
+                                <Icons.MapPin className="w-2.5 h-2.5" /> Current Location
+                              </span>
+                            </div>
+                            <span className="text-xs font-semibold text-slate-800 truncate" title={addressText}>
+                              {addressText}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {hasCurLoc && updatedDate ? `Updated: ${updatedDate}` : 'Location Not Available'}
+                            </span>
+                          </div>
+                        );
+                      } else {
+                        const hasRegLoc = regLoc && (regLoc.address || (typeof regLoc.latitude === 'number' && typeof regLoc.longitude === 'number'));
+                        const addressText = regLoc?.address || (regLoc?.latitude ? `${regLoc.latitude.toFixed(4)}°, ${regLoc.longitude.toFixed(4)}°` : 'Location Not Available');
+                        const registeredDate = regLoc?.capturedAt ? formatDate(regLoc.capturedAt) : (u.createdAt ? formatDate(u.createdAt) : null);
+
+                        return (
+                          <div className="flex flex-col gap-0.5 max-w-[190px]">
+                            <div className="flex items-center gap-1">
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                                <Icons.Lock className="w-2.5 h-2.5" /> Registered Location
+                              </span>
+                            </div>
+                            <span className="text-xs font-semibold text-slate-800 truncate" title={addressText}>
+                              {addressText}
+                            </span>
+                            <span className="text-[10px] text-slate-400 font-medium">
+                              {hasRegLoc && registeredDate ? `Registered On: ${registeredDate}` : 'Location Not Available'}
+                            </span>
+                          </div>
+                        );
+                      }
+                    })()}
                   </td>
 
                   {/* Skip Face Toggle */}
@@ -327,7 +453,7 @@ export default function UsersManagement() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => handleDeleteUser(u._id)}
+                        onClick={() => handleOpenDeleteModal(u)}
                         className="p-1 rounded hover:bg-rose-50 text-slate-450 hover:text-rose-600 transition-colors"
                         title="Remove User"
                       >
@@ -496,6 +622,338 @@ export default function UsersManagement() {
                 className="px-5 py-2.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-semibold transition-all"
               >
                 Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Location Detail & Complete Login History Modal */}
+      {selectedUserForLocation && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-3xl p-6 w-full max-w-2xl border border-slate-200 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+            <div className="flex justify-between items-start border-b border-slate-100 pb-3 flex-shrink-0">
+              <div>
+                <h3 className="text-base font-extrabold text-slate-800 flex items-center gap-2">
+                  <Icons.MapPin className="w-5 h-5 text-indigo-600" /> Location & Login History Audit
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-0.5">
+                  {selectedUserForLocation.firstName} {selectedUserForLocation.lastName} ({selectedUserForLocation.email})
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedUserForLocation(null)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500 transition-colors"
+              >
+                <Icons.X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {(() => {
+              const u = selectedUserForLocation;
+              const isSkipped = !!(u.skipLocation || u.locationVerificationSkipped);
+              const regLoc = u.registeredLocation || u.registrationLocation;
+              const curLoc = u.currentLocation;
+
+              const activeLoc = isSkipped ? curLoc : regLoc;
+              const hasCoordinates = typeof activeLoc?.latitude === 'number' && typeof activeLoc?.longitude === 'number';
+              const addressStr = activeLoc?.address || (hasCoordinates ? `${activeLoc.latitude.toFixed(6)}°, ${activeLoc.longitude.toFixed(6)}°` : 'Location Not Available');
+              const timestamp = isSkipped
+                ? (curLoc?.lastUpdated ? formatDate(curLoc.lastUpdated) : 'Location Not Available')
+                : (regLoc?.capturedAt ? formatDate(regLoc.capturedAt) : (u.createdAt ? formatDate(u.createdAt) : 'Location Not Available'));
+
+              const historyList = u.loginHistory || [];
+
+              return (
+                <div className="space-y-4 text-xs overflow-y-auto pr-1 flex-1">
+                  {/* Mode Card */}
+                  <div className={`p-3.5 rounded-2xl border ${
+                    isSkipped ? 'bg-amber-50/60 border-amber-200 text-amber-900' : 'bg-emerald-50/60 border-emerald-200 text-emerald-900'
+                  }`}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-extrabold uppercase text-[10px] tracking-wider flex items-center gap-1.5">
+                        {isSkipped ? <Icons.MapPin className="w-3.5 h-3.5 text-amber-600" /> : <Icons.Lock className="w-3.5 h-3.5 text-emerald-600" />}
+                        {isSkipped ? 'Location Verification Skipped' : 'Mandatory Location Verification'}
+                      </span>
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-extrabold uppercase ${
+                        isSkipped ? 'bg-amber-200/80 text-amber-900' : 'bg-emerald-200/80 text-emerald-900'
+                      }`}>
+                        {isSkipped ? 'Current Location Active' : 'Registered Location Active'}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] opacity-90 leading-relaxed">
+                      {isSkipped
+                        ? 'Location verification is skipped for this user. System dynamically captures and displays their latest login location address.'
+                        : 'Location verification is mandatory for this user. System verifies login against their permanent registered location.'}
+                    </p>
+                  </div>
+
+                  {/* Active Address & Details Card */}
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
+                    <div>
+                      <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
+                        {isSkipped ? 'Current Location Address' : 'Registered Location Address'}
+                      </span>
+                      <p className="text-sm font-bold text-slate-800 leading-snug">
+                        {addressStr}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 pt-2.5 border-t border-slate-200/60">
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Latitude</span>
+                        <span className="font-mono text-xs font-bold text-slate-700">
+                          {hasCoordinates ? activeLoc.latitude.toFixed(6) : 'N/A'}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Longitude</span>
+                        <span className="font-mono text-xs font-bold text-slate-700">
+                          {hasCoordinates ? activeLoc.longitude.toFixed(6) : 'N/A'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="pt-2 border-t border-slate-200/60">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        {isSkipped ? 'Last Updated Timestamp' : 'Registered On Timestamp'}
+                      </span>
+                      <span className="font-bold text-slate-700">{timestamp}</span>
+                    </div>
+                  </div>
+
+                  {/* Complete Login History Section */}
+                  <div className="space-y-2 pt-2">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-extrabold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+                        <Icons.History className="w-4 h-4 text-indigo-600" /> Complete Login History Log ({historyList.length})
+                      </h4>
+                    </div>
+
+                    {historyList.length === 0 ? (
+                      <div className="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-center text-slate-400 text-xs font-medium">
+                        No login history recorded yet.
+                      </div>
+                    ) : (
+                      <div className="border border-slate-200 rounded-2xl overflow-hidden shadow-xs">
+                        <table className="w-full text-left text-[11px]">
+                          <thead className="bg-slate-100 text-slate-500 font-bold uppercase text-[9px] tracking-wider border-b border-slate-200">
+                            <tr>
+                              <th className="py-2.5 px-3">Date & Time</th>
+                              <th className="py-2.5 px-3">Login Address / GPS</th>
+                              <th className="py-2.5 px-3">Device / IP</th>
+                              <th className="py-2.5 px-3 text-center">Mode</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100 font-medium">
+                            {historyList.map((h: any, idx: number) => {
+                              const locAddress = h.address || (typeof h.latitude === 'number' ? `${h.latitude.toFixed(4)}°, ${h.longitude.toFixed(4)}°` : 'Location Not Available');
+                              return (
+                                <tr key={idx} className="hover:bg-slate-50 transition-colors">
+                                  <td className="py-2.5 px-3 font-semibold text-slate-700 whitespace-nowrap">
+                                    {formatDate(h.loginAt)}
+                                  </td>
+                                  <td className="py-2.5 px-3 text-slate-800 max-w-[200px] truncate" title={locAddress}>
+                                    {locAddress}
+                                  </td>
+                                  <td className="py-2.5 px-3 text-slate-600">
+                                    <div className="font-semibold text-slate-700">{h.browser || 'Browser'} on {h.os || 'OS'}</div>
+                                    <div className="text-[9px] font-mono text-slate-400">IP: {h.ip || '127.0.0.1'}</div>
+                                  </td>
+                                  <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold ${
+                                      h.locationVerificationSkipped ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'
+                                    }`}>
+                                      {h.locationVerificationSkipped ? 'Skipped' : 'Verified'}
+                                    </span>
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })()}
+
+            <div className="flex justify-end pt-3 border-t border-slate-100 flex-shrink-0">
+              <button
+                type="button"
+                onClick={() => setSelectedUserForLocation(null)}
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold uppercase transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SAFE DELETE USER MODAL */}
+      {deleteModalOpen && selectedUserForDelete && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 w-full max-w-lg border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 text-left animate-in fade-in zoom-in-95 duration-200">
+            
+            {/* Modal Header */}
+            <div className="flex items-start gap-4">
+              <div className={`p-3.5 rounded-2xl flex-shrink-0 ${
+                assignedLeadCount > 0 
+                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' 
+                  : 'bg-rose-500/10 text-rose-600 dark:text-rose-400'
+              }`}>
+                {assignedLeadCount > 0 ? (
+                  <Icons.AlertTriangle className="w-6 h-6 animate-pulse" />
+                ) : (
+                  <Icons.UserX className="w-6 h-6" />
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Remove User Account
+                  </h3>
+                  <button
+                    onClick={() => {
+                      setDeleteModalOpen(false);
+                      setSelectedUserForDelete(null);
+                    }}
+                    className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
+                  >
+                    <Icons.X className="w-5 h-5" />
+                  </button>
+                </div>
+                <div className="mt-1 flex items-center gap-2">
+                  <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                    {selectedUserForDelete.firstName} {selectedUserForDelete.lastName}
+                  </span>
+                  <span className="text-[11px] font-semibold text-slate-400">
+                    ({selectedUserForDelete.email})
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Lead Count Check Status */}
+            {checkingLeadCount ? (
+              <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl text-center space-y-2">
+                <Icons.Loader2 className="w-6 h-6 animate-spin text-indigo-600 dark:text-indigo-400 mx-auto" />
+                <p className="text-xs font-semibold text-slate-500">Checking assigned lead records...</p>
+              </div>
+            ) : assignedLeadCount > 0 ? (
+              /* STEP 1: MUST TRANSFER LEADS BEFORE DELETION */
+              <div className="space-y-4">
+                <div className="p-4 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 rounded-2xl text-left space-y-2">
+                  <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-bold text-xs">
+                    <Icons.AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>Action Required: Transfer Active Leads ({assignedLeadCount})</span>
+                  </div>
+                  <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed font-medium">
+                    This user currently has <strong>{assignedLeadCount} assigned lead(s)</strong>. You must transfer all leads to another agent before this user account can be deleted.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-800 text-left space-y-3">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    Select Target Agent to Receive Leads:
+                  </label>
+                  <select
+                    value={targetAgentId}
+                    onChange={(e) => setTargetAgentId(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                    <option value="">-- Choose Agent --</option>
+                    {users
+                      .filter((u) => u._id !== selectedUserForDelete._id)
+                      .map((u) => (
+                        <option key={u._id} value={u._id}>
+                          {u.firstName} {u.lastName} ({u.email})
+                        </option>
+                      ))}
+                  </select>
+
+                  <button
+                    type="button"
+                    disabled={!targetAgentId || transferringLeads}
+                    onClick={handleTransferLeadsBeforeDelete}
+                    className="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer uppercase tracking-wider"
+                  >
+                    {transferringLeads ? (
+                      <>
+                        <Icons.Loader2 className="w-4 h-4 animate-spin" />
+                        Transferring {assignedLeadCount} Leads...
+                      </>
+                    ) : (
+                      <>
+                        <Icons.Send className="w-4 h-4" />
+                        Transfer {assignedLeadCount} Leads Now
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* STEP 2: LEADS TRANSFERRED / 0 LEADS -> TYPE "DELETE" TO CONFIRM */
+              <div className="space-y-4">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 rounded-2xl text-left flex items-center gap-3">
+                  <Icons.CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
+                  <p className="text-xs text-emerald-800 dark:text-emerald-300 font-semibold">
+                    Verified: 0 active leads assigned. User is ready for deletion.
+                  </p>
+                </div>
+
+                <div className="text-left space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                    To confirm permanent deletion, please type <span className="text-rose-600 dark:text-rose-400 font-mono">DELETE</span> below:
+                  </label>
+                  <input
+                    type="text"
+                    value={deleteConfirmText}
+                    onChange={(e) => setDeleteConfirmText(e.target.value)}
+                    placeholder='Type "DELETE" to confirm'
+                    className="w-full px-4 py-2.5 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-700 rounded-xl text-xs font-mono font-bold text-slate-900 dark:text-white focus:outline-none focus:border-rose-500 uppercase tracking-widest"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setDeleteModalOpen(false);
+                  setSelectedUserForDelete(null);
+                }}
+                className="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                disabled={
+                  assignedLeadCount > 0 || 
+                  deleteConfirmText.trim().toUpperCase() !== 'DELETE' || 
+                  deletingUser
+                }
+                onClick={handleExecuteUserDelete}
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center gap-2 cursor-pointer uppercase tracking-wider active:scale-95"
+              >
+                {deletingUser ? (
+                  <>
+                    <Icons.Loader2 className="w-4 h-4 animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Icons.Trash2 className="w-4 h-4" />
+                    Permanently Remove User
+                  </>
+                )}
               </button>
             </div>
           </div>

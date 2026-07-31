@@ -130,6 +130,78 @@ export default function ReportsList() {
         </button>
       </div>
 
+      {/* Standard Analytics & Funnel Reports Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <Link to="/reports/funnel-monthly" className="card-premium hover:border-indigo-300 transition-all flex flex-col justify-between group">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+                <Icons.Filter className="w-5 h-5" />
+              </div>
+              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
+                Campaign Funnel
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors uppercase">
+              Monthly Campaign Funnel
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Visual ring chart & bar graph for lead status distribution (Hot, Warm, Unreachable, Disbursed) per campaign.
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+            <span>View Monthly Funnel</span>
+            <Icons.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        <Link to="/reports/funnel-annual" className="card-premium hover:border-emerald-300 transition-all flex flex-col justify-between group">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+                <Icons.TrendingUp className="w-5 h-5" />
+              </div>
+              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+                12-Month Progression
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors uppercase">
+              Annual Campaign Funnel
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Year-over-year campaign lead volume progression and monthly conversion yield summary.
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600">
+            <span>View Annual Funnel</span>
+            <Icons.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+
+        <Link to="/reports/lead-reports" className="card-premium hover:border-amber-300 transition-all flex flex-col justify-between group">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+                <Icons.ListFilter className="w-5 h-5" />
+              </div>
+              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-amber-50 text-amber-700 rounded-full border border-amber-100">
+                Lead Analytics
+              </span>
+            </div>
+            <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors uppercase">
+              Campaign & Lead Reports
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Filter leads by active campaigns, statuses, products, and export full reports to CSV.
+            </p>
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
+            <span>View Lead Reports</span>
+            <Icons.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </div>
+        </Link>
+      </div>
+
       {/* Reports Grid list */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {reports.map((rep) => (
@@ -146,21 +218,27 @@ export default function ReportsList() {
                     <Icons.BarChart2 className="w-4 h-4" strokeWidth={2} />
                   )}
                 </div>
-                <span className="text-[9px] font-[800] text-slate-400 uppercase tracking-wider">
-                  {rep.moduleId?.pluralLabel || 'Custom'} Module
-                </span>
+                <div>
+                  <h3 className="font-[800] text-sm text-slate-800 uppercase tracking-tight">{rep.name}</h3>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                    {rep.moduleId?.pluralLabel || 'General'}
+                  </span>
+                </div>
               </div>
-
-              <h3 className="font-bold text-slate-850 text-sm mt-3">{rep.name}</h3>
-              <p className="text-xs text-slate-400 mt-1 truncate">{rep.description || 'No description.'}</p>
+              <p className="text-xs text-slate-500 font-medium mt-3">{rep.description}</p>
             </div>
 
-            <Link
-              to={`/reports/${rep._id}`}
-              className="btn-secondary-premium w-full text-center h-10 mt-6"
-            >
-              Run Report
-            </Link>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
+              <span className="font-bold text-indigo-600 uppercase tracking-wider text-[10px]">
+                {rep.chartType} chart
+              </span>
+              <Link
+                to={`/reports/${rep._id}`}
+                className="font-bold text-slate-700 hover:text-indigo-600 flex items-center gap-1"
+              >
+                View <Icons.ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
           </div>
         ))}
 

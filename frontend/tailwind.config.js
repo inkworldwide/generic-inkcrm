@@ -39,7 +39,7 @@ export default {
         }
       },
       fontFamily: {
-        sans: ['Geist', 'var(--font-family, Inter)', 'system-ui', '-apple-system', 'sans-serif'],
+        sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
         premium: '0 4px 20px -2px rgba(23, 34, 59, 0.04), 0 2px 6px -1px rgba(23, 34, 59, 0.02)',

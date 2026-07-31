@@ -21,6 +21,9 @@ import ReportDetails from './pages/ReportDetails';
 import LeadReportsPage from './pages/LeadReportsPage';
 import TelecallerReportsPage from './pages/TelecallerReportsPage';
 import TelecallerMonthlyPage from './pages/TelecallerMonthlyPage';
+import MonthlyFunnelPage from './pages/MonthlyFunnelPage';
+import AnnualFunnelPage from './pages/AnnualFunnelPage';
+import CampaignReportPage from './pages/CampaignReportPage';
 import Status from './pages/Status';
 import MyCampaign from './pages/MyCampaign';
 
@@ -132,6 +135,30 @@ export default function App() {
           element={
             <ProtectedRoute>
               <TelecallerMonthlyPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/campaign-report"
+          element={
+            <ProtectedRoute>
+              <CampaignReportPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/funnel-monthly"
+          element={
+            <ProtectedRoute>
+              <MonthlyFunnelPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/funnel-annual"
+          element={
+            <ProtectedRoute>
+              <AnnualFunnelPage />
             </ProtectedRoute>
           }
         />

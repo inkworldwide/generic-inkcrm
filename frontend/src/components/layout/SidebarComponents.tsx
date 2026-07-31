@@ -168,6 +168,69 @@ export const SidebarAccordion = ({
 };
 
 // ---------------------------------------------------------
+// PURE LIGHT THEME SUB-ACCORDION (NESTED EXPANDABLE NAV)
+// ---------------------------------------------------------
+export const SidebarSubAccordion = ({
+  label,
+  icon,
+  colorClass,
+  children,
+  defaultOpen = false,
+  isCollapsed = false
+}: {
+  label: string;
+  icon?: any;
+  colorClass?: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+  isCollapsed?: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  if (isCollapsed) return null;
+
+  return (
+    <div className="flex flex-col my-0.5 ml-2">
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "flex items-center justify-between w-full px-3 py-1.5 min-h-[32px] rounded-lg text-[12.5px] transition-all duration-150 group cursor-pointer text-left",
+          isOpen ? "text-[#111827] font-bold bg-indigo-50/70" : "text-[#4B5563] hover:text-[#111827] hover:bg-[#F3F4F6] font-semibold"
+        )}
+      >
+        <div className="flex items-center gap-2 min-w-0">
+          {icon && <SidebarIcon icon={icon} colorClass={colorClass} active={isOpen} />}
+          <span className="truncate tracking-tight uppercase font-semibold text-[12px]">{label}</span>
+        </div>
+        <ChevronRight
+          className={cn(
+            "w-3 h-3 text-[#9CA3AF] transition-transform duration-200 flex-shrink-0 group-hover:text-[#111827]",
+            isOpen && "rotate-90 text-[#111827]"
+          )}
+        />
+      </button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.15, ease: 'easeInOut' }}
+            className="overflow-hidden"
+          >
+            <div className="ml-3 pl-2 my-0.5 space-y-0.5 border-l border-indigo-200">
+              {children}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+// ---------------------------------------------------------
 // SECTION GROUP & HEADERS
 // ---------------------------------------------------------
 export const SidebarGroup = ({ title, children, isCollapsed = false }: { title: string; children: React.ReactNode; isCollapsed?: boolean }) => (

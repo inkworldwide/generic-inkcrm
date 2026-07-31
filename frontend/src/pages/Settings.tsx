@@ -102,6 +102,7 @@ export default function Settings() {
   const [moduleForm, setModuleForm] = useState<any>({});
   const [moduleEditingId, setModuleEditingId] = useState('');
   const [moduleModalOpen, setModuleModalOpen] = useState(false);
+  const [moduleSearchQuery, setModuleSearchQuery] = useState('');
 
   // Custom Banking Partner state — hardcoded Indian bank list
   const INDIAN_BANKS = [
@@ -132,6 +133,10 @@ export default function Settings() {
   const [bpPsmSearchQuery, setBpPsmSearchQuery] = useState('');
   const [bpEditPsmDropdownOpen, setBpEditPsmDropdownOpen] = useState(false);
   const [bpEditPsmSearchQuery, setBpEditPsmSearchQuery] = useState('');
+  const [bpBanksDropdownOpen, setBpBanksDropdownOpen] = useState(false);
+  const [bpBankSearchQuery, setBpBankSearchQuery] = useState('');
+  const [bpEditBanksDropdownOpen, setBpEditBanksDropdownOpen] = useState(false);
+  const [bpEditBankSearchQuery, setBpEditBankSearchQuery] = useState('');
   const [bpProductsList, setBpProductsList] = useState<string[]>([]);
   const [bpSuccessModal, setBpSuccessModal] = useState<{ isOpen: boolean; title: string; message: string } | null>(null);
 
@@ -264,6 +269,7 @@ export default function Settings() {
     setBpFilterPsm('');
     setBpFilterLoanType('');
     setShowAllBp(false);
+    setModuleSearchQuery('');
     loadSettingsData();
   }, [branding, currentTab]);
 
@@ -331,7 +337,7 @@ export default function Settings() {
         setUsers(resUsers.data || []);
       } else if (tabToApiPath[currentTab]) {
         const apiPath = tabToApiPath[currentTab];
-        const resModRecords = await api.get(`/records/${apiPath}`);
+        const resModRecords = await api.get(`/records/${apiPath}?limit=1000`);
         setModuleRecords(resModRecords.data?.records || []);
 
         if (currentTab === 'bankingpartner') {
@@ -342,7 +348,7 @@ export default function Settings() {
           } catch { console.warn('Could not load users for PSM'); }
           // Fetch bank masters list
           try {
-            const resBM = await api.get('/records/bankmasters');
+            const resBM = await api.get('/records/bankmasters?limit=1000');
             const apiNames: string[] = (resBM.data?.records || []).map((r: any) => r.data?.bankName).filter(Boolean);
             setBankMastersList(apiNames);
           } catch {
@@ -350,7 +356,7 @@ export default function Settings() {
           }
           // Fetch products for loan types
           try {
-            const resProducts = await api.get('/records/products');
+            const resProducts = await api.get('/records/products?limit=1000');
             const productNames: string[] = (resProducts.data?.records || []).map((r: any) => r.data?.name).filter(Boolean);
             setBpProductsList(productNames.map((n: string) => n.toUpperCase()));
           } catch {
@@ -1441,48 +1447,104 @@ export default function Settings() {
         </div>
 
 
-        {/* Generic Dynamic Custom Module tab */}
+        {/* Generic Dynamic Custom Module tab (Department, Product, Bank Master, etc.) */}
         {tabToApiPath[currentTab] && activeModuleDef && currentTab !== 'bankingpartner' && (
           <div className="lg:col-span-12 bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl p-4 shadow-sm">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-slate-800">{activeModuleDef.pluralLabel} Settings</h2>
-              <button onClick={() => {
-                setModuleForm({});
-                setModuleEditingId('');
-                setModuleModalOpen(true);
-              }} className="btn-primary-premium flex items-center gap-2">
-                <Icons.Plus className="w-4 h-4" /> Add Record
-              </button>
-            </div>
+            {(() => {
+              const filteredModuleRecords = moduleRecords.filter(rec => {
+                if (!moduleSearchQuery.trim()) return true;
+                const q = moduleSearchQuery.toLowerCase().trim();
+                return activeModuleDef.fields.some(f => {
+                  const val = String(rec.data?.[f.name] ?? '').toLowerCase();
+                  return val.includes(q);
+                });
+              });
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left border-collapse">
-                <thead>
-                  <tr className="table-header-premium">
-                    {activeModuleDef.fields.map(f => (
-                      <th key={f.name} className="py-2.5 px-4">{f.label}</th>
-                    ))}
-                    <th className="py-2.5 px-4 text-center w-36">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-150">
-                  {moduleRecords.map(rec => (
-                    <tr key={rec._id} className="hover:bg-slate-50/50 transition-colors h-11">
-                      {activeModuleDef.fields.map(f => (
-                        <td key={f.name} className="px-4 py-2 text-slate-900 font-semibold">
-                          {f.type === 'currency' ? '$' : ''}
-                          {String(rec.data?.[f.name] ?? '')}
-                        </td>
-                      ))}
-                      <td className="px-4 py-2 text-center flex justify-center gap-3">
-                        <button onClick={() => handleEditModuleRecord(rec)} className="btn-edit-premium" title="Edit Record"><Icons.SquarePen className="w-4 h-4" /></button>
-                        <button onClick={() => handleDeleteModuleRecord(rec._id)} className="btn-delete-premium" title="Delete Record"><Icons.Trash className="w-4 h-4" /></button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+              return (
+                <>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                    <div className="flex items-center gap-3">
+                      <h2 className="text-xl font-extrabold text-slate-850 uppercase tracking-tight">
+                        {activeModuleDef.pluralLabel} Settings
+                      </h2>
+                      <span className="text-xs font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
+                        {filteredModuleRecords.length} {filteredModuleRecords.length === 1 ? 'Record' : 'Records'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      {/* Search Bar */}
+                      <div className="relative flex-1 sm:w-72">
+                        <Icons.Search className="absolute left-3.5 top-2.5 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={moduleSearchQuery}
+                          onChange={(e) => setModuleSearchQuery(e.target.value)}
+                          placeholder={`Search ${activeModuleDef.pluralLabel.toLowerCase()}...`}
+                          className="w-full h-9 pl-9 pr-8 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-900 font-semibold placeholder:text-slate-400 transition-all"
+                        />
+                        {moduleSearchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setModuleSearchQuery('')}
+                            className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 cursor-pointer"
+                          >
+                            <Icons.X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+
+                      <button onClick={() => {
+                        setModuleForm({});
+                        setModuleEditingId('');
+                        setModuleModalOpen(true);
+                      }} className="btn-primary-premium flex items-center gap-2 flex-shrink-0">
+                        <Icons.Plus className="w-4 h-4" /> Add Record
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left border-collapse">
+                      <thead>
+                        <tr className="table-header-premium">
+                          {activeModuleDef.fields.map(f => (
+                            <th key={f.name} className="py-2.5 px-4">{f.label}</th>
+                          ))}
+                          <th className="py-2.5 px-4 text-center w-36">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-150">
+                        {filteredModuleRecords.length === 0 ? (
+                          <tr>
+                            <td colSpan={activeModuleDef.fields.length + 1} className="py-12 text-center text-slate-400 font-medium text-xs">
+                              {moduleSearchQuery 
+                                ? `No ${activeModuleDef.pluralLabel.toLowerCase()} matching "${moduleSearchQuery}"` 
+                                : `No ${activeModuleDef.pluralLabel.toLowerCase()} records found.`}
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredModuleRecords.map(rec => (
+                            <tr key={rec._id} className="hover:bg-slate-50/50 transition-colors h-11">
+                              {activeModuleDef.fields.map(f => (
+                                <td key={f.name} className="px-4 py-2 text-slate-900 font-semibold">
+                                  {f.type === 'currency' ? '$' : ''}
+                                  {String(rec.data?.[f.name] ?? '')}
+                                </td>
+                              ))}
+                              <td className="px-4 py-2 text-center flex justify-center gap-3">
+                                <button onClick={() => handleEditModuleRecord(rec)} className="btn-edit-premium" title="Edit Record"><Icons.SquarePen className="w-4 h-4" /></button>
+                                <button onClick={() => handleDeleteModuleRecord(rec._id)} className="btn-delete-premium" title="Delete Record"><Icons.Trash className="w-4 h-4" /></button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              );
+            })()}
 
             {/* Dynamic Module Add/Edit Modal */}
             {moduleModalOpen && (
@@ -1614,33 +1676,157 @@ export default function Settings() {
                   </div>
                 </div>
 
-                {/* 2. Banks Checkboxes (Middle) */}
-                <div className="space-y-2">
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                    Banks <span className="text-red-500">*</span> (Select one or more)
-                  </label>
-                  <div className="bg-slate-50 border border-slate-200/60 rounded-2xl p-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-56 overflow-y-auto">
-                    {bankMastersList.map((bankName) => {
-                      const isChecked = selectedBanks.includes(bankName);
-                      return (
-                        <label
-                          key={bankName}
-                          className={`flex items-center gap-3 px-4 py-2.5 border rounded-xl text-sm font-semibold transition-all cursor-pointer select-none ${
-                            isChecked
-                              ? 'bg-indigo-50 border-indigo-500 text-indigo-700 shadow-sm shadow-indigo-100/30'
-                              : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50 hover:border-indigo-200'
-                          }`}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isChecked}
-                            onChange={(e) => handleBankCheckboxChange(bankName, e.target.checked)}
-                            className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
-                          />
-                          <span>{bankName}</span>
-                        </label>
-                      );
-                    })}
+                {/* 2. Searchable Multi-Select Banks Dropdown */}
+                <div className="space-y-2 relative">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                      Banks <span className="text-red-500">*</span> (Select one or more)
+                    </label>
+                    <span className="text-[11px] font-bold text-indigo-600">
+                      {selectedBanks.length} Selected
+                    </span>
+                  </div>
+
+                  {/* Trigger Button showing Selected Tags & Search Prompt */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setBpBanksDropdownOpen(!bpBanksDropdownOpen)}
+                      className="w-full min-h-[46px] px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-650 transition-all shadow-sm flex items-center justify-between text-left gap-2 flex-wrap cursor-pointer"
+                    >
+                      {selectedBanks.length === 0 ? (
+                        <span className="text-slate-400 font-medium text-xs">
+                          Search & Select Banks (Out of {bankMastersList.length} Banks)...
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-1.5 flex-wrap max-h-24 overflow-y-auto">
+                          {selectedBanks.map((bank) => (
+                            <span
+                              key={bank}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleBankCheckboxChange(bank, false);
+                              }}
+                            >
+                              {bank}
+                              <Icons.X className="w-3 h-3 hover:text-indigo-900 cursor-pointer" />
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 ml-auto flex-shrink-0">
+                        <Icons.Search className="w-4 h-4 text-slate-400" />
+                        <Icons.ChevronDown className="w-4 h-4 text-slate-500" />
+                      </div>
+                    </button>
+
+                    {/* Dropdown Popover with Live Search Bar */}
+                    {bpBanksDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-40" onClick={() => setBpBanksDropdownOpen(false)} />
+                        <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl p-3 z-50 space-y-2.5 max-h-80 flex flex-col">
+                          
+                          {/* Search Input Bar */}
+                          <div className="relative">
+                            <Icons.Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                            <input
+                              type="text"
+                              value={bpBankSearchQuery}
+                              onChange={(e) => setBpBankSearchQuery(e.target.value)}
+                              placeholder={`Search out of ${bankMastersList.length} banks...`}
+                              className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                              autoFocus
+                            />
+                            {bpBankSearchQuery && (
+                              <button
+                                type="button"
+                                onClick={() => setBpBankSearchQuery('')}
+                                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                              >
+                                <Icons.X className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Quick Action Bar (Select All / Clear All) */}
+                          <div className="flex items-center justify-between border-b border-slate-100 pb-2 px-1 text-[11px] font-bold">
+                            <span className="text-slate-400">
+                              {bankMastersList.filter(b => b.toLowerCase().includes(bpBankSearchQuery.toLowerCase())).length} Banks Found
+                            </span>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const filtered = bankMastersList.filter(b => b.toLowerCase().includes(bpBankSearchQuery.toLowerCase()));
+                                  const combined = Array.from(new Set([...selectedBanks, ...filtered]));
+                                  setSelectedBanks(combined);
+                                }}
+                                className="text-indigo-600 hover:text-indigo-800"
+                              >
+                                Select All Filtered
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setSelectedBanks([])}
+                                className="text-rose-500 hover:text-rose-700"
+                              >
+                                Clear All
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Scrollable Bank List */}
+                          <div className="space-y-1 overflow-y-auto pr-1 flex-1 max-h-52">
+                            {(() => {
+                              const filteredBanks = bankMastersList.filter(b => 
+                                b.toLowerCase().includes(bpBankSearchQuery.toLowerCase())
+                              );
+
+                              if (filteredBanks.length === 0) {
+                                return (
+                                  <div className="py-6 text-center text-slate-400 text-xs font-medium">
+                                    No banks matching "{bpBankSearchQuery}"
+                                  </div>
+                                );
+                              }
+
+                              return filteredBanks.map((bankName) => {
+                                const isChecked = selectedBanks.includes(bankName);
+                                return (
+                                  <button
+                                    key={bankName}
+                                    type="button"
+                                    onClick={() => handleBankCheckboxChange(bankName, !isChecked)}
+                                    className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all ${
+                                      isChecked
+                                        ? 'bg-indigo-50 text-indigo-800 font-bold border border-indigo-200'
+                                        : 'hover:bg-slate-50 text-slate-700 border border-transparent'
+                                    }`}
+                                  >
+                                    <div className="flex items-center gap-2.5">
+                                      <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                                        isChecked
+                                          ? 'bg-indigo-600 border-indigo-600 text-white'
+                                          : 'border-slate-300 bg-white'
+                                      }`}>
+                                        {isChecked && <Icons.Check className="w-3 h-3 stroke-[3]" />}
+                                      </div>
+                                      <span>{bankName}</span>
+                                    </div>
+                                    {isChecked && (
+                                      <span className="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded">
+                                        Selected
+                                      </span>
+                                    )}
+                                  </button>
+                                );
+                              });
+                            })()}
+                          </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -1753,33 +1939,155 @@ export default function Settings() {
                       </div>
                     </div>
 
-                    {/* 2. Banks Checkboxes (Middle) */}
-                    <div>
-                      <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
-                        Banks <span className="text-red-500">*</span> (Select one or more)
-                      </label>
-                      <div className="bg-slate-50 border border-indigo-100 rounded-xl p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto">
-                        {bankMastersList.map((bankName) => {
-                          const isChecked = selectedEditBanks.includes(bankName);
-                          return (
-                            <label
-                              key={bankName}
-                              className={`flex items-center gap-2 px-3 py-2 border rounded-lg text-sm font-medium transition-all cursor-pointer select-none ${
-                                isChecked
-                                  ? 'bg-indigo-50 border-indigo-400 text-indigo-705 shadow-sm shadow-indigo-105/50'
-                                  : 'bg-white border-slate-200 text-slate-650 hover:bg-slate-50 hover:border-indigo-200'
-                              }`}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={isChecked}
-                                onChange={(e) => handleEditBankCheckboxChange(bankName, e.target.checked)}
-                                className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 w-4 h-4 cursor-pointer"
-                              />
-                              <span>{bankName}</span>
-                            </label>
-                          );
-                        })}
+                    {/* 2. Searchable Multi-Select Banks Dropdown for Edit Modal */}
+                    <div className="space-y-2 relative">
+                      <div className="flex items-center justify-between">
+                        <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
+                          Banks <span className="text-red-500">*</span> (Select one or more)
+                        </label>
+                        <span className="text-[11px] font-bold text-indigo-600">
+                          {selectedEditBanks.length} Selected
+                        </span>
+                      </div>
+
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setBpEditBanksDropdownOpen(!bpEditBanksDropdownOpen)}
+                          className="w-full min-h-[44px] px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all flex items-center justify-between text-left gap-2 flex-wrap cursor-pointer"
+                        >
+                          {selectedEditBanks.length === 0 ? (
+                            <span className="text-slate-400 font-medium text-xs">
+                              Search & Select Banks (Out of {bankMastersList.length} Banks)...
+                            </span>
+                          ) : (
+                            <div className="flex items-center gap-1.5 flex-wrap max-h-20 overflow-y-auto">
+                              {selectedEditBanks.map((bank) => (
+                                <span
+                                  key={bank}
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditBankCheckboxChange(bank, false);
+                                  }}
+                                >
+                                  {bank}
+                                  <Icons.X className="w-3 h-3 hover:text-indigo-900 cursor-pointer" />
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-1 ml-auto flex-shrink-0">
+                            <Icons.Search className="w-4 h-4 text-slate-400" />
+                            <Icons.ChevronDown className="w-4 h-4 text-slate-500" />
+                          </div>
+                        </button>
+
+                        {bpEditBanksDropdownOpen && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setBpEditBanksDropdownOpen(false)} />
+                            <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl p-3 z-50 space-y-2.5 max-h-72 flex flex-col">
+                              
+                              {/* Search Bar */}
+                              <div className="relative">
+                                <Icons.Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                                <input
+                                  type="text"
+                                  value={bpEditBankSearchQuery}
+                                  onChange={(e) => setBpEditBankSearchQuery(e.target.value)}
+                                  placeholder={`Search out of ${bankMastersList.length} banks...`}
+                                  className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                  autoFocus
+                                />
+                                {bpEditBankSearchQuery && (
+                                  <button
+                                    type="button"
+                                    onClick={() => setBpEditBankSearchQuery('')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                                  >
+                                    <Icons.X className="w-3.5 h-3.5" />
+                                  </button>
+                                )}
+                              </div>
+
+                              {/* Quick Actions */}
+                              <div className="flex items-center justify-between border-b border-slate-100 pb-2 px-1 text-[11px] font-bold">
+                                <span className="text-slate-400">
+                                  {bankMastersList.filter(b => b.toLowerCase().includes(bpEditBankSearchQuery.toLowerCase())).length} Banks Found
+                                </span>
+                                <div className="flex items-center gap-3">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const filtered = bankMastersList.filter(b => b.toLowerCase().includes(bpEditBankSearchQuery.toLowerCase()));
+                                      const combined = Array.from(new Set([...selectedEditBanks, ...filtered]));
+                                      setSelectedEditBanks(combined);
+                                    }}
+                                    className="text-indigo-600 hover:text-indigo-800"
+                                  >
+                                    Select All Filtered
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setSelectedEditBanks([])}
+                                    className="text-rose-500 hover:text-rose-700"
+                                  >
+                                    Clear All
+                                  </button>
+                                </div>
+                              </div>
+
+                              {/* Scrollable Bank List */}
+                              <div className="space-y-1 overflow-y-auto pr-1 flex-1 max-h-48">
+                                {(() => {
+                                  const filteredBanks = bankMastersList.filter(b => 
+                                    b.toLowerCase().includes(bpEditBankSearchQuery.toLowerCase())
+                                  );
+
+                                  if (filteredBanks.length === 0) {
+                                    return (
+                                      <div className="py-6 text-center text-slate-400 text-xs font-medium">
+                                        No banks matching "{bpEditBankSearchQuery}"
+                                      </div>
+                                    );
+                                  }
+
+                                  return filteredBanks.map((bankName) => {
+                                    const isChecked = selectedEditBanks.includes(bankName);
+                                    return (
+                                      <button
+                                        key={bankName}
+                                        type="button"
+                                        onClick={() => handleEditBankCheckboxChange(bankName, !isChecked)}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-left transition-all ${
+                                          isChecked
+                                            ? 'bg-indigo-50 text-indigo-800 font-bold border border-indigo-200'
+                                            : 'hover:bg-slate-50 text-slate-700 border border-transparent'
+                                        }`}
+                                      >
+                                        <div className="flex items-center gap-2.5">
+                                          <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                                            isChecked
+                                              ? 'bg-indigo-600 border-indigo-600 text-white'
+                                              : 'border-slate-300 bg-white'
+                                          }`}>
+                                            {isChecked && <Icons.Check className="w-3 h-3 stroke-[3]" />}
+                                          </div>
+                                          <span>{bankName}</span>
+                                        </div>
+                                        {isChecked && (
+                                          <span className="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded">
+                                            Selected
+                                          </span>
+                                        )}
+                                      </button>
+                                    );
+                                  });
+                                })()}
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
 

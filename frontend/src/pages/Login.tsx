@@ -142,11 +142,28 @@ export default function Login() {
       return;
     }
 
+    // Capture GPS coordinates to log current location and address
+    let currentCoords: { latitude: number; longitude: number } | null = null;
+    if (navigator.geolocation) {
+      try {
+        currentCoords = await new Promise((resolve) => {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+            () => resolve(null),
+            { enableHighAccuracy: true, timeout: 4000, maximumAge: 0 }
+          );
+        });
+      } catch (e) {
+        // location capture timeout or prompt skipped
+      }
+    }
+
     try {
       const res = await api.post('/auth/login', {
         email: email.toLowerCase(),
         password,
-        rememberMe
+        rememberMe,
+        ...(currentCoords ? currentCoords : {})
       });
 
       if (res.data.onboardingRequired && res.data.tempToken) {

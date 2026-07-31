@@ -8,10 +8,29 @@ export interface IDeviceSession {
   lastActive: Date;
 }
 
-export interface IRegistrationLocation {
-  latitude: number;
-  longitude: number;
-  capturedAt: Date;
+export interface IRegisteredLocation {
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  capturedAt?: Date;
+}
+
+export interface ICurrentLocation {
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  lastUpdated?: Date;
+}
+
+export interface ILoginHistoryEntry {
+  loginAt: Date;
+  ip?: string;
+  browser?: string;
+  os?: string;
+  latitude?: number;
+  longitude?: number;
+  address?: string;
+  locationVerificationSkipped?: boolean;
 }
 
 export interface IUser extends Document {
@@ -33,7 +52,11 @@ export interface IUser extends Document {
     encryptedEmbedding?: string;
     enrolledAt?: Date;
   };
-  registrationLocation?: IRegistrationLocation;
+  registrationLocation?: IRegisteredLocation;
+  registeredLocation?: IRegisteredLocation;
+  currentLocation?: ICurrentLocation;
+  locationVerificationSkipped?: boolean;
+  loginHistory?: ILoginHistoryEntry[];
   locationRadius: number; // allowed radius in meters (default: 100)
   avatarUrl?: string;
   refreshTokens: string[];
@@ -70,12 +93,40 @@ const UserSchema = new Schema<IUser>(
       encryptedEmbedding: { type: String },
       enrolledAt: { type: Date }
     },
-    // GPS registration location — stored once at signup
+    // GPS registration location — stored once at signup / onboarding
+    registeredLocation: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+      address: { type: String },
+      capturedAt: { type: Date }
+    },
     registrationLocation: {
       latitude: { type: Number },
       longitude: { type: Number },
+      address: { type: String },
       capturedAt: { type: Date }
     },
+    // Dynamic current location — updated on login when location verification is skipped
+    currentLocation: {
+      latitude: { type: Number },
+      longitude: { type: Number },
+      address: { type: String },
+      lastUpdated: { type: Date }
+    },
+    locationVerificationSkipped: { type: Boolean, default: false },
+    // Complete audit log of past logins with date, time, IP, browser, and GPS address
+    loginHistory: [
+      {
+        loginAt: { type: Date, default: Date.now },
+        ip: { type: String },
+        browser: { type: String },
+        os: { type: String },
+        latitude: { type: Number },
+        longitude: { type: Number },
+        address: { type: String },
+        locationVerificationSkipped: { type: Boolean }
+      }
+    ],
     // Allowed login radius in meters (configurable per user, default 100m)
     locationRadius: { type: Number, default: 100 },
     avatarUrl: { type: String },

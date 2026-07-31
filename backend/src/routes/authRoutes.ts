@@ -5,11 +5,13 @@ import User from '../models/User';
 import Role from '../models/Role';
 import Organization from '../models/Organization';
 import ModuleDefinition from '../models/ModuleDefinition';
+import CustomRecord from '../models/CustomRecord';
 import { authenticate } from '../middleware/authMiddleware';
 import { encrypt, decrypt, euclideanDistance } from '../utils/encryption';
 import { haversineDistance } from '../utils/geoUtils';
 import { seedNewTenantData } from '../utils/seeder';
 import { HierarchyService } from '../utils/hierarchy';
+import { reverseGeocode } from '../utils/geocoding';
 
 const router = Router();
 
@@ -229,11 +231,11 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     }
 
     // ── Check if first-time onboarding is required ─────────────────────────────
-    const hasRegisteredLocation = user.registrationLocation?.latitude !== undefined && 
-                                  user.registrationLocation?.longitude !== undefined;
+    const regLoc = user.registeredLocation || user.registrationLocation;
+    const isRegisteredLocSet = regLoc?.latitude !== undefined && regLoc?.longitude !== undefined;
     const hasFaceEnrolled = user.faceRecognition?.encryptedEmbedding != null;
 
-    if ((!hasRegisteredLocation && !user.skipLocation) || (!hasFaceEnrolled && !user.skipFace)) {
+    if ((!isRegisteredLocSet && !user.skipLocation) || (!hasFaceEnrolled && !user.skipFace)) {
       await user.save();
       const tempToken = jwt.sign(
         { id: user._id, onboarding: true, issuedAt: Date.now() },
@@ -248,8 +250,22 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ── Step 2: Location verification (Haversine) — conditional ──────────────
-    if (hasRegisteredLocation && !user.skipLocation) {
+    // ── Step 2: Location verification & Dynamic currentLocation Update ──────
+    const isLocationSkipped = !!(user.skipLocation || user.locationVerificationSkipped);
+
+    // Update user's current GPS location on successful authentication attempt
+    if (typeof latitude === 'number' && typeof longitude === 'number') {
+      const address = await reverseGeocode(latitude, longitude);
+      user.currentLocation = {
+        latitude,
+        longitude,
+        address,
+        lastUpdated: new Date()
+      };
+      user.locationVerificationSkipped = isLocationSkipped;
+    }
+
+    if (!isLocationSkipped && regLoc && typeof regLoc.latitude === 'number' && typeof regLoc.longitude === 'number') {
       if (typeof latitude !== 'number' || typeof longitude !== 'number') {
         res.status(200).json({
           locationRequired: true,
@@ -258,7 +274,6 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         return;
       }
 
-      const regLoc = user.registrationLocation!;
       const distance = haversineDistance(
         latitude,
         longitude,
@@ -329,6 +344,38 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     if (user.refreshTokens.length > 5) user.refreshTokens.shift();
     user.activeDevices.push({ deviceId, browser, os, ip, lastActive: new Date() });
     if (user.activeDevices.length > 5) user.activeDevices.shift();
+
+    // Record complete login history entry with timestamp, IP, browser, OS, and location address
+    user.loginHistory = user.loginHistory || [];
+    let curAddr = user.currentLocation?.address;
+    if (!curAddr && typeof latitude === 'number' && typeof longitude === 'number') {
+      curAddr = await reverseGeocode(latitude, longitude);
+      user.currentLocation = {
+        latitude,
+        longitude,
+        address: curAddr,
+        lastUpdated: new Date()
+      };
+    }
+
+    const activeLocData = isLocationSkipped 
+      ? user.currentLocation 
+      : (user.registeredLocation || user.registrationLocation || user.currentLocation);
+
+    user.loginHistory.unshift({
+      loginAt: new Date(),
+      ip,
+      browser,
+      os,
+      latitude: activeLocData?.latitude || (typeof latitude === 'number' ? latitude : undefined),
+      longitude: activeLocData?.longitude || (typeof longitude === 'number' ? longitude : undefined),
+      address: activeLocData?.address || curAddr,
+      locationVerificationSkipped: isLocationSkipped
+    });
+    if (user.loginHistory.length > 50) {
+      user.loginHistory = user.loginHistory.slice(0, 50);
+    }
+
     await user.save();
 
     const maxAge = rememberMe ? 7 * 24 * 60 * 60 * 1000 : 15 * 60 * 1000;
@@ -388,12 +435,15 @@ router.post('/onboarding', async (req: Request, res: Response): Promise<void> =>
       return;
     }
 
-    // Update location and face
-    user.registrationLocation = {
+    const address = await reverseGeocode(latitude, longitude);
+    const locObj = {
       latitude,
       longitude,
+      address,
       capturedAt: new Date()
     };
+    user.registeredLocation = locObj;
+    user.registrationLocation = locObj;
     
     user.faceRecognition = {
       enabled: true,
@@ -801,9 +851,8 @@ router.post('/location/check', async (req: Request, res: Response): Promise<void
 
     const user = await User.findOne({ email: email.toLowerCase() });
 
-    // If user not found or has no registration location, return generic success
-    // (actual auth will still fail later — we don't reveal account existence)
-    if (!user || !user.registrationLocation?.latitude) {
+    const userRegLoc = user?.registeredLocation || user?.registrationLocation;
+    if (!user || !userRegLoc || typeof userRegLoc.latitude !== 'number' || typeof userRegLoc.longitude !== 'number') {
       res.status(200).json({ withinRadius: true, distance: 0, allowedRadius: 100 });
       return;
     }
@@ -811,8 +860,8 @@ router.post('/location/check', async (req: Request, res: Response): Promise<void
     const distance = haversineDistance(
       latitude,
       longitude,
-      user.registrationLocation.latitude,
-      user.registrationLocation.longitude
+      userRegLoc.latitude,
+      userRegLoc.longitude
     );
 
     const allowedRadius = user.locationRadius || 100;
@@ -955,6 +1004,20 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
     const userCode = `${rolePrefix}-${cleanFirstName}`;
     
     const passwordHash = await bcrypt.hash(password, 10);
+    const skipLoc = req.body.skipLocation !== undefined ? req.body.skipLocation : (req.body.locationVerificationSkipped !== undefined ? req.body.locationVerificationSkipped : false);
+    const skipFc = req.body.skipFace !== undefined ? req.body.skipFace : false;
+
+    let regLocObj = undefined;
+    if (req.body.registeredLocation && typeof req.body.registeredLocation.latitude === 'number') {
+      const address = req.body.registeredLocation.address || await reverseGeocode(req.body.registeredLocation.latitude, req.body.registeredLocation.longitude);
+      regLocObj = {
+        latitude: req.body.registeredLocation.latitude,
+        longitude: req.body.registeredLocation.longitude,
+        address,
+        capturedAt: new Date()
+      };
+    }
+
     const newUser = await User.create({
       organizationId: req.organizationId,
       roleId,
@@ -965,8 +1028,11 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       plainPassword: password, // Save the plain-text password
       isVerified: true,
       userCode,
-      skipFace: false,
-      skipLocation: false,
+      skipFace: skipFc,
+      skipLocation: skipLoc,
+      locationVerificationSkipped: skipLoc,
+      registeredLocation: regLocObj,
+      registrationLocation: regLocObj,
       isActive: true,
       department: department || ''
     });
@@ -1017,7 +1083,25 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       user.plainPassword = password;
     }
     if (skipFace !== undefined) user.skipFace = skipFace;
-    if (skipLocation !== undefined) user.skipLocation = skipLocation;
+    if (skipLocation !== undefined) {
+      user.skipLocation = skipLocation;
+      user.locationVerificationSkipped = skipLocation;
+    }
+    if (req.body.locationVerificationSkipped !== undefined) {
+      user.skipLocation = req.body.locationVerificationSkipped;
+      user.locationVerificationSkipped = req.body.locationVerificationSkipped;
+    }
+    if (req.body.registeredLocation && typeof req.body.registeredLocation.latitude === 'number') {
+      const address = req.body.registeredLocation.address || await reverseGeocode(req.body.registeredLocation.latitude, req.body.registeredLocation.longitude);
+      const regLoc = {
+        latitude: req.body.registeredLocation.latitude,
+        longitude: req.body.registeredLocation.longitude,
+        address,
+        capturedAt: req.body.registeredLocation.capturedAt || new Date()
+      };
+      user.registeredLocation = regLoc;
+      user.registrationLocation = regLoc;
+    }
     if (isActive !== undefined) user.isActive = isActive;
     if (reportingManager !== undefined) user.reportingManager = reportingManager || null;
     if (department !== undefined) user.department = department;
@@ -1029,7 +1113,40 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
   }
 });
 
-// 11. Delete User
+// 11. Get Lead Count for User Before Deletion
+router.get('/users/:id/lead-count', authenticate, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
+    if (!user) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    const leadModule = await ModuleDefinition.findOne({ organizationId: req.organizationId, apiPath: 'leads' });
+    if (!leadModule) {
+      res.status(200).json({ assignedCount: 0, userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email });
+      return;
+    }
+
+    const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+    const assignedCount = await CustomRecord.countDocuments({
+      organizationId: req.organizationId,
+      moduleId: leadModule._id,
+      $or: [
+        { 'data.assignedTo': String(user._id) },
+        { 'data.assignedTo': user.email },
+        { 'data.assignedTo': user.firstName },
+        { 'data.assignedTo': fullName }
+      ]
+    });
+
+    res.status(200).json({ assignedCount, userName: fullName || user.email });
+  } catch (e) {
+    res.status(500).json({ error: 'Failed to fetch user lead count.' });
+  }
+});
+
+// 12. Delete User (Requires 0 assigned leads)
 router.delete('/users/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
     const requester = await User.findById((req as any).user.id).populate('roleId');
@@ -1040,11 +1157,38 @@ router.delete('/users/:id', authenticate, async (req: Request, res: Response): P
       return;
     }
 
-    const user = await User.findOneAndDelete({ _id: req.params.id, organizationId: req.organizationId });
+    const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
       return;
     }
+
+    // Check if user still has assigned leads
+    const leadModule = await ModuleDefinition.findOne({ organizationId: req.organizationId, apiPath: 'leads' });
+    let assignedCount = 0;
+    if (leadModule) {
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      assignedCount = await CustomRecord.countDocuments({
+        organizationId: req.organizationId,
+        moduleId: leadModule._id,
+        $or: [
+          { 'data.assignedTo': String(user._id) },
+          { 'data.assignedTo': user.email },
+          { 'data.assignedTo': user.firstName },
+          { 'data.assignedTo': fullName }
+        ]
+      });
+    }
+
+    if (assignedCount > 0) {
+      res.status(400).json({
+        error: `Cannot delete user '${user.firstName} ${user.lastName}'. They still have ${assignedCount} assigned lead(s). Please transfer all leads before deleting.`,
+        assignedCount
+      });
+      return;
+    }
+
+    await User.deleteOne({ _id: user._id });
     res.status(200).json({ message: 'User deleted successfully.' });
   } catch (e) {
     res.status(500).json({ error: 'Failed to delete user.' });

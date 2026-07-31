@@ -63,6 +63,7 @@ export default function RecordForm() {
     loanType: string;
   } | null>(null);
   const [bpDropdownOpen, setBpDropdownOpen] = useState(false);
+  const [bpSearchQuery, setBpSearchQuery] = useState('');
   const [allBanks, setAllBanks] = useState<string[]>([]);
   const [allLoanTypes, setAllLoanTypes] = useState<string[]>([]);
   const [allTeams, setAllTeams] = useState<string[]>([]);
@@ -590,31 +591,100 @@ export default function RecordForm() {
             {bpDropdownOpen && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setBpDropdownOpen(false)} />
-                <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl p-2 z-50 max-h-60 overflow-y-auto space-y-1">
-                  {opts.map((opt) => {
-                    const isChecked = selectedList.includes(opt);
-                    return (
+                <div className="absolute top-full left-0 w-full mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-2xl p-3 z-50 space-y-2 max-h-72 flex flex-col">
+                  {/* Search Bar */}
+                  <div className="relative">
+                    <Icons.Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={bpSearchQuery}
+                      onChange={(e) => setBpSearchQuery(e.target.value)}
+                      placeholder={`Search out of ${opts.length} banks...`}
+                      className="w-full pl-9 pr-8 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      autoFocus
+                    />
+                    {bpSearchQuery && (
                       <button
-                        key={opt}
                         type="button"
-                        onClick={() => toggleBank(opt)}
-                        className={`w-full flex items-center gap-3 px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
-                          isChecked
-                            ? 'bg-emerald-500/10 text-emerald-800'
-                            : 'hover:bg-slate-50 text-slate-700'
-                        }`}
+                        onClick={() => setBpSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
                       >
-                        <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
-                          isChecked
-                            ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
-                            : 'border-slate-300 bg-white'
-                        }`}>
-                          {isChecked && <Icons.Check className="w-3 h-3 stroke-[3]" />}
-                        </div>
-                        <span>{opt}</span>
+                        <Icons.X className="w-3.5 h-3.5" />
                       </button>
-                    );
-                  })}
+                    )}
+                  </div>
+
+                  {/* Quick Action Bar */}
+                  <div className="flex items-center justify-between border-b border-slate-100 pb-1.5 px-1 text-[11px] font-bold">
+                    <span className="text-slate-400">
+                      {opts.filter(b => b.toLowerCase().includes(bpSearchQuery.toLowerCase())).length} Banks Found
+                    </span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const filtered = opts.filter(b => b.toLowerCase().includes(bpSearchQuery.toLowerCase()));
+                          const combined = Array.from(new Set([...selectedList, ...filtered]));
+                          setValue(field.name, combined.join(', '), { shouldValidate: true });
+                        }}
+                        className="text-emerald-600 hover:text-emerald-800"
+                      >
+                        Select All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setValue(field.name, '', { shouldValidate: true })}
+                        className="text-rose-500 hover:text-rose-700"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Scrollable list */}
+                  <div className="space-y-1 overflow-y-auto pr-1 flex-1 max-h-48">
+                    {(() => {
+                      const filteredOpts = opts.filter(b => b.toLowerCase().includes(bpSearchQuery.toLowerCase()));
+                      if (filteredOpts.length === 0) {
+                        return (
+                          <div className="py-4 text-center text-slate-400 text-xs font-medium">
+                            No banks matching "{bpSearchQuery}"
+                          </div>
+                        );
+                      }
+                      return filteredOpts.map((opt) => {
+                        const isChecked = selectedList.includes(opt);
+                        return (
+                          <button
+                            key={opt}
+                            type="button"
+                            onClick={() => toggleBank(opt)}
+                            className={`w-full flex items-center justify-between px-3 py-2 text-xs font-semibold rounded-xl text-left transition-all ${
+                              isChecked
+                                ? 'bg-emerald-500/10 text-emerald-800 font-bold'
+                                : 'hover:bg-slate-50 text-slate-700'
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <div className={`w-4 h-4 rounded-md border flex items-center justify-center transition-all ${
+                                isChecked
+                                  ? 'bg-emerald-500 border-emerald-500 text-white shadow-sm'
+                                  : 'border-slate-300 bg-white'
+                              }`}>
+                                {isChecked && <Icons.Check className="w-3 h-3 stroke-[3]" />}
+                              </div>
+                              <span>{opt}</span>
+                            </div>
+                            {isChecked && (
+                              <span className="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                Selected
+                              </span>
+                            )}
+                          </button>
+                        );
+                      });
+                    })()}
+                  </div>
                 </div>
               </>
             )}
