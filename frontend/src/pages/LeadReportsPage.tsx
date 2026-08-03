@@ -5,6 +5,8 @@ import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
 import MultiSelectDropdown from '../components/MultiSelectDropdown';
 
+import { exportLeadReportXLSX } from '../utils/exportLeadReportXLSX';
+
 export default function LeadReportsPage() {
   const [searchParams] = useSearchParams();
   const initialCamp = searchParams.get('campaign');
@@ -93,26 +95,12 @@ export default function LeadReportsPage() {
   });
 
   const exportCSV = () => {
-    if (filteredLeads.length === 0) return;
-    const headers = ['Lead ID', 'Full Name', 'Phone', 'Email', 'Loan Type', 'Status', 'Amount', 'Assigned To'];
-    const rows = filteredLeads.map(l => [
-      l._id,
-      l.data?.fullName || l.data?.name || 'N/A',
-      l.data?.phone || 'N/A',
-      l.data?.email || 'N/A',
-      l.data?.loanType || 'Personal Loan',
-      l.data?.status || 'New',
-      l.data?.amount || 250000,
-      l.assignedTo?.name || 'Unassigned'
-    ]);
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `Lead_Report.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (filteredLeads.length === 0) {
+      showToast('No lead data available for export.', 'warning');
+      return;
+    }
+    exportLeadReportXLSX(filteredLeads, 'Lead_Report');
+    showToast(`Exported ${filteredLeads.length} lead records to Excel!`, 'success');
   };
 
   return (

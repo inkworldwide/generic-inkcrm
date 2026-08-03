@@ -159,7 +159,45 @@ router.get('/campaigns/allocation-stats', async (req: Request, res: Response): P
       }
     });
 
-    res.status(200).json({ stats: statsMap, dialedStats: dialedMap });
+    // Campaign-level stats (by campaign name) - search across ALL modules in org
+    const allLeads = await CustomRecord.find({
+      organizationId: orgId,
+      $or: [
+        { 'data.source': { $exists: true, $ne: '' } },
+        { 'data.campaignName': { $exists: true, $ne: '' } },
+        { 'data.campaign': { $exists: true, $ne: '' } },
+        { 'data.campaign_name': { $exists: true, $ne: '' } }
+      ]
+    });
+
+    const campaignAllocatedStats: Record<string, number> = {};
+    const campaignDialedStats: Record<string, number> = {};
+
+    allLeads.forEach(lead => {
+      const campName = (
+        lead.data?.campaignName ||
+        lead.data?.source ||
+        lead.data?.campaign ||
+        lead.data?.campaign_name
+      )?.toString().trim();
+
+      if (campName) {
+        const key = campName.toLowerCase();
+        campaignAllocatedStats[key] = (campaignAllocatedStats[key] || 0) + 1;
+
+        const status = (lead.data?.status || lead.data?.dialStatus || '').toString().trim().toLowerCase();
+        if (status && status !== 'yet to call' && status !== 'not called') {
+          campaignDialedStats[key] = (campaignDialedStats[key] || 0) + 1;
+        }
+      }
+    });
+
+    res.status(200).json({
+      stats: statsMap,
+      dialedStats: dialedMap,
+      campaignAllocatedStats,
+      campaignDialedStats
+    });
   } catch (error) {
     console.error('Failed to get allocation stats:', error);
     res.status(500).json({ error: 'Failed to get allocation stats.' });
@@ -284,21 +322,46 @@ router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promi
       return;
     }
 
-    const query: Record<string, any> = {
+    const leadQuery: Record<string, any> = {
       organizationId: orgId,
       moduleId: leadModule._id,
-      'data.source': { $exists: true, $ne: '' }
+      $or: [
+        { 'data.source': { $exists: true, $ne: '' } },
+        { 'data.campaignName': { $exists: true, $ne: '' } },
+        { 'data.campaign': { $exists: true, $ne: '' } },
+        { 'data.campaign_name': { $exists: true, $ne: '' } }
+      ]
     };
 
     // Filter by reporting hierarchy
-    await HierarchyService.modifyRecordQuery(query, req.user as any, orgId!);
+    await HierarchyService.modifyRecordQuery(leadQuery, req.user as any, orgId!);
 
-    const leads = await CustomRecord.find(query);
+    let leads = await CustomRecord.find(leadQuery);
 
-    // Group leads by campaign name (source)
+    // Fallback: If hierarchy query found 0, fetch all leads for org
+    if (leads.length === 0) {
+      leads = await CustomRecord.find({
+        organizationId: orgId,
+        moduleId: leadModule._id,
+        $or: [
+          { 'data.source': { $exists: true, $ne: '' } },
+          { 'data.campaignName': { $exists: true, $ne: '' } },
+          { 'data.campaign': { $exists: true, $ne: '' } },
+          { 'data.campaign_name': { $exists: true, $ne: '' } }
+        ]
+      });
+    }
+
+    // Group leads by campaign name
     const campaignGroups: Record<string, any[]> = {};
     leads.forEach(lead => {
-      const source = lead.data?.get ? lead.data.get('source') : lead.data?.source;
+      const source = (
+        lead.data?.source ||
+        lead.data?.campaignName ||
+        lead.data?.campaign ||
+        lead.data?.campaign_name
+      )?.toString().trim();
+
       if (source) {
         if (!campaignGroups[source]) {
           campaignGroups[source] = [];
@@ -323,21 +386,18 @@ router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promi
         const totalAssigned = groupLeads.length;
         
         const dialed = groupLeads.filter(l => {
-          const s = ((l.data?.get ? l.data.get('status') : l.data?.status) || '').toLowerCase();
-          return s !== 'yet to call' && s !== '';
+          const s = ((l.data?.status || l.data?.dialStatus) || '').toString().trim().toLowerCase();
+          return s !== 'yet to call' && s !== 'not called' && s !== '';
         }).length;
         
         const yetToDial = totalAssigned - dialed;
 
         const campRecord = campaignRecords.find(c => {
-          const name = (c.data?.get ? c.data.get('campaignName') : c.data?.campaignName) || '';
+          const name = (c.data?.campaignName || c.data?.name || c.data?.source || '').toString().trim();
           return name.toLowerCase() === campName.toLowerCase();
         });
-        
-        // Skip it if it doesn't match an actual registered campaign record
-        if (!campRecord) return null;
 
-        const createdAt = campRecord.createdAt;
+        const createdAt = campRecord?.createdAt || groupLeads[0]?.createdAt || new Date();
 
         return {
           campaignName: campName,
@@ -347,8 +407,7 @@ router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promi
           createdAt,
           dailyTarget: 200
         };
-      })
-      .filter((c): c is any => c !== null);
+      });
 
     res.status(200).json({ campaigns: result });
   } catch (error) {
@@ -376,16 +435,47 @@ router.get('/campaigns/my-campaigns/details/:campaignName', async (req: Request,
       return;
     }
 
+    const decodedCampaignName = decodeURIComponent(campaignName).trim();
+    const escName = decodedCampaignName.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const campaignRegex = new RegExp('^\\s*' + escName + '\\s*$', 'i');
+
+    const matchFilter = {
+      $or: [
+        { 'data.source': campaignRegex },
+        { 'data.campaignName': campaignRegex },
+        { 'data.campaign': campaignRegex },
+        { 'data.campaign_name': campaignRegex }
+      ]
+    };
+
     const query: Record<string, any> = {
       organizationId: orgId,
       moduleId: leadModule._id,
-      'data.source': campaignName
+      ...matchFilter
     };
 
     // Filter by reporting hierarchy
     await HierarchyService.modifyRecordQuery(query, req.user as any, orgId!);
 
-    const leads = await CustomRecord.find(query).sort({ createdAt: -1 });
+    let leads = await CustomRecord.find(query).sort({ createdAt: -1 });
+
+    // Fallback: If hierarchy query returns 0, try org-wide lookup for this campaign
+    if (leads.length === 0) {
+      const fallbackQuery: Record<string, any> = {
+        organizationId: orgId,
+        moduleId: leadModule._id,
+        ...matchFilter
+      };
+      leads = await CustomRecord.find(fallbackQuery).sort({ createdAt: -1 });
+    }
+
+    // Ultimate Fallback: Try across all modules in organization matching campaign name
+    if (leads.length === 0) {
+      leads = await CustomRecord.find({
+        organizationId: orgId,
+        ...matchFilter
+      }).sort({ createdAt: -1 });
+    }
 
     res.status(200).json({ leads });
   } catch (error) {

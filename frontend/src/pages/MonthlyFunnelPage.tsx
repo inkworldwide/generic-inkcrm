@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
+import { exportLeadReportXLSX } from '../utils/exportLeadReportXLSX';
 import {
   PieChart,
   Pie,
@@ -151,32 +152,14 @@ export default function MonthlyFunnelPage() {
   const convertedCount = (statusCounts['Approved'] || 0) + (statusCounts['Disbursed'] || 0);
   const conversionRate = totalLeadsCount > 0 ? Math.round((convertedCount / totalLeadsCount) * 100) : 0;
 
-  // Export CSV
+  // Export Excel Report with all 18 columns
   const handleExportCSV = () => {
     if (filteredLeads.length === 0) {
       showToast('No data to export', 'info');
       return;
     }
-    const headers = ['Lead ID', 'Client Name', 'Phone', 'Campaign', 'Status', 'Assigned To', 'Created Date'];
-    const rows = filteredLeads.map(l => [
-      l._id,
-      l.data?.fullName || l.data?.name || 'N/A',
-      l.data?.mobile || l.data?.phone || 'N/A',
-      l.data?.campaign || l.campaignName || 'N/A',
-      l.data?.status || 'New',
-      l.assignedTo?.name || l.data?.telecaller || 'Unassigned',
-      l.createdAt ? new Date(l.createdAt).toLocaleDateString() : 'N/A'
-    ]);
-    const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Monthly_Funnel_${selectedMonth}_${selectedYear}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('Exported Monthly Funnel report to CSV', 'success');
+    exportLeadReportXLSX(filteredLeads, `Monthly_Funnel_${selectedMonth}_${selectedYear}`);
+    showToast('Exported Monthly Funnel report to Excel', 'success');
   };
 
   return (

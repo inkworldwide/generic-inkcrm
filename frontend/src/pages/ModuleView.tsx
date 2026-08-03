@@ -8,6 +8,8 @@ import api, { FILE_BASE_URL } from '../services/api';
 import { DynamicIcon } from '../components/Layout';
 import { useToastStore } from '../store/toastStore';
 import { formatDate } from '../utils/dateFormatter';
+import { exportCampaignCSV } from '../utils/exportCampaignCSV';
+import { exportLeadReportXLSX } from '../utils/exportLeadReportXLSX';
 
 type ViewMode = 'table' | 'kanban' | 'calendar' | 'timeline';
 
@@ -33,6 +35,30 @@ export default function ModuleView() {
   const [historyActivities, setHistoryActivities] = useState<any[]>([]);
   const [historyDocuments, setHistoryDocuments] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Campaign expansion state for 12-column detailed view
+  const [expandedCampaign, setExpandedCampaign] = useState<string | null>(null);
+  const [campaignLeadsMap, setCampaignLeadsMap] = useState<Record<string, any[]>>({});
+  const [loadingCampaignLeads, setLoadingCampaignLeads] = useState<Record<string, boolean>>({});
+
+  const toggleExpandCampaign = async (campaignName: string) => {
+    if (expandedCampaign === campaignName) {
+      setExpandedCampaign(null);
+      return;
+    }
+    setExpandedCampaign(campaignName);
+    if (!campaignLeadsMap[campaignName]) {
+      try {
+        setLoadingCampaignLeads(prev => ({ ...prev, [campaignName]: true }));
+        const res = await api.get(`/records/campaigns/my-campaigns/details/${encodeURIComponent(campaignName)}`);
+        setCampaignLeadsMap(prev => ({ ...prev, [campaignName]: res.data.leads || [] }));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingCampaignLeads(prev => ({ ...prev, [campaignName]: false }));
+      }
+    }
+  };
 
   const handleUploadClick = (recordId: string) => {
     setUploadingRecordId(recordId);
@@ -631,64 +657,62 @@ export default function ModuleView() {
     setCampaignNameInput(rec.data?.campaignName || '');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  
+  // Fetch dynamic campaign allocation & dialed stats
+  const { data: campaignStatsData } = useQuery({
+    queryKey: ['campaign-allocation-stats'],
+    queryFn: async () => {
+      const res = await api.get('/records/campaigns/allocation-stats');
+      return res.data || {};
+    },
+    enabled: apiPath === 'campaigns' || apiPath === 'campaignassignments'
+  });
+
+  const campAllocStats = campaignStatsData?.campaignAllocatedStats || {};
+  const campDialedStats = campaignStatsData?.campaignDialedStats || {};
 
   const getAllocatedNumbers = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('raja')) return 0;
-    if (n.includes('apmc-cate-a -2k')) return 1980;
-    if (n.includes('b2b-b1-10k')) return 10000;
-    if (n.includes('apmc-cate-a-4k')) return 8274;
-    if (n.includes('vc-ka01')) return 10000;
-    if (n.includes('25-35k')) return 9702;
-    if (n.includes('ktk-pl')) return 100;
-    if (n.includes('crmdemo2')) return 11;
-    if (n.includes('b2b-f1')) return 7739;
-    if (n.includes('govt-pl')) return 115;
-    if (n.includes('bommanahalli')) return 348;
-    if (n.includes('bly-21')) return 20;
-    if (n.includes('b1-01 to 10k')) return 9999;
-    if (n.includes('aland')) return 60;
-    if (n.includes('kvb-db')) return 21;
-    // fallback based on name length/hash
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return Math.abs(hash % 5000);
+    const key = (name || '').toLowerCase().trim();
+    if (campAllocStats[key] !== undefined) return campAllocStats[key];
+    return 0;
   };
 
   const getDialedNumbers = (name: string) => {
-    const n = name.toLowerCase();
-    if (n.includes('raja')) return 0;
-    if (n.includes('apmc-cate-a -2k')) return 1362;
-    if (n.includes('b2b-b1-10k')) return 2858;
-    if (n.includes('apmc-cate-a-4k')) return 1582;
-    if (n.includes('vc-ka01')) return 546;
-    if (n.includes('25-35k')) return 1280;
-    if (n.includes('ktk-pl')) return 100;
-    if (n.includes('crmdemo2')) return 9;
-    if (n.includes('b2b-f1')) return 1685;
-    if (n.includes('govt-pl')) return 83;
-    if (n.includes('bommanahalli')) return 48;
-    if (n.includes('bly-21')) return 20;
-    if (n.includes('b1-01 to 10k')) return 3895;
-    if (n.includes('aland')) return 0;
-    if (n.includes('kvb-db')) return 21;
-    // fallback based on allocated
-    const alloc = getAllocatedNumbers(name);
-    return Math.floor(alloc * 0.4);
+    const key = (name || '').toLowerCase().trim();
+    if (campDialedStats[key] !== undefined) return campDialedStats[key];
+    return 0;
   };
 
-  const handleDownloadCampaign = (rec: any) => {
-    const headers = 'Campaign Name,Created Date,Total Allocated Numbers,Total Dialed Numbers\n';
-    const row = `"${rec.data.campaignName}","${formatDate(rec.createdAt)}","${getAllocatedNumbers(rec.data.campaignName)}","${getDialedNumbers(rec.data.campaignName)}"\n`;
-    const encodedUri = encodeURI('data:text/csv;charset=utf-8,' + headers + row);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `campaign_${rec.data.campaignName}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadCampaign = async (rec: any) => {
+    const campaignName = (
+      rec.data?.campaignName ||
+      rec.data?.source ||
+      rec.data?.campaign ||
+      rec.data?.name ||
+      rec.name
+    )?.toString().trim();
+
+    if (!campaignName) {
+      showToast('Campaign name not found.', 'error');
+      return;
+    }
+
+    try {
+      showToast(`Exporting 12-column report for "${campaignName}"...`, 'info');
+      const res = await api.get(`/records/campaigns/my-campaigns/details/${encodeURIComponent(campaignName)}`);
+      const leads = res.data?.leads || [];
+
+      if (leads.length === 0) {
+        showToast(`No lead records found under campaign "${campaignName}".`, 'warning');
+        return;
+      }
+
+      exportCampaignCSV(campaignName, leads);
+      showToast(`Exported ${leads.length} leads for campaign "${campaignName}"!`, 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Failed to export campaign data.', 'error');
+    }
   };
 
   // Read ?status= from URL and apply as filter
@@ -759,10 +783,16 @@ export default function ModuleView() {
     });
   };
 
-  // CSV Export Utility
+  // CSV / XLSX Export Utility
   const handleExportCSV = () => {
     if (!data?.records || !activeModule) return;
     
+    if (activeModule.apiPath === 'leads') {
+      exportLeadReportXLSX(data.records, 'Leads_Report');
+      showToast(`Exported ${data.records.length} lead records to Excel!`, 'success');
+      return;
+    }
+
     // Header
     const fields = activeModule.fields.map((f) => f.name);
     const headers = activeModule.fields.map((f) => f.label).join(',');
@@ -1183,7 +1213,7 @@ export default function ModuleView() {
                       </thead>
                       <tbody className="divide-y divide-[#EAE4DA] dark:divide-slate-700">
                         {data?.records.map((rec: any) => {
-                          const name = rec.data?.campaignName || 'Unnamed Campaign';
+                          const name = rec.data?.campaignName || rec.data?.source || rec.data?.campaign || rec.data?.name || rec.name || 'Unnamed Campaign';
                           const createdDateStr = formatDate(rec.createdAt) + ' ' + new Date(rec.createdAt).toLocaleTimeString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
@@ -1207,21 +1237,21 @@ export default function ModuleView() {
                               <td className="px-6 py-4 text-right space-x-2">
                                 <button
                                   onClick={() => handleDownloadCampaign(rec)}
-                                  className="btn-secondary-premium p-2 rounded-xl inline-flex items-center justify-center"
-                                  title="Download CSV"
+                                  className="btn-secondary-premium p-2 rounded-xl inline-flex items-center justify-center cursor-pointer active:scale-95"
+                                  title="Download 12-Column CSV"
                                 >
                                   <Icons.Download className="w-3.5 h-3.5 text-[#17223B]" />
                                 </button>
                                 <button
                                   onClick={() => handleEditClick(rec)}
-                                  className="btn-edit-premium p-2 rounded-xl inline-flex items-center justify-center"
+                                  className="btn-edit-premium p-2 rounded-xl inline-flex items-center justify-center cursor-pointer active:scale-95"
                                   title="Edit Campaign"
                                 >
                                   <Icons.Edit3 className="w-3.5 h-3.5 text-slate-700" />
                                 </button>
                                 <button
                                   onClick={() => handleDelete(rec._id)}
-                                  className="btn-delete-premium p-2 rounded-xl inline-flex items-center justify-center"
+                                  className="btn-delete-premium p-2 rounded-xl inline-flex items-center justify-center cursor-pointer active:scale-95"
                                   title="Delete Campaign"
                                 >
                                   <Icons.Trash2 className="w-3.5 h-3.5 text-rose-600" />

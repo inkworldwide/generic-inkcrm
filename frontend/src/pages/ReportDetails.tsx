@@ -6,6 +6,8 @@ import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { formatDate } from '../utils/dateFormatter';
 
+import { exportLeadReportXLSX } from '../utils/exportLeadReportXLSX';
+
 const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4'];
 
 export default function ReportDetails() {
@@ -23,24 +25,7 @@ export default function ReportDetails() {
 
   const handleExportCSV = () => {
     if (!data?.details || !data?.report) return;
-
-    const cols = data.report.columns.length > 0 
-      ? data.report.columns 
-      : Object.keys(data.details[0]?.data || {});
-
-    const headers = cols.join(',');
-    const rows = data.details.map((row: any) =>
-      cols.map((c: string) => `"${String(row.data[c] || '').replace(/"/g, '""')}"`).join(',')
-    );
-
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers, ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `${data.report.name.replace(/\s+/g, '_')}_export.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    exportLeadReportXLSX(data.details, data.report.name || 'Report');
   };
 
   const handlePrint = () => {

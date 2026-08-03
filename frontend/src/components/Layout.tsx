@@ -380,6 +380,7 @@ export default function Layout({ children }: LayoutProps) {
 
               {/* Separate Funnel Accordion */}
               <SidebarAccordion label="FUNNEL" icon={Icons.Filter} colorClass="text-indigo-500" isCollapsed={isCollapsed}>
+                <SidebarItem to="/reports/funnel-daily" label="DAILY FUNNEL" icon={Icons.CalendarRange} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
                 <SidebarItem to="/reports/funnel-monthly" label="MONTHLY FUNNEL" icon={Icons.CalendarDays} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
                 <SidebarItem to="/reports/funnel-annual" label="ANNUAL FUNNEL" icon={Icons.TrendingUp} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
               </SidebarAccordion>
@@ -422,6 +423,7 @@ export default function Layout({ children }: LayoutProps) {
                     if (path === '/reports/telecaller-reports') return "Telecaller's Reports";
                     if (path === '/reports/telecaller-monthly') return "Telecaller's Monthly Report";
                     if (path === '/reports/campaign-report') return 'My Campaign Report';
+                    if (path === '/reports/funnel-daily') return 'Daily Lead Funnel';
                     if (path === '/reports/funnel-monthly') return 'Monthly Lead Funnel';
                     if (path === '/reports/funnel-annual') return 'Annual Lead Funnel';
                     if (path === '/reports') return 'Reports & Analytics';

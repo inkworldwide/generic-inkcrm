@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<'overview' | 'pipeline' | 'followups'>('overview');
+  const [followupTab, setFollowupTab] = useState<'today' | 'upcoming'>('today');
   const [showNotifications, setShowNotifications] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
 
@@ -30,6 +31,15 @@ export default function Dashboard() {
   const [historyActivities, setHistoryActivities] = useState<any[]>([]);
   const [historyDocuments, setHistoryDocuments] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
+
+  // Fetch dynamic configured statuses from database (Settings -> Status Settings)
+  const { data: configuredStatuses = [] } = useQuery({
+    queryKey: ['dashboard-configured-statuses'],
+    queryFn: async () => {
+      const res = await api.get('/statuses').catch(() => ({ data: [] }));
+      return Array.isArray(res.data) ? res.data : [];
+    }
+  });
 
   // Fetch campaigns for Campaign Status section
   const { data: campaignRecords } = useQuery({
@@ -110,6 +120,16 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
+    if (metricsData) {
+      if (metricsData.todayFollowupsCount > 0) {
+        setFollowupTab('today');
+      } else if (metricsData.upcomingFollowupsCount > 0 || metricsData.isUpcoming) {
+        setFollowupTab('upcoming');
+      }
+    }
+  }, [metricsData]);
+
+  useEffect(() => {
     // Trigger progress bar animations on load
     const timer = setTimeout(() => setAnimate(true), 150);
     return () => clearTimeout(timer);
@@ -143,19 +163,101 @@ export default function Dashboard() {
 
   const getStatusCount = (lbl: string) => {
     if (!metricsData?.statusCounts) return 0;
-    let key = lbl.toUpperCase();
-    if (key.endsWith(' LEADS')) {
-      key = key.replace(' LEADS', '');
-    }
-    if (key === 'CEBIL PENDING') key = 'CEDIL PENDING';
-    if (key === 'APPROVED BUT NOT DISBUSE') key = 'APPROVED';
-    if (key === 'DISBUSED') key = 'DISBURSED';
-    
-    // Count today's followups separately
-    if (key === "TODAY'S FOLLOWUPS") {
+    const raw = (lbl || '').trim();
+    if (!raw) return 0;
+    const upper = raw.toUpperCase();
+
+    if (upper === "TODAY'S FOLLOWUPS") {
       return metricsData.todayFollowupsCount || 0;
     }
-    return metricsData.statusCounts[key] || 0;
+
+    // Direct lookup in statusCounts object
+    if (metricsData.statusCounts[raw] !== undefined) return metricsData.statusCounts[raw];
+    if (metricsData.statusCounts[upper] !== undefined) return metricsData.statusCounts[upper];
+
+    // Alias mapping
+    if (upper === 'CEBIL PENDING') return metricsData.statusCounts['CEDIL PENDING'] || metricsData.statusCounts['CEBIL PENDING'] || 0;
+    if (upper === 'CEDIL PENDING') return metricsData.statusCounts['CEBIL PENDING'] || metricsData.statusCounts['CEDIL PENDING'] || 0;
+    if (upper === 'APPROVED BUT NOT DISBUSE') return metricsData.statusCounts['APPROVED'] || 0;
+    if (upper === 'DISBUSED') return metricsData.statusCounts['DISBURSED'] || 0;
+
+    // Check with " LEADS" stripped
+    const noLeadsKey = upper.replace(/ LEADS$/, '');
+    if (metricsData.statusCounts[noLeadsKey] !== undefined) return metricsData.statusCounts[noLeadsKey];
+
+    return 0;
+  };
+
+  // Construct dynamic metric cards list from configured statuses in Settings
+  const getDynamicMetricCards = () => {
+    if (configuredStatuses && configuredStatuses.length > 0) {
+      const visible = configuredStatuses
+        .filter((s: any) => s.dashboardVisibility !== false)
+        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+
+      if (visible.length > 0) {
+        return visible.map((st: any) => {
+          const IconComp = (Icons as any)[st.icon] || Icons.Circle;
+          const upperName = (st.name || '').toUpperCase();
+
+          let category = 'overview';
+          if (st.pipelinePosition > 0) category = 'pipeline';
+          if (upperName.includes('FOLLOW') || upperName.includes('WARM') || upperName.includes('PENDING') || upperName.includes('REACHABLE')) {
+            category = 'followups';
+          }
+
+          let iconBg = 'bg-indigo-50';
+          let iconText = 'text-indigo-600';
+          let iconBorder = 'border-indigo-100';
+
+          if (st.color) {
+            if (st.color.toLowerCase() === '#ea580c' || upperName.includes('HOT')) {
+              iconBg = 'bg-orange-50'; iconText = 'text-orange-600'; iconBorder = 'border-orange-100';
+            } else if (st.color.toLowerCase() === '#d97706' || upperName.includes('WARM')) {
+              iconBg = 'bg-amber-50'; iconText = 'text-amber-600'; iconBorder = 'border-amber-100';
+            } else if (st.color.toLowerCase() === '#16a34a' || st.color.toLowerCase() === '#15803d' || upperName.includes('APPROV') || upperName.includes('DISBURS')) {
+              iconBg = 'bg-emerald-50'; iconText = 'text-emerald-600'; iconBorder = 'border-emerald-100';
+            } else if (st.color.toLowerCase() === '#dc2626' || upperName.includes('REJECT')) {
+              iconBg = 'bg-red-50'; iconText = 'text-red-600'; iconBorder = 'border-red-100';
+            } else if (upperName.includes('FOLLOW')) {
+              iconBg = 'bg-sky-50'; iconText = 'text-sky-600'; iconBorder = 'border-sky-100';
+            } else if (st.color.toLowerCase() === '#64748b' || upperName.includes('PENDING') || upperName.includes('DROP')) {
+              iconBg = 'bg-slate-100'; iconText = 'text-slate-600'; iconBorder = 'border-slate-200';
+            }
+          }
+
+          return {
+            label: st.name.toUpperCase(),
+            rawName: st.name,
+            category,
+            accentColor: st.color || '#4F46E5',
+            icon: IconComp,
+            sub: st.isFinal 
+              ? (st.isSuccess ? '✔ Closed Won' : '✕ Closed Final') 
+              : (st.pipelinePosition > 0 ? `Stage #${st.pipelinePosition}` : '📌 Configured Status'),
+            bg: iconBg,
+            text: iconText,
+            border: iconBorder
+          };
+        });
+      }
+    }
+
+    // Default fallback list
+    return [
+      { label: 'NEW LEADS', rawName: 'New', category: 'overview', accentColor: '#3B82F6', icon: Icons.Sparkles, sub: '▲ +8% This Month', bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
+      { label: 'HOT LEADS', rawName: 'Hot', category: 'pipeline', accentColor: '#EA580C', icon: Icons.Flame, sub: '🔥 Updated Today', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
+      { label: 'WARM LEADS', rawName: 'Warm', category: 'pipeline', accentColor: '#D97706', icon: Icons.Sun, sub: '☀ Active Follow-ups', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
+      { label: 'CEBIL PENDING', rawName: 'Cedil Pending', category: 'pipeline', accentColor: '#64748B', icon: Icons.FileWarning, sub: '⏳ Awaiting verification', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
+      { label: 'DOCUMENT PENDING', rawName: 'Document Pending', category: 'pipeline', accentColor: '#64748B', icon: Icons.FileText, sub: '📄 Files required', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
+      { label: 'APPROVAL PENDING', rawName: 'Approval Pending', category: 'pipeline', accentColor: '#EA580C', icon: Icons.Clock, sub: '⏳ Under review', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
+      { label: 'APPROVED', rawName: 'Approved', category: 'pipeline', accentColor: '#16A34A', icon: Icons.CheckCircle, sub: '✔ Ready for disbursement', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
+      { label: 'DISBURSED', rawName: 'Disbursed', category: 'pipeline', accentColor: '#15803D', icon: Icons.Banknote, sub: '💰 Funds released', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
+      { label: 'FOLLOWUP', rawName: 'Followup', category: 'followups', accentColor: '#0284C7', icon: Icons.PhoneCall, sub: '📞 Call scheduled', bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-100' },
+      { label: 'PENDING', rawName: 'Pending', category: 'followups', accentColor: '#D97706', icon: Icons.Hourglass, sub: '⏳ Pending action', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
+      { label: 'REJECTED', rawName: 'Rejected', category: 'overview', accentColor: '#DC2626', icon: Icons.XOctagon, sub: '✕ Closed', bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' },
+      { label: 'DROPPED', rawName: 'Dropped', category: 'overview', accentColor: '#64748B', icon: Icons.ArrowDownCircle, sub: '✕ Inactive', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
+    ];
   };
 
   // Convert pipeline stage data to array with dynamic percentage scaling
@@ -416,42 +518,15 @@ export default function Dashboard() {
       <div className="space-y-6">
         <div className="bg-[#F8F5F1] border border-[#EAE4DA] rounded-2xl p-6 shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4.5">
-            {[
-              { label: 'NEW LEADS', category: 'overview', accentColor: '#3B82F6', icon: Icons.Sparkles, sub: '▲ +8% This Month', bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' },
-              { label: 'HOT LEADS', category: 'pipeline', accentColor: '#EA580C', icon: Icons.Flame, sub: '🔥 Updated Today', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
-              { label: 'WARM LEADS', category: 'pipeline', accentColor: '#D97706', icon: Icons.Sun, sub: '☀ Active Follow-ups', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
-              { label: 'CEBIL PENDING', category: 'pipeline', accentColor: '#64748B', icon: Icons.FileWarning, sub: '⏳ Awaiting verification', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
-              { label: 'DOCUMENT PENDING', category: 'pipeline', accentColor: '#64748B', icon: Icons.FileText, sub: '📄 Files required', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
-              { label: 'APPROVAL PENDING', category: 'pipeline', accentColor: '#EA580C', icon: Icons.Clock, sub: '⏳ Under review', bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' },
-              { label: 'APPROVED', category: 'pipeline', accentColor: '#16A34A', icon: Icons.CheckCircle, sub: '✔ Ready for disbursement', bg: 'bg-emerald-50', text: 'text-emerald-600', border: 'border-emerald-100' },
-              { label: 'DISBURSED', category: 'pipeline', accentColor: '#15803D', icon: Icons.Banknote, sub: '💰 Funds released', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
-              { label: 'FOLLOWUP', category: 'followups', accentColor: '#0284C7', icon: Icons.PhoneCall, sub: '📞 Call scheduled', bg: 'bg-sky-50', text: 'text-sky-600', border: 'border-sky-100' },
-              { label: 'PENDING', category: 'followups', accentColor: '#D97706', icon: Icons.Hourglass, sub: '⏳ Pending action', bg: 'bg-amber-50', text: 'text-amber-600', border: 'border-amber-100' },
-              { label: 'REJECTED', category: 'overview', accentColor: '#DC2626', icon: Icons.XOctagon, sub: '✕ Closed', bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' },
-              { label: 'DROPPED', category: 'overview', accentColor: '#64748B', icon: Icons.ArrowDownCircle, sub: '✕ Inactive', bg: 'bg-slate-100', text: 'text-slate-600', border: 'border-slate-200' },
-            ].filter(m => {
+            {getDynamicMetricCards().filter(m => {
               if (activeTab === 'overview') return true;
-              if (activeTab === 'pipeline') return m.category === 'pipeline' || m.label === 'HOT LEADS' || m.label === 'WARM LEADS';
-              if (activeTab === 'followups') return m.category === 'followups' || m.label.includes('FOLLOWUP') || m.label === 'WARM LEADS';
+              if (activeTab === 'pipeline') return m.category === 'pipeline' || m.label.includes('HOT') || m.label.includes('WARM');
+              if (activeTab === 'followups') return m.category === 'followups' || m.label.includes('FOLLOWUP') || m.label.includes('WARM');
               return true;
             }).map((metric, idx) => {
               const Icon = metric.icon;
-              const count = getStatusCount(metric.label);
-              const statusMap: Record<string, string> = {
-                'NEW LEADS': 'New',
-                'HOT LEADS': 'Hot',
-                'WARM LEADS': 'Warm',
-                'CEBIL PENDING': 'Cedil Pending',
-                'DOCUMENT PENDING': 'Document Pending',
-                'APPROVAL PENDING': 'Approval Pending',
-                'APPROVED': 'Approved',
-                'DISBURSED': 'Disbursed',
-                'REJECTED': 'Rejected',
-                'FOLLOWUP': 'Followup',
-                'DROPPED': 'Dropped',
-                'PENDING': 'Pending',
-              };
-              const filterStatus = statusMap[metric.label] || metric.label;
+              const count = getStatusCount(metric.rawName || metric.label);
+              const filterStatus = metric.rawName || metric.label;
               return (
                 <Link
                   to={`/modules/leads?status=${encodeURIComponent(filterStatus)}`}
@@ -660,28 +735,78 @@ export default function Dashboard() {
 
       </div>
 
-      {/* 4. TODAY'S FOLLOWUP LEADS DETAILS */}
+      {/* 4. TODAY'S & UPCOMING FOLLOWUP LEADS DETAILS */}
       <div className="bg-[#F8F5F1] border border-[#EAE4DA] rounded-2xl p-6 md:p-8 overflow-hidden text-left shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
-        <div className="px-2 pb-5 border-b border-[#EAE4DA] flex items-center justify-between mb-6">
-          <h2 className="text-xs font-[800] text-slate-800 uppercase tracking-wider flex items-center gap-2">
-            <Icons.CalendarClock className="w-4 h-4 text-slate-800" />
-            {metricsData?.isUpcoming ? "Upcoming Followup Leads" : "Today's Followup Leads"}
-          </h2>
+        <div className="px-2 pb-5 border-b border-[#EAE4DA] flex flex-wrap items-center justify-between gap-4 mb-6">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-white border border-[#EAE4DA] flex items-center justify-center shadow-2xs">
+              <Icons.CalendarClock className="w-4.5 h-4.5 text-indigo-600" />
+            </div>
+            <div>
+              <h2 className="text-sm font-[800] text-slate-800 uppercase tracking-wider">
+                Followup Leads Details
+              </h2>
+              <p className="text-[11px] text-slate-500 font-semibold mt-0.5">
+                {followupTab === 'today' ? "Scheduled for action today" : "Upcoming scheduled followups"}
+              </p>
+            </div>
+          </div>
+
+          {/* Tab buttons: Today's vs Upcoming */}
+          <div className="flex items-center gap-2 bg-white border border-[#EAE4DA] p-1.5 rounded-xl shadow-2xs">
+            <button
+              onClick={() => setFollowupTab('today')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-2 ${
+                followupTab === 'today'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Icons.Calendar className="w-3.5 h-3.5" />
+              <span>Today's Followups</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${followupTab === 'today' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                {metricsData?.todayFollowupsCount || 0}
+              </span>
+            </button>
+
+            <button
+              onClick={() => setFollowupTab('upcoming')}
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold transition-all flex items-center gap-2 ${
+                followupTab === 'upcoming'
+                  ? 'bg-indigo-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Icons.Clock className="w-3.5 h-3.5" />
+              <span>Upcoming Followups</span>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${followupTab === 'upcoming' ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                {metricsData?.upcomingFollowupsCount || 0}
+              </span>
+            </button>
+          </div>
         </div>
         
         <div className="space-y-6">
-          {!metricsData?.todayFollowupsList || metricsData.todayFollowupsList.length === 0 ? (
-            <div className="py-12 bg-white border border-[#EAE4DA] rounded-xl flex flex-col items-center justify-center text-center shadow-xs">
-              <div className="w-14 h-14 rounded-full bg-[#F8F5F1] border border-[#EAE4DA] flex items-center justify-center mb-3 shadow-inner">
-                <Icons.CheckCircle2 className="w-7 h-7 text-slate-400" />
-              </div>
-              <h3 className="text-sm font-bold text-slate-800">
-                {metricsData?.isUpcoming ? "No upcoming follow-ups scheduled." : "No follow-ups scheduled today."}
-              </h3>
-              <p className="text-xs text-slate-400 mt-1">Enjoy your day.</p>
-            </div>
-          ) : (
-            metricsData.todayFollowupsList.map((rec: any, idx: number) => {
+          {(() => {
+            const activeList = followupTab === 'today'
+              ? (metricsData?.todayFollowupsList || [])
+              : (metricsData?.upcomingFollowupsList?.length ? metricsData.upcomingFollowupsList : (metricsData?.todayFollowupsList || []));
+
+            if (!activeList || activeList.length === 0) {
+              return (
+                <div className="py-12 bg-white border border-[#EAE4DA] rounded-xl flex flex-col items-center justify-center text-center shadow-xs">
+                  <div className="w-14 h-14 rounded-full bg-[#F8F5F1] border border-[#EAE4DA] flex items-center justify-center mb-3 shadow-inner">
+                    <Icons.CheckCircle2 className="w-7 h-7 text-slate-400" />
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-800">
+                    {followupTab === 'today' ? "No follow-ups scheduled today." : "No upcoming follow-ups scheduled."}
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-1">Enjoy your day.</p>
+                </div>
+              );
+            }
+
+            return activeList.map((rec: any, idx: number) => {
               const leadNo = rec._id.slice(-6).toUpperCase();
               return (
                 <div key={rec._id} className="border border-[#EAE4DA] rounded-2xl p-5 bg-white relative mb-6 last:mb-0 text-left shadow-xs">
@@ -790,8 +915,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               );
-            })
-          )}
+            });
+          })()}
         </div>
       </div>
 
