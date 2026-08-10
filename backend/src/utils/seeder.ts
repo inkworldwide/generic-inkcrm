@@ -848,7 +848,6 @@ async function seed() {
   // Seed dynamic Statuses for Sales Organization
   console.log('Seeding Statuses...');
   const defaultStatuses = [
-    { name: 'Yet To Call', color: '#6366f1', icon: 'PhoneOff', pipelinePosition: 0, order: 0 },
     { name: 'New', color: '#64748b', icon: 'Circle', pipelinePosition: 1, order: 1 },
     { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 2, order: 2 },
     { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 3, order: 3 },
@@ -1637,7 +1636,6 @@ export async function seedNewTenantData(organizationId: mongoose.Types.ObjectId)
 
   // 2. Create default statuses
   const defaultStatuses = [
-    { name: 'Yet To Call', color: '#6366f1', icon: 'PhoneOff', pipelinePosition: 0, order: 0 },
     { name: 'New', color: '#6366f1', icon: 'Sparkles', pipelinePosition: 1, order: 1 },
     { name: 'Hot', color: '#ef4444', icon: 'Flame', pipelinePosition: 2, order: 2 },
     { name: 'Warm', color: '#f59e0b', icon: 'Sun', pipelinePosition: 3, order: 3 },

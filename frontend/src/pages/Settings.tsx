@@ -7,6 +7,7 @@ import * as Icons from 'lucide-react';
 import FaceEnrollment from '../components/FaceEnrollment';
 import { useAuthStore } from '../store/authStore';
 import { useToastStore } from '../store/toastStore';
+import { useQueryClient } from '@tanstack/react-query';
 
 const PRESET_COLORS = [
   { name: 'Indigo', rgb: '79 70 229', hex: '#4F46E5' },
@@ -20,6 +21,7 @@ const PRESET_COLORS = [
 const FONTS = ['Inter', 'Outfit', 'Roboto'];
 
 export default function Settings() {
+  const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const { showConfirm, showToast, showAlertModal } = useToastStore();
@@ -51,6 +53,7 @@ export default function Settings() {
   const [email, setEmail] = useState('');
   const [fax, setFax] = useState('');
   const [website, setWebsite] = useState('');
+  const [currency, setCurrency] = useState('INR');
 
   // Address state
   const [address, setAddress] = useState('');
@@ -299,6 +302,7 @@ export default function Settings() {
       setEmail(activeBranding.email || '');
       setFax(activeBranding.fax || '');
       setWebsite(activeBranding.website || '');
+      setCurrency(activeBranding.currency || 'INR');
 
       setAddress(activeBranding.address || '');
       setCity(activeBranding.city || '');
@@ -451,6 +455,7 @@ export default function Settings() {
         email,
         fax,
         website,
+        currency,
 
         address,
         city,
@@ -578,6 +583,9 @@ export default function Settings() {
       });
       setStatusEditing(false);
       loadSettingsData();
+      queryClient.invalidateQueries({ queryKey: ['statuses-list'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-statuses'] });
+      queryClient.invalidateQueries({ queryKey: ['sidebar-leads'] });
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Failed to save status.', 'error');
     }
@@ -611,6 +619,9 @@ export default function Settings() {
             type: 'success'
           });
           loadSettingsData();
+          queryClient.invalidateQueries({ queryKey: ['statuses-list'] });
+          queryClient.invalidateQueries({ queryKey: ['sidebar-statuses'] });
+          queryClient.invalidateQueries({ queryKey: ['sidebar-leads'] });
         } catch (err) {
           showToast('Failed to delete status.', 'error');
         }
@@ -1080,6 +1091,16 @@ export default function Settings() {
                   <div>
                     <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Website</label>
                     <input type="text" value={website} onChange={e => setWebsite(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500" placeholder="https://frontlinebazaar.com/" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Default Currency</label>
+                    <select value={currency} onChange={e => setCurrency(e.target.value)} className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 cursor-pointer">
+                      <option value="INR">₹ INR (Indian Rupee)</option>
+                      <option value="USD">$ USD (US Dollar)</option>
+                      <option value="EUR">€ EUR (Euro)</option>
+                      <option value="GBP">£ GBP (British Pound)</option>
+                      <option value="AED">د.إ AED (UAE Dirham)</option>
+                    </select>
                   </div>
                 </div>
               </div>

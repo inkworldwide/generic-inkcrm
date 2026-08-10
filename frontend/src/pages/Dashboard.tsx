@@ -808,6 +808,16 @@ export default function Dashboard() {
 
             return activeList.map((rec: any, idx: number) => {
               const leadNo = rec._id.slice(-6).toUpperCase();
+              const leadName = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || rec.data?.fullName || rec.data?.customerName || rec.data?.name || rec.data?.leadName || 'N/A';
+              const leadLocation = rec.data?.location || [rec.data?.city, rec.data?.state].filter(Boolean).join(', ') || rec.data?.city || rec.data?.presentAddress || rec.data?.address || 'N/A';
+              const amountVal = rec.data?.budget ?? rec.data?.loanAmount ?? rec.data?.amount;
+              const currencySymbol = (rec.data?.currency === 'USD' || rec.data?.currency === '$') ? '$' : '₹';
+              const formattedAmount = amountVal != null && amountVal !== '' ? `${currencySymbol}${Number(amountVal).toLocaleString('en-IN')}` : 'N/A';
+              const createdByName = rec.createdBy?.firstName 
+                ? `${rec.createdBy.firstName} ${rec.createdBy.lastName || ''}`.trim()
+                : (rec.createdBy?.name || rec.createdBy?.email?.split('@')[0] || (typeof rec.createdBy === 'string' && rec.createdBy.length < 25 && !rec.createdBy.match(/^[0-9a-fA-F]{24}$/) ? rec.createdBy : '') || rec.data?.source || rec.data?.createdBy || 'System');
+              const psmName = rec.data?.psm || rec.data?.assignedTo || 'Unassigned';
+
               return (
                 <div key={rec._id} className="border border-[#EAE4DA] rounded-2xl p-5 bg-white relative mb-6 last:mb-0 text-left shadow-xs">
                   <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-green-500 rounded-t-2xl" />
@@ -824,19 +834,20 @@ export default function Dashboard() {
 
                     {/* Column 2 */}
                     <div className="space-y-4">
-                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead Name:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.firstName} {rec.data?.lastName}</span></div>
-                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Location:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.location || 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead Name:</span> <span className="text-slate-600 dark:text-slate-400 font-semibold">{leadName}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Location:</span> <span className="text-slate-600 dark:text-slate-400">{leadLocation}</span></div>
                       <div><span className="font-bold text-slate-700 dark:text-slate-350">Mobile No.:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.phone || 'N/A'}</span></div>
-                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Amount:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.budget ? '$' + Number(rec.data.budget).toLocaleString() : 'N/A'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Amount:</span> <span className="text-slate-600 dark:text-slate-400 font-semibold">{formattedAmount}</span></div>
                       <div><span className="font-bold text-slate-700 dark:text-slate-350">Case Details:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.caseDetails || 'N/A'}</span></div>
                     </div>
 
                     {/* Column 3 */}
                     <div className="space-y-4">
                       <div><span className="font-bold text-slate-700 dark:text-slate-350">Created On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.createdAt)}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">Created By:</span> <span className="text-slate-600 dark:text-slate-400 font-medium">{createdByName}</span></div>
                       <div><span className="font-bold text-slate-700 dark:text-slate-350">Followup Date:</span> <span className="text-indigo-650 font-bold bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100/50 px-2 py-0.5 rounded-lg text-xs">{rec.data?.followUpDate ? formatDate(rec.data.followUpDate) : 'N/A'}</span></div>
                       <div><span className="font-bold text-slate-700 dark:text-slate-350">Pending at:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignToTeam || 'Sales Review'}</span></div>
-                      <div><span className="font-bold text-slate-700 dark:text-slate-350">PSM:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignedTo || 'Unassigned'}</span></div>
+                      <div><span className="font-bold text-slate-700 dark:text-slate-350">PSM:</span> <span className="text-slate-600 dark:text-slate-400">{psmName}</span></div>
                       <div><span className="font-bold text-slate-700 dark:text-slate-350">Data Code:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.dataCode || 'N/A'}</span></div>
                     </div>
 
@@ -857,7 +868,7 @@ export default function Dashboard() {
                       <span className={`${
                         rec.data?.status?.toUpperCase() === 'HOT' 
                           ? 'bg-rose-50 border border-rose-200 text-rose-700 dark:bg-rose-950/20 dark:text-rose-400 dark:border-rose-900/30' 
-                          : 'bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30'
+                  : 'bg-indigo-50 border border-indigo-200 text-indigo-700 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30'
                       } text-[10px] font-[800] uppercase tracking-wider px-3 py-1.5 rounded-lg`}>
                         {rec.data?.status ? `${rec.data.status} Lead` : 'Lead Info'}
                       </span>
@@ -865,31 +876,35 @@ export default function Dashboard() {
                     <div className="flex flex-wrap items-center gap-2">
                       <button 
                         onClick={() => {
-                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
-                          const cleanPhone = phone.replace(/\D/g, '');
+                          const rawPhone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || rec.data?.contactNum || rec.data?.mobileNo || rec.data?.contact_num || '';
+                          let cleanPhone = String(rawPhone).replace(/\D/g, '').trim();
                           if (cleanPhone) {
+                            if (cleanPhone.length === 10) {
+                              cleanPhone = `91${cleanPhone}`;
+                            }
                             window.open(`https://wa.me/${cleanPhone}`, '_blank');
                           } else {
                             showToast('No phone number available for this lead.', 'warning');
                           }
                         }}
-                        className="bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-150 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30 dark:hover:bg-emerald-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200"
+                        className="bg-emerald-50 hover:bg-emerald-100 active:bg-emerald-150 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30 dark:hover:bg-emerald-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer"
                       >
                         WA Chat
                       </button>
                       
                       <button 
                         onClick={() => {
-                          const phone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || '';
-                          const cleanPhone = phone.replace(/\D/g, '');
+                          const rawPhone = rec.data?.phone || rec.data?.mobile || rec.data?.contactNumber || rec.data?.contactNum || rec.data?.mobileNo || rec.data?.contact_num || '';
+                          const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').trim();
                           if (cleanPhone) {
-                            const leadName = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || 'Lead';
-                            showToast(`Initiating call to ${leadName}...`, 'info');
+                            const leadName = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || rec.data?.fullName || rec.data?.customerName || rec.data?.name || 'Lead';
+                            showToast(`Calling ${leadName} (${cleanPhone})...`, 'info');
+                            window.location.href = `tel:${cleanPhone}`;
                           } else {
                             showToast('No phone number available for this lead.', 'warning');
                           }
                         }}
-                        className="bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-150 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30 dark:hover:bg-indigo-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200"
+                        className="bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-150 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/20 dark:text-indigo-400 dark:border-indigo-900/30 dark:hover:bg-indigo-900/40 text-[10px] font-bold uppercase tracking-wider px-4 py-2 rounded-lg transition-all duration-200 cursor-pointer"
                       >
                         Call
                       </button>

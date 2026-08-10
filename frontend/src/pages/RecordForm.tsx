@@ -9,6 +9,7 @@ import { useModuleStore, FieldDefinition } from '../store/moduleStore';
 import api, { FILE_BASE_URL } from '../services/api';
 import { useToastStore } from '../store/toastStore';
 import { useAuthStore } from '../store/authStore';
+import { useThemeStore } from '../store/themeStore';
 
 // Normalization helper for bank names
 const normalizeBankForSubmit = (bankName: string): string => {
@@ -38,6 +39,7 @@ export default function RecordForm() {
   const { activeModule, setActiveModuleByPath } = useModuleStore();
   const { showConfirm, showToast, showAlertModal } = useToastStore();
   const { user } = useAuthStore();
+  const { branding } = useThemeStore();
   const isLeads = true; // Use light layout for all creation/edit forms
 
   const [loading, setLoading] = useState(true);
@@ -245,9 +247,40 @@ export default function RecordForm() {
         api.get('/dashboard/metrics') // loads activities
       ]);
 
-      const recordValues = recordRes.data.data instanceof Map 
+      const rawData = recordRes.data.data instanceof Map 
         ? Object.fromEntries(recordRes.data.data) 
-        : recordRes.data.data;
+        : (recordRes.data.data || {});
+      
+      const recordValues = { ...rawData };
+
+      // Auto-populate firstName / lastName if lead has fullName, customerName, name, or leadName
+      if (!recordValues.firstName && recordValues.fullName) {
+        const parts = String(recordValues.fullName).trim().split(' ');
+        recordValues.firstName = parts[0] || '';
+        recordValues.lastName = parts.slice(1).join(' ') || '';
+      } else if (!recordValues.firstName && recordValues.customerName) {
+        const parts = String(recordValues.customerName).trim().split(' ');
+        recordValues.firstName = parts[0] || '';
+        recordValues.lastName = parts.slice(1).join(' ') || '';
+      } else if (!recordValues.firstName && recordValues.name) {
+        const parts = String(recordValues.name).trim().split(' ');
+        recordValues.firstName = parts[0] || '';
+        recordValues.lastName = parts.slice(1).join(' ') || '';
+      } else if (!recordValues.firstName && recordValues.leadName) {
+        const parts = String(recordValues.leadName).trim().split(' ');
+        recordValues.firstName = parts[0] || '';
+        recordValues.lastName = parts.slice(1).join(' ') || '';
+      }
+
+      // Ensure location is loaded from city / state / presentAddress if not set
+      if (!recordValues.location) {
+        recordValues.location = [recordValues.city, recordValues.state].filter(Boolean).join(', ') || recordValues.city || recordValues.presentAddress || '';
+      }
+
+      // Default currency
+      if (!recordValues.currency) {
+        recordValues.currency = 'INR';
+      }
       
       reset(recordValues);
       setDocuments(docRes.data || []);
@@ -367,9 +400,22 @@ export default function RecordForm() {
     }
   }, [errors]);
 
-  const onSubmitForm = async (data: any) => {
+  const onSubmitForm = async (formData: any) => {
     setSaving(true);
     try {
+      const data = { ...formData };
+
+      // Auto-sync fullName, location, and currency
+      if (data.firstName || data.lastName) {
+        data.fullName = `${data.firstName || ''} ${data.lastName || ''}`.trim();
+      }
+      if (!data.location && (data.city || data.presentAddress || data.state)) {
+        data.location = [data.city, data.state].filter(Boolean).join(', ') || data.city || data.presentAddress || '';
+      }
+      if (!data.currency) {
+        data.currency = 'INR';
+      }
+
       let createdCount = 1;
       if (id) {
         await api.put(`/records/${apiPath}/${id}`, data);
@@ -895,14 +941,70 @@ export default function RecordForm() {
         );
       }
 
-      default:
+      case 'currency': {
+        const symbol = branding?.currency === 'USD' ? '$' : branding?.currency === 'EUR' ? '€' : branding?.currency === 'GBP' ? '£' : branding?.currency === 'AED' ? 'AED' : '₹';
+
+        return (
+          <div key={field.name} className="space-y-1.5 text-left">
+            <label className={labelClass}>
+              {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
+            </label>
+            <div className="relative flex items-center">
+              <input
+                type="number"
+                step="any"
+                {...register(field.name)}
+                placeholder={`Enter ${field.label.toLowerCase()} amount`}
+                className={`${inputBase} pr-10 font-medium`}
+                autoComplete="new-password"
+              />
+              <span className="absolute right-3.5 text-sm font-black text-slate-400 select-none pointer-events-none">
+                {symbol}
+              </span>
+            </div>
+            {errors[field.name] && (
+              <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
+            )}
+          </div>
+        );
+      }
+
+      default: {
+        if (field.name === 'budget' || field.name === 'salary') {
+          const symbol = branding?.currency === 'USD' ? '$' : branding?.currency === 'EUR' ? '€' : branding?.currency === 'GBP' ? '£' : branding?.currency === 'AED' ? 'AED' : '₹';
+
+          return (
+            <div key={field.name} className="space-y-1.5 text-left">
+              <label className={labelClass}>
+                {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
+              </label>
+              <div className="relative flex items-center">
+                <input
+                  type="number"
+                  step="any"
+                  {...register(field.name)}
+                  placeholder={`Enter ${field.label.toLowerCase()} amount`}
+                  className={`${inputBase} pr-10 font-medium`}
+                  autoComplete="new-password"
+                />
+                <span className="absolute right-3.5 text-sm font-black text-slate-400 select-none pointer-events-none">
+                  {symbol}
+                </span>
+              </div>
+              {errors[field.name] && (
+                <p className="text-[11px] text-rose-550 font-bold mt-1">{(errors[field.name]?.message as string)}</p>
+              )}
+            </div>
+          );
+        }
+
         return (
           <div key={field.name} className="space-y-1.5 text-left">
             <label className={labelClass}>
               {field.label}{field.required && <span className="text-rose-500 ml-0.5">*</span>}
             </label>
             <input
-              type={field.type === 'number' || field.type === 'currency' ? 'number' : 'text'}
+              type={field.type === 'number' ? 'number' : 'text'}
               {...register(field.name)}
               placeholder={field.label}
               className={inputBase}
@@ -913,6 +1015,7 @@ export default function RecordForm() {
             )}
           </div>
         );
+      }
     }
   };
 

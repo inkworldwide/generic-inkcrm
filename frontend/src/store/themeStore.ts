@@ -30,6 +30,7 @@ interface TenantBranding {
   email?: string;
   fax?: string;
   website?: string;
+  currency?: string;
 
   address?: string;
   city?: string;

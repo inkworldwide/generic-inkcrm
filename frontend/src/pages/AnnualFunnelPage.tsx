@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
+import { exportLeadReportXLSX } from '../utils/exportLeadReportXLSX';
 import {
   PieChart,
   Pie,
@@ -167,28 +168,14 @@ export default function AnnualFunnelPage() {
   const convertedAnnual = (statusCounts['Approved'] || 0) + (statusCounts['Disbursed'] || 0);
   const annualYieldRate = totalAnnualLeads > 0 ? Math.round((convertedAnnual / totalAnnualLeads) * 100) : 0;
 
-  // Export CSV
-  const handleExportCSV = () => {
-    if (monthlyProgressionData.length === 0) return;
-    const headers = ['Month', 'Total Leads', 'Hot Leads', 'Warm Leads', 'Converted (Approved/Disbursed)', 'Conversion Rate %'];
-    const rows = monthlyProgressionData.map(r => [
-      r.fullMonth,
-      r.total,
-      r.hot,
-      r.warm,
-      r.disbursed,
-      `${r.conversionRate}%`
-    ]);
-    const csvContent = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', `Annual_Funnel_Report_${selectedYear}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('Exported Annual Funnel report to CSV', 'success');
+  // Export Excel
+  const handleExportExcel = () => {
+    if (filteredLeads.length === 0) {
+      showToast('No leads available to export for the selected filters', 'warning');
+      return;
+    }
+    exportLeadReportXLSX(filteredLeads, `Annual_Funnel_Report_${selectedYear}`);
+    showToast(`Exported ${filteredLeads.length} leads to Excel`, 'success');
   };
 
   return (
@@ -225,10 +212,10 @@ export default function AnnualFunnelPage() {
             <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <button 
-            onClick={handleExportCSV}
+            onClick={handleExportExcel}
             className="btn-primary-premium flex items-center gap-2"
           >
-            <Icons.Download className="w-3.5 h-3.5" /> Export CSV
+            <Icons.Download className="w-3.5 h-3.5" /> Export Excel
           </button>
         </div>
       </div>

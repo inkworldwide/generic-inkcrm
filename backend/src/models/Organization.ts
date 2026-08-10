@@ -26,6 +26,7 @@ export interface IOrganization extends Document {
   email?: string;
   fax?: string;
   website?: string;
+  currency?: string;
 
   // Address
   address?: string;
@@ -80,6 +81,7 @@ const OrganizationSchema = new Schema<IOrganization>(
     email: { type: String },
     fax: { type: String },
     website: { type: String },
+    currency: { type: String, default: 'INR' },
 
     // Address
     address: { type: String },

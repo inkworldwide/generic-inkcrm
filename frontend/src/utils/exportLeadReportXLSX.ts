@@ -65,7 +65,7 @@ export const exportLeadReportXLSX = (leads: any[], fileNamePrefix: string = 'Lea
     const mobileNo = String(data.phone || data.mobile || data.contactNum || data.contact_num || data.mobileNo || 'N/A').trim();
     const firmCompany = String(data.company || data.firmName || data.firm_name || data.firm || data.firmCompany || '').trim();
     const turnoverSalary = String(data.turnover || data.salary || data.income || data.turnoverSalary || '').trim();
-    const loanAmount = String(data.loanAmount || data.amount || data.requiredLoan || '').trim();
+    const loanAmount = String(data.loanAmount || data.budget || data.amount || data.requiredLoan || '').trim();
     const presentAddress = String(data.presentAddress || data.address || data.locationAddress || data.present_address || '').trim();
     const city = String(data.city || data.location || '').trim();
     const loanProduct = String(data.loanProduct || data.loanType || data.product || data.serviceType || '').trim();

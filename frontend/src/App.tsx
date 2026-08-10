@@ -29,8 +29,8 @@ import Status from './pages/Status';
 import MyCampaign from './pages/MyCampaign';
 
 // Route Guard for authenticated workspaces
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isInitializing } = useAuthStore();
+function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menuKey?: string }) {
+  const { isAuthenticated, isInitializing, canAccessMenu } = useAuthStore();
 
   if (isInitializing) {
     return (
@@ -47,7 +47,28 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
+  if (menuKey && !canAccessMenu(menuKey)) {
+    if (canAccessMenu('dashboard')) return <Navigate to="/" replace />;
+    if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
+    if (canAccessMenu('campaigns')) return <Navigate to="/modules/campaigns" replace />;
+    if (canAccessMenu('lead_reports')) return <Navigate to="/reports/lead-reports" replace />;
+    return <Navigate to="/my-campaign" replace />;
+  }
+
   return <Layout>{children}</Layout>;
+}
+
+function DashboardGuard() {
+  const { canAccessMenu } = useAuthStore();
+  if (!canAccessMenu('dashboard')) {
+    if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
+    if (canAccessMenu('campaigns')) return <Navigate to="/modules/campaigns" replace />;
+    if (canAccessMenu('lead_reports')) return <Navigate to="/reports/lead-reports" replace />;
+    if (canAccessMenu('settings')) return <Navigate to="/settings" replace />;
+    if (canAccessMenu('access_privilege')) return <Navigate to="/access-privilege" replace />;
+    return <Navigate to="/my-campaign" replace />;
+  }
+  return <Dashboard />;
 }
 
 export default function App() {
@@ -63,7 +84,7 @@ export default function App() {
           path="/"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <DashboardGuard />
             </ProtectedRoute>
           }
         />
@@ -118,7 +139,7 @@ export default function App() {
         <Route
           path="/reports/lead-reports"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="lead_reports">
               <LeadReportsPage />
             </ProtectedRoute>
           }
@@ -126,7 +147,7 @@ export default function App() {
         <Route
           path="/reports/telecaller-reports"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="telecaller_reports">
               <TelecallerReportsPage />
             </ProtectedRoute>
           }
@@ -134,7 +155,7 @@ export default function App() {
         <Route
           path="/reports/telecaller-monthly"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="telecaller_monthly">
               <TelecallerMonthlyPage />
             </ProtectedRoute>
           }
@@ -150,7 +171,7 @@ export default function App() {
         <Route
           path="/reports/funnel-daily"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="funnel_daily">
               <DailyFunnelPage />
             </ProtectedRoute>
           }
@@ -158,7 +179,7 @@ export default function App() {
         <Route
           path="/reports/funnel-monthly"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="funnel_monthly">
               <MonthlyFunnelPage />
             </ProtectedRoute>
           }
@@ -166,7 +187,7 @@ export default function App() {
         <Route
           path="/reports/funnel-annual"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="funnel_annual">
               <AnnualFunnelPage />
             </ProtectedRoute>
           }
@@ -182,7 +203,7 @@ export default function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="settings">
               <Settings />
             </ProtectedRoute>
           }
@@ -190,7 +211,7 @@ export default function App() {
         <Route
           path="/access-privilege"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="access_privilege">
               <AccessPrivilege />
             </ProtectedRoute>
           }
@@ -198,7 +219,7 @@ export default function App() {
         <Route
           path="/lead-transfer"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="lead_transfer">
               <LeadTransfer />
             </ProtectedRoute>
           }
@@ -206,7 +227,7 @@ export default function App() {
         <Route
           path="/users-management"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute menuKey="users_management">
               <UsersManagement />
             </ProtectedRoute>
           }

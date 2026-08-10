@@ -133,13 +133,17 @@ router.get('/campaigns/allocation-stats', async (req: Request, res: Response): P
       { $group: { _id: '$data.assignedTo', count: { $sum: 1 } } }
     ]);
 
-    // Aggregate count of dialed leads (any status except 'Yet To Call' counts as dialed)
+    // Aggregate count of dialed leads
     const dialedStats = await CustomRecord.aggregate([
       { 
         $match: { 
           organizationId: orgId, 
           moduleId: leadModule._id,
-          'data.status': { $nin: ['Yet To Call', ''] }
+          $or: [
+            { 'data.dialStatus': { $exists: true, $nin: ['Yet To Call', ''] } },
+            { 'data.status': { $nin: ['New', 'Yet To Call', ''] } },
+            { 'data.callAttempts': { $gt: 0 } }
+          ]
         } 
       },
       { $group: { _id: '$data.assignedTo', count: { $sum: 1 } } }
@@ -254,7 +258,8 @@ router.post('/campaigns/bulk-assign', async (req: Request, res: Response): Promi
           dataCode: lead.dataCode || lead.data_code || '',
           caseDetails: lead.caseDetails || lead.case_status || lead.case_details || '',
           notes: lead.notes || lead.remarks || lead.remark || '',
-          status: 'Yet To Call',
+          status: lead.status || 'New',
+          dialStatus: 'Yet To Call',
           source: campaignName, // Set source as campaign name
           assignedTo: assignedAgent // Set agent name
         }
@@ -517,23 +522,17 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
       query.createdBy = req.user?.id;
     }
 
-    // Default filter for leads: exclude campaign calling statuses unless specifically queried
-    if (apiPath.toLowerCase() === 'leads') {
-      if (!req.query['data.status']) {
-        query['data.status'] = { 
-          $nin: [
-            'Yet To Call', 'Not Reachable', 'Not Intested', 'Call Rejected', 
-            'Not Connected', 'Cool Lead', 'No Answer', 'Wrong Number', 
-            'Not Exists', 'Repeated Number', 'No Business', 'Hot Lead', 'Warm Lead'
-          ] 
-        };
-      }
-    }
 
     // Parse other fields for inline filters, e.g. ?data.status=Qualified
     Object.keys(req.query).forEach((q) => {
       if (q.startsWith('data.')) {
-        query[q] = req.query[q];
+        const val = req.query[q];
+        if (typeof val === 'string' && val.trim()) {
+          const escVal = val.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+          query[q] = { $regex: new RegExp(`^${escVal}$`, 'i') };
+        } else {
+          query[q] = val;
+        }
       }
     });
 
@@ -566,6 +565,8 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
     }
 
     const records = await CustomRecord.find(query)
+      .populate('createdBy', 'firstName lastName name email')
+      .populate('updatedBy', 'firstName lastName name email')
       .sort(sortOption)
       .skip(skipNum)
       .limit(limitNum);
@@ -733,7 +734,9 @@ router.get('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
     // Apply Dynamic Reporting Manager Hierarchy filtering
     await HierarchyService.modifyRecordQuery(query, req.user as any, req.organizationId!);
 
-    const record = await CustomRecord.findOne(query);
+    const record = await CustomRecord.findOne(query)
+      .populate('createdBy', 'firstName lastName name email')
+      .populate('updatedBy', 'firstName lastName name email');
     if (!record) {
       res.status(404).json({ error: 'Record not found.' });
       return;

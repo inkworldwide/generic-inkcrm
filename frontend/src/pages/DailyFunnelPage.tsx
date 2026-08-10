@@ -199,7 +199,7 @@ export default function DailyFunnelPage() {
   };
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto space-y-6 bg-[#F8F5F1] min-h-screen border border-[#EAE4DA] rounded-3xl">
+    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
       {/* Header Banner */}
       <div className="bg-white border border-[#EAE4DA] p-6 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>

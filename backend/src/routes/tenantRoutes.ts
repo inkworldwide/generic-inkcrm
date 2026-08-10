@@ -45,6 +45,7 @@ router.get('/branding', async (req: Request, res: Response): Promise<void> => {
       email: organization.email,
       fax: organization.fax,
       website: organization.website,
+      currency: organization.currency || 'INR',
       address: organization.address,
       city: organization.city,
       state: organization.state,
@@ -64,7 +65,7 @@ router.put('/branding', authenticate, requireTenant, async (req: Request, res: R
     const {
       name, themeSettings, logoUrl, faviconUrl, loginBgUrl,
       companyCode, registrationId, startDate, endDate, companyDocUrl,
-      phoneNumber, mobile, email, fax, website,
+      phoneNumber, mobile, email, fax, website, currency,
       address, city, state, country, postalCode,
       adminDetails
     } = req.body;
@@ -90,6 +91,7 @@ router.put('/branding', authenticate, requireTenant, async (req: Request, res: R
     if (email !== undefined) organization.email = email;
     if (fax !== undefined) organization.fax = fax;
     if (website !== undefined) organization.website = website;
+    if (currency !== undefined) organization.currency = currency;
 
     if (address !== undefined) organization.address = address;
     if (city !== undefined) organization.city = city;
@@ -132,6 +134,7 @@ router.put('/branding', authenticate, requireTenant, async (req: Request, res: R
         email: organization.email,
         fax: organization.fax,
         website: organization.website,
+        currency: organization.currency || 'INR',
         address: organization.address,
         city: organization.city,
         state: organization.state,

@@ -33,7 +33,7 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(window.innerWidth >= 1024);
   const { modules, fetchModules } = useModuleStore();
-  const { user, logout } = useAuthStore();
+  const { user, logout, canAccessMenu } = useAuthStore();
   const { branding, fetchBranding } = useThemeStore();
   const { toasts, hideToast, confirm, hideConfirm, alertModal, hideAlertModal } = useToastStore();
 
@@ -89,6 +89,15 @@ export default function Layout({ children }: LayoutProps) {
     queryFn: async () => {
       const res = await api.get('/records/leads', { params: { limit: 100 } });
       return res.data;
+    },
+    refetchInterval: (query) => (query.state.error ? false : 5000)
+  });
+
+  const { data: dbStatuses } = useQuery({
+    queryKey: ['statuses-list'],
+    queryFn: async () => {
+      const res = await api.get('/statuses');
+      return res.data || [];
     },
     refetchInterval: (query) => (query.state.error ? false : 5000)
   });
@@ -169,12 +178,12 @@ export default function Layout({ children }: LayoutProps) {
   }, []);
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#F8F5F1] dark:bg-[#0f1115] text-[#1F2937] dark:text-white selection:bg-navy-800/20 selection:text-navy-800">
+    <div className="h-screen w-screen overflow-hidden bg-[#F8F5F1] dark:bg-[#0f1115] text-[#1F2937] dark:text-white selection:bg-navy-800/20 selection:text-navy-800 flex flex-col">
       
       {/* Clean Subtle Background Layer */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 bg-[#F8F5F1] dark:bg-[#0f1115]" />
+      <div className="fixed inset-0 overflow-hidden pointer-events-none z-0 bg-[#F8F5F1] dark:bg-[#0f1115]" />
 
-      <div className="relative z-10 flex h-screen p-2 sm:p-4 gap-4">
+      <div className="relative z-10 flex h-full w-full p-2 sm:p-4 gap-4 overflow-hidden">
         
         {/* Mobile Backdrop */}
         <AnimatePresence>
@@ -191,8 +200,8 @@ export default function Layout({ children }: LayoutProps) {
 
         {/* Pure White Light Sidebar with Rich Elevation Shadow */}
         <aside className={cn(
-          "fixed inset-y-2 sm:inset-y-4 left-2 sm:left-4 z-50 lg:relative lg:inset-0",
-          "flex-shrink-0 rounded-2xl bg-white !bg-white border border-[#E5E7EB] shadow-[0_4px_25px_rgba(0,0,0,0.08),4px_0_15px_rgba(0,0,0,0.05)] flex flex-col transition-all duration-250 ease-in-out",
+          "fixed inset-y-2 sm:inset-y-4 left-2 sm:left-4 z-50 lg:relative lg:inset-auto",
+          "flex-shrink-0 rounded-2xl bg-white !bg-white border border-[#E5E7EB] shadow-[0_4px_25px_rgba(0,0,0,0.08),4px_0_15px_rgba(0,0,0,0.05)] flex flex-col h-full transition-all duration-250 ease-in-out",
           isCollapsed ? "w-[68px]" : "w-[250px]",
           sidebarOpen ? "translate-x-0" : "-translate-x-[120%]",
           "lg:translate-x-0"
@@ -243,160 +252,246 @@ export default function Layout({ children }: LayoutProps) {
             </SidebarGroup>
 
             {/* Group 2: Main Menu */}
-            <SidebarGroup title="MAIN MENU" isCollapsed={isCollapsed}>
-              <SidebarItem 
-                to="/" 
-                label="DASHBOARD" 
-                icon={Icons.LayoutDashboard} 
-                colorClass="text-indigo-400"
-                isCollapsed={isCollapsed}
-              />
-
-              {/* Dynamic Modules */}
-              {modules.filter(m => {
-                const hiddenSettingsModules = ['departments', 'products', 'bankmasters', 'bankingpartners', 'companies', 'deals'];
-                if (hiddenSettingsModules.includes(m.apiPath.toLowerCase())) return false;
-                if (!branding) return true;
-                return branding.enabledModules.includes(m.apiPath.toLowerCase());
-              }).map(m => {
-                let icon = Icons.FileText;
-                let colorClass = "text-indigo-400";
-                
-                const path = m.apiPath.toLowerCase();
-                if (path === 'leads') {
-                  icon = Icons.Layers;
-                  colorClass = "text-indigo-400";
-                } else if (path === 'deals') {
-                  icon = Icons.DollarSign;
-                  colorClass = "text-emerald-400";
-                } else if (path === 'companies') {
-                  icon = Icons.Building2;
-                  colorClass = "text-cyan-400";
-                } else if (path === 'campaigns') {
-                  icon = Icons.Target;
-                  colorClass = "text-orange-400";
-                } else if (path === 'campaignassignments') {
-                  icon = Icons.UserCheck;
-                  colorClass = "text-orange-400";
-                } else if (path === 'students') {
-                  icon = Icons.GraduationCap;
-                  colorClass = "text-pink-400";
-                } else if (path === 'courses') {
-                  icon = Icons.BookOpen;
-                  colorClass = "text-teal-400";
-                } else if (path === 'patients') {
-                  icon = Icons.HeartPulse;
-                  colorClass = "text-rose-400";
-                } else if (path === 'appointments') {
-                  icon = Icons.Calendar;
-                  colorClass = "text-sky-400";
-                } else if (m.icon) {
-                  icon = (Icons as any)[m.icon] || Icons.FileText;
-                }
-
-                if (path === 'leads') {
-                  return (
-                    <SidebarAccordion 
-                      key={m._id} 
-                      label="LEADS PROCESS" 
-                      icon={icon} 
-                      colorClass={colorClass} 
-                      defaultOpen={false}
-                      isCollapsed={isCollapsed}
-                    >
-                      <SidebarItem 
-                        to="/modules/leads" 
-                        label="ALL LEADS" 
-                        icon={Icons.Layers} 
-                        colorClass="text-indigo-400" 
-                        indent 
-                        badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} 
-                        isCollapsed={isCollapsed}
-                      />
-                      {(() => {
-                        const statusCategories = [
-                          { label: 'NEW', icon: Icons.Sparkles, color: 'text-indigo-400', query: 'New' },
-                          { label: 'HOT', icon: Icons.Flame, color: 'text-red-400', query: 'Hot' },
-                          { label: 'WARM', icon: Icons.Sun, color: 'text-amber-400', query: 'Warm' },
-                          { label: 'CEDIL PENDING', icon: Icons.FileWarning, color: 'text-pink-400', query: 'Cedil Pending' },
-                          { label: 'DOCUMENT PENDING', icon: Icons.FileText, color: 'text-teal-400', query: 'Document Pending' },
-                          { label: 'APPROVAL PENDING', icon: Icons.Clock, color: 'text-orange-400', query: 'Approval Pending' },
-                          { label: 'APPROVED', icon: Icons.CheckCircle, color: 'text-green-400', query: 'Approved' },
-                          { label: 'DISBURSED', icon: Icons.Banknote, color: 'text-lime-400', query: 'Disbursed' },
-                          { label: 'REJECTED', icon: Icons.XOctagon, color: 'text-rose-400', query: 'Rejected' },
-                          { label: 'FOLLOWUP', icon: Icons.PhoneCall, color: 'text-sky-400', query: 'Followup' },
-                          { label: 'DROPPED', icon: Icons.ArrowDownCircle, color: 'text-red-400', query: 'Dropped' },
-                          { label: 'PENDING', icon: Icons.Hourglass, color: 'text-yellow-400', query: 'Pending' },
-                        ];
-                        const records = leadsData?.records || [];
-                        return statusCategories.map((cat) => {
-                          const count = records.filter((r: any) =>
-                            (r.data?.status || '').toLowerCase() === cat.query.toLowerCase()
-                          ).length;
-                          return (
-                            <SidebarItem
-                              key={cat.label}
-                              to={`/modules/leads?status=${encodeURIComponent(cat.query)}`}
-                              label={cat.label}
-                              icon={cat.icon}
-                              colorClass={cat.color}
-                              indent
-                              badge={count}
-                              isCollapsed={isCollapsed}
-                            />
-                          );
-                        });
-                      })()}
-                    </SidebarAccordion>
-                  );
-                }
-
-                return (
+            {(canAccessMenu('dashboard') ||
+              canAccessMenu('leads') ||
+              canAccessMenu('campaigns') ||
+              canAccessMenu('campaignassignments') ||
+              canAccessMenu('lead_reports') ||
+              canAccessMenu('telecaller_reports') ||
+              canAccessMenu('telecaller_monthly') ||
+              canAccessMenu('funnel_daily') ||
+              canAccessMenu('funnel_monthly') ||
+              canAccessMenu('funnel_annual') ||
+              modules.some(m => canAccessMenu(m.apiPath))) && (
+              <SidebarGroup title="MAIN MENU" isCollapsed={isCollapsed}>
+                {canAccessMenu('dashboard') && (
                   <SidebarItem 
-                    key={m._id} 
-                    to={`/modules/${m.apiPath}`} 
-                    label={m.pluralLabel.toUpperCase()} 
-                    icon={icon} 
-                    colorClass={colorClass}
+                    to="/" 
+                    label="DASHBOARD" 
+                    icon={Icons.LayoutDashboard} 
+                    colorClass="text-indigo-400"
                     isCollapsed={isCollapsed}
                   />
-                );
-              })}
+                )}
 
-              {/* Campaigns accordion */}
-              {modules.some(m => m.apiPath === 'campaigns') && (!branding || branding.enabledModules.includes('leads') || branding.enabledModules.includes('campaigns')) && (
-                <SidebarAccordion label="CAMPAIGNS" icon={Icons.Megaphone} colorClass="text-orange-400" isCollapsed={isCollapsed}>
-                  <SidebarItem to="/modules/campaigns" label="CAMPAIGN LIST" icon={Icons.Target} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
-                  <SidebarItem to="/modules/campaignassignments" label="ASSIGN CAMPAIGN" icon={Icons.UserCheck} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
-                </SidebarAccordion>
-              )}
+                {/* Dynamic Modules */}
+                {modules.filter(m => {
+                  const hiddenSettingsModules = ['departments', 'products', 'bankmasters', 'bankingpartners', 'companies', 'deals'];
+                  if (hiddenSettingsModules.includes(m.apiPath.toLowerCase())) return false;
+                  if (!canAccessMenu(m.apiPath.toLowerCase())) return false;
+                  if (!branding) return true;
+                  return branding.enabledModules.includes(m.apiPath.toLowerCase());
+                }).map(m => {
+                  let icon = Icons.FileText;
+                  let colorClass = "text-indigo-400";
+                  
+                  const path = m.apiPath.toLowerCase();
+                  if (path === 'leads') {
+                    icon = Icons.Layers;
+                    colorClass = "text-indigo-400";
+                  } else if (path === 'deals') {
+                    icon = Icons.DollarSign;
+                    colorClass = "text-emerald-400";
+                  } else if (path === 'companies') {
+                    icon = Icons.Building2;
+                    colorClass = "text-cyan-400";
+                  } else if (path === 'campaigns') {
+                    icon = Icons.Target;
+                    colorClass = "text-orange-400";
+                  } else if (path === 'campaignassignments') {
+                    icon = Icons.UserCheck;
+                    colorClass = "text-orange-400";
+                  } else if (path === 'students') {
+                    icon = Icons.GraduationCap;
+                    colorClass = "text-pink-400";
+                  } else if (path === 'courses') {
+                    icon = Icons.BookOpen;
+                    colorClass = "text-teal-400";
+                  } else if (path === 'patients') {
+                    icon = Icons.HeartPulse;
+                    colorClass = "text-rose-400";
+                  } else if (path === 'appointments') {
+                    icon = Icons.Calendar;
+                    colorClass = "text-sky-400";
+                  } else if (m.icon) {
+                    icon = (Icons as any)[m.icon] || Icons.FileText;
+                  }
 
-              {/* Reports accordion */}
-              <SidebarAccordion label="REPORTS & ANALYTICS" icon={Icons.BarChart3} colorClass="text-emerald-400" isCollapsed={isCollapsed}>
-                <SidebarItem to="/reports/lead-reports" label="LEAD REPORTS" icon={Icons.ListFilter} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/reports/telecaller-reports" label="TELECALLER'S REPORTS" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/reports/telecaller-monthly" label="TELECALLER'S MONTHLY" icon={Icons.Calendar} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
-              </SidebarAccordion>
+                  if (path === 'leads') {
+                    if (!canAccessMenu('leads')) return null;
+                    return (
+                      <SidebarAccordion 
+                        key={m._id} 
+                        label="LEADS PROCESS" 
+                        icon={icon} 
+                        colorClass={colorClass} 
+                        defaultOpen={false}
+                        isCollapsed={isCollapsed}
+                      >
+                        <SidebarItem 
+                          to="/modules/leads" 
+                          label="ALL LEADS" 
+                          icon={Icons.Layers} 
+                          colorClass="text-indigo-400" 
+                          indent 
+                          badge={leadsData?.pagination?.totalRecords || leadsData?.records?.length || 0} 
+                          isCollapsed={isCollapsed}
+                        />
+                        {(() => {
+                          const getStatusIcon = (statusName: string, iconName?: string) => {
+                            if (iconName && (Icons as any)[iconName]) {
+                              return (Icons as any)[iconName];
+                            }
+                            const lower = statusName.toLowerCase();
+                            if (lower.includes('new') || lower.includes('fresh')) return Icons.Sparkles;
+                            if (lower.includes('hot')) return Icons.Flame;
+                            if (lower.includes('warm')) return Icons.Sun;
+                            if (lower.includes('cedil')) return Icons.FileWarning;
+                            if (lower.includes('document') || lower.includes('doc')) return Icons.FileText;
+                            if (lower.includes('approval') || lower.includes('approve')) return Icons.Clock;
+                            if (lower.includes('approved')) return Icons.CheckCircle;
+                            if (lower.includes('disburs') || lower.includes('paid')) return Icons.Banknote;
+                            if (lower.includes('reject') || lower.includes('decline')) return Icons.XOctagon;
+                            if (lower.includes('follow') || lower.includes('call')) return Icons.PhoneCall;
+                            if (lower.includes('drop') || lower.includes('lost')) return Icons.ArrowDownCircle;
+                            if (lower.includes('pending') || lower.includes('wait')) return Icons.Hourglass;
+                            if (lower.includes('kyc') || lower.includes('verify')) return Icons.ShieldCheck;
+                            if (lower.includes('underwrit')) return Icons.FileCheck;
+                            return Icons.Tag;
+                          };
 
-              {/* Separate Funnel Accordion */}
-              <SidebarAccordion label="FUNNEL" icon={Icons.Filter} colorClass="text-indigo-500" isCollapsed={isCollapsed}>
-                <SidebarItem to="/reports/funnel-daily" label="DAILY FUNNEL" icon={Icons.CalendarRange} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/reports/funnel-monthly" label="MONTHLY FUNNEL" icon={Icons.CalendarDays} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/reports/funnel-annual" label="ANNUAL FUNNEL" icon={Icons.TrendingUp} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
-              </SidebarAccordion>
-            </SidebarGroup>
+                          const getStatusColor = (statusName: string, colorHex?: string) => {
+                            const lower = statusName.toLowerCase();
+                            if (lower.includes('hot') || lower.includes('reject') || lower.includes('drop')) return 'text-rose-400';
+                            if (lower.includes('warm') || lower.includes('pending') || lower.includes('cedil')) return 'text-amber-400';
+                            if (lower.includes('approved') || lower.includes('disburs') || lower.includes('success')) return 'text-emerald-400';
+                            if (lower.includes('document')) return 'text-teal-400';
+                            if (lower.includes('approval')) return 'text-orange-400';
+                            if (lower.includes('follow')) return 'text-sky-400';
+                            if (lower.includes('new')) return 'text-indigo-400';
+                            return 'text-indigo-400';
+                          };
+
+                          const activeStatuses = (Array.isArray(dbStatuses) && dbStatuses.length > 0)
+                            ? dbStatuses
+                            : [
+                                { name: 'New', icon: 'Sparkles', color: '#4F46E5' },
+                                { name: 'Hot', icon: 'Flame', color: '#EF4444' },
+                                { name: 'Warm', icon: 'Sun', color: '#F59E0B' },
+                                { name: 'Cedil Pending', icon: 'FileWarning', color: '#EC4899' },
+                                { name: 'Document Pending', icon: 'FileText', color: '#14B8A6' },
+                                { name: 'Approval Pending', icon: 'Clock', color: '#F97316' },
+                                { name: 'Approved', icon: 'CheckCircle', color: '#10B981' },
+                                { name: 'Disbursed', icon: 'Banknote', color: '#84CC16' },
+                                { name: 'Rejected', icon: 'XOctagon', color: '#F43F5E' },
+                                { name: 'Followup', icon: 'PhoneCall', color: '#0EA5E9' },
+                                { name: 'Dropped', icon: 'ArrowDownCircle', color: '#EF4444' },
+                                { name: 'Pending', icon: 'Hourglass', color: '#EAB308' },
+                              ];
+
+                          const records = leadsData?.records || [];
+                          return activeStatuses.map((st: any) => {
+                            const statusName = st.name || '';
+                            const count = records.filter((r: any) =>
+                              (r.data?.status || '').toString().trim().toLowerCase() === statusName.trim().toLowerCase()
+                            ).length;
+                            return (
+                              <SidebarItem
+                                key={st._id || statusName}
+                                to={`/modules/leads?status=${encodeURIComponent(statusName)}`}
+                                label={statusName.toUpperCase()}
+                                icon={getStatusIcon(statusName, st.icon)}
+                                colorClass={getStatusColor(statusName, st.color)}
+                                indent
+                                badge={count}
+                                isCollapsed={isCollapsed}
+                              />
+                            );
+                          });
+                        })()}
+                      </SidebarAccordion>
+                    );
+                  }
+
+                  return (
+                    <SidebarItem 
+                      key={m._id} 
+                      to={`/modules/${m.apiPath}`} 
+                      label={m.pluralLabel.toUpperCase()} 
+                      icon={icon} 
+                      colorClass={colorClass}
+                      isCollapsed={isCollapsed}
+                    />
+                  );
+                })}
+
+                {/* Campaigns accordion */}
+                {modules.some(m => m.apiPath === 'campaigns') && (!branding || branding.enabledModules.includes('leads') || branding.enabledModules.includes('campaigns')) && (canAccessMenu('campaigns') || canAccessMenu('campaignassignments')) && (
+                  <SidebarAccordion label="CAMPAIGNS" icon={Icons.Megaphone} colorClass="text-orange-400" isCollapsed={isCollapsed}>
+                    {canAccessMenu('campaigns') && (
+                      <SidebarItem to="/modules/campaigns" label="CAMPAIGN LIST" icon={Icons.Target} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
+                    )}
+                    {canAccessMenu('campaignassignments') && (
+                      <SidebarItem to="/modules/campaignassignments" label="ASSIGN CAMPAIGN" icon={Icons.UserCheck} colorClass="text-orange-400" indent isCollapsed={isCollapsed} />
+                    )}
+                  </SidebarAccordion>
+                )}
+
+                {/* Reports accordion */}
+                {(canAccessMenu('lead_reports') || canAccessMenu('telecaller_reports') || canAccessMenu('telecaller_monthly')) && (
+                  <SidebarAccordion label="REPORTS & ANALYTICS" icon={Icons.BarChart3} colorClass="text-emerald-400" isCollapsed={isCollapsed}>
+                    {canAccessMenu('lead_reports') && (
+                      <SidebarItem to="/reports/lead-reports" label="LEAD REPORTS" icon={Icons.ListFilter} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                    )}
+                    {canAccessMenu('telecaller_reports') && (
+                      <SidebarItem to="/reports/telecaller-reports" label="TELECALLER'S REPORTS" icon={Icons.PhoneCall} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                    )}
+                    {canAccessMenu('telecaller_monthly') && (
+                      <SidebarItem to="/reports/telecaller-monthly" label="TELECALLER'S MONTHLY" icon={Icons.Calendar} colorClass="text-emerald-400" indent isCollapsed={isCollapsed} />
+                    )}
+                  </SidebarAccordion>
+                )}
+
+                {/* Separate Funnel Accordion */}
+                {(canAccessMenu('funnel_daily') || canAccessMenu('funnel_monthly') || canAccessMenu('funnel_annual')) && (
+                  <SidebarAccordion label="FUNNEL" icon={Icons.Filter} colorClass="text-indigo-500" isCollapsed={isCollapsed}>
+                    {canAccessMenu('funnel_daily') && (
+                      <SidebarItem to="/reports/funnel-daily" label="DAILY FUNNEL" icon={Icons.CalendarRange} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
+                    )}
+                    {canAccessMenu('funnel_monthly') && (
+                      <SidebarItem to="/reports/funnel-monthly" label="MONTHLY FUNNEL" icon={Icons.CalendarDays} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
+                    )}
+                    {canAccessMenu('funnel_annual') && (
+                      <SidebarItem to="/reports/funnel-annual" label="ANNUAL FUNNEL" icon={Icons.TrendingUp} colorClass="text-indigo-500" indent isCollapsed={isCollapsed} />
+                    )}
+                  </SidebarAccordion>
+                )}
+              </SidebarGroup>
+            )}
 
             {/* Group 3: Administration */}
-            <SidebarGroup title="ADMINISTRATION" isCollapsed={isCollapsed}>
-              <SidebarItem to="/settings" label="SETTINGS" icon={Icons.Settings} colorClass="text-amber-400" isCollapsed={isCollapsed} />
+            {(canAccessMenu('settings') || canAccessMenu('access_privilege') || canAccessMenu('lead_transfer') || canAccessMenu('users_management')) && (
+              <SidebarGroup title="ADMINISTRATION" isCollapsed={isCollapsed}>
+                {canAccessMenu('settings') && (
+                  <SidebarItem to="/settings" label="SETTINGS" icon={Icons.Settings} colorClass="text-amber-400" isCollapsed={isCollapsed} />
+                )}
 
-              <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400" isCollapsed={isCollapsed}>
-                <SidebarItem to="/access-privilege" label="ACCESS PRIVILEGE" icon={Icons.ShieldCheck} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
-                <SidebarItem to="/lead-transfer" label="LEAD TRANSFER" icon={Icons.Send} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
-              </SidebarAccordion>
+                {(canAccessMenu('access_privilege') || canAccessMenu('lead_transfer')) && (
+                  <SidebarAccordion label="SECURITY" icon={Icons.ShieldCheck} colorClass="text-red-400" defaultOpen={true} isCollapsed={isCollapsed}>
+                    {canAccessMenu('access_privilege') && (
+                      <SidebarItem to="/access-privilege" label="ACCESS PRIVILEGE" icon={Icons.ShieldCheck} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
+                    )}
+                    {canAccessMenu('lead_transfer') && (
+                      <SidebarItem to="/lead-transfer" label="LEAD TRANSFER" icon={Icons.Send} colorClass="text-red-400" indent isCollapsed={isCollapsed} />
+                    )}
+                  </SidebarAccordion>
+                )}
 
-              <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-400" isCollapsed={isCollapsed} />
-            </SidebarGroup>
+                {canAccessMenu('users_management') && (
+                  <SidebarItem to="/users-management" label="USERS MANAGEMENT" icon={Icons.Users} colorClass="text-pink-400" isCollapsed={isCollapsed} />
+                )}
+              </SidebarGroup>
+            )}
           </div>
 
           {/* Single Row Profile Footer */}
@@ -404,10 +499,10 @@ export default function Layout({ children }: LayoutProps) {
         </aside>
 
         {/* Main Content Area */}
-        <main className="flex-1 rounded-[26px] bg-white dark:bg-slate-900 shadow-[0_4px_24px_rgba(23,34,59,0.04)] overflow-hidden flex flex-col relative border border-[#EAE4DA]">
+        <main className="flex-1 min-w-0 min-h-0 rounded-[26px] bg-white dark:bg-slate-900 shadow-[0_4px_24px_rgba(23,34,59,0.04)] overflow-hidden flex flex-col relative border border-[#EAE4DA]">
           
           {/* Dashboard Header */}
-          <header className="h-[70px] sm:h-[80px] bg-[#FDFBF7]/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#EAE4DA] dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-20 transition-colors duration-300">
+          <header className="h-[70px] sm:h-[80px] flex-shrink-0 bg-[#FDFBF7]/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-[#EAE4DA] dark:border-slate-800/60 flex items-center justify-between px-4 sm:px-8 z-20 transition-colors duration-300">
             <div className="flex items-center gap-3">
               <button 
                 onClick={() => setSidebarOpen(true)}
@@ -429,9 +524,29 @@ export default function Layout({ children }: LayoutProps) {
                     if (path === '/reports') return 'Reports & Analytics';
                     if (path === '/users-management') return 'Users Management';
                     if (path === '/settings') return 'Settings';
-                    if (path.startsWith('/modules/leads')) return 'Leads';
+                    if (path === '/access-privilege') return 'Access Privilege';
+                    if (path === '/lead-transfer') return 'Lead Transfer';
+                    if (path === '/my-campaign') return 'My Campaign';
+                    if (path === '/workflows') return 'Workflows & Automation';
+                    if (path === '/status') return 'Status Pipeline Stages';
+                    if (path === '/modules/leads/new') return 'Create Lead';
+                    if (path.startsWith('/modules/leads')) return 'Leads Process';
                     if (path.startsWith('/modules/deals')) return 'Deals';
                     if (path.startsWith('/modules/campaigns')) return 'Campaigns';
+                    if (path.startsWith('/modules/campaignassignments')) return 'Assign Campaign';
+                    if (path.startsWith('/modules/')) {
+                      const parts = path.split('/');
+                      const modApi = parts[2];
+                      const found = modules.find(m => m.apiPath.toLowerCase() === modApi?.toLowerCase());
+                      if (parts.length > 3 && parts[3] === 'new') {
+                        return `Create ${found?.name || 'Record'}`;
+                      }
+                      if (parts.length > 3) {
+                        return `Edit ${found?.name || 'Record'}`;
+                      }
+                      if (found) return found.pluralLabel || found.name;
+                      return 'Module';
+                    }
                     return 'Dashboard Overview';
                   })()}
                 </h2>
@@ -441,12 +556,24 @@ export default function Layout({ children }: LayoutProps) {
                     if (path === '/reports/lead-reports') return 'Filter, generate, and analyze lead distribution by month, year, status, and loan type.';
                     if (path === '/reports/telecaller-reports') return 'Detailed call logs, lead allocations, and agent productivity performance audit.';
                     if (path === '/reports/telecaller-monthly') return 'Monthly target tracking, telecaller performance matrix, and historical revenue trends.';
+                    if (path === '/reports/campaign-report') return 'Individual campaign lead performance, calls conducted, and conversion metrics.';
+                    if (path === '/reports/funnel-daily') return 'Analyze daily lead flow, day-of-week trends, and stage conversions.';
+                    if (path === '/reports/funnel-monthly') return 'Campaign lead status breakdown, conversion ring chart, and monthly progression.';
+                    if (path === '/reports/funnel-annual') return 'Yearly lead distribution, 12-month funnel progression, and annual yield.';
                     if (path === '/reports') return 'Visual report designer and automated performance reports.';
                     if (path === '/users-management') return 'Manage team members, roles, permissions, and reporting hierarchies.';
                     if (path === '/settings') return 'Configure organization branding, modules, and system preferences.';
+                    if (path === '/access-privilege') return 'Configure role-based navigation menu access and data visibility across the CRM.';
+                    if (path === '/lead-transfer') return 'Reassign leads and bulk transfers across telecallers and sales managers.';
+                    if (path === '/my-campaign') return 'Quick calling workspace and customer interaction queue.';
+                    if (path === '/workflows') return 'Manage automated triggers, rules, and business processes.';
+                    if (path === '/status') return 'Configure custom lead statuses, progression pipeline, and display colors.';
+                    if (path.startsWith('/modules/leads/new')) return 'Create a new customer lead with complete contact and qualification details.';
                     if (path.startsWith('/modules/leads')) return 'View, manage, and track client lead records.';
                     if (path.startsWith('/modules/deals')) return 'Pipeline opportunities and sales deal stages.';
                     if (path.startsWith('/modules/campaigns')) return 'Marketing campaigns and audience targeting drive.';
+                    if (path.startsWith('/modules/campaignassignments')) return 'Batch lead assignment to telecallers and marketing agents.';
+                    if (path.startsWith('/modules/')) return 'Manage records, custom fields, and data workflows.';
                     return "Welcome back. Here is today's business summary.";
                   })()}
                 </p>
@@ -760,29 +887,34 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </header>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={location.pathname}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: 0.25, ease: "easeOut" }}
-              className="flex-1 overflow-auto p-4 sm:p-5 bg-[#fdfbf7] text-slate-800"
-            >
-              {children}
-            </motion.div>
-          </AnimatePresence>
+          {/* Scrollable Main Content Area */}
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden flex flex-col bg-[#fdfbf7] dark:bg-slate-900 custom-scrollbar">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={location.pathname}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                className="flex-1 flex flex-col p-4 sm:p-6 text-slate-800 dark:text-slate-100 min-h-full"
+              >
+                <div className="flex-1">
+                  {children}
+                </div>
 
-          <footer className="h-14 bg-white border-t border-slate-200/60 flex items-center justify-between px-8 text-xs font-semibold text-slate-400 flex-shrink-0">
-            <div>
-              <span>© {new Date().getFullYear()} {branding?.name || 'INK CRM'}. All Rights Reserved.</span>
-            </div>
-            <div className="flex gap-4">
-              <a href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</a>
-              <span className="text-slate-200">|</span>
-              <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
-            </div>
-          </footer>
+                <footer className="mt-8 pt-4 pb-2 border-t border-slate-200/60 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs font-semibold text-slate-400 flex-shrink-0">
+                  <div>
+                    <span>© {new Date().getFullYear()} {branding?.name || 'INK CRM'}. All Rights Reserved.</span>
+                  </div>
+                  <div className="flex gap-4">
+                    <a href="#" className="hover:text-indigo-600 transition-colors">Privacy Policy</a>
+                    <span className="text-slate-200 dark:text-slate-700">|</span>
+                    <a href="#" className="hover:text-indigo-600 transition-colors">Terms of Service</a>
+                  </div>
+                </footer>
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </main>
       </div>
 

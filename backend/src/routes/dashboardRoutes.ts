@@ -150,7 +150,10 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
       }
       
       todayFollowupsCount = await CustomRecord.countDocuments(followUpQuery);
-      todayFollowupsList = await CustomRecord.find(followUpQuery).sort({ 'data.followUpDate': 1 }).limit(10);
+      todayFollowupsList = await CustomRecord.find(followUpQuery)
+        .populate('createdBy', 'firstName lastName name email')
+        .sort({ 'data.followUpDate': 1 })
+        .limit(10);
 
       // 3. Count & fetch Upcoming followups (future dates)
       const upcomingQuery: any = {
@@ -176,6 +179,7 @@ router.get('/metrics', async (req: Request, res: Response): Promise<void> => {
       }
 
       const upcomingFollowupsList = await CustomRecord.find(upcomingQuery)
+        .populate('createdBy', 'firstName lastName name email')
         .sort({ 'data.followUpDate': 1 })
         .limit(10);
       const upcomingFollowupsCount = upcomingFollowupsList.length;

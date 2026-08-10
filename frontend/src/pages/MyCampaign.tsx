@@ -211,23 +211,28 @@ export default function MyCampaign() {
   };
 
   const handleWhatsAppChat = (lead: LeadRecord) => {
-    const phone = lead.data?.phone || lead.data?.mobile;
-    if (!phone) {
+    const rawPhone = lead.data?.phone || lead.data?.mobile || lead.data?.contactNumber || lead.data?.contactNum || lead.data?.mobileNo || lead.data?.contact_num || '';
+    let cleanPhone = String(rawPhone).replace(/\D/g, '').trim();
+    if (!cleanPhone) {
       showToast('No phone number available for this lead.', 'warning');
       return;
     }
-    const cleanPhone = String(phone).replace(/\D/g, '');
+    if (cleanPhone.length === 10) {
+      cleanPhone = `91${cleanPhone}`;
+    }
     window.open(`https://wa.me/${cleanPhone}`, '_blank');
   };
 
   const handleInitiateCall = (lead: LeadRecord) => {
-    const phone = lead.data?.phone || lead.data?.mobile;
-    if (!phone) {
+    const rawPhone = lead.data?.phone || lead.data?.mobile || lead.data?.contactNumber || lead.data?.contactNum || lead.data?.mobileNo || lead.data?.contact_num || '';
+    const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').trim();
+    if (!cleanPhone) {
       showToast('No phone number available for this lead.', 'warning');
       return;
     }
-    const leadName = `${lead.data?.firstName || ''} ${lead.data?.lastName || ''}`.trim() || 'Lead';
-    showToast(`Initiating call to ${leadName}...`, 'info');
+    const leadName = `${lead.data?.firstName || ''} ${lead.data?.lastName || ''}`.trim() || lead.data?.fullName || lead.data?.customerName || lead.data?.name || 'Lead';
+    showToast(`Calling ${leadName} (${cleanPhone})...`, 'info');
+    window.location.href = `tel:${cleanPhone}`;
   };
 
   const handleSaveLead = async (leadId: string) => {
