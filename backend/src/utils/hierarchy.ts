@@ -8,7 +8,9 @@ export class HierarchyService {
     if (!roleId) return false;
     try {
       const role = await Role.findById(roleId);
-      return !!(role && role.name === 'Super Admin');
+      if (!role) return false;
+      const lower = (role.name || '').toLowerCase();
+      return lower === 'super admin' || lower === 'admin' || lower === 'administrator' || lower === 'org admin' || lower === 'organization admin';
     } catch (e) {
       return false;
     }

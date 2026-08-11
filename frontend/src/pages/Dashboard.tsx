@@ -151,24 +151,32 @@ export default function Dashboard() {
     if (!raw) return 0;
     const upper = raw.toUpperCase();
 
-    if (upper === 'ALL_LEADS' || upper === 'ALL LEADS') {
-      return metricsData.totalLeads || 42;
-    }
-
     if (upper === "TODAY'S FOLLOWUPS") {
       return metricsData.todayFollowupsCount || 0;
+    }
+
+    if (upper === 'APPROVED BUT NOT DISBUSE') {
+      return metricsData.statusCounts['APPROVED'] || metricsData.statusCounts['Approved'] || 0;
+    }
+    if (upper === 'DISBUSED' || upper === 'DISBURSED') {
+      return metricsData.statusCounts['DISBURSED'] || metricsData.statusCounts['Disbursed'] || metricsData.statusCounts['DISBUSED'] || 0;
+    }
+    if (upper === 'CEBIL PENDING' || upper === 'CEDIL PENDING') {
+      return metricsData.statusCounts['CEDIL PENDING'] || metricsData.statusCounts['CEBIL PENDING'] || metricsData.statusCounts['Cedil Pending'] || 0;
     }
 
     if (metricsData.statusCounts[raw] !== undefined) return metricsData.statusCounts[raw];
     if (metricsData.statusCounts[upper] !== undefined) return metricsData.statusCounts[upper];
 
-    if (upper === 'CEBIL PENDING') return metricsData.statusCounts['CEDIL PENDING'] || metricsData.statusCounts['CEBIL PENDING'] || 0;
-    if (upper === 'CEDIL PENDING') return metricsData.statusCounts['CEBIL PENDING'] || metricsData.statusCounts['CEDIL PENDING'] || 0;
-    if (upper === 'APPROVED BUT NOT DISBUSE') return metricsData.statusCounts['APPROVED'] || 0;
-    if (upper === 'DISBUSED') return metricsData.statusCounts['DISBURSED'] || 0;
-
     const noLeadsKey = upper.replace(/ LEADS$/, '');
     if (metricsData.statusCounts[noLeadsKey] !== undefined) return metricsData.statusCounts[noLeadsKey];
+
+    for (const [k, v] of Object.entries(metricsData.statusCounts)) {
+      const kUpper = k.trim().toUpperCase();
+      if (kUpper === upper || kUpper === noLeadsKey) {
+        return Number(v);
+      }
+    }
 
     return 0;
   };
@@ -176,92 +184,35 @@ export default function Dashboard() {
   // Helper to resolve card theme color strictly matching user prompt mapping
   const getCardThemeColor = (name: string): string => {
     const upper = (name || '').toUpperCase();
-    if (upper === 'ALL_LEADS' || upper === 'ALL LEADS') return '#7C3AED';
-    if (upper.includes('YET TO CALL') || upper.includes('CALL')) return '#4F46E5';
-    if (upper.includes('HOT')) return '#E11D48';
-    if (upper.includes('WARM')) return '#D97706';
-    if (upper.includes('REACHABLE') || upper.includes('UNREACHABLE') || upper.includes('CONNECTED')) return '#7C3AED';
-    if (upper.includes('CEDIL') || upper.includes('CEBIL')) return '#0D9488';
-    if (upper.includes('INKWORLDWIDE')) return '#64748B';
-    if (upper.includes('DOCUMENT') || upper.includes('DOC')) return '#2563EB';
+    if (upper.includes('HOT')) return '#0284C7';
+    if (upper.includes('WARM')) return '#F59E0B';
+    if (upper.includes('CEDIL') || upper.includes('CEBIL')) return '#E11D48';
+    if (upper.includes('DOCUMENT') || upper.includes('DOC')) return '#0284C7';
     if (upper.includes('APPROVAL') || (upper.includes('APPROV') && upper.includes('PEND'))) return '#EA580C';
-    if (upper.includes('APPROVED')) return '#059669';
-    if (upper.includes('DISBURSED') || upper.includes('DISBURS')) return '#059669';
-    if (upper.includes('NEGOTIATION')) return '#EA580C';
-    if (upper.includes('REJECTED') || upper.includes('REJECT') || upper.includes('INTEREST')) return '#E11D48';
-    if (upper.includes('FOLLOWUP') || upper.includes('FOLLOW')) return '#2563EB';
-    if (upper.includes('DROPPED') || upper.includes('DROP')) return '#64748B';
-    if (upper.includes('PENDING')) return '#D97706';
-    if (upper.includes('NEW')) return '#4F46E5';
-    return '#64748B';
+    if (upper.includes('APPROVED')) return '#F59E0B';
+    if (upper.includes('DISBURSED') || upper.includes('DISBURS')) return '#16A34A';
+    if (upper.includes('REJECTED') || upper.includes('REJECT')) return '#E11D48';
+    if (upper.includes('FOLLOWUP') || upper.includes('FOLLOW')) return '#0284C7';
+    if (upper.includes('DROPPED') || upper.includes('DROP')) return '#EA580C';
+    if (upper.includes('PENDING')) return '#F59E0B';
+    return '#0284C7';
   };
 
-  // Construct dynamic metric cards list from configured statuses in Settings
+  // Exactly the 11 status categories + Today's Followups in the exact order requested by the user
   const getDynamicMetricCards = () => {
-    const allLeadsCard = {
-      label: 'ALL LEADS',
-      rawName: 'ALL_LEADS',
-      category: 'overview',
-      accentColor: '#7C3AED',
-      icon: Icons.Layers,
-      sub: 'Total Active Registry',
-      isTotal: true
-    };
-
-    if (configuredStatuses && configuredStatuses.length > 0) {
-      const visible = configuredStatuses
-        .filter((s: any) => s.dashboardVisibility !== false)
-        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
-
-      if (visible.length > 0) {
-        const statusCards = visible.map((st: any) => {
-          const IconComp = (Icons as any)[st.icon] || Icons.Circle;
-          const upperName = (st.name || '').toUpperCase();
-
-          let category = 'overview';
-          if (st.pipelinePosition > 0) category = 'pipeline';
-          if (upperName.includes('FOLLOW') || upperName.includes('WARM') || upperName.includes('PENDING') || upperName.includes('REACHABLE')) {
-            category = 'followups';
-          }
-
-          const themeColor = getCardThemeColor(st.name);
-
-          return {
-            label: st.name.toUpperCase(),
-            rawName: st.name,
-            category,
-            accentColor: themeColor,
-            icon: IconComp,
-            sub: st.isFinal 
-              ? (st.isSuccess ? '✔ Closed Won' : '✕ Closed Final') 
-              : (st.pipelinePosition > 0 ? `Stage #${st.pipelinePosition}` : 'Configured Status')
-          };
-        });
-
-        return [allLeadsCard, ...statusCards];
-      }
-    }
-
-    // Default fallback list of cards
     return [
-      allLeadsCard,
-      { label: 'YET TO CALL', rawName: 'Yet To Call', category: 'pipeline', icon: Icons.PhoneForwarded, sub: 'Stage #1' },
-      { label: 'HOT LEADS', rawName: 'Hot', category: 'pipeline', icon: Icons.Flame, sub: 'Stage #2' },
-      { label: 'WARM LEADS', rawName: 'Warm', category: 'pipeline', icon: Icons.Sun, sub: 'Stage #3' },
-      { label: 'NOT REACHABLE', rawName: 'Not Reachable', category: 'followups', icon: Icons.PhoneOff, sub: 'Stage #4' },
-      { label: 'CEBIL PENDING', rawName: 'Cedil Pending', category: 'pipeline', icon: Icons.FileWarning, sub: 'Stage #5' },
-      { label: 'DOCUMENT PENDING', rawName: 'Document Pending', category: 'pipeline', icon: Icons.FileText, sub: 'Stage #6' },
-      { label: 'APPROVAL PENDING', rawName: 'Approval Pending', category: 'pipeline', icon: Icons.Clock, sub: 'Stage #7' },
-      { label: 'APPROVED', rawName: 'Approved', category: 'pipeline', icon: Icons.CheckCircle, sub: 'Stage #8' },
-      { label: 'NEGOTIATION', rawName: 'Negotiation', category: 'pipeline', icon: Icons.TrendingUp, sub: 'Stage #9' },
-      { label: 'DISBURSED', rawName: 'Disbursed', category: 'pipeline', icon: Icons.Banknote, sub: '✔ Closed Won' },
-      { label: 'FOLLOWUP', rawName: 'Followup', category: 'followups', icon: Icons.PhoneCall, sub: 'Stage #11' },
-      { label: 'NOT CONNECTED', rawName: 'Not Connected', category: 'followups', icon: Icons.PhoneMissed, sub: 'Followup Queue' },
-      { label: 'PENDING', rawName: 'Pending', category: 'followups', icon: Icons.Hourglass, sub: 'Stage #13' },
-      { label: 'INKWORLDWIDE', rawName: 'Inkworldwide', category: 'overview', icon: Icons.Globe, sub: 'Configured Status' },
-      { label: 'DROPPED', rawName: 'Dropped', category: 'overview', icon: Icons.ArrowDownCircle, sub: '✕ Closed Final' },
-      { label: 'NOT INTERESTED', rawName: 'Not Interested', category: 'overview', icon: Icons.XCircle, sub: '✕ Closed Final' },
-      { label: 'REJECTED', rawName: 'Rejected', category: 'overview', icon: Icons.XOctagon, sub: '✕ Closed Final' },
+      { label: 'HOT LEADS', rawName: 'Hot', category: 'pipeline', icon: Icons.Flame, sub: 'Stage #2', accentColor: '#0284C7' },
+      { label: 'WARM LEADS', rawName: 'Warm', category: 'pipeline', icon: Icons.Sun, sub: 'Stage #3', accentColor: '#F59E0B' },
+      { label: 'CEBIL PENDING', rawName: 'Cedil Pending', category: 'pipeline', icon: Icons.FileWarning, sub: 'Stage #5', accentColor: '#E11D48' },
+      { label: 'DOCUMENT PENDING', rawName: 'Document Pending', category: 'pipeline', icon: Icons.FileText, sub: 'Stage #6', accentColor: '#0284C7' },
+      { label: 'APPROVAL PENDING', rawName: 'Approval Pending', category: 'pipeline', icon: Icons.Clock, sub: 'Stage #7', accentColor: '#EA580C' },
+      { label: 'APPROVED BUT NOT DISBUSE', rawName: 'Approved', category: 'pipeline', icon: Icons.CheckCircle, sub: 'Stage #8', accentColor: '#F59E0B' },
+      { label: 'DISBUSED', rawName: 'Disbursed', category: 'pipeline', icon: Icons.Banknote, sub: '✔ Closed Won', accentColor: '#16A34A' },
+      { label: 'REJECTED', rawName: 'Rejected', category: 'overview', icon: Icons.XOctagon, sub: '✕ Closed Final', accentColor: '#E11D48' },
+      { label: 'FOLLOWUP', rawName: 'Followup', category: 'followups', icon: Icons.PhoneCall, sub: 'Stage #11', accentColor: '#0284C7' },
+      { label: 'DROPPED', rawName: 'Dropped', category: 'overview', icon: Icons.ArrowDownCircle, sub: '✕ Closed Final', accentColor: '#EA580C' },
+      { label: 'PENDING', rawName: 'Pending', category: 'followups', icon: Icons.Hourglass, sub: 'Stage #13', accentColor: '#F59E0B' },
+      { label: "TODAY'S FOLLOWUPS", rawName: "TODAY'S FOLLOWUPS", category: 'followups', icon: Icons.Calendar, sub: 'Due Today', accentColor: '#0284C7' },
     ];
   };
 
@@ -450,7 +401,11 @@ export default function Dashboard() {
 
             return (
               <Link
-                to={(metric as any).isTotal || metric.rawName === 'ALL_LEADS' ? '/modules/leads' : `/modules/leads?status=${encodeURIComponent(filterStatus)}`}
+                to={
+                  metric.rawName === "TODAY'S FOLLOWUPS"
+                    ? '/modules/leads?followup=today'
+                    : `/modules/leads?status=${encodeURIComponent(metric.rawName || metric.label)}`
+                }
                 key={idx} 
                 className="group flex flex-col justify-between p-3.5 sm:p-4 bg-white dark:bg-slate-900 rounded-xl transition-all duration-200 cursor-pointer relative overflow-hidden text-left shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] hover:-translate-y-0.5"
                 style={{
