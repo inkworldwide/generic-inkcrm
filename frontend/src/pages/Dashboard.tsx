@@ -7,6 +7,7 @@ import { DynamicIcon } from '../components/Layout';
 import { useQuery } from '@tanstack/react-query';
 import { formatDate } from '../utils/dateFormatter';
 import { useToastStore } from '../store/toastStore';
+import SalesFunnel3D from '../components/SalesFunnel3D';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -1044,178 +1045,70 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* 5. PIPELINE SUMMARY & CONVERSION BAR */}
-      <div className="bg-[#F8F5F1] border border-[#EAE4DA] rounded-2xl p-6 md:p-8 overflow-hidden text-left shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
-        <div className="px-2 pb-5 border-b border-[#EAE4DA] flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white border border-[#EAE4DA] flex items-center justify-center shadow-2xs">
-              <Icons.GitCommit className="w-4.5 h-4.5 text-indigo-600" />
+      {/* 5. 3D CONICAL SALES FUNNEL & PIPELINE ADVANCEMENT */}
+      <div className="space-y-4">
+        <SalesFunnel3D
+          stages={rawPipeline.map(s => ({
+            name: s.name,
+            val: Number(s.val),
+            count: Number(s.count),
+            pct: Math.round((Number(s.val) / maxPipelineVal) * 100),
+            icon: s.icon
+          }))}
+          maxVal={maxPipelineVal}
+        />
+
+        {/* Pipeline Summary Horizontal KPI Bar */}
+        <div className="w-full grid grid-cols-2 sm:grid-cols-4 bg-white border border-black/[0.06] rounded-2xl p-4 sm:p-5 items-center gap-4 shadow-sm text-left">
+          <div className="flex items-center gap-3 pl-1">
+            <div 
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4F46E5' }}
+            >
+              <Icons.Briefcase className="w-4.5 h-4.5 stroke-[2.2]" style={{ color: '#4F46E5' }} />
             </div>
-            <div>
-              <h3 className="text-base font-black text-[#111111] tracking-tight">Lead Conversion & Pipeline Funnel</h3>
-              <p className="text-xs text-[#6B7280] font-medium mt-0.5">Step-by-step stage advancement breakdown</p>
+            <div className="text-left min-w-0">
+              <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Total Pipeline</p>
+              <p className="text-base font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">₹{totalPipeline.toLocaleString('en-IN')}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 pl-1 sm:border-l border-black/[0.06]">
+            <div 
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}
+            >
+              <Icons.Percent className="w-4.5 h-4.5 stroke-[2.2]" style={{ color: '#059669' }} />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Win Rate</p>
+              <p className="text-base font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">{winRate}%</p>
             </div>
           </div>
           
-          <Link 
-            to="/reports/lead-reports"
-            className="text-xs font-bold text-[#111111] hover:text-black bg-white px-3.5 py-2 rounded-xl border border-black/[0.08] hover:border-black/[0.18] uppercase tracking-wider flex items-center gap-1.5 shadow-2xs transition-all"
-          >
-            Detailed Analytics <Icons.ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
-          {/* Left Column (70% width) - Visual Step Funnel */}
-          <div className="md:col-span-8 flex flex-col gap-4">
-            <div className="space-y-2.5">
-              {rawPipeline.map((stageItem, idx) => {
-                const val = stageItem.val;
-                const dealsCount = stageItem.count;
-                const pct = Math.round((val / maxPipelineVal) * 100);
-                const stageName = stageItem.name;
-                const StageIcon = stageItem.icon;
-                const meta = stageMeta[stageName] || { color: '#6B7280' };
-                
-                // Funnel width decrements nicely down the stage list
-                const widthClass = idx === 0 ? 'w-full' : idx === 1 ? 'w-[94%]' : idx === 2 ? 'w-[88%]' : idx === 3 ? 'w-[82%]' : 'w-[76%]';
-
-                return (
-                  <div 
-                    key={idx}
-                    className={`${widthClass} flex items-center justify-between py-3 px-4 bg-white border border-black/[0.06] hover:border-black/[0.14] rounded-xl transition-all duration-150 relative overflow-hidden shadow-2xs group`}
-                  >
-                    {/* Left vertical color accent */}
-                    <div 
-                      className="absolute left-0 top-0 bottom-0 w-1.5"
-                      style={{ backgroundColor: meta.color }}
-                    />
-                    
-                    <div className="flex items-center gap-3 pl-2">
-                      <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{
-                          backgroundColor: meta.bgTint || 'rgba(79, 70, 229, 0.1)',
-                          color: meta.color || '#4F46E5'
-                        }}
-                      >
-                        <StageIcon className="w-4 h-4 stroke-[2.2]" style={{ color: meta.color || 'currentColor' }} />
-                      </div>
-                      
-                      <div className="text-left">
-                        <span className="text-[10px] font-bold uppercase tracking-wider block text-[#6B7280]">{stageName}</span>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-sm font-black text-[#1A1A1A] tracking-tight">₹{Number(val).toLocaleString('en-IN')}</span>
-                          <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-[#FAFAF9] border border-black/[0.08] text-[#6B7280]">
-                            {dealsCount} Leads
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="text-right pr-2">
-                      <span className="text-xs font-black text-[#1A1A1A] block">{pct}%</span>
-                      <span className="text-[9px] font-bold text-[#8C8C8C] uppercase tracking-wider block mt-0.5">Conversion</span>
-                    </div>
-                  </div>
-                );
-              })}
+          <div className="flex items-center gap-3 pl-1 sm:border-l border-black/[0.06]">
+            <div 
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: 'rgba(37, 99, 235, 0.1)', color: '#2563EB' }}
+            >
+              <Icons.Calendar className="w-4.5 h-4.5 stroke-[2.2]" style={{ color: '#2563EB' }} />
             </div>
-
-            {/* Pipeline Summary Horizontal KPI Bar */}
-            <div className="w-full grid grid-cols-2 sm:grid-cols-4 bg-white border border-black/[0.06] rounded-xl p-3.5 items-center gap-4 shadow-2xs">
-              <div className="flex items-center gap-2.5 pl-1">
-                <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4F46E5' }}
-                >
-                  <Icons.Briefcase className="w-4 h-4 stroke-[2.2]" style={{ color: '#4F46E5' }} />
-                </div>
-                <div className="text-left min-w-0">
-                  <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Total Pipeline</p>
-                  <p className="text-sm font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">₹{totalPipeline.toLocaleString('en-IN')}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5 pl-1 sm:border-l border-black/[0.06]">
-                <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}
-                >
-                  <Icons.Percent className="w-4 h-4 stroke-[2.2]" style={{ color: '#059669' }} />
-                </div>
-                <div className="text-left min-w-0">
-                  <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Win Rate</p>
-                  <p className="text-sm font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">{winRate}%</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2.5 pl-1 sm:border-l border-black/[0.06]">
-                <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'rgba(37, 99, 235, 0.1)', color: '#2563EB' }}
-                >
-                  <Icons.Calendar className="w-4 h-4 stroke-[2.2]" style={{ color: '#2563EB' }} />
-                </div>
-                <div className="text-left min-w-0">
-                  <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Avg. Cycle</p>
-                  <p className="text-sm font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">28 Days</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2.5 pl-1 sm:border-l border-black/[0.06]">
-                <div 
-                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ backgroundColor: 'rgba(217, 119, 6, 0.1)', color: '#D97706' }}
-                >
-                  <Icons.IndianRupee className="w-4 h-4 stroke-[2.2]" style={{ color: '#D97706' }} />
-                </div>
-                <div className="text-left min-w-0">
-                  <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Avg. Deal</p>
-                  <p className="text-sm font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">₹{avgDealSize.toLocaleString('en-IN')}</p>
-                </div>
-              </div>
+            <div className="text-left min-w-0">
+              <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Avg. Cycle</p>
+              <p className="text-base font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">28 Days</p>
             </div>
           </div>
 
-          {/* Right Column (30% width) - Conversion Overview */}
-          <div className="md:col-span-4 flex flex-col gap-4">
-            <div className="bg-white border border-[#EAE4DA] p-5 rounded-xl text-left">
-              <h4 className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider mb-4">Conversion Overview</h4>
-              <div className="space-y-3.5">
-                {rawPipeline.map((stageItem, idx) => {
-                  const val = stageItem.val;
-                  const pct = Math.round((val / maxPipelineVal) * 100);
-                  const stageName = stageItem.name;
-                  const meta = stageMeta[stageName] || { color: '#6B7280' };
-                  return (
-                    <div key={idx} className="space-y-1.5">
-                      <div className="flex justify-between items-center text-xs">
-                        <div className="flex items-center gap-2">
-                          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: meta.color }} />
-                          <span className="font-bold text-xs text-[#1A1A1A]">{stageName}</span>
-                        </div>
-                        <span className="font-black text-[#1A1A1A] text-xs">₹{Number(val).toLocaleString('en-IN')}</span>
-                      </div>
-                      
-                      {/* Progress bar line */}
-                      <div className="flex items-center gap-2.5">
-                        <div className="flex-1 h-2 bg-[#E5E5E0] border border-[#DCDCD5] rounded-full overflow-hidden">
-                          <div
-                            style={{ 
-                              width: animate ? `${pct}%` : '0%', 
-                              backgroundColor: meta.color, 
-                              transition: `width 1.2s cubic-bezier(0.4,0,0.2,1) ${idx * 0.08}s` 
-                            }}
-                            className="h-full rounded-full"
-                          />
-                        </div>
-                        <span className="text-[10px] font-bold text-[#6B7280] w-8 text-right">{pct}%</span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          <div className="flex items-center gap-3 pl-1 sm:border-l border-black/[0.06]">
+            <div 
+              className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ backgroundColor: 'rgba(217, 119, 6, 0.1)', color: '#D97706' }}
+            >
+              <Icons.IndianRupee className="w-4.5 h-4.5 stroke-[2.2]" style={{ color: '#D97706' }} />
+            </div>
+            <div className="text-left min-w-0">
+              <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Avg. Deal</p>
+              <p className="text-base font-black text-[#1A1A1A] tracking-tight mt-0.5 truncate">₹{avgDealSize.toLocaleString('en-IN')}</p>
             </div>
           </div>
         </div>
