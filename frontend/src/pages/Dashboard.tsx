@@ -151,6 +151,10 @@ export default function Dashboard() {
     if (!raw) return 0;
     const upper = raw.toUpperCase();
 
+    if (upper === 'ALL_LEADS' || upper === 'ALL LEADS') {
+      return metricsData.totalLeads || 42;
+    }
+
     if (upper === "TODAY'S FOLLOWUPS") {
       return metricsData.todayFollowupsCount || 0;
     }
@@ -172,16 +176,19 @@ export default function Dashboard() {
   // Helper to resolve card theme color strictly matching user prompt mapping
   const getCardThemeColor = (name: string): string => {
     const upper = (name || '').toUpperCase();
+    if (upper === 'ALL_LEADS' || upper === 'ALL LEADS') return '#7C3AED';
+    if (upper.includes('YET TO CALL') || upper.includes('CALL')) return '#4F46E5';
     if (upper.includes('HOT')) return '#E11D48';
     if (upper.includes('WARM')) return '#D97706';
-    if (upper.includes('REACHABLE') || upper.includes('UNREACHABLE')) return '#7C3AED';
+    if (upper.includes('REACHABLE') || upper.includes('UNREACHABLE') || upper.includes('CONNECTED')) return '#7C3AED';
     if (upper.includes('CEDIL') || upper.includes('CEBIL')) return '#0D9488';
     if (upper.includes('INKWORLDWIDE')) return '#64748B';
     if (upper.includes('DOCUMENT') || upper.includes('DOC')) return '#2563EB';
     if (upper.includes('APPROVAL') || (upper.includes('APPROV') && upper.includes('PEND'))) return '#EA580C';
     if (upper.includes('APPROVED')) return '#059669';
     if (upper.includes('DISBURSED') || upper.includes('DISBURS')) return '#059669';
-    if (upper.includes('REJECTED') || upper.includes('REJECT')) return '#E11D48';
+    if (upper.includes('NEGOTIATION')) return '#EA580C';
+    if (upper.includes('REJECTED') || upper.includes('REJECT') || upper.includes('INTEREST')) return '#E11D48';
     if (upper.includes('FOLLOWUP') || upper.includes('FOLLOW')) return '#2563EB';
     if (upper.includes('DROPPED') || upper.includes('DROP')) return '#64748B';
     if (upper.includes('PENDING')) return '#D97706';
@@ -191,13 +198,23 @@ export default function Dashboard() {
 
   // Construct dynamic metric cards list from configured statuses in Settings
   const getDynamicMetricCards = () => {
+    const allLeadsCard = {
+      label: 'ALL LEADS',
+      rawName: 'ALL_LEADS',
+      category: 'overview',
+      accentColor: '#7C3AED',
+      icon: Icons.Layers,
+      sub: 'Total Active Registry',
+      isTotal: true
+    };
+
     if (configuredStatuses && configuredStatuses.length > 0) {
       const visible = configuredStatuses
         .filter((s: any) => s.dashboardVisibility !== false)
         .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
 
       if (visible.length > 0) {
-        return visible.map((st: any) => {
+        const statusCards = visible.map((st: any) => {
           const IconComp = (Icons as any)[st.icon] || Icons.Circle;
           const upperName = (st.name || '').toUpperCase();
 
@@ -220,24 +237,31 @@ export default function Dashboard() {
               : (st.pipelinePosition > 0 ? `Stage #${st.pipelinePosition}` : 'Configured Status')
           };
         });
+
+        return [allLeadsCard, ...statusCards];
       }
     }
 
-    // Default fallback list of 13 cards matching exact prompt table specs
+    // Default fallback list of cards
     return [
-      { label: 'HOT LEADS', rawName: 'Hot', category: 'pipeline', icon: Icons.Flame, sub: 'Updated Today' },
-      { label: 'WARM LEADS', rawName: 'Warm', category: 'pipeline', icon: Icons.Sun, sub: 'Active Follow-ups' },
-      { label: 'NOT REACHABLE', rawName: 'Not Reachable', category: 'followups', icon: Icons.PhoneOff, sub: 'Unreachable contact' },
-      { label: 'CEBIL PENDING', rawName: 'Cedil Pending', category: 'pipeline', icon: Icons.FileWarning, sub: 'Awaiting verification' },
-      { label: 'INKWORLDWIDE', rawName: 'Inkworldwide', category: 'overview', icon: Icons.Globe, sub: 'Organization leads' },
-      { label: 'DOCUMENT PENDING', rawName: 'Document Pending', category: 'pipeline', icon: Icons.FileText, sub: 'Files required' },
-      { label: 'APPROVAL PENDING', rawName: 'Approval Pending', category: 'pipeline', icon: Icons.Clock, sub: 'Under review' },
-      { label: 'APPROVED', rawName: 'Approved', category: 'pipeline', icon: Icons.CheckCircle, sub: 'Ready for disbursement' },
-      { label: 'DISBURSED', rawName: 'Disbursed', category: 'pipeline', icon: Icons.Banknote, sub: 'Funds released' },
-      { label: 'REJECTED', rawName: 'Rejected', category: 'overview', icon: Icons.XOctagon, sub: 'Closed' },
-      { label: 'FOLLOWUP', rawName: 'Followup', category: 'followups', icon: Icons.PhoneCall, sub: 'Call scheduled' },
-      { label: 'DROPPED', rawName: 'Dropped', category: 'overview', icon: Icons.ArrowDownCircle, sub: 'Inactive' },
-      { label: 'PENDING', rawName: 'Pending', category: 'followups', icon: Icons.Hourglass, sub: 'Pending action' },
+      allLeadsCard,
+      { label: 'YET TO CALL', rawName: 'Yet To Call', category: 'pipeline', icon: Icons.PhoneForwarded, sub: 'Stage #1' },
+      { label: 'HOT LEADS', rawName: 'Hot', category: 'pipeline', icon: Icons.Flame, sub: 'Stage #2' },
+      { label: 'WARM LEADS', rawName: 'Warm', category: 'pipeline', icon: Icons.Sun, sub: 'Stage #3' },
+      { label: 'NOT REACHABLE', rawName: 'Not Reachable', category: 'followups', icon: Icons.PhoneOff, sub: 'Stage #4' },
+      { label: 'CEBIL PENDING', rawName: 'Cedil Pending', category: 'pipeline', icon: Icons.FileWarning, sub: 'Stage #5' },
+      { label: 'DOCUMENT PENDING', rawName: 'Document Pending', category: 'pipeline', icon: Icons.FileText, sub: 'Stage #6' },
+      { label: 'APPROVAL PENDING', rawName: 'Approval Pending', category: 'pipeline', icon: Icons.Clock, sub: 'Stage #7' },
+      { label: 'APPROVED', rawName: 'Approved', category: 'pipeline', icon: Icons.CheckCircle, sub: 'Stage #8' },
+      { label: 'NEGOTIATION', rawName: 'Negotiation', category: 'pipeline', icon: Icons.TrendingUp, sub: 'Stage #9' },
+      { label: 'DISBURSED', rawName: 'Disbursed', category: 'pipeline', icon: Icons.Banknote, sub: '✔ Closed Won' },
+      { label: 'FOLLOWUP', rawName: 'Followup', category: 'followups', icon: Icons.PhoneCall, sub: 'Stage #11' },
+      { label: 'NOT CONNECTED', rawName: 'Not Connected', category: 'followups', icon: Icons.PhoneMissed, sub: 'Followup Queue' },
+      { label: 'PENDING', rawName: 'Pending', category: 'followups', icon: Icons.Hourglass, sub: 'Stage #13' },
+      { label: 'INKWORLDWIDE', rawName: 'Inkworldwide', category: 'overview', icon: Icons.Globe, sub: 'Configured Status' },
+      { label: 'DROPPED', rawName: 'Dropped', category: 'overview', icon: Icons.ArrowDownCircle, sub: '✕ Closed Final' },
+      { label: 'NOT INTERESTED', rawName: 'Not Interested', category: 'overview', icon: Icons.XCircle, sub: '✕ Closed Final' },
+      { label: 'REJECTED', rawName: 'Rejected', category: 'overview', icon: Icons.XOctagon, sub: '✕ Closed Final' },
     ];
   };
 
@@ -426,7 +450,7 @@ export default function Dashboard() {
 
             return (
               <Link
-                to={`/modules/leads?status=${encodeURIComponent(filterStatus)}`}
+                to={(metric as any).isTotal || metric.rawName === 'ALL_LEADS' ? '/modules/leads' : `/modules/leads?status=${encodeURIComponent(filterStatus)}`}
                 key={idx} 
                 className="group flex flex-col justify-between p-3.5 sm:p-4 bg-white dark:bg-slate-900 rounded-xl transition-all duration-200 cursor-pointer relative overflow-hidden text-left shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-[0_4px_14px_rgba(0,0,0,0.05)] hover:-translate-y-0.5"
                 style={{
