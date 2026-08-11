@@ -41,6 +41,7 @@ export default function UsersManagement() {
   const [transferringLeads, setTransferringLeads] = useState<boolean>(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState<string>('');
   const [deletingUser, setDeletingUser] = useState<boolean>(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'active'>('all');
 
   const [loading, setLoading] = useState(true);
 
@@ -76,6 +77,29 @@ export default function UsersManagement() {
       console.error('Failed to load users management data:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleApproveUser = async (userId: string, approve: boolean) => {
+    try {
+      await api.put(`/auth/users/${userId}`, {
+        isApproved: approve,
+        approvalStatus: approve ? 'approved' : 'rejected',
+        isActive: approve
+      });
+      showToast(approve ? 'User approved successfully! User can now log in.' : 'User registration rejected.', approve ? 'success' : 'warning');
+      loadData();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update user approval status.', 'error');
+    }
+  };
+
+  const handleToggleUserSetting = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
+    try {
+      await api.put(`/auth/users/${userId}`, { [field]: !currentValue });
+      loadData();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update user setting.', 'error');
     }
   };
 
@@ -199,15 +223,6 @@ export default function UsersManagement() {
     }
   };
 
-  const handleToggleUserSetting = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
-    try {
-      await api.put(`/auth/users/${userId}`, { [field]: !currentValue });
-      loadData();
-    } catch (err: any) {
-      showToast(err.response?.data?.error || 'Failed to update user setting.', 'error');
-    }
-  };
-
   const handleUserRoleChange = async (userId: string, newRoleId: string) => {
     try {
       await api.put(`/auth/users/${userId}`, { roleId: newRoleId });
@@ -240,12 +255,29 @@ export default function UsersManagement() {
     );
   }
 
+  const pendingUsersCount = users.filter(u => u.approvalStatus === 'pending' || u.isApproved === false).length;
+  const activeUsersCount = users.filter(u => u.isActive && u.isApproved !== false).length;
+
+  const filteredUsers = users.filter(u => {
+    if (statusFilter === 'pending') return u.approvalStatus === 'pending' || u.isApproved === false;
+    if (statusFilter === 'active') return u.isActive && u.isApproved !== false;
+    return true;
+  });
+
   return (
-    <div className="space-y-8 p-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl uppercase font-bold tracking-tight text-slate-800">
-          Users Management
-        </h1>
+    <div className="space-y-6 p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl uppercase font-extrabold tracking-tight text-slate-800 dark:text-white flex items-center gap-3">
+            Users Management
+            {pendingUsersCount > 0 && (
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
+                {pendingUsersCount} Pending Approval
+              </span>
+            )}
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">Manage team members, permissions, and registration approvals.</p>
+        </div>
         <button
           type="button"
           onClick={() => {
@@ -264,10 +296,57 @@ export default function UsersManagement() {
             });
             setUserModalOpen(true);
           }}
-          className="btn-primary-premium flex items-center gap-2"
+          className="btn-primary-premium flex items-center gap-2 shadow-md"
         >
           <Icons.Plus className="w-4 h-4" /> Add User
         </button>
+      </div>
+
+      {/* Filter Tabs Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('all')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              statusFilter === 'all'
+                ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-xs'
+                : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            All Users <span className="px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 rounded-full text-[10px]">{users.length}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('pending')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              statusFilter === 'pending'
+                ? 'bg-amber-500 text-white shadow-xs'
+                : 'text-slate-500 hover:text-amber-600'
+            }`}
+          >
+            <Icons.Clock className="w-3.5 h-3.5" /> Pending Approval
+            {pendingUsersCount > 0 && (
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'pending' ? 'bg-white/30 text-white' : 'bg-amber-100 text-amber-800 font-extrabold'}`}>
+                {pendingUsersCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('active')}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+              statusFilter === 'active'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'text-slate-500 hover:text-emerald-600'
+            }`}
+          >
+            <Icons.CheckCircle className="w-3.5 h-3.5" /> Active Team
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'active' ? 'bg-white/30 text-white' : 'bg-slate-200 text-slate-700'}`}>
+              {activeUsersCount}
+            </span>
+          </button>
+        </div>
       </div>
 
       <div className="card-premium">
@@ -280,7 +359,7 @@ export default function UsersManagement() {
                 <th className="py-2 px-4">LOCATION</th>
                 <th className="py-2 px-4 text-center">SKIP FACE</th>
                 <th className="py-2 px-4 text-center">SKIP LOCATION</th>
-                <th className="py-2 px-4 text-center">ACCOUNT STATUS</th>
+                <th className="py-2 px-4 text-center min-w-[140px]">ACCOUNT STATUS</th>
                 <th className="py-2 px-4">ROLE</th>
                 <th className="py-2 px-4">DEPARTMENT</th>
                 <th className="py-2 px-4">REPORTING MANAGER</th>
@@ -288,7 +367,7 @@ export default function UsersManagement() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map(u => (
+              {filteredUsers.map(u => (
                 <tr key={u._id} className="hover:bg-slate-50/50 transition-colors h-14">
                   {/* Employee Profile Card */}
                   <td className="px-4 py-2 font-semibold text-slate-700">
@@ -395,26 +474,65 @@ export default function UsersManagement() {
                     </button>
                   </td>
 
-                  {/* Account Status Enable/Disable Toggle */}
+                  {/* Account Status & Approval Actions */}
                   <td className="px-4 py-2 text-center">
-                    <div className="flex flex-col items-center gap-0.5">
-                      <button
-                        type="button"
-                        onClick={() => handleToggleUserSetting(u._id, 'isActive', u.isActive !== false)}
-                        className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                          u.isActive !== false ? 'bg-indigo-600' : 'bg-slate-200'
-                        }`}
-                      >
-                        <span
-                          className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            u.isActive !== false ? 'translate-x-5' : 'translate-x-0'
+                    {u.approvalStatus === 'pending' || u.isApproved === false ? (
+                      <div className="flex flex-col items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded-full text-[9.5px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 flex items-center gap-1 animate-pulse">
+                          <Icons.Clock className="w-2.5 h-2.5" /> PENDING APPROVAL
+                        </span>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <button
+                            type="button"
+                            onClick={() => handleApproveUser(u._id, true)}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] shadow-xs flex items-center gap-1 transition-all cursor-pointer"
+                            title="Approve User for Login"
+                          >
+                            <Icons.Check className="w-3 h-3" /> Approve
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleApproveUser(u._id, false)}
+                            className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold text-[10px] flex items-center transition-all cursor-pointer"
+                            title="Reject Registration"
+                          >
+                            <Icons.X className="w-3 h-3" /> Reject
+                          </button>
+                        </div>
+                      </div>
+                    ) : u.approvalStatus === 'rejected' ? (
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1">
+                          <Icons.XCircle className="w-2.5 h-2.5" /> REJECTED
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => handleApproveUser(u._id, true)}
+                          className="px-2 py-0.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[9px] shadow-xs flex items-center gap-1 transition-colors cursor-pointer"
+                        >
+                          <Icons.Check className="w-2.5 h-2.5" /> Re-Approve
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-0.5">
+                        <button
+                          type="button"
+                          onClick={() => handleToggleUserSetting(u._id, 'isActive', u.isActive !== false)}
+                          className={`relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                            u.isActive !== false ? 'bg-indigo-600' : 'bg-slate-200'
                           }`}
-                        />
-                      </button>
-                      <span className={`text-[8px] font-bold ${u.isActive !== false ? 'text-indigo-600' : 'text-slate-400'}`}>
-                        {u.isActive !== false ? 'ENABLED' : 'DISABLED'}
-                      </span>
-                    </div>
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              u.isActive !== false ? 'translate-x-5' : 'translate-x-0'
+                            }`}
+                          />
+                        </button>
+                        <span className={`text-[8px] font-bold ${u.isActive !== false ? 'text-indigo-600' : 'text-slate-400'}`}>
+                          {u.isActive !== false ? 'ENABLED' : 'DISABLED'}
+                        </span>
+                      </div>
+                    )}
                   </td>
 
                   {/* Role (Read Only) */}

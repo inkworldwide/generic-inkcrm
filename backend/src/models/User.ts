@@ -67,6 +67,8 @@ export interface IUser extends Document {
   skipFace: boolean; // Bypass biometric face recognition check
   skipLocation: boolean; // Bypass proximity location check
   isActive: boolean; // Account status: enabled (true) or disabled (false)
+  isApproved?: boolean; // Super Admin approval state
+  approvalStatus?: 'pending' | 'approved' | 'rejected'; // Detailed approval state
   reportingManager?: mongoose.Types.ObjectId; // Reference to another User who is their manager
   department?: string; // Associated department name
   createdAt: Date;
@@ -149,6 +151,8 @@ const UserSchema = new Schema<IUser>(
     skipFace: { type: Boolean, default: false },
     skipLocation: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
+    isApproved: { type: Boolean, default: false },
+    approvalStatus: { type: String, enum: ['pending', 'approved', 'rejected'], default: 'pending' },
     reportingManager: { type: Schema.Types.ObjectId, ref: 'User' },
     department: { type: String, trim: true }
   },

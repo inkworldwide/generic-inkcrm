@@ -309,70 +309,44 @@ export default function Login() {
     }
   };
 
-  /** Step 3 → API: Face enrolled, now register workspace and partner */
-  const executeRegistration = async (faceEmbedding: number[]) => {
-    if (!regCoords) {
-      setError('Registration location is missing. Please go back and allow location access.');
-      setRegStep('location');
-      return;
-    }
+  /** Step 3 → API: Face enrolled, now register partner */
+  const executeRegistration = async (faceEmbedding: number[] = []) => {
     setError('');
     setSuccess('');
     setLoading(true);
     setRegStep('form');
 
+    const locationData = regCoords ? {
+      latitude: regCoords.latitude,
+      longitude: regCoords.longitude
+    } : undefined;
+
     try {
-      await import('../services/api').then(({ default: api }) =>
-        api.post('/auth/register', {
-          companyName,
-          subdomain: subdomain.toLowerCase(),
-          firstName,
-          lastName,
-          email: signUpEmail.toLowerCase(),
-          password: signUpPassword,
-          faceEmbedding,
-          registrationLocation: {
-            latitude: regCoords.latitude,
-            longitude: regCoords.longitude
-          },
-          userCode
-        })
-      );
+      const { default: api } = await import('../services/api');
+      const res = await api.post('/auth/register', {
+        companyName,
+        subdomain: subdomain.toLowerCase(),
+        firstName,
+        lastName,
+        email: signUpEmail.toLowerCase(),
+        password: signUpPassword,
+        faceEmbedding: faceEmbedding && faceEmbedding.length === 128 ? faceEmbedding : undefined,
+        registrationLocation: locationData,
+        userCode
+      });
 
-      setSuccess('Account registered successfully! Initiating session...');
-      localStorage.setItem('tenantSubdomain', subdomain.toLowerCase());
-      await fetchBranding(subdomain.toLowerCase());
-
-      // Auto-login after successful registration
-      setTimeout(async () => {
-        try {
-          const { default: api } = await import('../services/api');
-          const res = await api.post('/auth/login', {
-            email: signUpEmail.toLowerCase(),
-            password: signUpPassword,
-            latitude: regCoords.latitude,
-            longitude: regCoords.longitude
-          });
-          if (res.data.mfaRequired && res.data.tempToken) {
-            setIsSignUpTab(false);
-            setEmail(signUpEmail);
-            setPassword(signUpPassword);
-            setTempToken(res.data.tempToken);
-            setLoginStep('face');
-            setSuccess('');
-          } else if (res.data.token) {
-            setAuth(res.data.user, res.data.token, res.data.refreshToken);
-            localStorage.setItem('user', JSON.stringify(res.data.user));
-            navigate('/');
-          }
-        } catch {
-          setIsSignUpTab(false);
-          setEmail(signUpEmail);
-          setSuccess('');
-        }
-      }, 1800);
+      if (res.data?.pendingApproval) {
+        setSuccess('Registration submitted successfully! Your account is pending Super Admin approval. You will be able to log in once an administrator approves your account.');
+      } else {
+        setSuccess('Account registered successfully! Please log in.');
+      }
+      setIsSignUpTab(false);
+      setEmail(signUpEmail);
+      setPassword('');
+      setSignUpPassword('');
+      setConfirmPassword('');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create workspace.');
+      setError(err.response?.data?.error || 'Failed to complete registration.');
     } finally {
       setLoading(false);
     }
@@ -427,8 +401,17 @@ export default function Login() {
               <FaceEnrollment
                 mode="signup"
                 onSuccess={(embedding) => executeRegistration(embedding)}
-                onCancel={() => setRegStep('location')}
+                onCancel={() => executeRegistration([])}
               />
+              <div className="text-center mt-3">
+                <button
+                  type="button"
+                  onClick={() => executeRegistration([])}
+                  className="text-xs text-white/80 hover:text-white underline font-semibold transition-colors"
+                >
+                  Skip Face Enrollment & Submit Registration →
+                </button>
+              </div>
             </motion.div>
           </div>
         )}
@@ -998,25 +981,36 @@ export default function Login() {
 
                 {regGpsError && (
                   <>
-                    <div className="w-20 h-20 bg-rose-50 rounded-full flex items-center justify-center mx-auto">
-                      <Icons.MapPinOff className="w-9 h-9 text-rose-500" />
+                    <div className="w-20 h-20 bg-amber-50 rounded-full flex items-center justify-center mx-auto">
+                      <Icons.MapPinOff className="w-9 h-9 text-amber-500" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-slate-800">Location Access Required</h3>
-                      <p className="text-sm text-rose-600 mt-1.5 max-w-xs mx-auto bg-rose-50 p-3 rounded-xl border border-rose-100 leading-relaxed">
+                      <h3 className="text-lg font-bold text-slate-800">Location Access Optional</h3>
+                      <p className="text-sm text-slate-600 mt-1.5 max-w-xs mx-auto bg-amber-50 p-3 rounded-xl border border-amber-100 leading-relaxed text-xs font-medium">
                         {regGpsError}
                       </p>
-                      <p className="text-xs text-slate-400 mt-3">
-                        Location is mandatory for registration. You cannot skip this step.
+                      <p className="text-xs text-slate-400 mt-2">
+                        You can try again or skip location to complete registration.
                       </p>
                     </div>
-                    <button
-                      onClick={captureRegGps}
-                      className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
-                    >
-                      <Icons.RefreshCw className="w-4 h-4" />
-                      Try Again
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={captureRegGps}
+                        className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2"
+                      >
+                        <Icons.RefreshCw className="w-4 h-4" />
+                        Try Location Again
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRegStep('face');
+                        }}
+                        className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-all"
+                      >
+                        Skip Location & Continue →
+                      </button>
+                    </div>
                   </>
                 )}
 
@@ -1052,12 +1046,21 @@ export default function Login() {
                   </>
                 )}
 
-                <button
-                  onClick={resetRegFlow}
-                  className="w-full py-2 text-xs text-slate-400 hover:text-slate-600 transition-colors"
-                >
-                  ← Back to registration form
-                </button>
+                <div className="flex items-center justify-between gap-2 pt-2">
+                  <button
+                    onClick={resetRegFlow}
+                    className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    ← Back to form
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => executeRegistration([])}
+                    className="text-xs font-semibold text-indigo-600 hover:text-indigo-700 transition-colors"
+                  >
+                    Submit Registration Now →
+                  </button>
+                </div>
               </motion.div>
             )}
 

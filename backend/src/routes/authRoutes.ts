@@ -68,114 +68,123 @@ router.post('/register', async (req: Request, res: Response): Promise<void> => {
     const { email, password, firstName, lastName, companyName, subdomain, faceEmbedding, registrationLocation, userCode } = req.body;
 
     // ── Field validation ─────────────────────────────────────────────────────
-    if (!email || !password || !firstName || !lastName || !companyName || !subdomain) {
-      res.status(400).json({ error: 'All fields are required.' });
+    if (!email || !password || !firstName || !lastName) {
+      res.status(400).json({ error: 'First name, last name, email, and password are required.' });
       return;
     }
 
-    // Face embedding is mandatory
-    if (!faceEmbedding || !Array.isArray(faceEmbedding) || faceEmbedding.length !== 128) {
-      res.status(400).json({ error: 'Biometric face enrollment is mandatory to complete registration.' });
-      return;
-    }
+    const cleanEmail = email.toLowerCase().trim();
 
-    // GPS registration location is mandatory
-    if (
-      !registrationLocation ||
-      typeof registrationLocation.latitude !== 'number' ||
-      typeof registrationLocation.longitude !== 'number'
-    ) {
-      res.status(400).json({ error: 'GPS location is required for registration. Please allow location access and try again.' });
-      return;
-    }
-
-    // Check if organization subdomain is already taken
-    const existingOrg = await Organization.findOne({ subdomain: subdomain.toLowerCase() });
-    if (existingOrg) {
-      res.status(400).json({ error: 'Subdomain already registered.' });
-      return;
-    }
-
-    // Check if user email exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    // Check if user email already exists
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
-      res.status(400).json({ error: 'Email already registered.' });
+      res.status(400).json({ error: 'This email is already registered.' });
       return;
     }
 
-    // Create Organization (Tenant)
-    const org = await Organization.create({
-      name: companyName,
-      subdomain: subdomain.toLowerCase(),
-      themeSettings: {
-        primaryColor: '79 70 229',
-        sidebarBg: '#0f172a',
-        headerBg: '#ffffff',
-        fontFamily: 'Inter',
-        mode: 'light'
-      },
-      enabledModules: ['dashboard', 'leads', 'deals', 'companies', 'tasks', 'settings', 'reports', 'workflows']
-    });
+    // Determine target organization (use current active organization if available)
+    let targetOrg = null;
+    if (subdomain) {
+      targetOrg = await Organization.findOne({ subdomain: subdomain.toLowerCase().trim() });
+    }
+    if (!targetOrg) {
+      targetOrg = await Organization.findOne({ subdomain: 'inkcrm' }) || await Organization.findOne();
+    }
 
-    // Create default Super Admin Role for this tenant
-    const superAdminRole = await Role.create({
-      organizationId: org._id,
-      name: 'Super Admin',
-      description: 'System owner with full privileges',
-      isSystem: true,
-      permissions: {
-        modules: [
-          { moduleName: 'leads', create: true, read: 'all', update: 'all', delete: 'all' },
-          { moduleName: 'deals', create: true, read: 'all', update: 'all', delete: 'all' },
-          { moduleName: 'companies', create: true, read: 'all', update: 'all', delete: 'all' },
-          { moduleName: 'tasks', create: true, read: 'all', update: 'all', delete: 'all' }
-        ],
-        fields: [],
-        menus: ['dashboard', 'leads', 'deals', 'companies', 'tasks', 'workflows', 'reports', 'settings']
+    // If database is completely empty with 0 organizations, initialize first Organization
+    if (!targetOrg) {
+      targetOrg = await Organization.create({
+        name: companyName || 'inkworldwide',
+        subdomain: (subdomain || 'inkcrm').toLowerCase().trim(),
+        themeSettings: {
+          primaryColor: '79 70 229',
+          sidebarBg: '#0f172a',
+          headerBg: '#ffffff',
+          fontFamily: 'Inter',
+          mode: 'light'
+        },
+        enabledModules: ['dashboard', 'leads', 'deals', 'companies', 'tasks', 'settings', 'reports', 'workflows']
+      });
+      try {
+        await seedNewTenantData(targetOrg._id);
+      } catch (seedErr) {
+        console.error('[AUTH] Seeding error:', seedErr);
       }
-    });
+    }
 
-    // Hash password & Create User with GPS location
-    const passwordHash = await bcrypt.hash(password, 12); // 12 rounds for strong entropy
+    // Find standard role for registered user
+    let defaultRole = await Role.findOne({ 
+      organizationId: targetOrg._id, 
+      name: { $in: ['TELI CALLER', 'Agent', 'Sales Agent', 'SALES MANAGER', 'ADMIN'] } 
+    });
+    if (!defaultRole) {
+      defaultRole = await Role.findOne({ organizationId: targetOrg._id });
+    }
+
+    // Hash password (12 rounds)
+    const passwordHash = await bcrypt.hash(password, 12);
+
+    // Prepare face embedding & location (optional so registration never fails)
+    const hasFace = Array.isArray(faceEmbedding) && faceEmbedding.length === 128;
+    const hasLoc = registrationLocation && typeof registrationLocation.latitude === 'number' && typeof registrationLocation.longitude === 'number';
+
+    let address = undefined;
+    if (hasLoc) {
+      try {
+        address = await reverseGeocode(registrationLocation.latitude, registrationLocation.longitude);
+      } catch (e) {}
+    }
+
+    const cleanFirstName = firstName.trim().toUpperCase().replace(/[^A-Z]/g, '');
+    const generatedUserCode = userCode || `USR-${cleanFirstName || 'AGT'}-${Date.now().toString().slice(-4)}`;
+
     const user = await User.create({
-      organizationId: org._id,
-      roleId: superAdminRole._id,
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
+      organizationId: targetOrg._id,
+      roleId: defaultRole?._id,
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: cleanEmail,
       passwordHash,
+      plainPassword: password,
       isVerified: true,
+      isActive: false, // Disabled until Super Admin approves
+      isApproved: false, // Super Admin approval required
+      approvalStatus: 'pending',
+      skipFace: !hasFace,
+      skipLocation: !hasLoc,
       faceRecognition: {
-        enabled: true,
-        encryptedEmbedding: encrypt(JSON.stringify(faceEmbedding)),
-        enrolledAt: new Date()
+        enabled: hasFace,
+        encryptedEmbedding: hasFace ? encrypt(JSON.stringify(faceEmbedding)) : undefined,
+        enrolledAt: hasFace ? new Date() : undefined
       },
-      registrationLocation: {
+      registeredLocation: hasLoc ? {
         latitude: registrationLocation.latitude,
         longitude: registrationLocation.longitude,
+        address,
         capturedAt: new Date()
-      },
-      locationRadius: 100, // default 100 meter radius
-      userCode: userCode || undefined
+      } : undefined,
+      registrationLocation: hasLoc ? {
+        latitude: registrationLocation.latitude,
+        longitude: registrationLocation.longitude,
+        address,
+        capturedAt: new Date()
+      } : undefined,
+      locationRadius: 100,
+      userCode: generatedUserCode
     });
 
-    console.log(`[AUTH] New account registered: ${email}, location: (${registrationLocation.latitude}, ${registrationLocation.longitude})`);
-
-    // Seed new organization with default modules, statuses, and sample leads
-    try {
-      await seedNewTenantData(org._id);
-    } catch (seedErr) {
-      console.error(`[AUTH] Failed to seed new tenant organization:`, seedErr);
-    }
+    console.log(`[AUTH] New user registered under org ${targetOrg.name} (${targetOrg.subdomain}): ${cleanEmail} — Status: PENDING SUPER ADMIN APPROVAL`);
 
     res.status(201).json({
-      message: 'Account successfully registered.',
-      organizationId: org._id,
+      success: true,
+      pendingApproval: true,
+      message: 'Registration submitted successfully! Your account is pending Super Admin approval. You will be able to log in once an administrator approves your account.',
+      organizationId: targetOrg._id,
       userId: user._id
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Registration Error:', error);
-    res.status(500).json({ error: 'Failed to register account.' });
+    res.status(500).json({ error: error.message || 'Failed to register account.' });
   }
 });
 
@@ -204,7 +213,17 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ── Check account status ──────────────────────────────────────────────────
+    // ── Check Super Admin Approval Status ────────────────────────────────────
+    if (user.approvalStatus === 'pending' || user.isApproved === false) {
+      res.status(403).json({ error: 'Your account is pending Super Admin approval. Please contact your administrator to activate your account.' });
+      return;
+    }
+    if (user.approvalStatus === 'rejected') {
+      res.status(403).json({ error: 'Your registration request was rejected. Please contact your administrator.' });
+      return;
+    }
+
+    // ── Check account active status ──────────────────────────────────────────
     if (user.isActive === false) {
       res.status(403).json({ error: 'Login denied: Your account has been disabled. Please contact your administrator.' });
       return;
@@ -1169,6 +1188,8 @@ router.post('/users', authenticate, async (req: Request, res: Response): Promise
       registeredLocation: regLocObj,
       registrationLocation: regLocObj,
       isActive: true,
+      isApproved: true,
+      approvalStatus: 'approved',
       department: department || ''
     });
     
@@ -1189,7 +1210,7 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       return;
     }
 
-    const { firstName, lastName, roleId, email, password, skipFace, skipLocation, isActive, reportingManager, department } = req.body;
+    const { firstName, lastName, roleId, email, password, skipFace, skipLocation, isActive, isApproved, approvalStatus, reportingManager, department } = req.body;
     const user = await User.findOne({ _id: req.params.id, organizationId: req.organizationId });
     if (!user) {
       res.status(404).json({ error: 'User not found.' });
@@ -1237,7 +1258,36 @@ router.put('/users/:id', authenticate, async (req: Request, res: Response): Prom
       user.registeredLocation = regLoc;
       user.registrationLocation = regLoc;
     }
-    if (isActive !== undefined) user.isActive = isActive;
+    if (isApproved !== undefined) {
+      user.isApproved = isApproved;
+      if (isApproved) {
+        user.approvalStatus = 'approved';
+        user.isActive = true;
+      } else {
+        user.approvalStatus = 'rejected';
+        user.isActive = false;
+      }
+    }
+    if (approvalStatus !== undefined) {
+      user.approvalStatus = approvalStatus;
+      if (approvalStatus === 'approved') {
+        user.isApproved = true;
+        user.isActive = true;
+      } else if (approvalStatus === 'rejected') {
+        user.isApproved = false;
+        user.isActive = false;
+      } else {
+        user.isApproved = false;
+        user.isActive = false;
+      }
+    }
+    if (isActive !== undefined) {
+      user.isActive = isActive;
+      if (isActive && (!user.approvalStatus || user.approvalStatus === 'pending')) {
+        user.isApproved = true;
+        user.approvalStatus = 'approved';
+      }
+    }
     if (reportingManager !== undefined) user.reportingManager = reportingManager || null;
     if (department !== undefined) user.department = department;
     
