@@ -115,6 +115,38 @@ export default function Dashboard() {
     refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
+  const { data: usersDropdown } = useQuery({
+    queryKey: ['dashboard-users-dropdown'],
+    queryFn: async () => {
+      const res = await api.get('/auth/users?purpose=dropdown');
+      return res.data || [];
+    },
+    staleTime: 60000
+  });
+
+  const resolveUserDisplayName = (val: any) => {
+    if (!val) return 'Unassigned';
+    if (typeof val === 'object') {
+      if (val.firstName || val.lastName) return `${val.firstName || ''} ${val.lastName || ''}`.trim();
+      if (val.name) return val.name;
+      if (val.email) return val.email.split('@')[0];
+    }
+    const str = String(val).trim();
+    if (!str || str === 'undefined' || str === 'null') return 'Unassigned';
+    if (Array.isArray(usersDropdown)) {
+      const found = usersDropdown.find((u: any) => 
+        u._id === str || u.id === str || u.email?.toLowerCase() === str.toLowerCase() || u.userCode === str
+      );
+      if (found) {
+        return `${found.firstName || ''} ${found.lastName || ''}`.trim() || found.name || found.email || str;
+      }
+    }
+    if (/^[0-9a-fA-F]{24}$/.test(str)) {
+      return 'Assigned Agent';
+    }
+    return str;
+  };
+
   useEffect(() => {
     if (metricsData) {
       if (metricsData.todayFollowupsCount > 0) {
@@ -863,8 +895,15 @@ export default function Dashboard() {
               const formattedAmount = amountVal != null && amountVal !== '' ? `${currencySymbol}${Number(amountVal).toLocaleString('en-IN')}` : 'N/A';
               const createdByName = rec.createdBy?.firstName 
                 ? `${rec.createdBy.firstName} ${rec.createdBy.lastName || ''}`.trim()
-                : (rec.createdBy?.name || rec.createdBy?.email?.split('@')[0] || (typeof rec.createdBy === 'string' && rec.createdBy.length < 25 && !rec.createdBy.match(/^[0-9a-fA-F]{24}$/) ? rec.createdBy : '') || rec.data?.source || rec.data?.createdBy || 'System');
-              const psmName = rec.data?.psm || rec.data?.assignedTo || 'Unassigned';
+                : (rec.createdBy?.name || rec.createdBy?.email?.split('@')[0] || (typeof rec.createdBy === 'string' && rec.createdBy.length < 25 && !rec.createdBy.match(/^[0-9a-fA-F]{24}$/) ? rec.createdBy : '') || rec.data?.source || rec.data?.createdBy || 'Ink CRM');
+
+              const assignedToName = rec.data?.assignedToName || resolveUserDisplayName(rec.data?.assignedTo || rec.data?.assignTo || rec.assignedTo);
+              const assignedByName = rec.data?.assignedByName 
+                ? resolveUserDisplayName(rec.data.assignedByName) 
+                : (rec.data?.assignedBy 
+                    ? resolveUserDisplayName(rec.data.assignedBy) 
+                    : (createdByName && createdByName !== 'System' && createdByName !== 'N/A' ? createdByName : 'System Router'));
+              const psmName = rec.data?.psmName || resolveUserDisplayName(rec.data?.psm || rec.data?.assignedTo || 'Unassigned');
               const statusThemeColor = getCardThemeColor(rec.data?.status || 'HOT');
 
               return (
@@ -936,7 +975,7 @@ export default function Dashboard() {
 
                     <div className="text-[13px] leading-snug">
                       <span className="font-semibold text-[#1C1917] dark:text-stone-100">Assigned By: </span>
-                      <span className="text-[#44403C] dark:text-stone-300">{rec.data?.assignedBy || 'System Router'}</span>
+                      <span className="text-[#44403C] dark:text-stone-300 font-medium">{assignedByName}</span>
                     </div>
 
                     {/* --- Row 4 --- */}
@@ -956,8 +995,8 @@ export default function Dashboard() {
                     </div>
 
                     <div className="text-[13px] leading-snug">
-                      <span className="font-semibold text-[#1C1917] dark:text-stone-100">Remarks: </span>
-                      <span className="text-slate-500 dark:text-slate-400 italic text-xs">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : '001remarks'}</span>
+                      <span className="font-semibold text-[#1C1917] dark:text-stone-100">Assigned To: </span>
+                      <span className="text-indigo-600 dark:text-indigo-400 font-bold">{assignedToName}</span>
                     </div>
 
                     {/* --- Row 5 --- */}
@@ -977,8 +1016,8 @@ export default function Dashboard() {
                     </div>
 
                     <div className="text-[13px] leading-snug">
-                      <span className="font-semibold text-[#1C1917] dark:text-stone-100">Data Code: </span>
-                      <span className="text-[#44403C] dark:text-stone-300">{rec.data?.dataCode || '001data code -1'}</span>
+                      <span className="font-semibold text-[#1C1917] dark:text-stone-100">Remarks: </span>
+                      <span className="text-slate-500 dark:text-slate-400 italic text-xs">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : (rec.data?.dataCode || '001remarks')}</span>
                     </div>
                   </div>
 

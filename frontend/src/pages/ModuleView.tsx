@@ -763,6 +763,38 @@ export default function ModuleView() {
     refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
+  const { data: usersDropdown } = useQuery({
+    queryKey: ['moduleview-users-dropdown'],
+    queryFn: async () => {
+      const res = await api.get('/auth/users?purpose=dropdown');
+      return res.data || [];
+    },
+    staleTime: 60000
+  });
+
+  const resolveUserDisplayName = (val: any) => {
+    if (!val) return 'Unassigned';
+    if (typeof val === 'object') {
+      if (val.firstName || val.lastName) return `${val.firstName || ''} ${val.lastName || ''}`.trim();
+      if (val.name) return val.name;
+      if (val.email) return val.email.split('@')[0];
+    }
+    const str = String(val).trim();
+    if (!str || str === 'undefined' || str === 'null') return 'Unassigned';
+    if (Array.isArray(usersDropdown)) {
+      const found = usersDropdown.find((u: any) => 
+        u._id === str || u.id === str || u.email?.toLowerCase() === str.toLowerCase() || u.userCode === str
+      );
+      if (found) {
+        return `${found.firstName || ''} ${found.lastName || ''}`.trim() || found.name || found.email || str;
+      }
+    }
+    if (/^[0-9a-fA-F]{24}$/.test(str)) {
+      return 'Assigned Agent';
+    }
+    return str;
+  };
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.delete(`/records/${apiPath}/${id}`),
     onSuccess: () => {
@@ -1294,8 +1326,15 @@ export default function ModuleView() {
                   const formattedAmount = amountVal != null && amountVal !== '' ? `${currencySymbol}${Number(amountVal).toLocaleString('en-IN')}` : 'N/A';
                   const createdByName = rec.createdBy?.firstName 
                     ? `${rec.createdBy.firstName} ${rec.createdBy.lastName || ''}`.trim()
-                    : (rec.createdBy?.name || rec.createdBy?.email?.split('@')[0] || (typeof rec.createdBy === 'string' && rec.createdBy.length < 25 && !rec.createdBy.match(/^[0-9a-fA-F]{24}$/) ? rec.createdBy : '') || rec.data?.source || rec.data?.createdBy || 'System');
-                  const psmName = rec.data?.psm || rec.data?.assignedTo || 'Unassigned';
+                    : (rec.createdBy?.name || rec.createdBy?.email?.split('@')[0] || (typeof rec.createdBy === 'string' && rec.createdBy.length < 25 && !rec.createdBy.match(/^[0-9a-fA-F]{24}$/) ? rec.createdBy : '') || rec.data?.source || rec.data?.createdBy || 'Ink CRM');
+
+                  const assignedToName = rec.data?.assignedToName || resolveUserDisplayName(rec.data?.assignedTo || rec.data?.assignTo || rec.assignedTo);
+                  const assignedByName = rec.data?.assignedByName 
+                    ? resolveUserDisplayName(rec.data.assignedByName) 
+                    : (rec.data?.assignedBy 
+                        ? resolveUserDisplayName(rec.data.assignedBy) 
+                        : (createdByName && createdByName !== 'System' && createdByName !== 'N/A' ? createdByName : 'System Router'));
+                  const psmName = rec.data?.psmName || resolveUserDisplayName(rec.data?.psm || rec.data?.assignedTo || 'Unassigned');
 
                   return (
                     <div key={rec._id} className="border border-slate-200 dark:border-slate-700/80 rounded-2xl p-5 bg-white dark:bg-slate-800 relative mb-6 last:mb-0 text-left shadow-sm">
@@ -1307,7 +1346,7 @@ export default function ModuleView() {
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Sl No.:</span> <span className="text-slate-600 dark:text-slate-400">{idx + 1}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead No.:</span> <span className="text-slate-600 dark:text-slate-400">LND-{leadNo}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Product:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.loanType || 'N/A'}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Status:</span> <span className="text-slate-600 dark:text-slate-400 uppercase">{rec.data?.status || 'New'}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Status:</span> <span className="text-slate-600 dark:text-slate-400 uppercase font-semibold">{rec.data?.status || 'New'}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Bank Partner:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.businessPartner || 'N/A'}</span></div>
                         </div>
 
@@ -1315,8 +1354,8 @@ export default function ModuleView() {
                         <div className="space-y-4">
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Lead Name:</span> <span className="text-slate-600 dark:text-slate-400 font-semibold">{leadName}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Location:</span> <span className="text-slate-600 dark:text-slate-400">{leadLocation}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Mobile No.:</span> <span className="text-slate-600 dark:text-slate-400 font-mono font-bold tracking-widest">xxxxxxxxxx</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Amount:</span> <span className="text-slate-600 dark:text-slate-400 font-semibold">{formattedAmount}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Mobile No.:</span> <span className="text-slate-600 dark:text-slate-400 font-mono font-bold tracking-widest">{rec.data?.phone || 'N/A'}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Amount:</span> <span className="text-emerald-700 dark:text-emerald-400 font-bold">{formattedAmount}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Case Details:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.caseDetails || 'N/A'}</span></div>
                         </div>
 
@@ -1324,19 +1363,20 @@ export default function ModuleView() {
                         <div className="space-y-4">
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Created On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.createdAt)}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Created By:</span> <span className="text-slate-600 dark:text-slate-400 font-medium">{createdByName}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Pending at:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignToTeam || 'Sales Review'}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Followup Date:</span> <span className="text-indigo-600 dark:text-indigo-400 font-bold">{rec.data?.followUpDate ? formatDate(rec.data.followUpDate) : 'N/A'}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Pending at:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.assignToTeam || rec.data?.pendingAt || 'SALES MANAGER'}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">PSM:</span> <span className="text-slate-600 dark:text-slate-400">{psmName}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Data Code:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.dataCode || 'N/A'}</span></div>
                         </div>
 
                         {/* Column 4 */}
                         <div className="space-y-4">
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Firm/Company:</span> <span className="text-slate-600 dark:text-slate-400">{rec.data?.company || 'N/A'}</span></div>
                           <div><span className="font-bold text-slate-700 dark:text-slate-350">Modified On:</span> <span className="text-slate-600 dark:text-slate-400">{formatDate(rec.updatedAt)}</span></div>
-                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Assigned By:</span> <span className="text-slate-600 dark:text-slate-400">System Router</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Assigned By:</span> <span className="text-slate-600 dark:text-slate-400 font-medium">{assignedByName}</span></div>
+                          <div><span className="font-bold text-slate-700 dark:text-slate-350">Assigned To:</span> <span className="text-indigo-600 dark:text-indigo-400 font-bold">{assignedToName}</span></div>
                           <div>
                             <span className="font-bold text-slate-700 dark:text-slate-350">Remarks:</span> 
-                            <span className="text-slate-500 italic ml-1 text-xs">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : 'Transferred to agent'}</span>
+                            <span className="text-slate-500 italic ml-1 text-xs">{rec.data?.notes ? rec.data.notes.replace(/<[^>]*>/g, '') : (rec.data?.dataCode || 'N/A')}</span>
                           </div>
                         </div>
                       </div>

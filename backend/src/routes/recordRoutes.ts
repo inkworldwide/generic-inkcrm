@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import ModuleDefinition from '../models/ModuleDefinition';
 import CustomRecord from '../models/CustomRecord';
 import Role from '../models/Role';
+import User from '../models/User';
 import Activity from '../models/Activity';
 import AuditLog from '../models/AuditLog';
 import { FormulaEvaluator } from '../services/formulaEvaluator';
@@ -571,6 +572,42 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
       .skip(skipNum)
       .limit(limitNum);
 
+    // Resolve any User ObjectIds/hashes in data.assignedTo, data.assignedBy, data.psm to real names
+    const userIdsToFetch = new Set<string>();
+    records.forEach(r => {
+      if (r.data?.assignedTo && /^[0-9a-fA-F]{24}$/.test(String(r.data.assignedTo))) {
+        userIdsToFetch.add(String(r.data.assignedTo));
+      }
+      if (r.data?.assignedBy && /^[0-9a-fA-F]{24}$/.test(String(r.data.assignedBy))) {
+        userIdsToFetch.add(String(r.data.assignedBy));
+      }
+      if (r.data?.psm && /^[0-9a-fA-F]{24}$/.test(String(r.data.psm))) {
+        userIdsToFetch.add(String(r.data.psm));
+      }
+    });
+
+    if (userIdsToFetch.size > 0) {
+      const userDocs = await User.find({ _id: { $in: Array.from(userIdsToFetch) } }).select('firstName lastName name email');
+      const userMap = new Map(userDocs.map(u => [u._id.toString(), `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.name || u.email]));
+
+      records.forEach((r: any) => {
+        if (r.data) {
+          if (r.data.assignedTo && userMap.has(String(r.data.assignedTo))) {
+            r.data.assignedToName = userMap.get(String(r.data.assignedTo));
+            r.data.assignedTo = userMap.get(String(r.data.assignedTo));
+          }
+          if (r.data.assignedBy && userMap.has(String(r.data.assignedBy))) {
+            r.data.assignedByName = userMap.get(String(r.data.assignedBy));
+            r.data.assignedBy = userMap.get(String(r.data.assignedBy));
+          }
+          if (r.data.psm && userMap.has(String(r.data.psm))) {
+            r.data.psmName = userMap.get(String(r.data.psm));
+            r.data.psm = userMap.get(String(r.data.psm));
+          }
+        }
+      });
+    }
+
     const total = await CustomRecord.countDocuments(query);
 
     res.status(200).json({
@@ -740,6 +777,27 @@ router.get('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
     if (!record) {
       res.status(404).json({ error: 'Record not found.' });
       return;
+    }
+
+    if (record.data) {
+      const ids = [record.data.assignedTo, record.data.assignedBy, record.data.psm]
+        .filter(id => id && /^[0-9a-fA-F]{24}$/.test(String(id)));
+      if (ids.length > 0) {
+        const users = await User.find({ _id: { $in: ids } }).select('firstName lastName name email');
+        const userMap = new Map(users.map(u => [u._id.toString(), `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.name || u.email]));
+        if (record.data.assignedTo && userMap.has(String(record.data.assignedTo))) {
+          record.data.assignedToName = userMap.get(String(record.data.assignedTo));
+          record.data.assignedTo = userMap.get(String(record.data.assignedTo));
+        }
+        if (record.data.assignedBy && userMap.has(String(record.data.assignedBy))) {
+          record.data.assignedByName = userMap.get(String(record.data.assignedBy));
+          record.data.assignedBy = userMap.get(String(record.data.assignedBy));
+        }
+        if (record.data.psm && userMap.has(String(record.data.psm))) {
+          record.data.psmName = userMap.get(String(record.data.psm));
+          record.data.psm = userMap.get(String(record.data.psm));
+        }
+      }
     }
 
     res.status(200).json(record);
