@@ -7,7 +7,7 @@ import { useToastStore } from '../store/toastStore';
 
 export default function ReportsList() {
   const { modules } = useModuleStore();
-  const { showToast } = useToastStore();
+  const { showToast, showAlertModal } = useToastStore();
 
   const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -84,7 +84,11 @@ export default function ReportsList() {
       setShowDesigner(false);
       resetDesigner();
       loadReports(); // refresh populate module values
-      showToast('Report configuration saved successfully.', 'success');
+      showAlertModal({
+        title: 'Saved Successfully',
+        message: 'Report configuration has been saved successfully.',
+        type: 'success'
+      });
     } catch (err) {
       showToast('Failed to save report configuration.', 'error');
     }

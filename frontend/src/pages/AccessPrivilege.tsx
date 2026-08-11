@@ -158,7 +158,7 @@ interface Role {
 
 export default function AccessPrivilege() {
   const { modules } = useModuleStore();
-  const { showToast } = useToastStore();
+  const { showToast, showAlertModal } = useToastStore();
   const { fetchProfile, setRole, role, user } = useAuthStore();
 
   const [roles, setRoles] = useState<Role[]>([]);
@@ -355,7 +355,11 @@ export default function AccessPrivilege() {
         }
       });
 
-      showToast('Access privileges and role permissions saved successfully.', 'success');
+      showAlertModal({
+        title: 'Saved Successfully',
+        message: 'Access privileges and role permissions have been saved successfully.',
+        type: 'success'
+      });
 
       // Update local state list
       const updatedRoles = roles.map(r => {

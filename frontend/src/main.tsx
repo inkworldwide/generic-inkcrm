@@ -38,6 +38,16 @@ window.alert = (message: any) => {
   useToastStore.getState().showToast(msgStr, type);
 };
 
+// Override native window.confirm to prevent Chrome default popups
+window.confirm = (message?: string): boolean => {
+  useToastStore.getState().showConfirm({
+    title: 'Confirmation',
+    message: message || 'Are you sure you want to proceed?',
+    onConfirm: () => {}
+  });
+  return true;
+};
+
 // Create React Query Client
 const queryClient = new QueryClient({
   defaultOptions: {

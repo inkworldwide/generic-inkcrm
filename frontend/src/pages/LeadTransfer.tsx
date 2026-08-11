@@ -22,6 +22,7 @@ interface Lead {
 
 export default function LeadTransfer() {
   const { branding } = useThemeStore();
+  const { showToast, showAlertModal, showConfirm } = useToastStore();
   const [users, setUsers] = useState<User[]>([]);
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,8 +57,6 @@ export default function LeadTransfer() {
     }).length;
   };
 
-  const { showConfirm, showToast } = useToastStore();
-
   const handleTransfer = async (fromUser: User) => {
     const toUserId = selectedDestinations[fromUser._id];
     if (!toUserId) {
@@ -88,7 +87,11 @@ export default function LeadTransfer() {
             toAgentId: toUser._id,
             toAgentName: toName,
           });
-          showToast(`Successfully transferred ${count} lead(s) to ${toName}!`, 'success');
+          showAlertModal({
+            title: 'Transferred Successfully',
+            message: `Successfully transferred ${count} lead(s) to ${toName}.`,
+            type: 'success'
+          });
           setCheckedMoves(prev => ({ ...prev, [fromUser._id]: false }));
           setSelectedDestinations((prev) => {
             const copy = { ...prev };
@@ -117,6 +120,7 @@ export default function LeadTransfer() {
     showConfirm({
       title: 'Unassign Leads',
       message: `Are you sure you want to unassign all ${count} lead(s) from ${fromName}?`,
+      type: 'warning',
       onConfirm: async () => {
         try {
           setTransferring(fromUser._id);
@@ -126,7 +130,11 @@ export default function LeadTransfer() {
             toAgentId: 'unassigned',
             toAgentName: 'Unassigned',
           });
-          showToast(`Successfully unassigned leads from ${fromName}.`, 'success');
+          showAlertModal({
+            title: 'Unassigned Successfully',
+            message: `Successfully unassigned ${count} lead(s) from ${fromName}.`,
+            type: 'success'
+          });
           await fetchData();
         } catch (err) {
           console.error('Clear failed:', err);

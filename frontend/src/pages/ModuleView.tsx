@@ -1290,8 +1290,7 @@ export default function ModuleView() {
                   const leadName = `${rec.data?.firstName || ''} ${rec.data?.lastName || ''}`.trim() || rec.data?.fullName || rec.data?.customerName || rec.data?.name || rec.data?.leadName || 'N/A';
                   const leadLocation = rec.data?.location || [rec.data?.city, rec.data?.state].filter(Boolean).join(', ') || rec.data?.city || rec.data?.presentAddress || rec.data?.address || 'N/A';
                   const amountVal = rec.data?.budget ?? rec.data?.loanAmount ?? rec.data?.amount;
-                  const defaultSymbol = branding?.currency === 'USD' ? '$' : branding?.currency === 'EUR' ? '€' : branding?.currency === 'GBP' ? '£' : branding?.currency === 'AED' ? 'AED ' : '₹';
-                  const currencySymbol = (rec.data?.currency === 'USD' || rec.data?.currency === '$') ? '$' : (rec.data?.currency ? rec.data.currency : defaultSymbol);
+                  const currencySymbol = '₹';
                   const formattedAmount = amountVal != null && amountVal !== '' ? `${currencySymbol}${Number(amountVal).toLocaleString('en-IN')}` : 'N/A';
                   const createdByName = rec.createdBy?.firstName 
                     ? `${rec.createdBy.firstName} ${rec.createdBy.lastName || ''}`.trim()
@@ -1453,7 +1452,7 @@ export default function ModuleView() {
                             {activeModule.fields.slice(1, 5).map((field) => (
                               <td key={field.name} className="px-6 py-4 truncate max-w-[150px]">
                                 {field.type === 'currency' 
-                                  ? `${branding?.currency === 'USD' ? '$' : branding?.currency === 'EUR' ? '€' : branding?.currency === 'GBP' ? '£' : branding?.currency === 'AED' ? 'AED ' : '₹'}${Number(rec.data[field.name] || 0).toLocaleString('en-IN')}` 
+                                  ? `₹${Number(rec.data[field.name] || 0).toLocaleString('en-IN')}` 
                                   : field.type === 'date'
                                     ? formatDate(rec.data[field.name])
                                     : String(rec.data[field.name] || '-')}

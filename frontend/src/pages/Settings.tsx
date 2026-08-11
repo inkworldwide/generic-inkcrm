@@ -412,7 +412,7 @@ export default function Settings() {
       const uploadedPath = `${FILE_BASE_URL}${res.data.filePath}`;
       setLogoUrl(uploadedPath);
     } catch (err) {
-      alert('Failed to upload logo.');
+      showToast('Failed to upload logo.', 'error');
     } finally {
       setUploading(false);
     }
@@ -474,7 +474,11 @@ export default function Settings() {
       });
 
       await fetchBranding();
-      showToast('Company settings saved successfully.', 'success');
+      showAlertModal({
+        title: 'Saved Successfully',
+        message: 'Company settings and branding configuration have been saved successfully.',
+        type: 'success'
+      });
     } catch (err) {
       showToast('Failed to save company settings.', 'error');
     } finally {

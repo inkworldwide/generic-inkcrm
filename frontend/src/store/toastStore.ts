@@ -9,6 +9,9 @@ export interface Toast {
 export interface ConfirmOptions {
   title: string;
   message: string;
+  confirmText?: string;
+  cancelText?: string;
+  type?: 'danger' | 'warning' | 'primary' | 'success';
   onConfirm: () => void;
   onCancel?: () => void;
 }
@@ -16,6 +19,7 @@ export interface ConfirmOptions {
 export interface AlertOptions {
   title: string;
   message: string;
+  buttonText?: string;
   type?: 'success' | 'info' | 'error' | 'warning';
   onClose?: () => void;
 }
