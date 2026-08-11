@@ -103,6 +103,15 @@ export default function Layout({ children }: LayoutProps) {
     refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
+  const { data: metricsData } = useQuery({
+    queryKey: ['dashboard-metrics-sidebar'],
+    queryFn: async () => {
+      const res = await api.get('/dashboard/metrics');
+      return res.data;
+    },
+    refetchInterval: (query) => (query.state.error ? false : 5000)
+  });
+
   const queryClient = useQueryClient();
 
   const { data: notificationsData, refetch: refetchNotifications } = useQuery({
@@ -375,26 +384,46 @@ export default function Layout({ children }: LayoutProps) {
                           const activeStatuses = (Array.isArray(dbStatuses) && dbStatuses.length > 0)
                             ? dbStatuses
                             : [
-                                { name: 'New', icon: 'Sparkles', color: '#4F46E5' },
-                                { name: 'Hot', icon: 'Flame', color: '#EF4444' },
-                                { name: 'Warm', icon: 'Sun', color: '#F59E0B' },
-                                { name: 'Cedil Pending', icon: 'FileWarning', color: '#EC4899' },
-                                { name: 'Document Pending', icon: 'FileText', color: '#14B8A6' },
-                                { name: 'Approval Pending', icon: 'Clock', color: '#F97316' },
-                                { name: 'Approved', icon: 'CheckCircle', color: '#10B981' },
-                                { name: 'Disbursed', icon: 'Banknote', color: '#84CC16' },
-                                { name: 'Rejected', icon: 'XOctagon', color: '#F43F5E' },
-                                { name: 'Followup', icon: 'PhoneCall', color: '#0EA5E9' },
-                                { name: 'Dropped', icon: 'ArrowDownCircle', color: '#EF4444' },
-                                { name: 'Pending', icon: 'Hourglass', color: '#EAB308' },
+                                { name: 'HOT LEADS', icon: 'Flame', color: '#0284C7' },
+                                { name: 'WARM LEADS', icon: 'Sun', color: '#F59E0B' },
+                                { name: 'CEBIL PENDING', icon: 'FileWarning', color: '#E11D48' },
+                                { name: 'DOCUMENT PENDING', icon: 'FileText', color: '#0284C7' },
+                                { name: 'APPROVAL PENDING', icon: 'Clock', color: '#EA580C' },
+                                { name: 'APPROVED BUT NOT DISBUSE', icon: 'CheckCircle', color: '#F59E0B' },
+                                { name: 'DISBUSED', icon: 'Banknote', color: '#16A34A' },
+                                { name: 'REJECTED', icon: 'XOctagon', color: '#E11D48' },
+                                { name: 'FOLLOWUP', icon: 'PhoneCall', color: '#0284C7' },
+                                { name: 'DROPPED', icon: 'ArrowDownCircle', color: '#EA580C' },
+                                { name: 'PENDING', icon: 'Hourglass', color: '#F59E0B' },
                               ];
 
-                          const records = leadsData?.records || [];
+                          const getStatusCountFromMetrics = (name: string) => {
+                            if (!metricsData?.statusCounts) {
+                              const records = leadsData?.records || [];
+                              return records.filter((r: any) => {
+                                const s1 = (r.data?.status || '').toString().trim().toUpperCase();
+                                const s2 = name.trim().toUpperCase();
+                                return s1 === s2 || s1 === s2.replace(/ LEADS$/, '') || s2 === s1.replace(/ LEADS$/, '');
+                              }).length;
+                            }
+                            const raw = (name || '').trim();
+                            const upper = raw.toUpperCase();
+                            if (metricsData.statusCounts[raw] !== undefined) return metricsData.statusCounts[raw];
+                            if (metricsData.statusCounts[upper] !== undefined) return metricsData.statusCounts[upper];
+                            const noLeadsKey = upper.replace(/ LEADS$/, '');
+                            if (metricsData.statusCounts[noLeadsKey] !== undefined) return metricsData.statusCounts[noLeadsKey];
+                            for (const [k, v] of Object.entries(metricsData.statusCounts)) {
+                              const kUpper = k.trim().toUpperCase();
+                              if (kUpper === upper || kUpper === noLeadsKey || kUpper.replace(/ LEADS$/, '') === noLeadsKey) {
+                                return Number(v);
+                              }
+                            }
+                            return 0;
+                          };
+
                           return activeStatuses.map((st: any) => {
                             const statusName = st.name || '';
-                            const count = records.filter((r: any) =>
-                              (r.data?.status || '').toString().trim().toLowerCase() === statusName.trim().toLowerCase()
-                            ).length;
+                            const count = getStatusCountFromMetrics(statusName);
                             return (
                               <SidebarItem
                                 key={st._id || statusName}
