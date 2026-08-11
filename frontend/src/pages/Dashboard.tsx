@@ -247,35 +247,40 @@ export default function Dashboard() {
       val: metricsData?.pipelineData?.['Prospecting'] || getStatusCount('NEW') * 50000 || 50000, 
       count: getStatusCount('NEW') || 10,
       icon: Icons.UserPlus,
-      color: '#4F46E5'
+      color: '#4F46E5',
+      bgTint: 'rgba(79, 70, 229, 0.1)'
     },
     { 
       name: 'Qualification & Hot Leads', 
       val: metricsData?.pipelineData?.['Qualification'] || 90000, 
       count: getStatusCount('HOT') + getStatusCount('WARM') || 14,
       icon: Icons.Flame,
-      color: '#10B981'
+      color: '#059669',
+      bgTint: 'rgba(5, 150, 105, 0.1)'
     },
     { 
       name: 'Proposal & Documentation', 
       val: metricsData?.pipelineData?.['Proposal'] || 150000, 
       count: getStatusCount('DOCUMENT PENDING') + getStatusCount('CEDIL PENDING') || 8,
       icon: Icons.FileText,
-      color: '#F59E0B'
+      color: '#D97706',
+      bgTint: 'rgba(217, 119, 6, 0.1)'
     },
     { 
       name: 'Negotiation & Approval', 
       val: metricsData?.pipelineData?.['Negotiation'] || 300000, 
       count: getStatusCount('APPROVAL PENDING') || 6,
       icon: Icons.TrendingUp,
-      color: '#F97316'
+      color: '#EA580C',
+      bgTint: 'rgba(234, 88, 12, 0.1)'
     },
     { 
       name: 'Disbursed / Closed Won', 
       val: metricsData?.pipelineData?.['Closed Won'] || 120000, 
       count: getStatusCount('APPROVED') + getStatusCount('DISBURSED') || 12,
       icon: Icons.CheckCircle2,
-      color: '#8B5CF6'
+      color: '#7C3AED',
+      bgTint: 'rgba(124, 58, 237, 0.1)'
     }
   ];
 
@@ -296,12 +301,12 @@ export default function Dashboard() {
   const totalClosed = wonCount + lostCount;
   const winRate = totalClosed > 0 ? Math.round((wonCount / totalClosed) * 100) : 80;
 
-  const stageMeta: Record<string, { icon: React.ComponentType<any>; color: string }> = {
-    'Lead Ingestion / New': { icon: Icons.UserPlus, color: '#4F46E5' },
-    'Qualification & Hot Leads': { icon: Icons.Flame, color: '#10B981' },
-    'Proposal & Documentation': { icon: Icons.FileText, color: '#F59E0B' },
-    'Negotiation & Approval': { icon: Icons.TrendingUp, color: '#F97316' },
-    'Disbursed / Closed Won': { icon: Icons.CheckCircle2, color: '#8B5CF6' }
+  const stageMeta: Record<string, { icon: React.ComponentType<any>; color: string; bgTint: string }> = {
+    'Lead Ingestion / New': { icon: Icons.UserPlus, color: '#4F46E5', bgTint: 'rgba(79, 70, 229, 0.1)' },
+    'Qualification & Hot Leads': { icon: Icons.Flame, color: '#059669', bgTint: 'rgba(5, 150, 105, 0.1)' },
+    'Proposal & Documentation': { icon: Icons.FileText, color: '#D97706', bgTint: 'rgba(217, 119, 6, 0.1)' },
+    'Negotiation & Approval': { icon: Icons.TrendingUp, color: '#EA580C', bgTint: 'rgba(234, 88, 12, 0.1)' },
+    'Disbursed / Closed Won': { icon: Icons.CheckCircle2, color: '#7C3AED', bgTint: 'rgba(124, 58, 237, 0.1)' }
   };
 
   if (isLoading) {
@@ -1088,9 +1093,13 @@ export default function Dashboard() {
                     
                     <div className="flex items-center gap-3 pl-2">
                       <div 
-                        className="w-8 h-8 rounded-lg flex items-center justify-center bg-[#FAFAF9] border border-black/[0.08] text-[#111111] shadow-2xs"
+                        className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{
+                          backgroundColor: meta.bgTint || 'rgba(79, 70, 229, 0.1)',
+                          color: meta.color || '#4F46E5'
+                        }}
                       >
-                        <StageIcon className="w-3.5 h-3.5" />
+                        <StageIcon className="w-4 h-4 stroke-[2.2]" style={{ color: meta.color || 'currentColor' }} />
                       </div>
                       
                       <div className="text-left">
@@ -1116,8 +1125,11 @@ export default function Dashboard() {
             {/* Pipeline Summary Horizontal KPI Bar */}
             <div className="w-full grid grid-cols-2 sm:grid-cols-4 bg-white border border-black/[0.06] rounded-xl p-3.5 items-center gap-4 shadow-2xs">
               <div className="flex items-center gap-2.5 pl-1">
-                <div className="w-8 h-8 rounded-lg bg-[#FAFAF9] border border-black/[0.08] flex items-center justify-center text-[#111111] flex-shrink-0">
-                  <Icons.Briefcase className="w-3.5 h-3.5" />
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'rgba(79, 70, 229, 0.1)', color: '#4F46E5' }}
+                >
+                  <Icons.Briefcase className="w-4 h-4 stroke-[2.2]" style={{ color: '#4F46E5' }} />
                 </div>
                 <div className="text-left min-w-0">
                   <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Total Pipeline</p>
@@ -1126,8 +1138,11 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-2.5 pl-1 sm:border-l border-black/[0.06]">
-                <div className="w-8 h-8 rounded-lg bg-[#FAFAF9] border border-black/[0.08] flex items-center justify-center text-[#111111] flex-shrink-0">
-                  <Icons.Percent className="w-3.5 h-3.5" />
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'rgba(5, 150, 105, 0.1)', color: '#059669' }}
+                >
+                  <Icons.Percent className="w-4 h-4 stroke-[2.2]" style={{ color: '#059669' }} />
                 </div>
                 <div className="text-left min-w-0">
                   <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Win Rate</p>
@@ -1136,8 +1151,11 @@ export default function Dashboard() {
               </div>
               
               <div className="flex items-center gap-2.5 pl-1 sm:border-l border-black/[0.06]">
-                <div className="w-8 h-8 rounded-lg bg-[#FAFAF9] border border-black/[0.08] flex items-center justify-center text-[#111111] flex-shrink-0">
-                  <Icons.Calendar className="w-3.5 h-3.5" />
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'rgba(37, 99, 235, 0.1)', color: '#2563EB' }}
+                >
+                  <Icons.Calendar className="w-4 h-4 stroke-[2.2]" style={{ color: '#2563EB' }} />
                 </div>
                 <div className="text-left min-w-0">
                   <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Avg. Cycle</p>
@@ -1146,8 +1164,11 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-2.5 pl-1 sm:border-l border-black/[0.06]">
-                <div className="w-8 h-8 rounded-lg bg-[#FAFAF9] border border-black/[0.08] flex items-center justify-center text-[#111111] flex-shrink-0">
-                  <Icons.IndianRupee className="w-3.5 h-3.5" />
+                <div 
+                  className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                  style={{ backgroundColor: 'rgba(217, 119, 6, 0.1)', color: '#D97706' }}
+                >
+                  <Icons.IndianRupee className="w-4 h-4 stroke-[2.2]" style={{ color: '#D97706' }} />
                 </div>
                 <div className="text-left min-w-0">
                   <p className="text-[9px] font-bold text-[#6B7280] uppercase tracking-wider truncate">Avg. Deal</p>
