@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import * as faceapi from 'face-api.js';
-import { ShieldCheck, XCircle, Loader2, RefreshCw, Eye, RotateCcw } from 'lucide-react';
+import { ShieldCheck, XCircle, Loader2, RefreshCw, Eye, RotateCcw, KeyRound } from 'lucide-react';
 import api from '../services/api';
+import { loadFaceApiModels } from '../utils/faceModelLoader';
 
 interface Props {
   tempToken: string;
@@ -34,7 +35,7 @@ export default function FaceVerificationModal({ tempToken, onSuccess, onCancel }
   const [errorMsg, setErrorMsg] = useState('');
   const [scanProgress, setScanProgress] = useState(0);
   const [livenessIndex, setLivenessIndex] = useState(0);
-  const [livenessTimer, setLivenessTimer] = useState(0);
+  const [fallbackLoading, setFallbackLoading] = useState(false);
 
   // ─── Model loading ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -63,18 +64,30 @@ export default function FaceVerificationModal({ tempToken, onSuccess, onCancel }
     setScanState('loading_models');
     setStatusMsg('Loading secure AI models...');
     try {
-      await Promise.all([
-        faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
-        faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-        faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-      ]);
+      await loadFaceApiModels((msg) => setStatusMsg(msg));
       // Set ref immediately so the detection loop can see it
       isModelLoadedRef.current = true;
       setStatusMsg('Camera starting...');
       await startCamera();
-    } catch {
+    } catch (err: any) {
+      console.error('[Face-AI] Model load error in verification:', err);
       setScanState('error');
-      setErrorMsg('Failed to load Face AI models. Please check your network and retry.');
+      setErrorMsg('Failed to load Face AI models. You can retry or login with password below.');
+    }
+  };
+
+  const handlePasswordFallback = async () => {
+    setFallbackLoading(true);
+    try {
+      const res = await api.post('/auth/face/password-fallback', { tempToken });
+      if (res.data.token) {
+        cleanup();
+        onSuccess(res.data.user, res.data.token, res.data.refreshToken);
+      }
+    } catch (err: any) {
+      setErrorMsg(err.response?.data?.error || 'Fallback login failed. Please return to login.');
+    } finally {
+      setFallbackLoading(false);
     }
   };
 
@@ -369,20 +382,30 @@ export default function FaceVerificationModal({ tempToken, onSuccess, onCancel }
         </div>
 
         {/* Actions */}
-        <div className="w-full space-y-3">
+        <div className="w-full space-y-2.5">
           {scanState === 'error' && (
             <button
               onClick={handleRetry}
-              className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-indigo-600/90 hover:bg-indigo-500 text-white rounded-2xl font-semibold text-xs tracking-wide transition-all"
+              className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-semibold text-xs tracking-wide transition-all shadow-md shadow-indigo-600/30 cursor-pointer"
             >
               <RefreshCw className="w-4 h-4" />
               Retry Face Scan
             </button>
           )}
 
+          {/* Password fallback bypass button */}
+          <button
+            onClick={handlePasswordFallback}
+            disabled={fallbackLoading}
+            className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl font-medium text-xs tracking-wide transition-all cursor-pointer"
+          >
+            {fallbackLoading ? <Loader2 className="w-4 h-4 animate-spin text-indigo-400" /> : <KeyRound className="w-4 h-4 text-indigo-400" />}
+            <span>Login with Password (Skip Face Scan)</span>
+          </button>
+
           <button
             onClick={onCancel}
-            className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-wider"
+            className="w-full py-2 text-xs font-semibold text-slate-500 hover:text-slate-300 transition-colors uppercase tracking-wider cursor-pointer"
           >
             ← Cancel and Return to Login
           </button>

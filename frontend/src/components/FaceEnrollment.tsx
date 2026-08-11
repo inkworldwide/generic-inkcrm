@@ -4,12 +4,14 @@ import * as faceapi from 'face-api.js';
 import { Camera, ShieldCheck, Trash2, Loader2, XCircle, CheckCircle } from 'lucide-react';
 import api from '../services/api';
 import { useToastStore } from '../store/toastStore';
+import { loadFaceApiModels } from '../utils/faceModelLoader';
 
 export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel }: { mode?: 'settings' | 'signup', onSuccess?: (embedding: number[]) => void, onCancel?: () => void }) {
   const { showConfirm, showAlertModal } = useToastStore();
   const videoRef = useRef<HTMLVideoElement>(null);
   
   const [isModelLoaded, setIsModelLoaded] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [status, setStatus] = useState<string>('');
   const [error, setError] = useState<string>('');
@@ -20,20 +22,23 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
   const descriptorsRef = useRef<Float32Array[]>([]);
   const detectionIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
+  const initModels = async () => {
+    setError('');
+    setIsModelLoading(true);
+    try {
+      await loadFaceApiModels((msg) => setStatus(msg));
+      setIsModelLoaded(true);
+      setStatus('');
+    } catch (e: any) {
+      console.error('[Face-AI] Model initialization error:', e);
+      setError('Failed to load Face AI models from local and CDN sources.');
+    } finally {
+      setIsModelLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadModels = async () => {
-      try {
-        await Promise.all([
-          faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
-          faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-          faceapi.nets.faceRecognitionNet.loadFromUri('/models')
-        ]);
-        setIsModelLoaded(true);
-      } catch (e) {
-        setError('Failed to load Face AI models.');
-      }
-    };
-    loadModels();
+    initModels();
 
     const checkEnrollmentStatus = async () => {
       try {
@@ -275,33 +280,56 @@ export default function FaceEnrollment({ mode = 'settings', onSuccess, onCancel 
         {/* State 3: Not Enrolled, Idle */}
         {!enrollmentComplete && !isCameraActive && (
           <div className="text-center flex flex-col items-center w-full">
-            <div className="w-24 h-24 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Camera className="w-10 h-10 text-indigo-500" />
+            <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
+              <Camera className="w-9 h-9 text-indigo-500" />
             </div>
             
             {error ? (
-              <p className="text-rose-500 font-medium text-sm mb-4 bg-rose-50 px-4 py-2 rounded-lg">{error}</p>
+              <div className="mb-4 space-y-2">
+                <p className="text-rose-600 font-medium text-xs bg-rose-50 px-4 py-2 rounded-xl border border-rose-100 max-w-sm">{error}</p>
+                <button
+                  onClick={initModels}
+                  disabled={isModelLoading}
+                  className="text-xs text-indigo-600 hover:text-indigo-700 font-bold underline cursor-pointer"
+                >
+                  {isModelLoading ? 'Retrying model load...' : '🔄 Retry Loading AI Models'}
+                </button>
+              </div>
             ) : status ? (
-              <p className="text-emerald-500 font-medium text-sm mb-4">{status}</p>
+              <p className="text-indigo-600 font-medium text-xs mb-4 animate-pulse">{status}</p>
             ) : null}
 
-            <button 
-              onClick={startCamera}
-              disabled={!isModelLoaded}
-              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all font-semibold flex items-center justify-center gap-2 mx-auto disabled:opacity-50 w-full max-w-xs"
-            >
-              {!isModelLoaded ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
-              {isModelLoaded ? 'Setup Face Login' : 'Loading AI Models...'}
-            </button>
+            <div className="w-full max-w-xs space-y-3">
+              <button 
+                onClick={startCamera}
+                disabled={!isModelLoaded || isModelLoading}
+                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-200 transition-all font-semibold flex items-center justify-center gap-2 mx-auto disabled:opacity-50 w-full cursor-pointer"
+              >
+                {isModelLoading || !isModelLoaded ? <Loader2 className="w-5 h-5 animate-spin" /> : <Camera className="w-5 h-5" />}
+                {isModelLoaded ? 'Start Camera & Scan Face' : isModelLoading ? 'Loading AI Models...' : 'AI Models Not Ready'}
+              </button>
 
+              {/* Onboarding / Signup mode: Allow skip if models or camera cannot load */}
+              {mode === 'signup' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onSuccess) onSuccess([]);
+                  }}
+                  className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-200 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <span>Skip Face Setup for Now</span>
+                  <span className="text-[10px] text-slate-400 font-normal">(Login with Password)</span>
+                </button>
+              )}
+            </div>
 
-
-            {onCancel && mode !== 'signup' && (
+            {onCancel && (
               <button 
                 onClick={onCancel}
-                className="mt-6 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
+                className="mt-4 text-xs text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-medium"
               >
-                Cancel
+                ← Back
               </button>
             )}
           </div>

@@ -10,6 +10,7 @@ import FaceVerificationModal from '../components/FaceVerificationModal';
 import FaceEnrollment from '../components/FaceEnrollment';
 import LocationVerificationStep from '../components/LocationVerificationStep';
 import api from '../services/api';
+import { useToastStore } from '../store/toastStore';
 
 // ─── User Code generator ─────────────────────────────────────────────────────
 const generateUserCode = () => {
@@ -236,23 +237,21 @@ export default function Login() {
     }
   };
 
-  const executeOnboarding = async (faceEmbedding: number[]) => {
-    if (!onboardCoords) {
-      setError('Location is missing. Please go back and allow location access.');
-      setLoginStep('onboarding-location');
-      return;
-    }
+  const executeOnboarding = async (faceEmbedding?: number[]) => {
+    const lat = onboardCoords?.latitude || 0;
+    const lng = onboardCoords?.longitude || 0;
     setError('');
     setLoading(true);
     try {
       const res = await api.post('/auth/onboarding', {
         tempToken,
-        latitude: onboardCoords.latitude,
-        longitude: onboardCoords.longitude,
-        faceEmbedding
+        latitude: lat,
+        longitude: lng,
+        faceEmbedding: (faceEmbedding && faceEmbedding.length === 128) ? faceEmbedding : null,
+        skipFace: !faceEmbedding || faceEmbedding.length === 0
       });
       if (res.data.token) {
-        alert('Successfully created your account.');
+        useToastStore.getState().showToast('Successfully logged in.', 'success');
         setAuth(res.data.user, res.data.token, res.data.refreshToken);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         if (res.data.user.subdomain) {
