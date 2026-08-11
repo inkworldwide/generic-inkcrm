@@ -198,21 +198,65 @@ export default function Dashboard() {
     return '#0284C7';
   };
 
-  // Exactly the 11 status categories + Today's Followups in the exact order requested by the user
+  // Construct dynamic metric cards from configured statuses in Settings, plus Today's Followups
   const getDynamicMetricCards = () => {
+    const todaysFollowupsCard = {
+      label: "TODAY'S FOLLOWUPS",
+      rawName: "TODAY'S FOLLOWUPS",
+      category: 'followups',
+      icon: Icons.Calendar,
+      sub: 'Due Today',
+      accentColor: '#0284C7'
+    };
+
+    if (configuredStatuses && configuredStatuses.length > 0) {
+      const visible = configuredStatuses
+        .filter((s: any) => s.dashboardVisibility !== false)
+        .sort((a: any, b: any) => (a.order || 0) - (b.order || 0));
+
+      if (visible.length > 0) {
+        const dynamicCards = visible.map((st: any) => {
+          const IconComp = (Icons as any)[st.icon] || Icons.Circle;
+          const upperName = (st.name || '').toUpperCase();
+
+          let category = 'overview';
+          if (st.pipelinePosition > 0) category = 'pipeline';
+          if (upperName.includes('FOLLOW') || upperName.includes('WARM') || upperName.includes('PENDING') || upperName.includes('REACHABLE')) {
+            category = 'followups';
+          }
+
+          const themeColor = st.color || getCardThemeColor(st.name);
+
+          return {
+            label: st.name.toUpperCase(),
+            rawName: st.name,
+            category,
+            accentColor: themeColor,
+            icon: IconComp,
+            sub: st.isFinal 
+              ? (st.isSuccess ? '✔ Closed Won' : '✕ Closed Final') 
+              : (st.pipelinePosition > 0 ? `Stage #${st.pipelinePosition}` : 'Configured Status')
+          };
+        });
+
+        return [...dynamicCards, todaysFollowupsCard];
+      }
+    }
+
+    // Default fallback list of 11 cards + Today's Followups
     return [
-      { label: 'HOT LEADS', rawName: 'Hot', category: 'pipeline', icon: Icons.Flame, sub: 'Stage #2', accentColor: '#0284C7' },
-      { label: 'WARM LEADS', rawName: 'Warm', category: 'pipeline', icon: Icons.Sun, sub: 'Stage #3', accentColor: '#F59E0B' },
-      { label: 'CEBIL PENDING', rawName: 'Cedil Pending', category: 'pipeline', icon: Icons.FileWarning, sub: 'Stage #5', accentColor: '#E11D48' },
-      { label: 'DOCUMENT PENDING', rawName: 'Document Pending', category: 'pipeline', icon: Icons.FileText, sub: 'Stage #6', accentColor: '#0284C7' },
-      { label: 'APPROVAL PENDING', rawName: 'Approval Pending', category: 'pipeline', icon: Icons.Clock, sub: 'Stage #7', accentColor: '#EA580C' },
-      { label: 'APPROVED BUT NOT DISBUSE', rawName: 'Approved', category: 'pipeline', icon: Icons.CheckCircle, sub: 'Stage #8', accentColor: '#F59E0B' },
-      { label: 'DISBUSED', rawName: 'Disbursed', category: 'pipeline', icon: Icons.Banknote, sub: '✔ Closed Won', accentColor: '#16A34A' },
-      { label: 'REJECTED', rawName: 'Rejected', category: 'overview', icon: Icons.XOctagon, sub: '✕ Closed Final', accentColor: '#E11D48' },
-      { label: 'FOLLOWUP', rawName: 'Followup', category: 'followups', icon: Icons.PhoneCall, sub: 'Stage #11', accentColor: '#0284C7' },
-      { label: 'DROPPED', rawName: 'Dropped', category: 'overview', icon: Icons.ArrowDownCircle, sub: '✕ Closed Final', accentColor: '#EA580C' },
-      { label: 'PENDING', rawName: 'Pending', category: 'followups', icon: Icons.Hourglass, sub: 'Stage #13', accentColor: '#F59E0B' },
-      { label: "TODAY'S FOLLOWUPS", rawName: "TODAY'S FOLLOWUPS", category: 'followups', icon: Icons.Calendar, sub: 'Due Today', accentColor: '#0284C7' },
+      { label: 'HOT LEADS', rawName: 'HOT LEADS', category: 'pipeline', icon: Icons.Flame, sub: 'Stage #2', accentColor: '#0284C7' },
+      { label: 'WARM LEADS', rawName: 'WARM LEADS', category: 'pipeline', icon: Icons.Sun, sub: 'Stage #3', accentColor: '#F59E0B' },
+      { label: 'CEBIL PENDING', rawName: 'CEBIL PENDING', category: 'pipeline', icon: Icons.FileWarning, sub: 'Stage #5', accentColor: '#E11D48' },
+      { label: 'DOCUMENT PENDING', rawName: 'DOCUMENT PENDING', category: 'pipeline', icon: Icons.FileText, sub: 'Stage #6', accentColor: '#0284C7' },
+      { label: 'APPROVAL PENDING', rawName: 'APPROVAL PENDING', category: 'pipeline', icon: Icons.Clock, sub: 'Stage #7', accentColor: '#EA580C' },
+      { label: 'APPROVED BUT NOT DISBUSE', rawName: 'APPROVED BUT NOT DISBUSE', category: 'pipeline', icon: Icons.CheckCircle, sub: 'Stage #8', accentColor: '#F59E0B' },
+      { label: 'DISBUSED', rawName: 'DISBUSED', category: 'pipeline', icon: Icons.Banknote, sub: '✔ Closed Won', accentColor: '#16A34A' },
+      { label: 'REJECTED', rawName: 'REJECTED', category: 'overview', icon: Icons.XOctagon, sub: '✕ Closed Final', accentColor: '#E11D48' },
+      { label: 'FOLLOWUP', rawName: 'FOLLOWUP', category: 'followups', icon: Icons.PhoneCall, sub: 'Stage #11', accentColor: '#0284C7' },
+      { label: 'DROPPED', rawName: 'DROPPED', category: 'overview', icon: Icons.ArrowDownCircle, sub: '✕ Closed Final', accentColor: '#EA580C' },
+      { label: 'PENDING', rawName: 'PENDING', category: 'followups', icon: Icons.Hourglass, sub: 'Stage #13', accentColor: '#F59E0B' },
+      todaysFollowupsCard
     ];
   };
 
