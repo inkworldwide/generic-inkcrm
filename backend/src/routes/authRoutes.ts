@@ -213,14 +213,19 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    // ── Check Super Admin Approval Status ────────────────────────────────────
-    if (user.approvalStatus === 'pending' || user.isApproved === false) {
-      res.status(403).json({ error: 'Your account is pending Super Admin approval. Please contact your administrator to activate your account.' });
-      return;
-    }
-    if (user.approvalStatus === 'rejected') {
-      res.status(403).json({ error: 'Your registration request was rejected. Please contact your administrator.' });
-      return;
+    // ── Check Super Admin Approval Status (Exempt Super Admins) ──────────────
+    const userRole = user.roleId ? await Role.findById(user.roleId) : null;
+    const isSuperAdmin = userRole?.name === 'Super Admin' || (userRole?.name || '').toLowerCase() === 'super admin';
+
+    if (!isSuperAdmin) {
+      if (user.approvalStatus === 'pending' || user.isApproved === false) {
+        res.status(403).json({ error: 'Your account is pending Super Admin approval. Please contact your administrator to activate your account.' });
+        return;
+      }
+      if (user.approvalStatus === 'rejected') {
+        res.status(403).json({ error: 'Your registration request was rejected. Please contact your administrator.' });
+        return;
+      }
     }
 
     // ── Check account active status ──────────────────────────────────────────
