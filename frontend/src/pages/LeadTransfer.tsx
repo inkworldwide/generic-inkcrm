@@ -152,29 +152,62 @@ export default function LeadTransfer() {
   });
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto text-left">
-      {/* Page Header */}
-      <div className="pb-2">
-        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">Lead Transfer</h1>
-        <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider mt-1.5">Transfer or unassign leads between agents</p>
+    <div className="space-y-6 max-w-7xl mx-auto text-left pb-16 font-['Plus_Jakarta_Sans',sans-serif] px-4 md:px-8 py-4">
+      {/* Page Header Banner */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500/80 via-blue-500/70 to-indigo-500/60" />
+        
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20 flex-shrink-0">
+            <Icons.ArrowLeftRight className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider font-mono px-2.5 py-0.5 rounded-full border bg-cyan-50 dark:bg-cyan-950/50 text-cyan-700 dark:text-cyan-300 border-cyan-200/80 dark:border-cyan-800/60">
+                Lead Distribution
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                Reallocation
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
+              Lead Transfer & Reassignment
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Reassign active customer leads between telecallers, sales reps, or unassign in bulk.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={fetchData}
+          disabled={loading}
+          className="flex items-center gap-1.5 px-4 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-3xs transition-all cursor-pointer flex-shrink-0"
+        >
+          <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
-      {/* Main Card — matches card-premium style */}
-      <div className="card-premium p-0 overflow-hidden shadow-sm">
+      {/* Main Card */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500/60 to-blue-500/60" />
+        
         {/* Card Header with Search */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-b border-slate-100 bg-white">
-          <h2 className="text-xs font-[800] text-slate-450 uppercase tracking-wider flex items-center gap-2">
-            <Icons.ArrowLeftRight className="w-4 h-4 text-indigo-655" />
-            Agent Lead Overview
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+          <h2 className="text-xs font-black text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <Icons.Users className="w-4 h-4 text-cyan-600 dark:text-cyan-400" />
+            Agent Lead Allocation Overview ({filteredUsers.length} Agents)
           </h2>
           <div className="relative">
-            <Icons.Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Icons.Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             <input
               type="text"
-              placeholder="Search agent..."
+              placeholder="Search agent by name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 pr-4 h-10 bg-white border border-[#E8ECF4] rounded-xl text-xs font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 w-56 transition-all"
+              className="pl-10 pr-4 h-9 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:border-cyan-500 w-64 transition-all"
             />
           </div>
         </div>
@@ -183,21 +216,21 @@ export default function LeadTransfer() {
         <div className="overflow-x-auto">
           {loading && leads.length === 0 ? (
             <div className="py-16 flex flex-col items-center justify-center text-slate-400">
-              <div className="w-8 h-8 border-[3px] border-indigo-500 border-t-transparent rounded-full animate-spin mb-3" />
-              <span className="text-sm font-medium">Loading agent data...</span>
+              <div className="w-8 h-8 border-[3px] border-cyan-500 border-t-transparent rounded-full animate-spin mb-3" />
+              <span className="text-sm font-medium">Loading agent allocation data...</span>
             </div>
           ) : (
             <table className="w-full text-xs text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
-                  <th className="py-2 px-6">Agent Name</th>
-                  <th className="py-2 px-6 text-center">Lead Count</th>
-                  <th className="py-2 px-6">Move To</th>
-                  <th className="py-2 px-6 text-center">Select</th>
-                  <th className="py-2 px-6 text-center">Actions</th>
+                <tr className="bg-slate-50/80 dark:bg-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 h-11">
+                  <th className="py-2.5 px-6">Agent Name</th>
+                  <th className="py-2.5 px-6 text-center">Lead Count</th>
+                  <th className="py-2.5 px-6">Move To</th>
+                  <th className="py-2.5 px-6 text-center">Select</th>
+                  <th className="py-2.5 px-6 text-center">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {filteredUsers.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-12 text-center text-slate-400 font-semibold italic">

@@ -163,56 +163,60 @@ export default function MonthlyFunnelPage() {
   };
 
   return (
-    <div className="p-6 max-w-[1600px] mx-auto space-y-6">
+    <div className="p-4 sm:p-6 max-w-[1600px] mx-auto space-y-6 text-left">
       {/* Header Banner */}
-      <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        
         <div className="flex items-center gap-4">
-          <div className="p-3.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex-shrink-0">
-            <Icons.Filter className="w-6 h-6" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
+            <Icons.CalendarDays className="w-6 h-6 stroke-[2.2]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                Reports & Analytics
+              <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                Monthly Funnel
               </span>
               <span className="text-xs font-semibold text-slate-400">
-                Monthly Campaign Funnel
+                Campaign Conversion Ring & Stage Volume
               </span>
             </div>
-            <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight mt-0.5">
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
               Monthly Funnel Report
             </h1>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
               Campaign lead status breakdown, conversion funnel ring chart, and monthly lead progression.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
           <button 
             onClick={fetchInitialData}
-            className="btn-secondary-premium flex items-center gap-2"
+            className="h-10 px-4 bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all flex items-center gap-2 cursor-pointer"
           >
             <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Refresh
           </button>
           <button 
             onClick={handleExportCSV}
-            className="btn-primary-premium flex items-center gap-2"
+            className="h-10 px-5 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center gap-2 cursor-pointer"
           >
-            <Icons.Download className="w-3.5 h-3.5" /> Export CSV
+            <Icons.Download className="w-3.5 h-3.5" /> Export Excel
           </button>
         </div>
       </div>
 
       {/* Filter Controls Bar */}
-      <div className="bg-white border border-slate-200/80 p-4 rounded-2xl shadow-sm grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 rounded-2xl shadow-xs grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Month Selector */}
         <div>
-          <label className="label-premium">Select Month</label>
+          <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <Icons.Calendar className="w-3.5 h-3.5 text-indigo-500" /> Select Month
+          </label>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="input-premium w-full"
+            className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             {MONTHS.map(m => (
               <option key={m} value={m}>{m}</option>
@@ -222,11 +226,13 @@ export default function MonthlyFunnelPage() {
 
         {/* Year Selector */}
         <div>
-          <label className="label-premium">Select Year</label>
+          <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <Icons.CalendarRange className="w-3.5 h-3.5 text-purple-500" /> Select Year
+          </label>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(e.target.value)}
-            className="input-premium w-full"
+            className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             {YEARS.map(y => (
               <option key={y} value={y}>{y}</option>
@@ -236,11 +242,13 @@ export default function MonthlyFunnelPage() {
 
         {/* Campaign Filter */}
         <div>
-          <label className="label-premium">Campaign Filter</label>
+          <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <Icons.Layers className="w-3.5 h-3.5 text-emerald-500" /> Campaign Filter
+          </label>
           <select
             value={selectedCampaign}
             onChange={(e) => setSelectedCampaign(e.target.value)}
-            className="input-premium w-full"
+            className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             <option value="ALL">All Campaigns</option>
             {campaignsList.map(c => (
@@ -251,11 +259,13 @@ export default function MonthlyFunnelPage() {
 
         {/* Agent Filter */}
         <div>
-          <label className="label-premium">Telecaller / Agent</label>
+          <label className="block text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+            <Icons.Users className="w-3.5 h-3.5 text-amber-500" /> Telecaller / Agent
+          </label>
           <select
             value={selectedAgent}
             onChange={(e) => setSelectedAgent(e.target.value)}
-            className="input-premium w-full"
+            className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 cursor-pointer"
           >
             <option value="ALL">All Telecallers</option>
             {agentsList.map(a => (
@@ -265,75 +275,89 @@ export default function MonthlyFunnelPage() {
         </div>
       </div>
 
-      {/* Analytics KPI Cards */}
+      {/* 4 Vibrant Analytics KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Leads ({selectedMonth})</p>
-            <h3 className="text-2xl font-black text-slate-900 mt-1">{totalLeadsCount}</h3>
-            <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded mt-1 inline-block">
+        <div className="bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 p-5 rounded-2xl shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Total Leads ({selectedMonth})</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-xs">
+              <Icons.Users className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">{totalLeadsCount}</span>
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md font-mono">
               Month Total
             </span>
           </div>
-          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-xl">
-            <Icons.Users className="w-6 h-6" />
-          </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Hot & Warm Leads</p>
-            <h3 className="text-2xl font-black text-amber-600 mt-1">{hotWarmCount}</h3>
-            <span className="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded mt-1 inline-block">
+        <div className="bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 p-5 rounded-2xl shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Hot & Warm Leads</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-xs">
+              <Icons.Flame className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-amber-600 dark:text-amber-400 font-mono">{hotWarmCount}</span>
+            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md font-mono">
               {totalLeadsCount > 0 ? Math.round((hotWarmCount / totalLeadsCount) * 100) : 0}% High Intent
             </span>
           </div>
-          <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
-            <Icons.Flame className="w-6 h-6" />
-          </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Not Connected / Invalid</p>
-            <h3 className="text-2xl font-black text-slate-700 mt-1">{notConnectedCount}</h3>
-            <span className="text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded mt-1 inline-block">
+        <div className="bg-white dark:bg-slate-900 border border-rose-100 dark:border-slate-800 p-5 rounded-2xl shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Not Connected / Invalid</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-rose-500 to-pink-600 flex items-center justify-center text-white shadow-xs">
+              <Icons.PhoneOff className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-rose-600 dark:text-rose-400 font-mono">{notConnectedCount}</span>
+            <span className="text-[11px] font-bold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/50 px-2 py-0.5 rounded-md font-mono">
               Needs Followup
             </span>
           </div>
-          <div className="p-3 bg-rose-50 text-rose-600 rounded-xl">
-            <Icons.PhoneOff className="w-6 h-6" />
-          </div>
         </div>
 
-        <div className="bg-white border border-slate-200/80 p-5 rounded-2xl shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Conversion Rate</p>
-            <h3 className="text-2xl font-black text-emerald-600 mt-1">{conversionRate}%</h3>
-            <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded mt-1 inline-block">
-              {convertedCount} Disbursed / Approved
-            </span>
+        <div className="bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 p-5 rounded-2xl shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Conversion Rate</span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-xs">
+              <Icons.TrendingUp className="w-4.5 h-4.5" />
+            </div>
           </div>
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
-            <Icons.TrendingUp className="w-6 h-6" />
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400 font-mono">{conversionRate}%</span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md font-mono">
+              {convertedCount} Converted
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Visual Charts Grid (Matches Prompt Handwritten Photo) */}
+      {/* Visual Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Donut Funnel Chart ("Funnel for Campaign") */}
-        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+        {/* Donut Funnel Chart */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+          
+          <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-tight">
+              <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
                 Funnel for Campaign
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
-                Distribution breakdown across lead statuses (Hot, Warm, Not Connected, Invalid, Not Required, etc.)
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+                Distribution breakdown across lead statuses
               </p>
             </div>
-            <span className="px-2.5 py-1 text-xs font-extrabold text-indigo-700 bg-indigo-50 border border-indigo-100 rounded-full">
+            <span className="px-3 py-1 text-xs font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 rounded-full font-mono">
               {selectedMonth} {selectedYear}
             </span>
           </div>
@@ -360,7 +384,7 @@ export default function MonthlyFunnelPage() {
                 </Pie>
                 <Tooltip 
                   formatter={(val: any, name: any) => [`${val} Leads`, name]}
-                  contentStyle={{ backgroundColor: '#1E293B', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none' }}
+                  contentStyle={{ backgroundColor: '#0F172A', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}
                 />
                 <Legend iconType="circle" wrapperStyle={{ fontSize: '11px', fontWeight: 'bold' }} />
               </PieChart>
@@ -368,18 +392,20 @@ export default function MonthlyFunnelPage() {
           </div>
         </div>
 
-        {/* Funnel Stage Bar Chart (Bar Graph Breakdown) */}
-        <div className="bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm">
-          <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+        {/* Funnel Stage Bar Chart */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500" />
+          
+          <div className="flex items-center justify-between mb-5 border-b border-slate-100 dark:border-slate-800 pb-3">
             <div>
-              <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-tight">
+              <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
                 Status Stage Volume Bar Chart
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
                 Lead count per stage for {selectedMonth} {selectedYear}
               </p>
             </div>
-            <span className="px-2.5 py-1 text-xs font-extrabold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-full">
+            <span className="px-3 py-1 text-xs font-black text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-800/60 rounded-full font-mono">
               {totalLeadsCount} Leads
             </span>
           </div>
@@ -387,10 +413,10 @@ export default function MonthlyFunnelPage() {
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={funnelBarData} margin={{ top: 10, right: 10, left: -20, bottom: 25 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" opacity={0.5} />
                 <XAxis 
                   dataKey="status" 
-                  tick={{ fontSize: 10, fontWeight: 700, fill: '#475569' }} 
+                  tick={{ fontSize: 10, fontWeight: 700, fill: '#64748B' }} 
                   interval={0}
                   angle={-25}
                   textAnchor="end"
@@ -398,7 +424,7 @@ export default function MonthlyFunnelPage() {
                 <YAxis tick={{ fontSize: 10, fontWeight: 700, fill: '#64748B' }} />
                 <Tooltip 
                   formatter={(val: any) => [`${val} Leads`, 'Volume']}
-                  contentStyle={{ backgroundColor: '#1E293B', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none' }}
+                  contentStyle={{ backgroundColor: '#0F172A', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }}
                 />
                 <Bar dataKey="count" radius={[6, 6, 0, 0]}>
                   {funnelBarData.map((entry) => (
@@ -412,26 +438,33 @@ export default function MonthlyFunnelPage() {
       </div>
 
       {/* Funnel Stage Breakdown Table */}
-      <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-        <h2 className="text-base font-extrabold text-slate-900 uppercase tracking-tight mb-4">
-          Funnel Stage Conversion Summary Table
-        </h2>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+        
+        <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+          <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
+            Funnel Stage Conversion Summary Table
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+            Stage-by-stage distribution and priority actions
+          </p>
+        </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left border-collapse">
+          <table className="w-full text-xs text-left border-collapse min-w-[750px]">
             <thead>
-              <tr className="table-header-premium">
-                <th className="py-3 px-4">Stage / Status</th>
-                <th className="py-3 px-4 text-center">Lead Count</th>
-                <th className="py-3 px-4 text-center">% of Total</th>
-                <th className="py-3 px-4 text-center">Stage Category</th>
-                <th className="py-3 px-4 text-center">Action Required</th>
+              <tr className="border-b border-slate-200 dark:border-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider h-11 bg-slate-50/90 dark:bg-slate-800/80">
+                <th className="py-3.5 px-6">Stage / Status</th>
+                <th className="py-3.5 px-6 text-center">Lead Count</th>
+                <th className="py-3.5 px-6 text-center">% of Total</th>
+                <th className="py-3.5 px-6 text-center">Stage Category</th>
+                <th className="py-3.5 px-6 text-center">Action Required</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-150">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {funnelBarData.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 font-semibold">
+                  <td colSpan={5} className="py-14 text-center text-slate-400 font-semibold">
                     No lead funnel records found for {selectedMonth} {selectedYear}.
                   </td>
                 </tr>
@@ -439,23 +472,25 @@ export default function MonthlyFunnelPage() {
                 funnelBarData.map((row) => {
                   const color = STATUS_COLORS[row.status] || '#6366F1';
                   return (
-                    <tr key={row.status} className="hover:bg-slate-50/60 transition-colors h-11">
-                      <td className="px-4 py-2 font-bold text-slate-900 flex items-center gap-2">
-                        <span className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                    <tr key={row.status} className="hover:bg-indigo-50/30 dark:hover:bg-slate-800/40 transition-colors h-14">
+                      <td className="px-6 py-3.5 font-bold text-slate-900 dark:text-white flex items-center gap-2.5">
+                        <span className="w-3.5 h-3.5 rounded-full shadow-3xs" style={{ backgroundColor: color }} />
                         {row.status}
                       </td>
-                      <td className="px-4 py-2 text-center font-extrabold text-slate-850">
-                        {row.count}
+                      <td className="px-6 py-3.5 text-center">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60 min-w-[3rem] shadow-3xs">
+                          {row.count}
+                        </span>
                       </td>
-                      <td className="px-4 py-2 text-center font-bold text-indigo-600">
+                      <td className="px-6 py-3.5 text-center font-bold text-indigo-600 dark:text-indigo-400 font-mono">
                         {row.percentage}%
                       </td>
-                      <td className="px-4 py-2 text-center">
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-700">
+                      <td className="px-6 py-3.5 text-center">
+                        <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700">
                           {['Hot', 'Warm'].includes(row.status) ? 'High Priority' : ['Not Connected', 'Invalid Number'].includes(row.status) ? 'Unreachable' : ['Approved', 'Disbursed'].includes(row.status) ? 'Converted' : 'In Pipeline'}
                         </span>
                       </td>
-                      <td className="px-4 py-2 text-center font-medium text-slate-500">
+                      <td className="px-6 py-3.5 text-center font-semibold text-slate-600 dark:text-slate-400 text-[11px]">
                         {['Hot', 'Warm'].includes(row.status) ? 'Immediate Telecall' : ['Not Connected', 'Invalid Number'].includes(row.status) ? 'Re-verify Number' : ['Approved', 'Disbursed'].includes(row.status) ? 'Done' : 'Followup Call'}
                       </td>
                     </tr>

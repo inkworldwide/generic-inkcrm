@@ -118,127 +118,156 @@ export default function ReportsList() {
   }
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto text-left">
-      <div className="flex justify-between items-center pb-2 text-left">
-        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">
-          Saved Reports
-        </h1>
+    <div className="space-y-6 max-w-6xl mx-auto text-left px-4 md:px-8 py-4">
+      {/* Header Banner */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
+            <Icons.BarChart3 className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono">
+                Analytics Hub
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                Visual Report Center
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
+              Reports & Analysis
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Access executive funnels, telecaller reports, and custom visual charts.
+            </p>
+          </div>
+        </div>
+
         <button
           onClick={() => {
             resetDesigner();
             setShowDesigner(true);
           }}
-          className="btn-primary-premium flex items-center gap-1.5"
+          className="h-11 px-5 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
-          <Icons.Plus className="w-4 h-4" /> Create Report
+          <Icons.Plus className="w-4 h-4" /> Create Custom Report
         </button>
       </div>
 
       {/* Standard Analytics & Funnel Reports Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <Link to="/reports/funnel-monthly" className="card-premium hover:border-indigo-300 transition-all flex flex-col justify-between group">
+        {/* Card 1: Monthly Funnel */}
+        <Link to="/reports/funnel-monthly" className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-indigo-400 dark:hover:border-indigo-600 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-xs">
                 <Icons.Filter className="w-5 h-5" />
               </div>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-indigo-50 text-indigo-700 rounded-full border border-indigo-100">
-                Campaign Funnel
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 rounded-full border border-indigo-200/80 dark:border-indigo-800 font-mono">
+                Monthly Funnel
               </span>
             </div>
-            <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-indigo-600 transition-colors uppercase">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors uppercase">
               Monthly Campaign Funnel
             </h3>
-            <p className="text-xs text-slate-500 font-medium mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-relaxed">
               Visual ring chart & bar graph for lead status distribution (Hot, Warm, Unreachable, Disbursed) per campaign.
             </p>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
-            <span>View Monthly Funnel</span>
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-indigo-600 dark:text-indigo-400">
+            <span>Launch Funnel</span>
             <Icons.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
 
-        <Link to="/reports/funnel-annual" className="card-premium hover:border-emerald-300 transition-all flex flex-col justify-between group">
+        {/* Card 2: Annual Funnel */}
+        <Link to="/reports/funnel-annual" className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-emerald-400 dark:hover:border-emerald-600 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-xs">
                 <Icons.TrendingUp className="w-5 h-5" />
               </div>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 rounded-full border border-emerald-200/80 dark:border-emerald-800 font-mono">
                 12-Month Progression
               </span>
             </div>
-            <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-emerald-600 transition-colors uppercase">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors uppercase">
               Annual Campaign Funnel
             </h3>
-            <p className="text-xs text-slate-500 font-medium mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-relaxed">
               Year-over-year campaign lead volume progression and monthly conversion yield summary.
             </p>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-emerald-600">
-            <span>View Annual Funnel</span>
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-600 dark:text-emerald-400">
+            <span>Launch Annual Report</span>
             <Icons.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
 
-        <Link to="/reports/lead-reports" className="card-premium hover:border-amber-300 transition-all flex flex-col justify-between group">
+        {/* Card 3: Lead Reports */}
+        <Link to="/reports/lead-reports" className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 hover:border-amber-400 dark:hover:border-amber-600 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all flex flex-col justify-between group relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
           <div>
             <div className="flex items-center justify-between mb-3">
-              <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-xs">
                 <Icons.ListFilter className="w-5 h-5" />
               </div>
-              <span className="px-2 py-0.5 text-[10px] font-extrabold uppercase bg-amber-50 text-amber-700 rounded-full border border-amber-100">
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 rounded-full border border-amber-200/80 dark:border-amber-800 font-mono">
                 Lead Analytics
               </span>
             </div>
-            <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-amber-600 transition-colors uppercase">
+            <h3 className="text-sm font-black text-slate-900 dark:text-white group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors uppercase">
               Campaign & Lead Reports
             </h3>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Filter leads by active campaigns, statuses, products, and export full reports to CSV.
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-1 leading-relaxed">
+              Filter leads by active campaigns, statuses, products, and export full reports to Excel.
             </p>
           </div>
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-600">
-            <span>View Lead Reports</span>
+          <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-amber-600 dark:text-amber-400">
+            <span>View Lead Matrix</span>
             <Icons.ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </div>
         </Link>
       </div>
 
       {/* Reports Grid list */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {reports.map((rep) => (
           <div
             key={rep._id}
-            className="card-premium text-left flex flex-col justify-between"
+            className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left flex flex-col justify-between hover:shadow-md transition-all"
           >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
             <div>
-              <div className="flex items-center gap-2">
-                <div className="p-2 bg-indigo-50 rounded-xl text-indigo-600">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold">
                   {rep.chartType === 'table' ? (
-                    <Icons.Table className="w-4 h-4" strokeWidth={2} />
+                    <Icons.Table className="w-4.5 h-4.5" />
                   ) : (
-                    <Icons.BarChart2 className="w-4 h-4" strokeWidth={2} />
+                    <Icons.BarChart2 className="w-4.5 h-4.5" />
                   )}
                 </div>
                 <div>
-                  <h3 className="font-[800] text-sm text-slate-800 uppercase tracking-tight">{rep.name}</h3>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                  <h3 className="font-black text-sm text-slate-900 dark:text-white uppercase tracking-tight">{rep.name}</h3>
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block font-mono">
                     {rep.moduleId?.pluralLabel || 'General'}
                   </span>
                 </div>
               </div>
-              <p className="text-xs text-slate-500 font-medium mt-3">{rep.description}</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-3 leading-relaxed">{rep.description}</p>
             </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs">
-              <span className="font-bold text-indigo-600 uppercase tracking-wider text-[10px]">
+            <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center text-xs">
+              <span className="font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider text-[10px] font-mono bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md">
                 {rep.chartType} chart
               </span>
               <Link
                 to={`/reports/${rep._id}`}
-                className="font-bold text-slate-700 hover:text-indigo-600 flex items-center gap-1"
+                className="font-bold text-slate-700 hover:text-indigo-600 dark:text-slate-300 flex items-center gap-1"
               >
                 View <Icons.ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -247,8 +276,8 @@ export default function ReportsList() {
         ))}
 
         {reports.length === 0 && (
-          <div className="col-span-3 py-12 text-center border border-dashed border-slate-200 rounded-2xl text-slate-400 font-medium">
-            No saved reports found. Click "Create Report" to launch designer.
+          <div className="col-span-3 py-12 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl text-slate-400 font-medium">
+            No saved reports found. Click "Create Custom Report" to launch designer.
           </div>
         )}
       </div>

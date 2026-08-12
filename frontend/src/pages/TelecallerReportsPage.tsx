@@ -170,23 +170,124 @@ export default function TelecallerReportsPage() {
     document.body.removeChild(link);
   };
 
+  // Compute summary stats for the hero cards
+  const displayAgents = liveAgentReports
+    .filter(u => selectedAgents.length === 0 || selectedAgents.includes(u.name))
+    .filter(u => selectedRoleTypes.length === 0 || selectedRoleTypes.some(r => (u.role || 'Telecaller').toLowerCase() === r.toLowerCase()));
+
+  const totalAssigned = displayAgents.reduce((sum, ag) => sum + ag.assigned, 0);
+  const totalConnected = displayAgents.reduce((sum, ag) => sum + ag.connected, 0);
+  const totalFollowups = displayAgents.reduce((sum, ag) => sum + ag.followups, 0);
+  const avgConnectionRate = totalAssigned > 0 ? Math.round((totalConnected / totalAssigned) * 100) : 0;
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto text-left px-4 md:px-8 py-4">
+      {/* 4 Vibrant Metric Hero Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Total Agents */}
+        <div className="bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Active Telecallers
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-xs">
+              <Icons.Users className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {displayAgents.length}
+            </span>
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md font-mono">
+              Filtered Agents
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Calls Connected */}
+        <div className="bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Calls Connected
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-xs">
+              <Icons.PhoneCall className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {totalConnected}
+            </span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md font-mono">
+              {avgConnectionRate}% Connected
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Total Assigned */}
+        <div className="bg-white dark:bg-slate-900 border border-sky-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Assigned Leads
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-xs">
+              <Icons.ListOrdered className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {totalAssigned}
+            </span>
+            <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-md font-mono">
+              Lead Pool
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Scheduled Followups */}
+        <div className="bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Followups Set
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-xs">
+              <Icons.CalendarClock className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {totalFollowups}
+            </span>
+            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md font-mono">
+              Scheduled
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* FILTER CONTROL CARD (With Multi-Select Checkboxes) */}
-      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10 z-20">
-        <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-visible z-20">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        
+        <div className="flex items-center justify-between gap-2 mb-5 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <Icons.SlidersHorizontal className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
-            <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
-              Monthly Telecaller's Report Parameters
+            <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <Icons.SlidersHorizontal className="w-3.5 h-3.5" />
+            </div>
+            <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+              Telecaller Performance Parameters
             </h3>
           </div>
           <button
             onClick={exportCSV}
-            className="btn-secondary-premium h-9 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+            className="h-9 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all flex items-center justify-center gap-2"
           >
             <Icons.Download className="w-3.5 h-3.5" />
-            Export Report
+            Export CSV
           </button>
         </div>
 
@@ -238,75 +339,82 @@ export default function TelecallerReportsPage() {
         </div>
 
         {/* View Detail Report Action */}
-        <div className="flex justify-start mt-6 pt-4 border-t border-[#EAE4DA] dark:border-slate-800">
+        <div className="flex justify-end mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={handleFilterClick}
-            className="btn-primary-premium h-11 px-6 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(23,34,59,0.15)]"
+            className="h-11 px-6 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Icons.CheckCircle className="w-4 h-4" />
-            View Detail Report
+            Apply Report Filter
           </button>
         </div>
       </div>
 
       {/* TELECALLER PERFORMANCE TABLE */}
-      <div className="card-premium overflow-hidden border border-[#EAE4DA] dark:border-slate-800">
-        <div className="p-6 border-b border-[#EAE4DA] dark:border-slate-800 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+        
+        <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
+            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
               Telecaller Productivity & Conversion Ledger
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Live statistics from database ({liveAgentReports.length} organization users)
+              Live statistics from database ({displayAgents.length} organization users)
             </p>
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-xs text-slate-400">Loading live user data...</div>
+          <div className="p-14 text-center text-xs text-slate-400">Loading live user data...</div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="table-header-premium text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                <tr>
+            <table className="w-full text-left text-xs min-w-[750px]">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider h-11 bg-slate-50/90 dark:bg-slate-800/80">
                   <th className="py-3.5 px-6">Agent Name</th>
                   <th className="py-3.5 px-6">Role Type</th>
-                  <th className="py-3.5 px-6">Assigned Leads</th>
-                  <th className="py-3.5 px-6">Calls Connected</th>
-                  <th className="py-3.5 px-6">Followups Scheduled</th>
+                  <th className="py-3.5 px-6 text-center">Assigned Leads</th>
+                  <th className="py-3.5 px-6 text-center">Calls Connected</th>
+                  <th className="py-3.5 px-6 text-center">Followups Scheduled</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EAE4DA]/60 dark:divide-slate-800">
-                {liveAgentReports
-                  .filter(u => selectedAgents.length === 0 || selectedAgents.includes(u.name))
-                  .filter(u => selectedRoleTypes.length === 0 || selectedRoleTypes.some(r => (u.role || 'Telecaller').toLowerCase() === r.toLowerCase()))
-                  .map((ag) => (
-                    <tr key={ag._id} className="hover:bg-[#F8F5F1]/60 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="py-3.5 px-6 font-bold text-[#0F172A] dark:text-white flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#17223B] text-white flex items-center justify-center text-[10px] font-bold uppercase">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+                {displayAgents.map((ag) => (
+                  <tr key={ag._id} className="hover:bg-indigo-50/30 dark:hover:bg-slate-800/40 transition-colors h-14">
+                    <td className="py-3.5 px-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-3xs">
                           {ag.name.substring(0, 2)}
                         </div>
                         <div>
-                          <div className="font-bold">{ag.name}</div>
-                          <div className="text-[10px] text-slate-400 font-medium">{ag.email}</div>
+                          <div className="font-bold text-slate-900 dark:text-white">{ag.name}</div>
+                          <div className="text-[10px] text-slate-400 font-mono">{ag.email}</div>
                         </div>
-                      </td>
-                      <td className="py-3.5 px-6">
-                        <span className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 text-[10px] font-bold uppercase tracking-wider border border-indigo-100">
-                          {ag.role}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-6 font-bold text-[#0F172A] dark:text-white">
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-6">
+                      <span className="px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 text-[10px] font-bold uppercase tracking-wider border border-purple-200/80 dark:border-purple-800/50">
+                        {ag.role}
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60 min-w-[3rem] shadow-3xs">
                         {ag.assigned}
-                      </td>
-                      <td className="py-3.5 px-6 font-semibold text-slate-700 dark:text-slate-300">
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 min-w-[3rem] shadow-3xs">
                         {ag.connected}
-                      </td>
-                      <td className="py-3.5 px-6 font-semibold text-sky-600 dark:text-sky-400">
+                      </span>
+                    </td>
+                    <td className="py-3.5 px-6 text-center">
+                      <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800/60 min-w-[3rem] shadow-3xs">
                         {ag.followups}
-                      </td>
-                    </tr>
-                  ))}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

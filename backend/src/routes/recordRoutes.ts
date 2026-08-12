@@ -580,28 +580,104 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
     }
 
 
-    // Parse other fields for inline filters, e.g. ?data.status=Qualified
+    // Parse other fields for inline filters, e.g. ?data.status=HOT LEADS
     Object.keys(req.query).forEach((q) => {
       if (q.startsWith('data.')) {
         const val = req.query[q];
         if (typeof val === 'string' && val.trim()) {
-          const escVal = val.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-          query[q] = { $regex: new RegExp(`^${escVal}$`, 'i') };
+          const cleanVal = val.trim();
+          if (q === 'data.status' || q === 'data.leadStatus') {
+            const noLeadsVal = cleanVal.replace(/\s+leads$/i, '');
+            const withLeadsVal = noLeadsVal + ' LEADS';
+            const variations = Array.from(new Set([cleanVal, noLeadsVal, withLeadsVal]));
+            const regexVariations = variations.map(
+              (v) => new RegExp(`^\\s*${v.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')}\\s*$`, 'i')
+            );
+            const statusFilter = {
+              $or: [
+                { 'data.status': { $in: regexVariations } },
+                { 'data.leadStatus': { $in: regexVariations } }
+              ]
+            };
+            if (query.$and) {
+              query.$and.push(statusFilter);
+            } else {
+              query.$and = [statusFilter];
+            }
+          } else {
+            const escVal = cleanVal.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            query[q] = { $regex: new RegExp(`^${escVal}$`, 'i') };
+          }
         } else {
           query[q] = val;
         }
       }
     });
 
-    // Global Search across text fields
-    if (search && typeof search === 'string') {
-      const searchRegex = { $regex: search, $options: 'i' };
-      const textFields = moduleDef.fields
-        .filter((f) => ['text', 'email', 'phone', 'rich-text', 'url'].includes(f.type))
-        .map((f) => ({ [`data.${f.name}`]: searchRegex }));
+    // Global Search across text fields, lead number, created by, and common entity fields
+    if (search && typeof search === 'string' && search.trim()) {
+      const trimmedSearch = search.trim();
+      const escSearch = trimmedSearch.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      const searchRegex = { $regex: escSearch, $options: 'i' };
 
-      if (textFields.length > 0) {
-        query.$or = textFields;
+      // 1. Find matching users for createdBy / updatedBy search
+      const matchedUsers = await User.find({
+        organizationId: req.organizationId,
+        $or: [
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { name: searchRegex },
+          { email: searchRegex },
+          { userCode: searchRegex }
+        ]
+      }).select('_id');
+      const matchedUserIds = matchedUsers.map((u) => u._id);
+
+      const searchConditions: any[] = [
+        // Match module dynamic fields
+        ...moduleDef.fields
+          .filter((f) => ['text', 'email', 'phone', 'rich-text', 'url', 'select', 'number'].includes(f.type))
+          .map((f) => ({ [`data.${f.name}`]: searchRegex })),
+        // Match standard lead name and number fields
+        { 'data.name': searchRegex },
+        { 'data.firstName': searchRegex },
+        { 'data.lastName': searchRegex },
+        { 'data.customerName': searchRegex },
+        { 'data.leadName': searchRegex },
+        { 'data.applicantName': searchRegex },
+        { 'data.clientName': searchRegex },
+        { 'data.leadNo': searchRegex },
+        { 'data.leadNumber': searchRegex },
+        { 'data.lead_no': searchRegex },
+        { 'data.leadId': searchRegex },
+        { 'data.leadCode': searchRegex },
+        { 'data.firmName': searchRegex },
+        { 'data.company': searchRegex },
+        { 'data.companyName': searchRegex },
+        { 'data.phone': searchRegex },
+        { 'data.phoneNumber': searchRegex },
+        { 'data.mobile': searchRegex },
+        { 'data.mobileNumber': searchRegex },
+        { 'data.email': searchRegex },
+        { 'data.source': searchRegex },
+        { 'data.campaign': searchRegex },
+        { 'data.campaignName': searchRegex },
+        { 'data.assignedTo': searchRegex }
+      ];
+
+      // Match createdBy / updatedBy users
+      if (matchedUserIds.length > 0) {
+        searchConditions.push({ createdBy: { $in: matchedUserIds } });
+        searchConditions.push({ updatedBy: { $in: matchedUserIds } });
+      }
+
+      // If search query is a valid 24-character MongoDB ObjectId
+      if (/^[0-9a-fA-F]{24}$/.test(trimmedSearch)) {
+        searchConditions.push({ _id: new mongoose.Types.ObjectId(trimmedSearch) });
+      }
+
+      if (searchConditions.length > 0) {
+        query.$or = searchConditions;
       }
     }
 

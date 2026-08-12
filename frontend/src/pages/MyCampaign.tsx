@@ -52,6 +52,7 @@ export default function MyCampaign() {
   const [loadingLeads, setLoadingLeads] = useState(false);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Track inputs for each lead ID
   const [leadStates, setLeadStates] = useState<Record<string, LeadState>>({});
@@ -317,138 +318,219 @@ export default function MyCampaign() {
   }
 
   return (
-    <div className="space-y-8 max-w-[1400px] mx-auto text-left p-4 sm:p-6">
+    <div className="space-y-6 max-w-[1400px] mx-auto text-left p-4 sm:p-6">
       
       {!activeCampaign ? (
         // CAMPAIGNS CARDS VIEW
-        <div className="space-y-6">
-          {/* Main Page Header */}
-          <div className="bg-white border border-slate-200/80 p-6 sm:p-7 rounded-2xl shadow-sm">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-              <div className="flex items-center gap-4">
-                <div className="p-3.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-2xl flex-shrink-0">
-                  <Icons.Megaphone className="w-6 h-6" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2.5 mb-1">
-                    <span className="text-[10px] font-extrabold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-                      Telecalling Drive
-                    </span>
-                    <span className="text-[11px] font-bold text-slate-400">
-                      {campaigns.length} Active {campaigns.length === 1 ? 'Campaign' : 'Campaigns'}
-                    </span>
+        (() => {
+          const filteredCampaigns = campaigns.filter(c => 
+            c.campaignName.toLowerCase().includes(searchQuery.trim().toLowerCase())
+          );
+
+          return (
+            <div className="space-y-4">
+              {/* Streamlined Header Summary Bar with Defined Border */}
+              <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-5 py-4 rounded-xl shadow-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 shadow-3xs">
+                      <Icons.Megaphone className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100">
+                          My Call Campaigns
+                        </h2>
+                        <span className="text-[11px] font-medium text-slate-400 dark:text-slate-500">
+                          ({campaigns.length} {campaigns.length === 1 ? 'Active' : 'Active'})
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Select a campaign to initiate telecalling, record call remarks, and update lead status.
+                      </p>
+                    </div>
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
-                    My Call Campaigns
-                  </h1>
-                  <p className="text-xs text-slate-500 font-medium mt-0.5">
-                    Select a campaign below to initiate calling, log remarks, update lead status, or WhatsApp clients.
-                  </p>
+
+                  {/* Compact Stats Indicators with Border */}
+                  {campaigns.length > 0 && (
+                    <div className="flex items-center gap-4 border-t sm:border-t-0 sm:border-l border-slate-200 dark:border-slate-800 pt-2.5 sm:pt-0 sm:pl-5 flex-shrink-0">
+                      <div className="text-left">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Campaigns</span>
+                        <span className="text-base font-bold text-slate-800 dark:text-slate-100 font-mono leading-tight">{campaigns.length}</span>
+                      </div>
+                      <div className="w-px h-7 bg-slate-200 dark:bg-slate-700" />
+                      <div className="text-left">
+                        <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Total Leads</span>
+                        <span className="text-base font-bold text-emerald-700 dark:text-emerald-400 font-mono leading-tight">
+                          {campaigns.reduce((sum, c) => sum + c.totalAssigned, 0)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              {/* Stats pill */}
+              {/* Search & Filter Toolbar with Crisp Border */}
               {campaigns.length > 0 && (
-                <div className="flex items-center gap-4 bg-slate-50 border border-slate-200/80 rounded-2xl px-5 py-3 flex-shrink-0">
-                  <div className="text-center">
-                    <span className="text-2xl font-black text-[#17223B] leading-none block">{campaigns.length}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Campaigns</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2.5 rounded-xl shadow-xs">
+                  <div className="relative flex-1 max-w-sm">
+                    <Icons.Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search campaigns by name..."
+                      className="w-full h-8.5 pl-9 pr-8 text-xs bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500/20 transition-all"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs p-0.5 rounded cursor-pointer"
+                        title="Clear search"
+                      >
+                        <Icons.X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
-                  <div className="w-px h-8 bg-slate-200" />
-                  <div className="text-center">
-                    <span className="text-2xl font-black text-emerald-600 leading-none block">{campaigns.reduce((sum, c) => sum + c.totalAssigned, 0)}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Total Leads</span>
+
+                  <div className="text-[11.5px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <span>Showing</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{filteredCampaigns.length}</span>
+                    <span>of</span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">{campaigns.length}</span>
+                    <span>campaigns</span>
                   </div>
                 </div>
               )}
-            </div>
-          </div>
 
-          {campaigns.length === 0 ? (
-            <div className="bg-white dark:bg-[#1a1f2c] rounded-3xl border border-slate-100 dark:border-slate-800 p-12 text-center text-slate-500 dark:text-slate-400">
-              <Icons.Megaphone className="w-12 h-12 mx-auto text-slate-300 dark:text-slate-700 mb-3 animate-pulse" />
-              <p className="font-bold">No campaigns assigned to you yet.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {campaigns.map((campaign) => {
-                const pct = campaign.totalAssigned > 0 
-                  ? Math.round((campaign.dialed / campaign.totalAssigned) * 100)
-                  : 0;
-
-                return (
-                  <div 
-                    key={campaign.campaignName}
-                    className="bg-white dark:bg-[#111827] rounded-2xl border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs flex flex-col justify-between group hover:shadow-md transition-all duration-200 space-y-4"
-                  >
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
-                      <div className="min-w-0">
-                        <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 dark:text-indigo-400 px-2 py-0.5 rounded-md uppercase tracking-wider">
-                          Campaign
-                        </span>
-                        <h3 className="text-base font-extrabold text-slate-900 dark:text-white truncate uppercase mt-1">
-                          {campaign.campaignName}
-                        </h3>
-                      </div>
-                      <div className="px-3 py-1.5 bg-[#17223B] text-white rounded-xl text-center flex-shrink-0">
-                        <span className="text-base font-black leading-none block">{campaign.totalAssigned}</span>
-                        <span className="text-[9px] font-bold text-slate-300 uppercase tracking-wider">Assigned</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex justify-between text-xs font-semibold text-slate-500">
-                        <span>Created:</span>
-                        <span className="font-bold text-slate-800 dark:text-slate-200">{new Date(campaign.createdAt).toLocaleDateString('en-GB')}</span>
-                      </div>
-
-                      {/* Stats row */}
-                      <div className="grid grid-cols-2 gap-2 bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl text-center text-xs font-semibold">
-                        <div>
-                          <p className="text-[10px] text-emerald-600 dark:text-emerald-400 uppercase font-bold">Dialed</p>
-                          <p className="font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{campaign.dialed}</p>
-                        </div>
-                        <div>
-                          <p className="text-[10px] text-amber-600 dark:text-amber-400 uppercase font-bold">Yet To Dial</p>
-                          <p className="font-extrabold text-amber-600 dark:text-amber-400 mt-0.5">{campaign.yetToDial}</p>
-                        </div>
-                      </div>
-
-                      {/* Progress bar */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-[11px] font-bold">
-                          <span className="text-slate-400 uppercase">Progress</span>
-                          <span className="text-indigo-600 dark:text-indigo-400">{pct}%</span>
-                        </div>
-                        <div className="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                      <button 
-                        onClick={() => handleViewDetails(campaign)}
-                        className="flex-1 py-2 px-3 bg-[#17223B] hover:bg-[#223050] text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider active:scale-95"
-                      >
-                        <Icons.Eye className="w-3.5 h-3.5" />
-                        View Details
-                      </button>
-                      <button 
-                        onClick={() => handleDownloadCampaign(campaign.campaignName)}
-                        className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer uppercase tracking-wider active:scale-95"
-                        title="Download Campaign Excel/CSV"
-                      >
-                        <Icons.Download className="w-3.5 h-3.5" />
-                        Export
-                      </button>
-                    </div>
+              {campaigns.length === 0 ? (
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-10 text-center text-slate-500 dark:text-slate-400 shadow-xs">
+                  <div className="w-12 h-12 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center mx-auto mb-3 text-slate-400 shadow-3xs">
+                    <Icons.Megaphone className="w-5 h-5" />
                   </div>
-                );
-              })}
+                  <p className="font-bold text-sm text-slate-800 dark:text-slate-200">No campaigns assigned to you yet.</p>
+                  <p className="text-xs text-slate-400 mt-0.5">When leads are allocated to your account, they will appear here.</p>
+                </div>
+              ) : filteredCampaigns.length === 0 ? (
+                <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-8 text-center text-slate-500 dark:text-slate-400 shadow-xs">
+                  <Icons.Search className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto mb-2" />
+                  <p className="font-bold text-sm text-slate-800 dark:text-slate-200">No campaigns matching &quot;{searchQuery}&quot;</p>
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="mt-3 px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-300 dark:hover:bg-indigo-900/40 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                  >
+                    Clear Search Filter
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredCampaigns.map((campaign) => {
+                    const pct = campaign.totalAssigned > 0 
+                      ? Math.round((campaign.dialed / campaign.totalAssigned) * 100)
+                      : 0;
+
+                    return (
+                      <div 
+                        key={campaign.campaignName}
+                        className="group relative bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-800/80 transition-all duration-200 flex flex-col justify-between overflow-hidden"
+                      >
+                        {/* Top Accent bar */}
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-indigo-500 via-indigo-600 to-indigo-700" />
+
+                        <div className="space-y-4">
+                          {/* Header: Title & Total Badge */}
+                          <div className="flex items-start justify-between gap-3 pt-1">
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-900/50 px-2 py-0.5 rounded-md uppercase tracking-wider">
+                                  <Icons.PhoneCall className="w-2.5 h-2.5" />
+                                  Campaign
+                                </span>
+                                <span className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+                                  {new Date(campaign.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                </span>
+                              </div>
+                              <h3 className="text-base font-bold text-slate-900 dark:text-white capitalize truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                                {campaign.campaignName}
+                              </h3>
+                            </div>
+
+                            <div className="text-right flex-shrink-0">
+                              <div className="inline-flex flex-col items-end bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 px-2.5 py-1 rounded-xl">
+                                <span className="text-sm font-black text-slate-800 dark:text-slate-100 leading-tight font-mono">{campaign.totalAssigned}</span>
+                                <span className="text-[9px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">Total Leads</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Metric Cards - Sleek 2-col cards with micro icons and subtle colored indicators */}
+                          <div className="grid grid-cols-2 gap-2.5">
+                            <div className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 rounded-xl p-3 flex items-center justify-between">
+                              <div>
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Dialed</span>
+                                <span className="text-lg font-bold text-emerald-600 dark:text-emerald-400 font-mono leading-none mt-1 block">
+                                  {campaign.dialed}
+                                </span>
+                              </div>
+                              <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <Icons.PhoneCall className="w-3.5 h-3.5" />
+                              </div>
+                            </div>
+
+                            <div className="bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/60 rounded-xl p-3 flex items-center justify-between">
+                              <div>
+                                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Yet to Dial</span>
+                                <span className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono leading-none mt-1 block">
+                                  {campaign.yetToDial}
+                                </span>
+                              </div>
+                              <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200/60 dark:border-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                <Icons.Clock className="w-3.5 h-3.5" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar in Sub-panel */}
+                          <div className="bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/70 dark:border-slate-700/50 rounded-xl p-2.5 space-y-1.5">
+                            <div className="flex justify-between items-center text-[11px]">
+                              <span className="font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-[10px]">Calling Progress</span>
+                              <span className="font-bold text-indigo-600 dark:text-indigo-400 font-mono">{pct}% completed</span>
+                            </div>
+                            <div className="w-full h-2 bg-slate-200/80 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                              <div 
+                                className="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-300"
+                                style={{ width: `${Math.max(pct, pct > 0 ? 5 : 0)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Actions Bar */}
+                        <div className="flex items-center gap-2 pt-4 border-t border-slate-100 dark:border-slate-800 mt-4">
+                          <button 
+                            onClick={() => handleViewDetails(campaign)}
+                            className="flex-1 h-9 px-3.5 bg-slate-900 hover:bg-slate-800 active:bg-black text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                          >
+                            <Icons.Eye className="w-4 h-4" />
+                            <span>View Details</span>
+                          </button>
+                          <button 
+                            onClick={() => handleDownloadCampaign(campaign.campaignName)}
+                            className="h-9 px-3.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-3xs"
+                            title="Download Campaign Excel/CSV"
+                          >
+                            <Icons.Download className="w-3.5 h-3.5 text-slate-500" />
+                            <span>Export</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          );
+        })()
       ) : (
         // DETAILS VIEW
         <div className="space-y-6">

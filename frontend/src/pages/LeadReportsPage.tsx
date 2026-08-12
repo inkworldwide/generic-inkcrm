@@ -103,23 +103,128 @@ export default function LeadReportsPage() {
     showToast(`Exported ${filteredLeads.length} lead records to Excel!`, 'success');
   };
 
+  // Compute summary stats for the hero cards
+  const totalAmount = filteredLeads.reduce((acc, item) => {
+    const data = item.data || {};
+    const amt = Number(data.amount || data.loanAmount || 250000);
+    return acc + (isNaN(amt) ? 0 : amt);
+  }, 0);
+
+  const hotAndConvertedCount = filteredLeads.filter((item) => {
+    const st = (item.data?.status || item.status || '').toLowerCase();
+    return st.includes('hot') || st.includes('approved') || st.includes('disbursed');
+  }).length;
+
+  const hotRate = filteredLeads.length > 0 ? Math.round((hotAndConvertedCount / filteredLeads.length) * 100) : 0;
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto text-left px-4 md:px-8 py-4">
+      {/* 4 Vibrant Metric Hero Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Total Leads */}
+        <div className="bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Filtered Leads
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-xs">
+              <Icons.Users className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {filteredLeads.length}
+            </span>
+            <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md font-mono">
+              of {leads.length} Total
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Hot & High Intent */}
+        <div className="bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Hot & Approved
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-xs">
+              <Icons.Flame className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {hotAndConvertedCount}
+            </span>
+            <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md font-mono">
+              {hotRate}% High Intent
+            </span>
+          </div>
+        </div>
+
+        {/* Card 3: Pipeline Value */}
+        <div className="bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Pipeline Volume
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-xs">
+              <Icons.IndianRupee className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              ₹{(totalAmount / 100000).toFixed(1)}L
+            </span>
+            <span className="text-[11px] font-bold text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/50 px-2 py-0.5 rounded-md font-mono">
+              Est. Value
+            </span>
+          </div>
+        </div>
+
+        {/* Card 4: Campaigns in Scope */}
+        <div className="bg-white dark:bg-slate-900 border border-sky-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-500" />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+              Campaign Sources
+            </span>
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-xs">
+              <Icons.Layers className="w-4.5 h-4.5" />
+            </div>
+          </div>
+          <div className="mt-3 flex items-baseline gap-2">
+            <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+              {campaignsList.length}
+            </span>
+            <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-md font-mono">
+              Active Drives
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* FILTER CONTROL CARD (With Multi-Select Checkboxes) */}
-      <div className="card-premium p-6 relative overflow-visible border-2 border-[#17223B]/10 z-20">
-        <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-[#EAE4DA] dark:border-slate-800">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-visible z-20">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        
+        <div className="flex items-center justify-between gap-2 mb-5 pb-3 border-b border-slate-100 dark:border-slate-800">
           <div className="flex items-center gap-2">
-            <Icons.Filter className="w-4 h-4 text-[#17223B] dark:text-indigo-400" />
-            <h3 className="text-xs font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
-              Final Report Parameters
+            <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+              <Icons.Filter className="w-3.5 h-3.5" />
+            </div>
+            <h3 className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+              Lead Analytics Filter Parameters
             </h3>
           </div>
           <button
             onClick={exportCSV}
-            className="btn-secondary-premium h-9 px-4 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2"
+            className="h-9 px-4 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all flex items-center justify-center gap-2"
           >
             <Icons.Download className="w-3.5 h-3.5" />
-            Export CSV
+            Export Excel
           </button>
         </div>
 
@@ -171,41 +276,49 @@ export default function LeadReportsPage() {
         </div>
 
         {/* View Detail Report Action */}
-        <div className="flex justify-end mt-6 pt-4 border-t border-[#EAE4DA] dark:border-slate-800">
+        <div className="flex justify-end mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
           <button
             onClick={handleFilterClick}
-            className="btn-primary-premium h-11 px-6 text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 shadow-[0_4px_16px_rgba(23,34,59,0.15)]"
+            className="h-11 px-6 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <Icons.PieChart className="w-4 h-4" />
-            View Detail Report
+            Apply Report Filter
           </button>
         </div>
       </div>
 
       {/* DETAILED DATA TABLE */}
-      <div className="card-premium overflow-hidden border border-[#EAE4DA] dark:border-slate-800">
-        <div className="p-6 border-b border-[#EAE4DA] dark:border-slate-800 flex items-center justify-between">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+        
+        <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-[#0F172A] dark:text-white uppercase tracking-wider">
+            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
               Detailed Lead Audit Matrix
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Showing {filteredLeads.length} record entries
+              Showing {filteredLeads.length} record entries with live data attributes
             </p>
           </div>
         </div>
 
         {loading ? (
-          <div className="p-12 text-center text-xs text-slate-400">Loading lead report data...</div>
+          <div className="p-14 text-center text-xs text-slate-400">Loading lead report data...</div>
         ) : filteredLeads.length === 0 ? (
-          <div className="p-12 text-center text-xs text-slate-400 font-medium">
-            No lead records found matching the selected filters.
+          <div className="py-14 text-center">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/20">
+              <Icons.Inbox className="w-6 h-6" />
+            </div>
+            <p className="font-extrabold text-sm text-slate-800 dark:text-slate-200">No lead records found</p>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Try modifying your filter parameters above to view more leads.
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="table-header-premium text-[10px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-300">
-                <tr>
+            <table className="w-full text-left text-xs min-w-[850px]">
+              <thead>
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider h-11 bg-slate-50/90 dark:bg-slate-800/80">
                   <th className="py-3.5 px-6">Lead ID</th>
                   <th className="py-3.5 px-6">Client Name</th>
                   <th className="py-3.5 px-6">Contact Info</th>
@@ -216,7 +329,7 @@ export default function LeadReportsPage() {
                   <th className="py-3.5 px-6">Assigned Agent</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EAE4DA]/60 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {filteredLeads.map((item, idx) => {
                   const data = item.data || {};
                   
@@ -245,43 +358,52 @@ export default function LeadReportsPage() {
                   const period = dateObj.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
                   return (
-                    <tr key={item._id || idx} className="hover:bg-[#F8F5F1]/60 dark:hover:bg-slate-800/50 transition-colors">
-                      <td className="py-3.5 px-6 font-mono text-[11px] text-slate-500 font-bold">
+                    <tr key={item._id || idx} className="hover:bg-indigo-50/30 dark:hover:bg-slate-800/40 transition-colors h-14">
+                      <td className="py-3.5 px-6 font-mono text-[11px] text-indigo-600 dark:text-indigo-400 font-bold">
                         #{item._id ? item._id.substring(item._id.length - 6).toUpperCase() : `LD-100${idx}`}
                       </td>
-                      <td className="py-3.5 px-6 font-bold text-[#0F172A] dark:text-white">
-                        {name}
+                      <td className="py-3.5 px-6">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-3xs">
+                            {name[0]}
+                          </div>
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {name}
+                          </span>
+                        </div>
                       </td>
                       <td className="py-3.5 px-6">
-                        <div className="font-semibold text-slate-700 dark:text-slate-300">{phone}</div>
-                        <div className="text-[10px] text-slate-400">{email}</div>
+                        <div className="font-semibold text-slate-800 dark:text-slate-200">{phone}</div>
+                        <div className="text-[10px] text-slate-400 font-mono">{email}</div>
                       </td>
-                      <td className="py-3.5 px-6 font-medium text-slate-600 dark:text-slate-300">
-                        <span className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[11px] font-semibold">
+                      <td className="py-3.5 px-6">
+                        <span className="px-2.5 py-1 rounded-md bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/50 text-[11px] font-bold">
                           {loanType}
                         </span>
                       </td>
                       <td className="py-3.5 px-6">
-                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border font-mono ${
                           status.toLowerCase() === 'disbursed' || status.toLowerCase() === 'approved'
-                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:border-emerald-800'
                             : status.toLowerCase() === 'hot'
-                            ? 'bg-orange-50 text-orange-700 border-orange-200'
-                            : status.toLowerCase() === 'followup'
-                            ? 'bg-sky-50 text-sky-700 border-sky-200'
-                            : 'bg-slate-100 text-slate-700 border-slate-200'
+                            ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/50 dark:text-rose-300 dark:border-rose-800'
+                            : status.toLowerCase() === 'followup' || status.toLowerCase() === 'warm'
+                            ? 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/50 dark:text-amber-300 dark:border-amber-800'
+                            : 'bg-sky-50 text-sky-700 border-sky-200 dark:bg-sky-950/50 dark:text-sky-300 dark:border-sky-800'
                         }`}>
                           {status}
                         </span>
                       </td>
-                      <td className="py-3.5 px-6 font-bold text-[#0F172A] dark:text-white">
+                      <td className="py-3.5 px-6 font-bold text-slate-900 dark:text-white font-mono">
                         ₹{Number(amount).toLocaleString('en-IN')}
                       </td>
-                      <td className="py-3.5 px-6 font-medium text-slate-500 text-[11px]">
+                      <td className="py-3.5 px-6 font-medium text-slate-500 dark:text-slate-400 text-[11px]">
                         {period}
                       </td>
-                      <td className="py-3.5 px-6 font-semibold text-slate-700 dark:text-slate-300">
-                        {agent}
+                      <td className="py-3.5 px-6">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
+                          {agent}
+                        </span>
                       </td>
                     </tr>
                   );

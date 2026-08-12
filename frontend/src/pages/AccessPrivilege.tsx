@@ -406,30 +406,38 @@ export default function AccessPrivilege() {
   const totalCount = fullMenuItems.length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto text-left pb-16 font-['Plus_Jakarta_Sans',sans-serif]">
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#EAE4DA] dark:border-slate-800">
-        <div>
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-100 dark:border-indigo-900/50">
-              <Icons.ShieldCheck className="w-6 h-6" />
+    <div className="space-y-6 max-w-7xl mx-auto text-left pb-16 font-['Plus_Jakarta_Sans',sans-serif] px-4 md:px-8 py-4">
+      {/* Page Header with Subtle Accent */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500/80 via-purple-500/70 to-blue-500/60" />
+        
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 flex-shrink-0">
+            <Icons.ShieldCheck className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider font-mono px-2.5 py-0.5 rounded-full border bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/60">
+                Security & RBAC
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                Role Permissions
+              </span>
             </div>
-            <div>
-              <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white uppercase">
-                Access Privilege
-              </h1>
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Configure role-based navigation menu access and data visibility across the CRM.
-              </p>
-            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
+              Access Privilege
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Configure role-based navigation menu access and data visibility across the CRM.
+            </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={fetchRoles}
             disabled={loading}
-            className="flex items-center gap-1.5 px-4 h-10 bg-white dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 shadow-2xs transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-3xs transition-all cursor-pointer"
           >
             <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -438,7 +446,7 @@ export default function AccessPrivilege() {
           <button
             onClick={handleSavePermissions}
             disabled={saving || loading}
-            className="flex items-center gap-2 px-6 h-10 bg-[#17223B] hover:bg-[#1E2E4F] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+            className="flex items-center gap-2 px-6 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
           >
             {saving ? (
               <Icons.Loader2 className="w-4 h-4 animate-spin" />
@@ -452,11 +460,12 @@ export default function AccessPrivilege() {
 
 
       {/* Role Selection & Statistics Card */}
-      <div className="bg-white dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-800 rounded-2xl p-6 shadow-[0_2px_12px_rgba(23,34,59,0.03)] space-y-6">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500/60 to-purple-500/60" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           {/* Role Dropdown */}
           <div className="space-y-1.5">
-            <label className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block">
+            <label className="text-[11px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider block">
               Select Role to Edit Privileges
             </label>
             {loading ? (
@@ -466,7 +475,7 @@ export default function AccessPrivilege() {
                 <select
                   value={selectedRoleId}
                   onChange={(e) => handleRoleSelectChange(e.target.value)}
-                  className="w-full h-11 px-4 text-xs font-black uppercase text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 cursor-pointer shadow-2xs appearance-none"
+                  className="w-full h-11 px-4 text-xs font-black uppercase text-slate-900 dark:text-white bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 cursor-pointer shadow-3xs appearance-none"
                 >
                   {roles.map((r) => {
                     const currentUserRoleId = (typeof user?.roleId === 'object' ? (user?.roleId as any)?._id : user?.roleId) || role?._id;
@@ -484,22 +493,22 @@ export default function AccessPrivilege() {
           </div>
 
           {/* Role Status Summary */}
-          <div className="space-y-1 bg-[#F8F5F1] dark:bg-slate-800/50 p-3.5 rounded-xl border border-[#EAE4DA] dark:border-slate-700/60">
+          <div className="space-y-1.5 bg-slate-50/80 dark:bg-slate-800/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/60">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">
                 Menu Access Ratio
               </span>
-              <span className="text-xs font-black text-indigo-600 dark:text-indigo-400">
+              <span className="text-xs font-black text-indigo-600 dark:text-indigo-400 font-mono">
                 {allowedCount} / {totalCount} Active
               </span>
             </div>
             <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
               <div
-                className="bg-indigo-600 h-full rounded-full transition-all duration-300"
+                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-full rounded-full transition-all duration-300"
                 style={{ width: `${(allowedCount / totalCount) * 100}%` }}
               />
             </div>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold block">
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold block truncate">
               {selectedRole?.description || 'Custom access privilege role'}
             </span>
           </div>
@@ -509,7 +518,7 @@ export default function AccessPrivilege() {
             <button
               onClick={handleGrantAll}
               type="button"
-              className="px-3.5 h-9 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 h-9 bg-indigo-50/80 hover:bg-indigo-100/80 text-indigo-700 dark:bg-indigo-950/60 dark:hover:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
             >
               <Icons.Check className="w-3.5 h-3.5" />
               Allow All Menus
@@ -517,7 +526,7 @@ export default function AccessPrivilege() {
             <button
               onClick={handleRevokeAll}
               type="button"
-              className="px-3.5 h-9 bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
+              className="px-3.5 h-9 bg-rose-50/80 hover:bg-rose-100/80 text-rose-700 dark:bg-rose-950/60 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200/80 dark:border-rose-800 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-3xs"
             >
               <Icons.Lock className="w-3.5 h-3.5" />
               Restrict All
@@ -526,7 +535,7 @@ export default function AccessPrivilege() {
         </div>
 
         {/* Search & Category Filter Bar */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-[#EAE4DA] dark:border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
           {/* Category Tabs */}
           <div className="flex flex-wrap items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
             {categories.map((cat) => {
@@ -537,8 +546,8 @@ export default function AccessPrivilege() {
                   onClick={() => setActiveCategory(cat)}
                   className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#17223B] dark:bg-indigo-600 text-white shadow-2xs'
-                      : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
+                      ? 'bg-indigo-600 text-white shadow-3xs font-extrabold'
+                      : 'bg-slate-100/80 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:bg-slate-200/80 dark:hover:bg-slate-700'
                   }`}
                 >
                   {cat}
@@ -555,7 +564,7 @@ export default function AccessPrivilege() {
               placeholder="Search menu or module..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-9 pl-9 pr-3 text-xs bg-slate-50 dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-slate-800 dark:text-white"
+              className="w-full h-9 pl-9 pr-3 text-xs bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-800 dark:text-white font-medium"
             />
             {searchQuery && (
               <button
@@ -569,10 +578,10 @@ export default function AccessPrivilege() {
         </div>
 
         {/* Permissions Table / Matrix */}
-        <div className="overflow-x-auto rounded-xl border border-[#EAE4DA] dark:border-slate-800">
+        <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
           <table className="w-full text-xs text-left border-collapse">
             <thead>
-              <tr className="bg-[#F8F5F1] dark:bg-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-[#EAE4DA] dark:border-slate-800 h-12">
+              <tr className="bg-slate-50/80 dark:bg-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 h-12">
                 <th className="py-3 px-5 w-72">Menu / Module Name</th>
                 <th className="py-3 px-4 text-center w-36">Menu Access</th>
                 <th className="py-3 px-4 text-center w-40">Read Permission</th>
@@ -581,7 +590,7 @@ export default function AccessPrivilege() {
                 <th className="py-3 px-4 text-center w-28">Route Path</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EAE4DA] dark:divide-slate-800 bg-white dark:bg-slate-900">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 bg-white dark:bg-slate-900">
               {filteredMenus.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-slate-400 font-medium">

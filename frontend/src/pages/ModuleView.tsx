@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import * as XLSX from 'xlsx';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -333,37 +333,162 @@ export default function ModuleView() {
   };
 
   const renderCampaignAssignments = () => {
+    const totalAgentAllocated = caAgents.reduce((sum: number, agent: any) => {
+      const fullName = `${agent.firstName} ${agent.lastName}`;
+      return sum + (caAllocatedStats[fullName] || 0);
+    }, 0);
+
+    const totalAgentDialed = caAgents.reduce((sum: number, agent: any) => {
+      const fullName = `${agent.firstName} ${agent.lastName}`;
+      return sum + (caDialedStats[fullName] || 0);
+    }, 0);
+
+    const dialRate = totalAgentAllocated > 0 ? Math.round((totalAgentDialed / totalAgentAllocated) * 100) : 0;
+
     return (
       <div className="space-y-6 text-left">
-        {/* Header Title */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-left">
-          <div className="flex items-center gap-3">
-            <div className="p-3 bg-[#F8F5F1] dark:bg-slate-800 text-[#17223B] dark:text-navy-100 rounded-2xl border border-[#EAE4DA] dark:border-slate-700 shadow-sm flex items-center justify-center">
-              <Icons.Target className="w-6 h-6 text-[#17223B] dark:text-white" />
+        {/* Header Title Bar with Modern Gradient Avatar */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-1">
+          <div className="flex items-center gap-3.5">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
+              <Icons.Target className="w-6 h-6 stroke-[2.2]" />
             </div>
-            <div>
-              <h1 className="text-2xl uppercase font-bold tracking-tight text-[#0F172A] dark:text-white leading-tight">
-                Assign Campaigns
-              </h1>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
+            <div className="text-left">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                  Assign Campaigns
+                </h1>
+                <span className="text-xs font-black px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 shadow-3xs font-mono">
+                  Lead Distribution
+                </span>
+              </div>
+              <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
                 Allocate leads and upload contact files for team members
               </p>
             </div>
           </div>
         </div>
 
-        {/* Top Control Card */}
-        <div className="card-premium p-6 relative overflow-hidden bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
+        {/* 4 Vibrant Gradient Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Total Campaigns */}
+          <div className="bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Available Campaigns
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-xs">
+                <Icons.Layers className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                {caCampaigns.length}
+              </span>
+              <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md">
+                Active Sources
+              </span>
+            </div>
+          </div>
+
+          {/* Card 2: Team Roles */}
+          <div className="bg-white dark:bg-slate-900 border border-sky-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-500" />
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Team Roles
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-xs">
+                <Icons.Users2 className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                {caRoles.length}
+              </span>
+              <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-md">
+                Role Groups
+              </span>
+            </div>
+          </div>
+
+          {/* Card 3: Loaded Employees */}
+          <div className="bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Loaded Agents
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-xs">
+                <Icons.UserCheck className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-baseline gap-2">
+              <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                {caAgents.length}
+              </span>
+              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                {caSelectedAgents.length} Selected
+              </span>
+            </div>
+          </div>
+
+          {/* Card 4: Allocated Pool */}
+          <div className="bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                Total Assigned
+              </span>
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-xs">
+                <Icons.Zap className="w-4.5 h-4.5" />
+              </div>
+            </div>
+            <div className="mt-3 flex items-center justify-between">
+              <div>
+                <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                  {totalAgentAllocated.toLocaleString()}
+                </span>
+                <span className="text-[10px] text-slate-400 block font-semibold">
+                  {totalAgentDialed.toLocaleString()} Dialed ({dialRate}%)
+                </span>
+              </div>
+              <div className="w-16 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/60 dark:border-slate-700/60">
+                <div 
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all" 
+                  style={{ width: `${Math.max(dialRate, 4)}%` }} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top Control Card (Campaign Distribution Studio) */}
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden text-left">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+          
+          <div className="flex items-center justify-between mb-5 pb-3 border-b border-slate-100 dark:border-slate-800">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                <Icons.Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                Campaign Distribution Studio
+              </span>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             <div className="text-left">
-              <label className="label-premium flex items-center gap-1.5">
-                <Icons.Layers className="w-3.5 h-3.5 text-[#17223B]" />
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <Icons.Layers className="w-3.5 h-3.5 text-indigo-500" />
                 Select Campaign
               </label>
               <select 
                 value={caSelectedCampaign} 
                 onChange={e => setCaSelectedCampaign(e.target.value)} 
-                className="w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl text-[#0F172A] dark:text-white focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all cursor-pointer"
+                className="w-full h-11 px-4 text-xs font-semibold bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all cursor-pointer shadow-inner-sm"
               >
                 <option value="">Select Campaign</option>
                 {caCampaigns.map((c: any) => {
@@ -374,14 +499,14 @@ export default function ModuleView() {
             </div>
 
             <div className="text-left">
-              <label className="label-premium flex items-center gap-1.5">
-                <Icons.Users2 className="w-3.5 h-3.5 text-[#17223B]" />
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
+                <Icons.Users2 className="w-3.5 h-3.5 text-purple-500" />
                 Agent Type (Role)
               </label>
               <select 
                 value={caSelectedRole} 
                 onChange={e => setCaSelectedRole(e.target.value)} 
-                className="w-full h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl text-[#0F172A] dark:text-white focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all cursor-pointer"
+                className="w-full h-11 px-4 text-xs font-semibold bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all cursor-pointer shadow-inner-sm"
               >
                 <option value="">Select Role</option>
                 {caRoles.map((r: any) => (
@@ -390,11 +515,11 @@ export default function ModuleView() {
               </select>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex gap-2.5">
               <button 
                 type="button" 
                 onClick={handleLoadAgents}
-                className="btn-primary-premium flex-1 h-11 text-xs uppercase font-bold tracking-wider"
+                className="flex-1 h-11 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 disabled={caLoadingAgents}
               >
                 {caLoadingAgents ? (
@@ -408,18 +533,18 @@ export default function ModuleView() {
               
               <Link 
                 to="/modules/campaigns"
-                className="btn-secondary-premium h-11 px-4 text-xs uppercase font-bold tracking-wider flex items-center justify-center"
+                className="h-11 px-4 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all flex items-center justify-center"
               >
                 View Details
               </Link>
             </div>
           </div>
 
-          <div className="border-t border-[#EAE4DA] dark:border-slate-700 my-6"></div>
+          <div className="border-t border-slate-100 dark:border-slate-800 my-6"></div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
             <div className="md:col-span-2 text-left">
-              <label className="label-premium flex items-center gap-1.5">
+              <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5 flex items-center gap-1.5">
                 <Icons.FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
                 Upload Excel / CSV File
               </label>
@@ -428,8 +553,8 @@ export default function ModuleView() {
                 onClick={() => document.getElementById('ca-file-input')?.click()}
                 className={`border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all ${
                   caFile 
-                    ? 'border-emerald-400 bg-emerald-50/20 dark:bg-emerald-950/20' 
-                    : 'border-[#EAE4DA] dark:border-slate-700 hover:border-[#17223B] bg-[#FDFBF7] dark:bg-slate-900/40'
+                    ? 'border-emerald-400 bg-emerald-50/30 dark:bg-emerald-950/30' 
+                    : 'border-indigo-200/90 dark:border-slate-700 hover:border-indigo-500 bg-indigo-50/15 dark:bg-slate-900/40'
                 }`}
               >
                 <input 
@@ -441,11 +566,11 @@ export default function ModuleView() {
                 />
                 {caFile ? (
                   <div className="flex items-center gap-3 w-full">
-                    <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-xl">
+                    <div className="p-2.5 bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 rounded-xl shadow-3xs">
                       <Icons.FileSpreadsheet className="w-6 h-6" />
                     </div>
                     <div className="flex-1 min-w-0 text-left">
-                      <p className="text-sm font-bold text-[#0F172A] dark:text-slate-200 truncate">{caFile.name}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-slate-100 truncate">{caFile.name}</p>
                       <p className="text-xs text-slate-500 font-medium">{(caFile.size / 1024).toFixed(1)} KB • Ready to assign</p>
                     </div>
                     <button 
@@ -461,11 +586,11 @@ export default function ModuleView() {
                   </div>
                 ) : (
                   <div className="flex items-center gap-3 py-1">
-                    <div className="p-2.5 bg-[#F8F5F1] dark:bg-slate-800 text-[#17223B] dark:text-slate-300 rounded-xl border border-[#EAE4DA] dark:border-slate-700">
+                    <div className="p-2.5 bg-indigo-50 dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-100 dark:border-slate-700 shadow-3xs">
                       <Icons.UploadCloud className="w-5 h-5" />
                     </div>
                     <div className="text-left">
-                      <p className="text-xs font-bold text-[#0F172A] dark:text-white">Click to select file (.csv, .xlsx, .xls)</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-white">Click to select file (.csv, .xlsx, .xls)</p>
                       <p className="text-[10px] text-slate-500 font-medium">File data will be allocated to selected employees</p>
                     </div>
                   </div>
@@ -477,14 +602,14 @@ export default function ModuleView() {
               <button 
                 type="button" 
                 onClick={handleAssignData}
-                className="w-full h-11 bg-[#17223B] hover:bg-[#24324A] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-[0_2px_6px_rgba(23,34,59,0.12)] hover:shadow-[0_4px_12px_rgba(23,34,59,0.2)] transition-all flex items-center justify-center gap-2"
+                className="w-full h-12 bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 active:scale-[0.98] text-white rounded-xl font-extrabold text-xs uppercase tracking-wider shadow-md shadow-emerald-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
                 disabled={caAssigning}
               >
                 {caAssigning ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                 ) : (
                   <>
-                    <Icons.CheckCircle2 className="w-4 h-4" /> Assign Data
+                    <Icons.CheckCircle2 className="w-4.5 h-4.5" /> Assign Data
                   </>
                 )}
               </button>
@@ -493,22 +618,29 @@ export default function ModuleView() {
         </div>
 
         {/* Employee Allocation Table Card */}
-        <div className="card-premium p-6 space-y-4 bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl shadow-[0_2px_8px_rgba(23,34,59,0.02)] relative overflow-hidden">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h2 className="text-base font-bold text-[#0F172A] dark:text-white text-left uppercase tracking-tight">
-              Assign Campaigns for Below Employees
-            </h2>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs relative">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+          
+          <div className="p-5 sm:p-6 pb-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h2 className="text-base font-black text-slate-900 dark:text-white text-left uppercase tracking-tight">
+                Assign Campaigns for Below Employees
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Check employees who should receive batch leads from the uploaded dataset.
+              </p>
+            </div>
             {caAgents.length > 0 && (
-              <span className="text-[10px] font-bold text-[#17223B] dark:text-navy-100 bg-[#F8F5F1] dark:bg-navy-900/40 px-3 py-1 rounded-full border border-[#EAE4DA] dark:border-navy-800/50 uppercase tracking-wider">
+              <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 px-3.5 py-1 rounded-full border border-indigo-200/80 dark:border-indigo-800/60 uppercase tracking-wider font-mono">
                 Selected: {caSelectedAgents.length} of {caAgents.length} Agents
               </span>
             )}
           </div>
           
           <div className="overflow-x-auto">
-            <table className="w-full text-xs text-left border-collapse">
+            <table className="w-full text-xs text-left border-collapse min-w-[750px]">
               <thead>
-                <tr className="border-b border-slate-200 dark:border-slate-750 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider h-11 bg-slate-50/50 dark:bg-slate-900/40">
+                <tr className="border-b border-slate-200 dark:border-slate-700 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider h-11 bg-slate-50/90 dark:bg-slate-800/80">
                   <th className="py-2 px-4 w-12 text-center">
                     <input 
                       type="checkbox"
@@ -520,17 +652,17 @@ export default function ModuleView() {
                           setCaSelectedAgents([]);
                         }
                       }}
-                      className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
+                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
                     />
                   </th>
-                  <th className="py-2 px-4">Full Name</th>
-                  <th className="py-2 px-4">Role</th>
-                  <th className="py-2 px-4">Reporting Manager</th>
-                  <th className="py-2 px-4 text-center">Total Allocated #</th>
-                  <th className="py-2 px-4 text-center">Total Dialed #</th>
+                  <th className="py-3 px-4">Full Name</th>
+                  <th className="py-3 px-4">Role</th>
+                  <th className="py-3 px-4">Reporting Manager</th>
+                  <th className="py-3 px-4 text-center">Total Allocated #</th>
+                  <th className="py-3 px-4 text-center">Total Dialed #</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {caAgents.map((agent: any) => {
                   const fullName = `${agent.firstName} ${agent.lastName}`;
                   const allocated = caAllocatedStats[fullName] || 0;
@@ -542,8 +674,8 @@ export default function ModuleView() {
                       key={agent._id} 
                       className={`transition-colors h-14 ${
                         isChecked 
-                          ? 'bg-slate-50/45 dark:bg-slate-800/20 hover:bg-slate-50 dark:hover:bg-slate-800/30' 
-                          : 'hover:bg-slate-50/50 dark:hover:bg-slate-800/10'
+                          ? 'bg-indigo-50/40 dark:bg-slate-800/50 hover:bg-indigo-50/60' 
+                          : 'hover:bg-slate-50/60 dark:hover:bg-slate-800/30'
                       }`}
                     >
                       <td className="px-4 py-2 text-center">
@@ -557,40 +689,45 @@ export default function ModuleView() {
                               setCaSelectedAgents(caSelectedAgents.filter(id => id !== agent._id));
                             }
                           }}
-                          className="rounded border-slate-350 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
+                          className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer w-4 h-4"
                         />
                       </td>
                       <td className="px-4 py-2 text-left">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-center font-bold text-xs uppercase select-none">
+                          <div className="w-8.5 h-8.5 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-bold text-xs uppercase shadow-3xs">
                             {agent.firstName ? agent.firstName[0] : 'U'}
                           </div>
-                          <span className="font-bold text-slate-800 dark:text-slate-200">
-                            {fullName}
-                          </span>
+                          <div>
+                            <span className="font-bold text-slate-900 dark:text-slate-100 block">
+                              {fullName}
+                            </span>
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
+                              {agent.email || agent.userCode || 'Agent'}
+                            </span>
+                          </div>
                         </div>
                       </td>
                       <td className="px-4 py-2 text-left">
-                        <span className="font-semibold text-slate-600 dark:text-slate-400">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200/80 dark:border-purple-800/50">
                           {agent.roleId?.name || 'No Role'}
                         </span>
                       </td>
                       <td className="px-4 py-2 text-left">
                         {agent.reportingManager ? (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-450 border border-slate-200/40 dark:border-slate-800/40">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
                             {agent.reportingManager.firstName} {agent.reportingManager.lastName}
                           </span>
                         ) : (
-                          <span className="text-slate-400 dark:text-slate-600 font-medium">N/A</span>
+                          <span className="text-slate-400 dark:text-slate-500 font-medium italic">Unassigned</span>
                         )}
                       </td>
                       <td className="px-4 py-2 text-center">
-                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-extrabold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-400 min-w-[3rem]">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60 min-w-[3rem] shadow-3xs">
                           {allocated}
                         </span>
                       </td>
                       <td className="px-4 py-2 text-center">
-                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-extrabold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 min-w-[3rem]">
+                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 min-w-[3rem] shadow-3xs">
                           {dialed}
                         </span>
                       </td>
@@ -599,8 +736,14 @@ export default function ModuleView() {
                 })}
                 {caAgents.length === 0 && (
                   <tr>
-                    <td colSpan={6} className="text-center text-slate-400 dark:text-slate-500 py-10 italic">
-                      No employees loaded. Select an agent role type above and click "Load Now".
+                    <td colSpan={6} className="py-14 text-center">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/20">
+                        <Icons.Users className="w-6 h-6" />
+                      </div>
+                      <p className="font-extrabold text-sm text-slate-800 dark:text-slate-200">No employees loaded</p>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Select an agent role type above and click "Load Now" to display team members.
+                      </p>
                     </td>
                   </tr>
                 )}
@@ -763,6 +906,25 @@ export default function ModuleView() {
     refetchInterval: (query) => (query.state.error ? false : 5000)
   });
 
+  const campaignSummaryStats = useMemo(() => {
+    const records = data?.records || [];
+    let totalAllocated = 0;
+    let totalDialed = 0;
+    records.forEach((rec: any) => {
+      const name = rec.data?.campaignName || rec.data?.source || rec.data?.campaign || rec.data?.name || rec.name || '';
+      totalAllocated += getAllocatedNumbers(name);
+      totalDialed += getDialedNumbers(name);
+    });
+    const overallRate = totalAllocated > 0 ? Math.round((totalDialed / totalAllocated) * 100) : 0;
+    return {
+      totalCampaigns: data?.pagination?.total ?? records.length,
+      totalAllocated,
+      totalDialed,
+      yetToDial: Math.max(0, totalAllocated - totalDialed),
+      overallRate
+    };
+  }, [data?.records, data?.pagination?.total, campaignStatsData]);
+
   const { data: usersDropdown } = useQuery({
     queryKey: ['moduleview-users-dropdown'],
     queryFn: async () => {
@@ -793,6 +955,24 @@ export default function ModuleView() {
       return 'Assigned Agent';
     }
     return str;
+  };
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    refetch();
+  };
+
+  const handleLoadAll = () => {
+    setSearchVal('');
+    setFilterVal('');
+    setFilterField('');
+    setPage(1);
+    if (urlStatus) {
+      navigate('/modules/leads');
+    } else {
+      refetch();
+    }
   };
 
   const deleteMutation = useMutation({
@@ -1040,32 +1220,154 @@ export default function ModuleView() {
     <div className="space-y-6">
       {apiPath === 'campaigns' ? (
         <div className="space-y-6">
-          {/* Header Title */}
-          <div className="text-left">
-            <h1 className="text-2xl uppercase font-bold tracking-tight text-[#0F172A] dark:text-white">
-              Campaigns
-            </h1>
-            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
-              Create and manage marketing campaign records
-            </p>
+          {/* Header Title Bar with Modern Gradient Avatar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-1">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
+                <Icons.Megaphone className="w-6 h-6 stroke-[2.2]" />
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                    Campaigns
+                  </h1>
+                  <span className="text-xs font-black px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 shadow-3xs font-mono">
+                    {data?.pagination?.total ?? (data?.records?.length || 0)} Total Drives
+                  </span>
+                </div>
+                <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 mt-0.5 font-medium">
+                  Create and manage marketing campaign records, track allocated leads, and monitor dial progress.
+                </p>
+              </div>
+            </div>
           </div>
 
-          {/* Inline Campaign Creation Form */}
-          <form onSubmit={handleSaveCampaign} className="card-premium bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl p-6 shadow-[0_2px_8px_rgba(23,34,59,0.02)]">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-              <div className="flex-1 text-left">
-                <label className="label-premium">
-                  Campaign Name
-                </label>
-                <input
-                  type="text"
-                  value={campaignNameInput}
-                  onChange={(e) => setCampaignNameInput(e.target.value)}
-                  placeholder="Enter Campaign Name..."
-                  className="w-full md:w-96 h-11 px-4 text-xs font-semibold bg-[#FDFBF7] dark:bg-slate-900 border border-[#EAE4DA] dark:border-slate-700 rounded-xl text-[#0F172A] dark:text-white focus:outline-none focus:ring-4 focus:ring-[#17223B]/10 focus:border-[#17223B] transition-all"
-                />
+          {/* 4 Vibrant Gradient Metric Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: Total Campaigns */}
+            <div className="bg-white dark:bg-slate-900 border border-indigo-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" />
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Total Campaigns
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-xs">
+                  <Icons.Megaphone className="w-4.5 h-4.5" />
+                </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                  {campaignSummaryStats.totalCampaigns}
+                </span>
+                <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                  Active Drives
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Allocated Leads */}
+            <div className="bg-white dark:bg-slate-900 border border-sky-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-blue-500" />
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Allocated Leads
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-xs">
+                  <Icons.Users className="w-4.5 h-4.5" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                  {campaignSummaryStats.totalAllocated.toLocaleString()}
+                </span>
+                <span className="text-[11px] font-bold text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/50 px-2 py-0.5 rounded-md">
+                  Pipeline Leads
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3: Total Dialed */}
+            <div className="bg-white dark:bg-slate-900 border border-emerald-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Total Dialed
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-600 flex items-center justify-center text-white shadow-xs">
+                  <Icons.PhoneCall className="w-4.5 h-4.5" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-baseline gap-2">
+                <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                  {campaignSummaryStats.totalDialed.toLocaleString()}
+                </span>
+                <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-md">
+                  Contacted
+                </span>
+              </div>
+            </div>
+
+            {/* Card 4: Overall Progress */}
+            <div className="bg-white dark:bg-slate-900 border border-amber-100 dark:border-slate-800 rounded-2xl p-5 shadow-xs relative overflow-hidden text-left hover:shadow-md transition-all group">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-500 to-orange-500" />
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                  Dialing Rate
+                </span>
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 flex items-center justify-center text-white shadow-xs">
+                  <Icons.Zap className="w-4.5 h-4.5" />
+                </div>
+              </div>
+              <div className="mt-3 flex items-center justify-between">
+                <span className="text-2xl font-black text-slate-900 dark:text-white font-mono">
+                  {campaignSummaryStats.overallRate}%
+                </span>
+                <div className="w-20 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/60 dark:border-slate-700/60">
+                  <div 
+                    className="h-full rounded-full bg-gradient-to-r from-amber-500 to-emerald-500 transition-all" 
+                    style={{ width: `${Math.max(campaignSummaryStats.overallRate, 4)}%` }} 
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Inline Campaign Creation Form Studio Card */}
+          <form 
+            onSubmit={handleSaveCampaign} 
+            className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden text-left"
+          >
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+            
+            <div className="flex items-center justify-between mb-4 pb-2.5 border-b border-slate-100 dark:border-slate-800">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+                  <Icons.Sparkles className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider">
+                  {editCampaignId ? 'Edit Campaign Details' : 'Quick Create Marketing Campaign'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex-1 max-w-xl">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">
+                  Campaign Name <span className="text-rose-500">*</span>
+                </label>
+                <div className="relative">
+                  <Icons.Tag className="w-4 h-4 text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={campaignNameInput}
+                    onChange={(e) => setCampaignNameInput(e.target.value)}
+                    placeholder="e.g. Q3 Telecalling Drive, HNI Real Estate, Loan Festival..."
+                    className="w-full h-11 pl-10 pr-4 text-xs sm:text-sm font-semibold bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15 transition-all shadow-inner-sm"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-2.5 self-end md:self-auto mt-2 md:mt-0">
                 {editCampaignId && (
                   <button
                     type="button"
@@ -1073,74 +1375,120 @@ export default function ModuleView() {
                       setCampaignNameInput('');
                       setEditCampaignId(null);
                     }}
-                    className="btn-secondary-premium h-11 px-5 text-xs uppercase font-bold tracking-wider"
+                    className="h-11 px-5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all cursor-pointer"
                   >
                     Cancel
                   </button>
                 )}
                 <button
                   type="submit"
-                  disabled={isSubmittingCampaign}
-                  className="btn-primary-premium h-11 px-6 text-xs uppercase font-bold tracking-wider"
+                  disabled={isSubmittingCampaign || !campaignNameInput.trim()}
+                  className="h-11 px-6 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] disabled:opacity-50 text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  {isSubmittingCampaign && <Icons.Loader className="w-4 h-4 animate-spin" />}
-                  {editCampaignId ? 'Update Campaign' : 'Create Campaign'}
+                  {isSubmittingCampaign ? (
+                    <Icons.Loader className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Icons.Plus className="w-4 h-4 stroke-[2.5]" />
+                  )}
+                  <span>{editCampaignId ? 'Update Campaign' : 'Create Campaign'}</span>
                 </button>
               </div>
             </div>
           </form>
         </div>
       ) : apiPath === 'leads' ? (
-        <div className="space-y-6">
-          {/* Header Title */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="text-left">
-              <h1 className="text-2xl uppercase font-black text-slate-800 dark:text-white uppercase tracking-wider">
-                {urlStatus ? `${urlStatus} Leads` : 'ALL LEADS'}
-              </h1>
+        <div className="space-y-5">
+          {/* Header Title Bar with Icon & Live Count */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-1">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-900/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-3xs flex-shrink-0">
+                <Icons.Users className="w-5 h-5" />
+              </div>
+              <div className="text-left">
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h1 className="text-xl sm:text-2xl font-black text-slate-800 dark:text-white uppercase tracking-tight">
+                    {urlStatus ? (urlStatus.toUpperCase().endsWith('LEADS') ? urlStatus.toUpperCase() : `${urlStatus.toUpperCase()} LEADS`) : 'ALL LEADS'}
+                  </h1>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 shadow-3xs font-mono">
+                    {data?.pagination?.total ?? (data?.records?.length || 0)} Total
+                  </span>
+                </div>
+                <p className="text-xs sm:text-[13px] text-slate-500 dark:text-slate-400 mt-0.5">
+                  {urlStatus ? `Filtering leads with status: ${urlStatus}` : 'Search, manage, and track leads across all campaigns.'}
+                </p>
+              </div>
             </div>
+
+            {urlStatus && (
+              <Link
+                to="/modules/leads"
+                className="px-3.5 py-2 text-xs font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-xl transition-all flex items-center gap-1.5 shadow-3xs cursor-pointer"
+              >
+                <Icons.X className="w-3.5 h-3.5" />
+                <span>Clear Status Filter</span>
+              </Link>
+            )}
           </div>
 
-          {/* Premium White Control Bar */}
-          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 rounded-xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          {/* Premium Control Bar with Generous Padding */}
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             {/* Create Lead Button */}
             <Link
               to="/modules/leads/new"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold text-xs px-4 py-2.5 rounded shadow transition-all uppercase tracking-wide flex items-center justify-center gap-1.5 self-start lg:self-auto"
+              className="inline-flex items-center justify-center gap-2 h-10 px-5 bg-[#17223B] hover:bg-[#223050] active:bg-[#0F172A] text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all self-start lg:self-auto cursor-pointer"
             >
-              Create Lead +
+              <Icons.Plus className="w-4 h-4 stroke-[2.5]" />
+              <span>Create Lead</span>
             </Link>
 
-            {/* Search Input and Buttons */}
-            <div className="flex flex-1 flex-col sm:flex-row items-center justify-end gap-3 w-full">
-              <span className="text-xs font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                Search by Name, Mobile Number Or Firm Name
-              </span>
-              <div className="flex w-full sm:w-auto items-center gap-2">
+            {/* Search Input & Action Buttons Form */}
+            <form 
+              onSubmit={handleSearchSubmit}
+              className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center justify-end gap-3 w-full"
+            >
+              <div className="relative flex-1 max-w-md">
+                <Icons.Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
                   value={searchVal}
                   onChange={(e) => setSearchVal(e.target.value)}
-                  placeholder="Enter search term..."
-                  className="w-full sm:w-64 px-3 py-2 text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded focus:outline-none focus:ring-1 focus:ring-primary text-slate-800 dark:text-white"
+                  placeholder="Search by name, lead number, created by, mobile..."
+                  className="w-full h-10 pl-10 pr-9 text-xs sm:text-sm bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all font-medium"
                 />
+                {searchVal && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearchVal('');
+                      setPage(1);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-xs p-1 rounded cursor-pointer"
+                    title="Clear search"
+                  >
+                    <Icons.X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2.5">
                 <button
-                  onClick={() => refetch()}
-                  className="bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-bold px-4 py-2 rounded shadow transition-all"
+                  type="submit"
+                  className="h-10 px-5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold uppercase tracking-wider rounded-xl shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  Search
+                  <Icons.Search className="w-3.5 h-3.5 stroke-[2.2]" />
+                  <span>Search</span>
                 </button>
                 <button
-                  onClick={() => {
-                    setSearchVal('');
-                    navigate(`/modules/leads`);
-                  }}
-                  className="bg-[#3b82f6] hover:bg-[#2563eb] text-white text-xs font-bold px-4 py-2 rounded shadow transition-all whitespace-nowrap"
+                  type="button"
+                  onClick={handleLoadAll}
+                  className="h-10 px-4.5 bg-white hover:bg-slate-50 active:bg-slate-100 text-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap"
+                  title="Reset filters and load all leads"
                 >
-                  Load All
+                  <Icons.RotateCcw className="w-3.5 h-3.5 stroke-[2]" />
+                  <span>Load All</span>
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       ) : (
@@ -1241,63 +1589,110 @@ export default function ModuleView() {
           {viewMode === 'table' && (
             apiPath === 'campaigns' ? (
               <div className="space-y-6">
-                <div className="bg-white dark:bg-slate-800 border border-[#EAE4DA] dark:border-slate-700 rounded-2xl overflow-hidden shadow-[0_2px_8px_rgba(23,34,59,0.02)] relative">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs relative">
+                  <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[800px] text-left text-xs text-[#0F172A] dark:text-slate-300">
-                      <thead className="table-header-premium">
-                        <tr>
-                          <th className="px-6 py-3.5">Campaign Name</th>
-                          <th className="px-6 py-3.5">Created Date</th>
-                          <th className="px-6 py-3.5">Total Allocated Numbers</th>
-                          <th className="px-6 py-3.5">Total Dialed Numbers</th>
-                          <th className="px-6 py-3.5 text-right">Action</th>
+                    <table className="w-full min-w-[850px] text-left text-xs text-slate-800 dark:text-slate-200">
+                      <thead>
+                        <tr className="bg-slate-50/90 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-700/80">
+                          <th className="px-6 py-4 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Campaign</th>
+                          <th className="px-6 py-4 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Created Date</th>
+                          <th className="px-6 py-4 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider text-center">Allocated Leads</th>
+                          <th className="px-6 py-4 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider text-center">Dialed</th>
+                          <th className="px-6 py-4 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Calling Progress</th>
+                          <th className="px-6 py-4 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-[#EAE4DA] dark:divide-slate-700">
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/80">
                         {data?.records.map((rec: any) => {
                           const name = rec.data?.campaignName || rec.data?.source || rec.data?.campaign || rec.data?.name || rec.name || 'Unnamed Campaign';
-                          const createdDateStr = formatDate(rec.createdAt) + ' ' + new Date(rec.createdAt).toLocaleTimeString('en-US', {
+                          const allocated = getAllocatedNumbers(name);
+                          const dialed = getDialedNumbers(name);
+                          const progress = allocated > 0 ? Math.round((dialed / allocated) * 100) : 0;
+                          const createdDateStr = new Date(rec.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) + ', ' + new Date(rec.createdAt).toLocaleTimeString('en-US', {
                             hour: 'numeric',
                             minute: '2-digit',
                             hour12: true
                           });
 
                           return (
-                            <tr key={rec._id} className="hover:bg-[#F8F5F1]/50 dark:hover:bg-slate-700/20 transition-colors">
-                              <td className="px-6 py-4 font-bold text-[#0F172A] dark:text-white">
-                                {name}
+                            <tr key={rec._id} className="hover:bg-indigo-50/30 dark:hover:bg-slate-800/60 transition-colors">
+                              <td className="px-6 py-4.5 font-bold text-slate-900 dark:text-white">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-xs flex-shrink-0">
+                                    <Icons.Megaphone className="w-5 h-5 stroke-[2.2]" />
+                                  </div>
+                                  <div>
+                                    <span className="capitalize block text-sm font-extrabold text-slate-900 dark:text-white tracking-tight">
+                                      {name}
+                                    </span>
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.2 rounded">
+                                      Active Campaign
+                                    </span>
+                                  </div>
+                                </div>
                               </td>
-                              <td className="px-6 py-4 text-slate-600 dark:text-slate-400 font-semibold">
-                                {createdDateStr}
+                              <td className="px-6 py-4.5 text-slate-500 dark:text-slate-400 font-medium">
+                                <span className="inline-flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200/60 dark:border-slate-700/60 text-xs font-semibold text-slate-700 dark:text-slate-300">
+                                  <Icons.Calendar className="w-3.5 h-3.5 text-indigo-500" />
+                                  {createdDateStr}
+                                </span>
                               </td>
-                              <td className="px-6 py-4 text-slate-700 dark:text-slate-400 font-bold">
-                                {getAllocatedNumbers(name).toLocaleString()}
+                              <td className="px-6 py-4.5 text-center">
+                                <span className="inline-flex items-center justify-center font-bold px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-800/60 font-mono text-xs shadow-3xs">
+                                  {allocated.toLocaleString()} Leads
+                                </span>
                               </td>
-                              <td className="px-6 py-4 text-slate-700 dark:text-slate-400 font-bold">
-                                {getDialedNumbers(name).toLocaleString()}
+                              <td className="px-6 py-4.5 text-center">
+                                <span className="inline-flex items-center justify-center font-bold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/60 font-mono text-xs shadow-3xs">
+                                  {dialed.toLocaleString()} Dialed
+                                </span>
                               </td>
-                              <td className="px-6 py-4 text-right space-x-2">
-                                <button
-                                  onClick={() => handleDownloadCampaign(rec)}
-                                  className="btn-secondary-premium p-2 rounded-xl inline-flex items-center justify-center cursor-pointer active:scale-95"
-                                  title="Download 12-Column CSV"
-                                >
-                                  <Icons.Download className="w-3.5 h-3.5 text-[#17223B]" />
-                                </button>
-                                <button
-                                  onClick={() => handleEditClick(rec)}
-                                  className="btn-edit-premium p-2 rounded-xl inline-flex items-center justify-center cursor-pointer active:scale-95"
-                                  title="Edit Campaign"
-                                >
-                                  <Icons.Edit3 className="w-3.5 h-3.5 text-slate-700" />
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(rec._id)}
-                                  className="btn-delete-premium p-2 rounded-xl inline-flex items-center justify-center cursor-pointer active:scale-95"
-                                  title="Delete Campaign"
-                                >
-                                  <Icons.Trash2 className="w-3.5 h-3.5 text-rose-600" />
-                                </button>
+                              <td className="px-6 py-4.5 min-w-[140px]">
+                                <div className="space-y-1.5">
+                                  <div className="flex justify-between items-center text-xs">
+                                    <span className="font-extrabold text-slate-800 dark:text-slate-100 font-mono">{progress}%</span>
+                                    <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded ${
+                                      progress >= 100 ? 'text-emerald-700 bg-emerald-100/80 dark:bg-emerald-950/60 dark:text-emerald-300' :
+                                      progress > 0 ? 'text-indigo-700 bg-indigo-100/80 dark:bg-indigo-950/60 dark:text-indigo-300' :
+                                      'text-slate-500 bg-slate-100 dark:bg-slate-800'
+                                    }`}>
+                                      {progress >= 100 ? 'Completed' : progress > 0 ? 'In Progress' : 'Pending'}
+                                    </span>
+                                  </div>
+                                  <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-200/60 dark:border-slate-700/60 p-0.5">
+                                    <div 
+                                      className="h-full rounded-full transition-all bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" 
+                                      style={{ width: `${Math.max(progress, 3)}%` }} 
+                                    />
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4.5 text-right">
+                                <div className="inline-flex items-center justify-end gap-2">
+                                  <button
+                                    onClick={() => handleDownloadCampaign(rec)}
+                                    className="h-8.5 px-3 bg-indigo-50 hover:bg-indigo-100 active:bg-indigo-150 text-indigo-700 dark:bg-indigo-950/50 dark:hover:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/80 rounded-xl text-xs font-bold shadow-3xs transition-all inline-flex items-center gap-1.5 cursor-pointer"
+                                    title="Download 12-Column CSV"
+                                  >
+                                    <Icons.Download className="w-3.5 h-3.5" />
+                                    <span className="hidden sm:inline">Export</span>
+                                  </button>
+                                  <button
+                                    onClick={() => handleEditClick(rec)}
+                                    className="w-8.5 h-8.5 rounded-xl bg-amber-50 hover:bg-amber-100 active:bg-amber-150 text-amber-700 dark:bg-amber-950/50 dark:hover:bg-amber-900/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800/80 flex items-center justify-center transition-all shadow-3xs cursor-pointer"
+                                    title="Edit Campaign"
+                                  >
+                                    <Icons.Edit3 className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(rec._id)}
+                                    className="w-8.5 h-8.5 rounded-xl bg-rose-50 hover:bg-rose-100 active:bg-rose-150 text-rose-600 dark:bg-rose-950/50 dark:hover:bg-rose-900/60 dark:text-rose-400 border border-rose-200 dark:border-rose-800/80 flex items-center justify-center transition-all shadow-3xs cursor-pointer"
+                                    title="Delete Campaign"
+                                  >
+                                    <Icons.Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
                               </td>
                             </tr>
                           );
@@ -1305,8 +1700,14 @@ export default function ModuleView() {
 
                         {data?.records.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="py-12 text-center text-slate-400">
-                              No campaigns found.
+                            <td colSpan={6} className="py-16 text-center">
+                              <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center mx-auto mb-3 shadow-lg shadow-indigo-500/20">
+                                <Icons.Megaphone className="w-7 h-7" />
+                              </div>
+                              <p className="font-extrabold text-base text-slate-800 dark:text-slate-100">No campaigns found</p>
+                              <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                                Enter a campaign name above to launch your first targeted marketing drive.
+                              </p>
                             </td>
                           </tr>
                         )}
@@ -1533,47 +1934,32 @@ export default function ModuleView() {
             )
           )}
 
-          {/* Simple Pagination bar */}
-          {apiPath === 'campaigns' ? (
-            <div className="mt-6 flex justify-center items-center gap-1.5 pb-4">
-              {Array.from({ length: data?.pagination.totalPages || 1 }, (_, i) => i + 1).map((p) => (
-                <button
-                  key={p}
-                  onClick={() => setPage(p)}
-                  className={`px-3 py-2 border border-slate-200 dark:border-slate-700 rounded font-semibold text-xs transition-all shadow-sm ${
-                    page === p
-                      ? 'bg-[#3b82f6] text-white border-[#3b82f6]'
-                      : 'bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-750 text-[#3b82f6] dark:text-blue-400'
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
+          {/* Pagination bar */}
+          <div className="px-6 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col sm:flex-row justify-between items-center gap-3 text-xs shadow-xs mt-6">
+            <span className="text-slate-500 dark:text-slate-400 font-medium">
+              Showing page <span className="font-bold text-slate-800 dark:text-slate-200">{page}</span> of{' '}
+              <span className="font-bold text-slate-800 dark:text-slate-200">{data?.pagination?.totalPages || 1}</span>
+              <span className="ml-2 text-slate-400 font-mono">({data?.pagination?.total ?? (data?.records?.length || 0)} Total Records)</span>
+            </span>
+            <div className="flex items-center gap-2">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage(page - 1)}
+                className="h-8.5 px-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs disabled:opacity-40 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                <Icons.ChevronLeft className="w-3.5 h-3.5" />
+                Previous
+              </button>
+              <button
+                disabled={page >= (data?.pagination?.totalPages || 1)}
+                onClick={() => setPage(page + 1)}
+                className="h-8.5 px-3.5 border border-slate-200 dark:border-slate-700 rounded-xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs disabled:opacity-40 transition-all flex items-center gap-1 cursor-pointer"
+              >
+                Next
+                <Icons.ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-          ) : (
-            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl mt-4 flex justify-between items-center text-xs">
-              <span className="text-slate-400">
-                Showing page <span className="font-semibold text-slate-600 dark:text-slate-300">{page}</span> of{' '}
-                <span className="font-semibold text-slate-600 dark:text-slate-300">{data?.pagination.totalPages || 1}</span>
-              </span>
-              <div className="flex gap-2">
-                <button
-                  disabled={page === 1}
-                  onClick={() => setPage(page - 1)}
-                  className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-500 disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <button
-                  disabled={page >= (data?.pagination.totalPages || 1)}
-                  onClick={() => setPage(page + 1)}
-                  className="px-3 py-1.5 border border-slate-200 dark:border-slate-700 rounded bg-white dark:bg-slate-800 hover:bg-slate-50 text-slate-500 disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            </div>
-          )}
+          </div>
 
           {viewMode === 'kanban' && renderKanban(activeModule, data?.records || [])}
 

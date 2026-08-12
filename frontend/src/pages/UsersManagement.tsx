@@ -42,6 +42,7 @@ export default function UsersManagement() {
   const [deleteConfirmText, setDeleteConfirmText] = useState<string>('');
   const [deletingUser, setDeletingUser] = useState<boolean>(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'active'>('all');
+  const [userSearchQuery, setUserSearchQuery] = useState<string>('');
 
   const [loading, setLoading] = useState(true);
 
@@ -107,26 +108,24 @@ export default function UsersManagement() {
     e.preventDefault();
     try {
       if (userEditing) {
-        await api.put(`/auth/users/${userForm.id}`, userForm);
-        showToast('User updated successfully.', 'success');
+        const payload: any = {
+          email: userForm.email,
+          firstName: userForm.firstName,
+          lastName: userForm.lastName,
+          roleId: userForm.roleId,
+          department: userForm.department,
+          skipFace: userForm.skipFace,
+          skipLocation: userForm.skipLocation,
+          isActive: userForm.isActive
+        };
+        if (userForm.password) payload.password = userForm.password;
+        await api.put(`/auth/users/${userForm.id}`, payload);
+        showToast('User details updated successfully.', 'success');
       } else {
-        await api.post('/auth/users', userForm);
-        showToast('User created successfully.', 'success');
+        await api.post('/auth/register', userForm);
+        showToast('New user account created successfully.', 'success');
       }
       setUserModalOpen(false);
-      setUserEditing(false);
-      setUserForm({
-        id: '',
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        roleId: '',
-        department: '',
-        skipFace: false,
-        skipLocation: false,
-        isActive: true
-      });
       loadData();
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Failed to save user.', 'error');
@@ -150,19 +149,16 @@ export default function UsersManagement() {
     setUserModalOpen(true);
   };
 
-  const handleOpenDeleteModal = async (userItem: any) => {
-    setSelectedUserForDelete(userItem);
-    setDeleteModalOpen(true);
-    setAssignedLeadCount(0);
-    setCheckingLeadCount(true);
+  const handleOpenDeleteModal = async (u: any) => {
+    setSelectedUserForDelete(u);
     setTargetAgentId('');
     setDeleteConfirmText('');
-
+    setDeleteModalOpen(true);
+    setCheckingLeadCount(true);
     try {
-      const res = await api.get(`/auth/users/${userItem._id}/lead-count`);
-      setAssignedLeadCount(res.data?.assignedCount || 0);
+      const res = await api.get(`/auth/users/${u._id}/assigned-leads-count`).catch(() => ({ data: { count: 0 } }));
+      setAssignedLeadCount(res.data?.count || 0);
     } catch (err) {
-      console.error('Failed to check lead count:', err);
       setAssignedLeadCount(0);
     } finally {
       setCheckingLeadCount(false);
@@ -223,16 +219,6 @@ export default function UsersManagement() {
     }
   };
 
-  const handleUserRoleChange = async (userId: string, newRoleId: string) => {
-    try {
-      await api.put(`/auth/users/${userId}`, { roleId: newRoleId });
-      showToast('Role updated successfully.', 'success');
-      loadData();
-    } catch (err: any) {
-      showToast(err.response?.data?.error || 'Failed to update user role.', 'error');
-    }
-  };
-
   const handleAssignManager = async (managerId: string) => {
     try {
       if (!selectedUserForManager) return;
@@ -259,25 +245,53 @@ export default function UsersManagement() {
   const activeUsersCount = users.filter(u => u.isActive && u.isApproved !== false).length;
 
   const filteredUsers = users.filter(u => {
-    if (statusFilter === 'pending') return u.approvalStatus === 'pending' || u.isApproved === false;
-    if (statusFilter === 'active') return u.isActive && u.isApproved !== false;
+    if (statusFilter === 'pending' && !(u.approvalStatus === 'pending' || u.isApproved === false)) return false;
+    if (statusFilter === 'active' && !(u.isActive && u.isApproved !== false)) return false;
+    if (userSearchQuery.trim()) {
+      const q = userSearchQuery.toLowerCase().trim();
+      const fullName = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase();
+      const email = (u.email || '').toLowerCase();
+      const userCode = (u.userCode || '').toLowerCase();
+      const roleName = (roles.find(r => r._id === u.roleId)?.name || '').toLowerCase();
+      const deptName = (u.department || '').toLowerCase();
+      return fullName.includes(q) || email.includes(q) || userCode.includes(q) || roleName.includes(q) || deptName.includes(q);
+    }
     return true;
   });
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl uppercase font-extrabold tracking-tight text-slate-800 dark:text-white flex items-center gap-3">
-            Users Management
-            {pendingUsersCount > 0 && (
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 animate-pulse">
-                {pendingUsersCount} Pending Approval
+    <div className="space-y-6 max-w-7xl mx-auto text-left pb-16 font-['Plus_Jakarta_Sans',sans-serif] px-4 md:px-8 py-4">
+      {/* Header Banner with Subtle Sky Blue Accent */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500/80 via-blue-500/70 to-indigo-500/60" />
+        
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center text-white shadow-lg shadow-sky-500/20 flex-shrink-0">
+            <Icons.Users className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-black uppercase tracking-wider font-mono px-2.5 py-0.5 rounded-full border bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border-sky-200/80 dark:border-sky-800/60">
+                Team & Personnel
               </span>
-            )}
-          </h1>
-          <p className="text-xs text-slate-500 mt-1">Manage team members, permissions, and registration approvals.</p>
+              <span className="text-xs font-semibold text-slate-400">
+                Administration
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase flex items-center gap-3">
+              Users Management
+              {pendingUsersCount > 0 && (
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-800 border border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 animate-pulse">
+                  {pendingUsersCount} Pending Approval
+                </span>
+              )}
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Manage team members, roles, reporting hierarchies, and registration approvals.
+            </p>
+          </div>
         </div>
+
         <button
           type="button"
           onClick={() => {
@@ -296,38 +310,38 @@ export default function UsersManagement() {
             });
             setUserModalOpen(true);
           }}
-          className="btn-primary-premium flex items-center gap-2 shadow-md"
+          className="flex items-center gap-2 px-5 h-10 bg-gradient-to-r from-sky-600 via-blue-600 to-indigo-600 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md shadow-sky-500/20 transition-all cursor-pointer flex-shrink-0"
         >
-          <Icons.Plus className="w-4 h-4" /> Add User
+          <Icons.Plus className="w-4 h-4" /> Add New User
         </button>
       </div>
 
-      {/* Filter Tabs Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80">
+      {/* Filter Tabs & Search Bar */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-3 rounded-2xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               statusFilter === 'all'
-                ? 'bg-white dark:bg-slate-900 text-slate-800 dark:text-white shadow-xs'
-                : 'text-slate-500 hover:text-slate-800'
+                ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-3xs font-extrabold'
+                : 'text-slate-500 hover:text-slate-850 dark:hover:text-slate-200'
             }`}
           >
-            All Users <span className="px-1.5 py-0.2 bg-slate-200 dark:bg-slate-700 rounded-full text-[10px]">{users.length}</span>
+            All Users <span className="px-1.5 py-0.2 bg-slate-200/70 dark:bg-slate-700 rounded-full text-[10px] font-mono">{users.length}</span>
           </button>
           <button
             type="button"
             onClick={() => setStatusFilter('pending')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               statusFilter === 'pending'
-                ? 'bg-amber-500 text-white shadow-xs'
+                ? 'bg-amber-500 text-white shadow-3xs font-extrabold'
                 : 'text-slate-500 hover:text-amber-600'
             }`}
           >
             <Icons.Clock className="w-3.5 h-3.5" /> Pending Approval
             {pendingUsersCount > 0 && (
-              <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'pending' ? 'bg-white/30 text-white' : 'bg-amber-100 text-amber-800 font-extrabold'}`}>
+              <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${statusFilter === 'pending' ? 'bg-white/30 text-white' : 'bg-amber-100 text-amber-800 font-extrabold'}`}>
                 {pendingUsersCount}
               </span>
             )}
@@ -335,38 +349,59 @@ export default function UsersManagement() {
           <button
             type="button"
             onClick={() => setStatusFilter('active')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
               statusFilter === 'active'
-                ? 'bg-emerald-600 text-white shadow-xs'
+                ? 'bg-emerald-600 text-white shadow-3xs font-extrabold'
                 : 'text-slate-500 hover:text-emerald-600'
             }`}
           >
             <Icons.CheckCircle className="w-3.5 h-3.5" /> Active Team
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] ${statusFilter === 'active' ? 'bg-white/30 text-white' : 'bg-slate-200 text-slate-700'}`}>
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${statusFilter === 'active' ? 'bg-white/30 text-white' : 'bg-slate-200/70 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}`}>
               {activeUsersCount}
             </span>
           </button>
         </div>
+
+        {/* Real-time search bar */}
+        <div className="relative w-full sm:w-72">
+          <Icons.Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-3 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by name, email, role, dept..."
+            value={userSearchQuery}
+            onChange={(e) => setUserSearchQuery(e.target.value)}
+            className="w-full h-9 pl-9 pr-8 text-xs bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-sky-500 text-slate-800 dark:text-white font-medium placeholder:text-slate-400 transition-all"
+          />
+          {userSearchQuery && (
+            <button
+              onClick={() => setUserSearchQuery('')}
+              className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+            >
+              <Icons.X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="card-premium">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500/60 via-blue-500/60 to-indigo-500/60" />
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-200 text-[10px] font-bold text-slate-400 uppercase tracking-wider h-10">
-                <th className="py-2 px-4">EMPLOYEE</th>
-                <th className="py-2 px-4">ID</th>
-                <th className="py-2 px-4">LOCATION</th>
-                <th className="py-2 px-4 text-center">SKIP FACE</th>
-                <th className="py-2 px-4 text-center">SKIP LOCATION</th>
-                <th className="py-2 px-4 text-center min-w-[140px]">ACCOUNT STATUS</th>
-                <th className="py-2 px-4">ROLE</th>
-                <th className="py-2 px-4">DEPARTMENT</th>
-                <th className="py-2 px-4">REPORTING MANAGER</th>
-                <th className="py-2 px-4 text-center w-40">ACTION</th>
+              <tr className="bg-slate-50/80 dark:bg-slate-800/80 text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border-b border-slate-200 dark:border-slate-800 h-11">
+                <th className="py-2.5 px-4">EMPLOYEE</th>
+                <th className="py-2.5 px-4">ID</th>
+                <th className="py-2.5 px-4">LOCATION</th>
+                <th className="py-2.5 px-4 text-center">SKIP FACE</th>
+                <th className="py-2.5 px-4 text-center">SKIP LOCATION</th>
+                <th className="py-2.5 px-4 text-center min-w-[140px]">ACCOUNT STATUS</th>
+                <th className="py-2.5 px-4">ROLE</th>
+                <th className="py-2.5 px-4">DEPARTMENT</th>
+                <th className="py-2.5 px-4">REPORTING MANAGER</th>
+                <th className="py-2.5 px-4 text-center w-40">ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredUsers.map(u => (
                 <tr key={u._id} className="hover:bg-slate-50/50 transition-colors h-14">
                   {/* Employee Profile Card */}

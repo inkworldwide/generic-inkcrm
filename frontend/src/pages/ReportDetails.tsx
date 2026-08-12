@@ -45,48 +45,65 @@ export default function ReportDetails() {
   const cols = report.columns.length > 0 ? report.columns : ['name', 'status', 'email']; // fallbacks
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto text-left print:p-0">
+    <div className="space-y-6 max-w-6xl mx-auto text-left print:p-0 p-4 sm:p-6">
       
-      {/* Header toolbar */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden pb-2">
-        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-450 uppercase tracking-widest">
-          <Link to="/reports" className="hover:text-indigo-650 transition-colors">Reports</Link>
-          <Icons.ChevronRight className="w-3.5 h-3.5 text-slate-400" />
-          <span className="text-slate-550">{report.name}</span>
+      {/* Header Banner */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+        
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25 flex-shrink-0">
+            <Icons.BarChart2 className="w-6 h-6 stroke-[2.2]" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <Link to="/reports" className="text-[10px] font-black text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200/80 dark:border-indigo-800/60 px-2.5 py-0.5 rounded-full uppercase tracking-wider font-mono hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors">
+                Reports Hub
+              </Link>
+              <Icons.ChevronRight className="w-3 h-3 text-slate-400" />
+              <span className="text-xs font-semibold text-slate-400">
+                Custom Analytics
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
+              {report.name}
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              {report.description || 'Custom generated dynamic report dataset.'}
+            </p>
+          </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
+        <div className="flex items-center gap-2.5">
           <button
             onClick={handleExportCSV}
-            className="btn-secondary-premium h-10 px-4 text-xs font-bold"
+            className="h-10 px-4 bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all flex items-center gap-2 cursor-pointer"
           >
-            <Icons.Download className="w-4 h-4" /> Export CSV
+            <Icons.Download className="w-4 h-4" /> Export Excel
           </button>
           <button
             onClick={handlePrint}
-            className="btn-primary-premium h-10 px-4 text-xs font-bold"
+            className="h-10 px-5 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/25 transition-all flex items-center gap-2 cursor-pointer"
           >
-            <Icons.Printer className="w-4 h-4" /> Export PDF / Print
+            <Icons.Printer className="w-4 h-4" /> Print / PDF
           </button>
         </div>
-      </div>
-
-      <div className="text-left">
-        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">{report.name}</h1>
-        <p className="text-xs text-slate-400 font-semibold mt-1.5 uppercase tracking-wider leading-relaxed">{report.description || 'No description provided.'}</p>
       </div>
 
       {/* Render Chart (except if type is table) */}
       {report.chartType !== 'table' && chartData && chartData.length > 0 && (
-        <div className="card-premium p-8">
-          <h3 className="text-[10px] font-[800] text-slate-400 uppercase tracking-wider mb-6 text-left">Aggregated Summary</h3>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-6 rounded-2xl shadow-xs relative overflow-hidden">
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
+          <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight mb-6 text-left border-b border-slate-100 dark:border-slate-800 pb-3">
+            Aggregated Summary Visualization
+          </h3>
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               {['bar'].includes(report.chartType) ? (
                 <BarChart data={chartData}>
                   <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                  <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
+                  <Tooltip contentStyle={{ backgroundColor: '#0F172A', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} />
                   <Bar dataKey="value" fill="#4F46E5" radius={[4, 4, 0, 0]}>
                     {chartData.map((entry: any, index: number) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -97,7 +114,7 @@ export default function ReportDetails() {
                 <LineChart data={chartData}>
                   <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} tickLine={false} />
                   <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} />
-                  <Tooltip />
+                  <Tooltip contentStyle={{ backgroundColor: '#0F172A', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} />
                   <Line type="monotone" dataKey="value" stroke="#4F46E5" strokeWidth={3} dot={{ r: 4 }} />
                 </LineChart>
               ) : (
@@ -116,7 +133,7 @@ export default function ReportDetails() {
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip contentStyle={{ backgroundColor: '#0F172A', color: '#FFF', borderRadius: '12px', fontSize: '12px', border: 'none', boxShadow: '0 8px 24px rgba(0,0,0,0.2)' }} />
                 </PieChart>
               )}
             </ResponsiveContainer>
@@ -125,13 +142,14 @@ export default function ReportDetails() {
       )}
 
       {/* Row detail dataset */}
-      <div className="card-premium p-0 overflow-hidden text-left shadow-sm">
-        <div className="px-6 py-4 border-b border-slate-100 text-left bg-slate-50/50">
-          <h3 className="text-xs font-[800] text-slate-400 uppercase tracking-wider">Detail Row Report</h3>
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl overflow-hidden shadow-xs relative">
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-emerald-500" />
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-800 text-left bg-slate-50/70 dark:bg-slate-800/60">
+          <h3 className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Detail Row Records ({details?.length || 0})</h3>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-650">
-            <thead className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
+          <table className="w-full text-left text-xs text-slate-650 min-w-[700px]">
+            <thead className="bg-slate-50/90 dark:bg-slate-800/80 text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase border-b border-slate-200 dark:border-slate-700 h-11">
               <tr>
                 {cols.map((colName: string) => (
                   <th key={colName} className="px-6 py-3.5">
@@ -141,22 +159,22 @@ export default function ReportDetails() {
                 <th className="px-6 py-3.5">Created Date</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
               {details && details.map((row: any) => (
-                <tr key={row._id} className="hover:bg-slate-50/30 transition-colors h-16">
+                <tr key={row._id} className="hover:bg-indigo-50/30 dark:hover:bg-slate-800/40 transition-colors h-14">
                   {cols.map((colName: string) => (
-                    <td key={colName} className="px-6 py-3.5 font-semibold text-slate-700 truncate max-w-[200px]">
+                    <td key={colName} className="px-6 py-3.5 font-bold text-slate-900 dark:text-white truncate max-w-[200px]">
                       {formatDate(row.data[colName]) || '-'}
                     </td>
                   ))}
-                  <td className="px-6 py-3.5 text-xs text-slate-400 font-semibold">
+                  <td className="px-6 py-3.5 text-xs text-slate-400 font-semibold font-mono">
                     {formatDate(row.createdAt)}
                   </td>
                 </tr>
               ))}
               {(!details || details.length === 0) && (
                 <tr>
-                  <td colSpan={cols.length + 1} className="py-12 text-center text-slate-450 font-semibold italic">
+                  <td colSpan={cols.length + 1} className="py-14 text-center text-slate-400 font-semibold italic">
                     No matching detail row records found.
                   </td>
                 </tr>

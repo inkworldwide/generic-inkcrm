@@ -244,13 +244,13 @@ export default function Settings() {
     setBpEditForm({ ...bpEditForm, loanType: newLoanType });
   };
   const SETTINGS_TABS = [
-    { id: 'company', label: 'Company Setting', icon: Icons.Building2 },
-    { id: 'role', label: 'Role', icon: Icons.Shield },
-    { id: 'department', label: 'Department', icon: Icons.Network },
-    { id: 'product', label: 'Product', icon: Icons.Package },
-    { id: 'bankmaster', label: 'Bank Master', icon: Icons.Landmark },
-    { id: 'bankingpartner', label: 'Banking Partner', icon: Icons.Briefcase },
-    { id: 'status', label: 'Status', icon: Icons.Tag },
+    { id: 'company', label: 'Company Setting', icon: Icons.Building2, color: 'indigo', accentGradient: 'from-indigo-500 via-purple-500 to-pink-500', activeBadge: 'text-indigo-700 dark:text-indigo-300 bg-indigo-50/80 dark:bg-indigo-950/50 border-indigo-200 dark:border-indigo-800/60' },
+    { id: 'role', label: 'Role', icon: Icons.Shield, color: 'purple', accentGradient: 'from-purple-500 to-pink-500', activeBadge: 'text-purple-700 dark:text-purple-300 bg-purple-50/80 dark:bg-purple-950/50 border-purple-200 dark:border-purple-800/60' },
+    { id: 'department', label: 'Department', icon: Icons.Network, color: 'teal', accentGradient: 'from-teal-500 to-emerald-500', activeBadge: 'text-teal-700 dark:text-teal-300 bg-teal-50/80 dark:bg-teal-950/50 border-teal-200 dark:border-teal-800/60' },
+    { id: 'product', label: 'Product', icon: Icons.Package, color: 'amber', accentGradient: 'from-amber-500 to-orange-500', activeBadge: 'text-amber-700 dark:text-amber-300 bg-amber-50/80 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800/60' },
+    { id: 'bankmaster', label: 'Bank Master', icon: Icons.Landmark, color: 'emerald', accentGradient: 'from-emerald-500 to-teal-500', activeBadge: 'text-emerald-700 dark:text-emerald-300 bg-emerald-50/80 dark:bg-emerald-950/50 border-emerald-200 dark:border-emerald-800/60' },
+    { id: 'bankingpartner', label: 'Banking Partner', icon: Icons.Briefcase, color: 'sky', accentGradient: 'from-sky-500 to-indigo-500', activeBadge: 'text-sky-700 dark:text-sky-300 bg-sky-50/80 dark:bg-sky-950/50 border-sky-200 dark:border-sky-800/60' },
+    { id: 'status', label: 'Status', icon: Icons.Tag, color: 'rose', accentGradient: 'from-rose-500 to-pink-500', activeBadge: 'text-rose-700 dark:text-rose-300 bg-rose-50/80 dark:bg-rose-950/50 border-rose-200 dark:border-rose-800/60' },
   ];
 
   const currentUserRole = roles.find(r => r._id === user?.roleId);
@@ -928,17 +928,40 @@ export default function Settings() {
     );
   }
 
+  const activeTabMeta = visibleTabs.find(t => t.id === currentTab) || visibleTabs[0];
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto text-left">
-      <div className="pb-2">
-        <h1 className="text-2xl uppercase font-[800] tracking-tight text-slate-800">
-          Settings
-        </h1>
+    <div className="space-y-6 max-w-6xl mx-auto text-left px-4 md:px-8 py-4">
+      {/* Header Banner with Subtle Accent */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 rounded-2xl shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${activeTabMeta.accentGradient}`} />
+        
+        <div className="flex items-center gap-4">
+          <div className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${activeTabMeta.accentGradient} flex items-center justify-center text-white shadow-lg shadow-indigo-500/20 flex-shrink-0`}>
+            {React.createElement(activeTabMeta.icon, { className: "w-6 h-6 stroke-[2.2]" })}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className={`text-[10px] font-black uppercase tracking-wider font-mono px-2.5 py-0.5 rounded-full border ${activeTabMeta.activeBadge}`}>
+                System Settings
+              </span>
+              <span className="text-xs font-semibold text-slate-400">
+                Workspace Configuration
+              </span>
+            </div>
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
+              {activeTabMeta.label}
+            </h1>
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
+              Manage organization settings, security privileges, masters, and pipeline statuses.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* Settings Tabs */}
-      <div className="flex overflow-x-auto border-b border-slate-100 hide-scrollbar pb-px">
-        <div className="flex gap-6 min-w-max px-1">
+      {/* Settings Tabs Navigation with Subtle Colored Active Pills */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 p-2 rounded-2xl shadow-xs">
+        <div className="flex overflow-x-auto gap-1.5 hide-scrollbar py-0.5 px-0.5">
           {visibleTabs.map(tab => {
             const Icon = tab.icon;
             const isActive = currentTab === tab.id;
@@ -946,13 +969,13 @@ export default function Settings() {
               <button
                 key={tab.id}
                 onClick={() => navigate(`/settings?tab=${tab.id}`)}
-                className={`flex items-center gap-2 pb-3.5 text-xs font-[800] uppercase tracking-wider border-b-2 transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap cursor-pointer ${
                   isActive 
-                    ? 'border-indigo-650 text-indigo-650' 
-                    : 'border-transparent text-slate-400 hover:text-slate-600 hover:border-slate-200'
+                    ? `${tab.activeBadge} shadow-3xs font-extrabold` 
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-850 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800/60 border border-transparent'
                 }`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className={`w-3.5 h-3.5 ${isActive ? '' : 'text-slate-400'}`} />
                 {tab.label}
               </button>
             );
@@ -963,49 +986,50 @@ export default function Settings() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         
         {/* Company Settings */}
-        <div className={`lg:col-span-12 card-premium p-0 overflow-hidden ${currentTab === 'company' ? 'block' : 'hidden'}`}>
+        <div className={`lg:col-span-12 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-0 overflow-hidden shadow-xs relative ${currentTab === 'company' ? 'block' : 'hidden'}`}>
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500" />
           {/* Sub-tabs Header */}
-          <div className="flex border-b border-slate-100 bg-slate-50/50">
+          <div className="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80">
             <button
               type="button"
               onClick={() => setCompanySubTab('details')}
-              className={`px-6 py-4 font-[800] text-[10px] uppercase tracking-wider transition-all relative ${
+              className={`px-6 py-3.5 font-bold text-xs uppercase tracking-wider transition-all relative cursor-pointer ${
                 companySubTab === 'details'
-                  ? 'bg-white text-slate-800 border-r border-slate-100 shadow-sm'
-                  : 'text-slate-450 hover:bg-slate-50 hover:text-slate-800 border-r border-slate-100'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 font-extrabold shadow-3xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800 hover:text-slate-800 border-r border-slate-100 dark:border-slate-800'
               }`}
             >
               Company Details
               {companySubTab === 'details' && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-650" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />
               )}
             </button>
             <button
               type="button"
               onClick={() => setCompanySubTab('address')}
-              className={`px-6 py-4 font-[800] text-[10px] uppercase tracking-wider transition-all relative ${
+              className={`px-6 py-3.5 font-bold text-xs uppercase tracking-wider transition-all relative cursor-pointer ${
                 companySubTab === 'address'
-                  ? 'bg-white text-slate-800 border-r border-slate-100 shadow-sm'
-                  : 'text-slate-450 hover:bg-slate-50 hover:text-slate-800 border-r border-slate-100'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 font-extrabold shadow-3xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800 hover:text-slate-800 border-r border-slate-100 dark:border-slate-800'
               }`}
             >
               Address
               {companySubTab === 'address' && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-650" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />
               )}
             </button>
             <button
               type="button"
               onClick={() => setCompanySubTab('admin')}
-              className={`px-6 py-4 font-[800] text-[10px] uppercase tracking-wider transition-all relative ${
+              className={`px-6 py-3.5 font-bold text-xs uppercase tracking-wider transition-all relative cursor-pointer ${
                 companySubTab === 'admin'
-                  ? 'bg-white text-slate-800 border-r border-slate-100 shadow-sm'
-                  : 'text-slate-450 hover:bg-slate-50 hover:text-slate-800 border-r border-slate-100'
+                  ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-indigo-400 border-r border-slate-100 dark:border-slate-800 font-extrabold shadow-3xs'
+                  : 'text-slate-500 dark:text-slate-400 hover:bg-white/60 dark:hover:bg-slate-800 hover:text-slate-800 border-r border-slate-100 dark:border-slate-800'
               }`}
             >
               Admin Details
               {companySubTab === 'admin' && (
-                <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-650" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 dark:bg-indigo-400" />
               )}
             </button>
           </div>
@@ -1221,59 +1245,68 @@ export default function Settings() {
 
         {/* Roles Management */}
         <div className={`lg:col-span-12 space-y-6 ${currentTab === 'role' ? 'block' : 'hidden'}`}>
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl uppercase font-[800] text-slate-800 tracking-tight">Roles</h1>
-          </div>
-
           {/* Form Card (Add/Edit) */}
-          <div className="card-premium">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+            <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4">
+              {editingRoleId ? 'Edit Role' : 'Create New Role'}
+            </h2>
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
               <div className="flex flex-col md:flex-row gap-4 flex-grow max-w-2xl">
                 <div className="flex-1">
-                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Role Type</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Role Type Name</label>
                   <input
                     type="text"
-                    placeholder="Enter role type"
+                    placeholder="e.g. Sales Manager, Telecaller"
                     value={roleFormName}
                     onChange={(e) => setRoleFormName(e.target.value)}
-                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                    className="w-full h-10 px-3.5 text-xs font-semibold bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-purple-500 text-slate-900 dark:text-white"
                   />
                 </div>
                 <div className="w-full md:w-36">
-                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Status</label>
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Status</label>
                   <select
                     value={roleFormActive ? 'active' : 'inactive'}
                     onChange={(e) => setRoleFormActive(e.target.value === 'active')}
-                    className="w-full h-11 px-4 text-xs font-semibold bg-white border border-[#E8ECF4] rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500"
+                    className="w-full h-10 px-3.5 text-xs font-semibold bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-purple-500 text-slate-900 dark:text-white cursor-pointer"
                   >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
                   </select>
                 </div>
               </div>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={handleCancelRoleEdit}
-                  className="btn-secondary-premium"
-                >
-                  Cancel
-                </button>
+              <div className="flex gap-2.5">
+                {editingRoleId && (
+                  <button
+                    type="button"
+                    onClick={handleCancelRoleEdit}
+                    className="h-10 px-4 bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={handleSaveRole}
-                  className="btn-primary-premium"
+                  className="h-10 px-5 bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-purple-500/20 transition-all cursor-pointer"
                 >
-                  {editingRoleId ? 'Update' : 'Save'}
+                  {editingRoleId ? 'Update Role' : 'Save Role'}
                 </button>
               </div>
             </div>
           </div>
 
           {/* Table Card (List) */}
-          <div className="bg-white border border-[#E8ECF4] rounded-[20px] shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden relative">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-purple-500 to-pink-500" />
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Active System Roles</h3>
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 rounded-full border border-purple-200/80 dark:border-purple-800 font-mono">
+                {roles.length} Total Roles
+              </span>
+            </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left border-collapse">
+              <table className="w-full text-xs text-left border-collapse">
                 <thead>
                   <tr className="bg-slate-50/50 text-[10px] font-bold text-slate-500 uppercase border-b border-slate-100 h-12">
                     <th className="py-2.5 px-4">Role Type</th>
@@ -1365,23 +1398,24 @@ export default function Settings() {
         {/* Status Settings tab */}
         <div className={`lg:col-span-12 grid grid-cols-1 md:grid-cols-12 gap-5 ${currentTab === 'status' ? 'block' : 'hidden'}`}>
           {/* Form Card */}
-          <div className="md:col-span-4 card-premium">
-            <h3 className="text-lg font-bold text-slate-800">
-              {statusEditing ? 'Edit Status' : 'Add New Status'}
+          <div className="md:col-span-4 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500" />
+            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight mb-4">
+              {statusEditing ? 'Edit Pipeline Status' : 'Add Pipeline Status'}
             </h3>
             <form onSubmit={handleSaveStatus} className="space-y-4">
               <div>
-                <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Status Name</label>
-                <input required type="text" value={statusForm.name} onChange={e => setStatusForm({ ...statusForm, name: e.target.value })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
+                <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Status Name</label>
+                <input required type="text" value={statusForm.name} onChange={e => setStatusForm({ ...statusForm, name: e.target.value })} className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Color</label>
-                  <input type="color" value={statusForm.color} onChange={e => setStatusForm({ ...statusForm, color: e.target.value })} className="w-full h-10 p-1 border border-slate-200 rounded-xl cursor-pointer" />
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Color</label>
+                  <input type="color" value={statusForm.color} onChange={e => setStatusForm({ ...statusForm, color: e.target.value })} className="w-full h-10 p-1 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer bg-slate-50 dark:bg-slate-800" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Icon</label>
-                  <select value={statusForm.icon} onChange={e => setStatusForm({ ...statusForm, icon: e.target.value })} className="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600">
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Icon</label>
+                  <select value={statusForm.icon} onChange={e => setStatusForm({ ...statusForm, icon: e.target.value })} className="w-full h-10 px-3 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500 cursor-pointer">
                     {['Circle', 'Flame', 'Sun', 'Tag', 'CheckCircle', 'Clock', 'XOctagon', 'PhoneCall', 'ArrowDownCircle', 'Hourglass', 'FileWarning', 'FileText', 'Banknote'].map(ic => (
                       <option key={ic} value={ic}>{ic}</option>
                     ))}
@@ -1390,45 +1424,53 @@ export default function Settings() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Pipeline Pos</label>
-                  <input type="number" value={statusForm.pipelinePosition} onChange={e => setStatusForm({ ...statusForm, pipelinePosition: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Pipeline Pos</label>
+                  <input type="number" value={statusForm.pipelinePosition} onChange={e => setStatusForm({ ...statusForm, pipelinePosition: Number(e.target.value) })} className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500" />
                 </div>
                 <div>
-                  <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">Serial Number</label>
-                  <input type="number" value={statusForm.order} onChange={e => setStatusForm({ ...statusForm, order: Number(e.target.value) })} className="w-full px-4 py-2 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 font-semibold focus:outline-none focus:ring-1 focus:ring-indigo-600" />
+                  <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">Serial Number</label>
+                  <input type="number" value={statusForm.order} onChange={e => setStatusForm({ ...statusForm, order: Number(e.target.value) })} className="w-full h-10 px-3.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-rose-500" />
                 </div>
               </div>
               <div className="space-y-2 py-2">
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-800 cursor-pointer">
-                  <input type="checkbox" checked={statusForm.dashboardVisibility} onChange={e => setStatusForm({ ...statusForm, dashboardVisibility: e.target.checked })} className="rounded border-slate-200 bg-white text-indigo-600 focus:ring-0 w-4 h-4" />
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={statusForm.dashboardVisibility} onChange={e => setStatusForm({ ...statusForm, dashboardVisibility: e.target.checked })} className="rounded border-slate-300 text-rose-600 focus:ring-0 w-4 h-4 cursor-pointer" />
                   Show on Dashboard Cards
                 </label>
-                <label className="flex items-center gap-2 text-sm font-semibold text-slate-800 cursor-pointer">
-                  <input type="checkbox" checked={statusForm.isFinal} onChange={e => setStatusForm({ ...statusForm, isFinal: e.target.checked })} className="rounded border-slate-200 bg-white text-indigo-600 focus:ring-0 w-4 h-4" />
-                  Is Closed/Final Stage
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                  <input type="checkbox" checked={statusForm.isFinal} onChange={e => setStatusForm({ ...statusForm, isFinal: e.target.checked })} className="rounded border-slate-300 text-rose-600 focus:ring-0 w-4 h-4 cursor-pointer" />
+                  Is Closed / Final Stage
                 </label>
                 {statusForm.isFinal && (
-                  <label className="flex items-center gap-2 text-sm font-semibold text-slate-800 cursor-pointer">
-                    <input type="checkbox" checked={statusForm.isSuccess} onChange={e => setStatusForm({ ...statusForm, isSuccess: e.target.checked })} className="rounded border-slate-200 bg-white text-indigo-600 focus:ring-0 w-4 h-4" />
-                    Is Success (Won)
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
+                    <input type="checkbox" checked={statusForm.isSuccess} onChange={e => setStatusForm({ ...statusForm, isSuccess: e.target.checked })} className="rounded border-slate-300 text-rose-600 focus:ring-0 w-4 h-4 cursor-pointer" />
+                    Is Success (Won / Approved)
                   </label>
                 )}
               </div>
-              <div className="flex gap-2">
-                <button type="submit" className="btn-primary-premium flex-grow text-center">Save Status</button>
+              <div className="flex gap-2.5">
+                <button type="submit" className="flex-1 h-10 bg-gradient-to-r from-rose-600 via-pink-600 to-red-600 hover:from-rose-700 hover:to-pink-700 active:scale-[0.98] text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-rose-500/20 transition-all cursor-pointer">
+                  {statusEditing ? 'Update Status' : 'Save Status'}
+                </button>
                 {statusEditing && (
                   <button type="button" onClick={() => {
                     setStatusEditing(false);
                     setStatusForm({ id: '', name: '', color: '#4F46E5', icon: 'Circle', pipelinePosition: 0, dashboardVisibility: true, isFinal: false, isSuccess: false, order: 0 });
-                  }} className="btn-secondary-premium">Cancel</button>
+                  }} className="h-10 px-4 bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-700 text-xs font-bold uppercase tracking-wider rounded-xl shadow-3xs transition-all cursor-pointer">Cancel</button>
                 )}
               </div>
             </form>
           </div>
 
           {/* Table Card */}
-          <div className="md:col-span-8 bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl p-4 shadow-sm space-y-3">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Configured Statuses</h3>
+          <div className="md:col-span-8 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl shadow-xs overflow-hidden relative">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 to-pink-500" />
+            <div className="p-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Configured Pipeline Statuses</h3>
+              <span className="px-2.5 py-0.5 text-[10px] font-black uppercase bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 rounded-full border border-rose-200/80 dark:border-rose-800 font-mono">
+                {statuses.length} Statuses
+              </span>
+            </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm text-left border-collapse">
                 <thead>
@@ -1474,7 +1516,8 @@ export default function Settings() {
 
         {/* Generic Dynamic Custom Module tab (Department, Product, Bank Master, etc.) */}
         {tabToApiPath[currentTab] && activeModuleDef && currentTab !== 'bankingpartner' && (
-          <div className="lg:col-span-12 bg-white border-t-[3px] border-t-indigo-600 border border-slate-200 rounded-xl p-4 shadow-sm">
+          <div className="lg:col-span-12 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden">
+            <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${activeTabMeta.accentGradient}`} />
             {(() => {
               const filteredModuleRecords = moduleRecords.filter(rec => {
                 if (!moduleSearchQuery.trim()) return true;
@@ -1489,10 +1532,10 @@ export default function Settings() {
                 <>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
                     <div className="flex items-center gap-3">
-                      <h2 className="text-xl font-extrabold text-slate-850 uppercase tracking-tight">
+                      <h2 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">
                         {activeModuleDef.pluralLabel} Settings
                       </h2>
-                      <span className="text-xs font-bold text-indigo-650 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
+                      <span className={`px-2.5 py-0.5 text-[10px] font-black uppercase rounded-full border font-mono ${activeTabMeta.activeBadge}`}>
                         {filteredModuleRecords.length} {filteredModuleRecords.length === 1 ? 'Record' : 'Records'}
                       </span>
                     </div>
@@ -1506,7 +1549,7 @@ export default function Settings() {
                           value={moduleSearchQuery}
                           onChange={(e) => setModuleSearchQuery(e.target.value)}
                           placeholder={`Search ${activeModuleDef.pluralLabel.toLowerCase()}...`}
-                          className="w-full h-9 pl-9 pr-8 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-slate-900 font-semibold placeholder:text-slate-400 transition-all"
+                          className="w-full h-9 pl-9 pr-8 text-xs bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl focus:outline-none focus:border-indigo-500 text-slate-900 dark:text-white font-semibold placeholder:text-slate-400 transition-all"
                         />
                         {moduleSearchQuery && (
                           <button
@@ -1523,7 +1566,7 @@ export default function Settings() {
                         setModuleForm({});
                         setModuleEditingId('');
                         setModuleModalOpen(true);
-                      }} className="btn-primary-premium flex items-center gap-2 flex-shrink-0">
+                      }} className={`h-9 px-4 bg-gradient-to-r ${activeTabMeta.accentGradient} text-white text-xs font-extrabold uppercase tracking-wider rounded-xl shadow-md shadow-indigo-500/20 hover:opacity-95 active:scale-[0.98] transition-all flex items-center gap-2 flex-shrink-0 cursor-pointer`}>
                         <Icons.Plus className="w-4 h-4" /> Add Record
                       </button>
                     </div>
@@ -1612,20 +1655,21 @@ export default function Settings() {
           <div className="lg:col-span-12 space-y-6">
             
             {/* Top Form Card */}
-            <div className="card-premium">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-5 sm:p-6 shadow-xs relative overflow-hidden">
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-sky-500 to-indigo-500" />
               <form onSubmit={handleSaveBankingPartner} className="space-y-6">
                 
                 {/* 1. Loan Type & PSM (Top) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block mb-1.5">
+                    <label className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider block mb-1.5">
                       Loan Type <span className="text-red-500">*</span>
                     </label>
                     <select
                       required
                       value={bpForm.loanType}
                       onChange={(e) => handleBpLoanTypeChange(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-850 font-semibold focus:outline-none focus:ring-4 focus:ring-indigo-600/5 focus:border-indigo-650 transition-all shadow-sm"
+                      className="w-full px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs text-slate-900 dark:text-white font-semibold focus:outline-none focus:border-sky-500 transition-all cursor-pointer"
                     >
                       <option value="">-Select One-</option>
                       {bpProductsList.map(type => (
