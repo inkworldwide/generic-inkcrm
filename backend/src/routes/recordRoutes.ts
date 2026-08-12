@@ -588,7 +588,7 @@ router.get('/:apiPath', async (req: Request, res: Response): Promise<void> => {
 
     if (userIdsToFetch.size > 0) {
       const userDocs = await User.find({ _id: { $in: Array.from(userIdsToFetch) } }).select('firstName lastName name email');
-      const userMap = new Map(userDocs.map(u => [u._id.toString(), `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.name || u.email]));
+      const userMap = new Map(userDocs.map(u => [u._id.toString(), `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email]));
 
       records.forEach((r: any) => {
         if (r.data) {
@@ -784,7 +784,7 @@ router.get('/:apiPath/:id', async (req: Request, res: Response): Promise<void> =
         .filter(id => id && /^[0-9a-fA-F]{24}$/.test(String(id)));
       if (ids.length > 0) {
         const users = await User.find({ _id: { $in: ids } }).select('firstName lastName name email');
-        const userMap = new Map(users.map(u => [u._id.toString(), `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.name || u.email]));
+        const userMap = new Map(users.map(u => [u._id.toString(), `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email]));
         if (record.data.assignedTo && userMap.has(String(record.data.assignedTo))) {
           record.data.assignedToName = userMap.get(String(record.data.assignedTo));
           record.data.assignedTo = userMap.get(String(record.data.assignedTo));
