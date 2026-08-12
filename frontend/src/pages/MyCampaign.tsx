@@ -80,9 +80,11 @@ export default function MyCampaign() {
       // Initialize states
       const initialStates: Record<string, LeadState> = {};
       (res.data.leads || []).forEach((lead: LeadRecord) => {
+        const rawRemarks = lead.data?.notes || lead.data?.remarks || '';
+        const cleanRemarks = String(rawRemarks).replace(/<[^>]*>/g, '').trim();
         initialStates[lead._id] = {
-          status: lead.data?.status || 'Yet To Call',
-          remarks: lead.data?.notes || '',
+          status: lead.data?.status || lead.data?.dialStatus || 'Yet To Call',
+          remarks: cleanRemarks,
           caseDetails: lead.data?.caseDetails || ''
         };
       });
@@ -118,22 +120,46 @@ export default function MyCampaign() {
     try {
       showToast('Exporting campaign CSV report...', 'info');
       let targetLeads = campaignLeads && campaignLeads.length > 0 ? campaignLeads : undefined;
-
+      
       if (!targetLeads) {
         const res = await api.get(`/records/campaigns/my-campaigns/details/${encodeURIComponent(campaignName)}`);
         targetLeads = res.data.leads || [];
       }
 
       if (!targetLeads || targetLeads.length === 0) {
-        showToast(`No leads found for campaign "${campaignName}".`, 'warning');
+        showToast('No leads available to export.', 'warning');
         return;
       }
 
-      exportCampaignCSV(campaignName, targetLeads);
-      showToast(`Exported ${targetLeads.length} leads for campaign "${campaignName}"!`, 'success');
+      // Generate CSV rows
+      const headers = ['Sl No', 'Data Code', 'Location', 'Customer', 'Firm Name', 'Contact Number', 'Case Details', 'Lead Category', 'Remarks', 'Agent Assigned To', 'Dial Status', 'Created At'];
+      const rows = targetLeads.map((lead, idx) => [
+        idx + 1,
+        lead.data?.dataCode || lead.data?.data_code || `LND-${lead._id.slice(-6).toUpperCase()}`,
+        lead.data?.city || lead.data?.location || 'N/A',
+        `${lead.data?.firstName || ''} ${lead.data?.lastName || ''}`.trim() || lead.data?.customerName || lead.data?.customer || 'N/A',
+        lead.data?.company || lead.data?.firmName || lead.data?.firm_name || 'N/A',
+        lead.data?.phone || lead.data?.mobile || lead.data?.name_contact_num || 'N/A',
+        leadStates[lead._id]?.caseDetails ?? lead.data?.caseDetails ?? 'N/A',
+        lead.data?.leadCategory || lead.data?.lead_category || lead.data?.loanType || 'N/A',
+        (leadStates[lead._id]?.remarks ?? lead.data?.notes ?? '').toString().replace(/<[^>]*>/g, ''),
+        lead.data?.assignedTo || (lead as any).assignedToName || 'Unassigned',
+        leadStates[lead._id]?.status || lead.data?.status || 'Yet To Call',
+        new Date(lead.createdAt).toLocaleDateString()
+      ]);
+
+      const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `${campaignName.replace(/\s+/g, '_')}_Leads_${new Date().toISOString().slice(0, 10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Campaign exported successfully!', 'success');
     } catch (err) {
       console.error(err);
-      showToast('Failed to export campaign data.', 'error');
+      showToast('Failed to export campaign report.', 'error');
     }
   };
 
@@ -164,6 +190,9 @@ export default function MyCampaign() {
     try {
       const payload = {
         status: newStatus,
+        dialStatus: newStatus,
+        dialedAt: new Date(),
+        callAttempts: ((lead.data?.callAttempts as number) || 0) + 1,
         notes: currentRemarks,
         caseDetails: currentCaseDetails
       };
@@ -223,7 +252,7 @@ export default function MyCampaign() {
     window.open(`https://wa.me/${cleanPhone}`, '_blank');
   };
 
-  const handleInitiateCall = (lead: LeadRecord) => {
+  const handleInitiateCall = async (lead: LeadRecord) => {
     const rawPhone = lead.data?.phone || lead.data?.mobile || lead.data?.contactNumber || lead.data?.contactNum || lead.data?.mobileNo || lead.data?.contact_num || '';
     const cleanPhone = String(rawPhone).replace(/[^\d+]/g, '').trim();
     if (!cleanPhone) {
@@ -232,6 +261,15 @@ export default function MyCampaign() {
     }
     const leadName = `${lead.data?.firstName || ''} ${lead.data?.lastName || ''}`.trim() || lead.data?.fullName || lead.data?.customerName || lead.data?.name || 'Lead';
     showToast(`Calling ${leadName} (${cleanPhone})...`, 'info');
+
+    // Track dial activity
+    try {
+      await api.put(`/records/leads/${lead._id}`, {
+        dialedAt: new Date(),
+        callAttempts: ((lead.data?.callAttempts as number) || 0) + 1
+      });
+    } catch (e) {}
+
     window.location.href = `tel:${cleanPhone}`;
   };
 
@@ -245,6 +283,7 @@ export default function MyCampaign() {
 
       const payload: Record<string, any> = {
         status: state.status,
+        dialStatus: state.status,
         notes: state.remarks,
         caseDetails: state.caseDetails
       };
@@ -265,7 +304,7 @@ export default function MyCampaign() {
       }
     } catch (err: any) {
       console.error(err);
-      showToast(err.response?.data?.error || 'Failed to save lead details.', 'error');
+      showToast('Failed to save lead updates.', 'error');
     }
   };
 
@@ -541,7 +580,7 @@ export default function MyCampaign() {
                 <table className="w-full text-left text-xs border-collapse min-w-[1300px]">
                   <thead className="sticky top-0 z-10">
                     <tr className="bg-[#17223B] text-white font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-800 shadow-xs">
-                      <th className="py-3.5 px-3 text-center w-12 border-r border-slate-700/50">Slno</th>
+                      <th className="py-3.5 px-3 text-center w-14 border-r border-slate-700/50">Sl No.</th>
                       <th className="py-3.5 px-3 border-r border-slate-700/50">Data Code</th>
                       <th className="py-3.5 px-3 border-r border-slate-700/50">Location</th>
                       <th className="py-3.5 px-3 border-r border-slate-700/50">Customer</th>
@@ -648,7 +687,7 @@ export default function MyCampaign() {
                             <input
                               type="text"
                               placeholder="Remarks / Notes"
-                              value={leadStates[lead._id]?.remarks ?? ''}
+                              value={(leadStates[lead._id]?.remarks ?? '').replace(/<[^>]*>/g, '')}
                               onChange={(e) => handleFieldChange(lead._id, 'remarks', e.target.value)}
                               onBlur={() => handleSaveLead(lead._id)}
                               className="w-full text-xs bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1.5 focus:outline-none focus:border-indigo-600"

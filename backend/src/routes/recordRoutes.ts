@@ -164,9 +164,26 @@ router.get('/campaigns/allocation-stats', async (req: Request, res: Response): P
       }
     });
 
-    // Campaign-level stats (by campaign name) - search across ALL modules in org
+    // Campaign-level stats (by campaign name) - only include registered campaigns in org
+    const campaignModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'campaigns' });
+    let campaignRecords: any[] = [];
+    if (campaignModule) {
+      campaignRecords = await CustomRecord.find({
+        organizationId: orgId,
+        moduleId: campaignModule._id
+      }).lean();
+    }
+
+    const registeredCampaignNames = new Set(
+      campaignRecords.map((c: any) => {
+        const d = c.data || {};
+        return (d.campaignName || d.name || d.source || '').toString().trim().toLowerCase();
+      }).filter(Boolean)
+    );
+
     const allLeads = await CustomRecord.find({
       organizationId: orgId,
+      moduleId: leadModule._id,
       $or: [
         { 'data.source': { $exists: true, $ne: '' } },
         { 'data.campaignName': { $exists: true, $ne: '' } },
@@ -182,18 +199,28 @@ router.get('/campaigns/allocation-stats', async (req: Request, res: Response): P
       const d = lead.data || {};
       const campName = (
         d.campaignName ||
-        d.source ||
         d.campaign ||
-        d.campaign_name
+        d.campaign_name ||
+        d.source
       )?.toString().trim();
 
       if (campName) {
-        const key = campName.toLowerCase();
-        campaignAllocatedStats[key] = (campaignAllocatedStats[key] || 0) + 1;
+        const lower = campName.toLowerCase();
+        const genericSources = ['website', 'referral', 'cold call', 'social media', 'google ads', 'facebook ads', 'walk-in', 'direct'];
+        const isRegistered = registeredCampaignNames.size === 0 || registeredCampaignNames.has(lower);
+        
+        if (isRegistered && (registeredCampaignNames.has(lower) || !genericSources.includes(lower))) {
+          campaignAllocatedStats[lower] = (campaignAllocatedStats[lower] || 0) + 1;
 
-        const status = (d.status || d.dialStatus || '').toString().trim().toLowerCase();
-        if (status && status !== 'yet to call' && status !== 'not called' && status !== 'new') {
-          campaignDialedStats[key] = (campaignDialedStats[key] || 0) + 1;
+          const dialSt = (d.dialStatus || '').toString().trim().toLowerCase();
+          const st = (d.status || '').toString().trim().toLowerCase();
+          const hasDialStatus = dialSt && dialSt !== 'yet to call' && dialSt !== 'not called' && dialSt !== 'new';
+          const hasDialedStatus = st && st !== 'new' && st !== 'yet to call' && st !== 'not called';
+          const hasCalls = (d.callAttempts && Number(d.callAttempts) > 0) || !!d.dialedAt;
+          
+          if (hasDialedStatus || (hasCalls && hasDialStatus)) {
+            campaignDialedStats[lower] = (campaignDialedStats[lower] || 0) + 1;
+          }
         }
       }
     });
@@ -322,7 +349,24 @@ router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promi
       return;
     }
 
-    // Get the leads module
+    // 1. Get registered campaigns from the Campaigns module
+    const campaignModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'campaigns' });
+    let campaignRecords: any[] = [];
+    if (campaignModule) {
+      campaignRecords = await CustomRecord.find({
+        organizationId: orgId,
+        moduleId: campaignModule._id
+      }).lean();
+    }
+
+    const registeredCampaignNames = new Set(
+      campaignRecords.map((c: any) => {
+        const d = c.data || {};
+        return (d.campaignName || d.name || d.source || '').toString().trim().toLowerCase();
+      }).filter(Boolean)
+    );
+
+    // 2. Get the leads module
     const leadModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'leads' });
     if (!leadModule) {
       res.status(200).json({ campaigns: [] });
@@ -359,47 +403,55 @@ router.get('/campaigns/my-campaigns', async (req: Request, res: Response): Promi
       }).lean();
     }
 
-    // Group leads by campaign name
+    // Group leads by campaign name — only include actual campaigns!
     const campaignGroups: Record<string, any[]> = {};
     leads.forEach((lead: any) => {
       const d = lead.data || {};
-      const source = (
-        d.source ||
+      const rawSource = (
         d.campaignName ||
         d.campaign ||
-        d.campaign_name
+        d.campaign_name ||
+        d.source
       )?.toString().trim();
 
-      if (source) {
-        if (!campaignGroups[source]) {
-          campaignGroups[source] = [];
+      if (rawSource) {
+        const lower = rawSource.toLowerCase();
+        const genericSources = ['website', 'referral', 'cold call', 'social media', 'google ads', 'facebook ads', 'walk-in', 'direct'];
+        const isRegistered = registeredCampaignNames.size === 0 || registeredCampaignNames.has(lower);
+
+        if (isRegistered && (registeredCampaignNames.has(lower) || !genericSources.includes(lower))) {
+          // Find canonical name from registered campaign or use raw
+          const canonical = campaignRecords.find(c => {
+            const cd = c.data || {};
+            return (cd.campaignName || cd.name || cd.source || '').toString().trim().toLowerCase() === lower;
+          });
+          const campName = canonical ? (canonical.data?.campaignName || canonical.data?.name || rawSource) : rawSource;
+
+          if (!campaignGroups[campName]) {
+            campaignGroups[campName] = [];
+          }
+          campaignGroups[campName].push(lead);
         }
-        campaignGroups[source].push(lead);
       }
     });
-
-    // Get all campaigns to match dates or other details
-    const campaignModule = await ModuleDefinition.findOne({ organizationId: orgId, apiPath: 'campaigns' });
-    let campaignRecords: any[] = [];
-    if (campaignModule) {
-      campaignRecords = await CustomRecord.find({
-        organizationId: orgId,
-        moduleId: campaignModule._id
-      }).lean();
-    }
 
     const result = Object.keys(campaignGroups)
       .map(campName => {
         const groupLeads = campaignGroups[campName];
         const totalAssigned = groupLeads.length;
         
+        // Accurate calculation of dialed leads:
         const dialed = groupLeads.filter(l => {
           const d = l.data || {};
-          const s = ((d.status || d.dialStatus) || '').toString().trim().toLowerCase();
-          return s !== 'yet to call' && s !== 'not called' && s !== '' && s !== 'new';
+          const dialSt = (d.dialStatus || '').toString().trim().toLowerCase();
+          const st = (d.status || '').toString().trim().toLowerCase();
+          const hasDialStatus = dialSt && dialSt !== 'yet to call' && dialSt !== 'not called' && dialSt !== 'new';
+          const hasDialedStatus = st && st !== 'new' && st !== 'yet to call' && st !== 'not called';
+          const hasCalls = (d.callAttempts && Number(d.callAttempts) > 0) || !!d.dialedAt;
+          return hasDialedStatus || (hasCalls && hasDialStatus);
         }).length;
         
-        const yetToDial = totalAssigned - dialed;
+        const yetToDial = Math.max(0, totalAssigned - dialed);
 
         const campRecord = campaignRecords.find(c => {
           const d = c.data || {};

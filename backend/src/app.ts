@@ -4,7 +4,6 @@ import helmet from 'helmet';
 import compression from 'compression';
 import path from 'path';
 import mongoose from 'mongoose';
-import rateLimit from 'express-rate-limit';
 import { resolveTenant } from './middleware/tenantMiddleware';
 import { logger } from './utils/logger';
 
@@ -62,26 +61,7 @@ app.use(cors({
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// 5. Global API Rate Limiter
-const globalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 300 : 100000, // limit relaxed in development
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many requests from this IP. Please try again after 15 minutes.' }
-});
-app.use(globalLimiter);
-
-// 6. Strict Rate Limiter for Authentication endpoints
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'production' ? 30 : 100000, // limit relaxed in development
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'Too many authentication attempts. Please try again after 15 minutes.' }
-});
-
-// 7. Custom NoSQL Injection Protection
+// 5. Custom NoSQL Injection Protection
 const sanitizeObject = (obj: any): any => {
   if (obj instanceof Object) {
     for (const key in obj) {
@@ -105,7 +85,7 @@ app.use((req, res, next) => {
 // Serve static uploaded files
 app.use('/uploads', express.static(path.join(__dirname, '../../uploads')));
 
-// 8. Health, Ready, and Version check endpoints (placed before tenant resolver)
+// 6. Health, Ready, and Version check endpoints (placed before tenant resolver)
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
@@ -130,8 +110,8 @@ app.get('/version', (req, res) => {
 // Multi-tenant resolver middleware runs on all API routes
 app.use(resolveTenant);
 
-// Mount API routes
-app.use('/api/v1/auth', authLimiter, authRoutes); // Apply strict auth rate limiter
+// Mount API routes (No 15-minute rate limiters)
+app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/tenants', tenantRoutes);
 app.use('/api/v1/modules', moduleRoutes);
 app.use('/api/v1/records', recordRoutes);
@@ -149,7 +129,7 @@ app.get('/', (req, res) => {
   res.json({ message: 'Welcome to inkCRM API Server' });
 });
 
-// 9. Centralized Error Handling Middleware (Hides stack traces in production)
+// 7. Centralized Error Handling Middleware (Hides stack traces in production)
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   logger.error(err.stack || err.message);
   
