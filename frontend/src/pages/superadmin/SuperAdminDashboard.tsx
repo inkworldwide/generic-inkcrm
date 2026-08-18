@@ -572,7 +572,7 @@ export default function SuperAdminDashboard() {
           {/* Navigation Links */}
           <div className="p-3 space-y-1">
             <div className="px-3 py-1.5 text-[10px] font-semibold tracking-wider text-[#9CA3AF] uppercase">
-              Platform Menu
+              Platform Navigation
             </div>
 
             {/* Tab 1: Dashboard */}
@@ -612,6 +612,34 @@ export default function SuperAdminDashboard() {
               <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-[#312E81] dark:text-indigo-300 font-semibold">
                 Super Admin
               </span>
+            </button>
+
+            <div className="pt-3 px-3 py-1.5 text-[10px] font-semibold tracking-wider text-[#9CA3AF] uppercase">
+              Platform Actions
+            </div>
+
+            {/* Action 1: Create Admin-CRM */}
+            <button
+              onClick={handleOpenCreateModal}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-[#111827] dark:text-slate-200 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Icons.UserPlus className="w-4 h-4 text-[#312E81] dark:text-indigo-400 group-hover:scale-105 transition-transform" />
+                <span className="font-semibold">Create Admin-CRM</span>
+              </div>
+              <Icons.Plus className="w-3.5 h-3.5 text-[#6B7280]" />
+            </button>
+
+            {/* Action 2: Add Custom Vertical */}
+            <button
+              onClick={() => setShowAddVerticalModal(true)}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium text-[#4B5563] dark:text-slate-300 hover:bg-[#F9FAFB] dark:hover:bg-slate-800/60 hover:text-[#111827] transition-colors cursor-pointer group"
+            >
+              <div className="flex items-center gap-2.5">
+                <Icons.Boxes className="w-4 h-4 text-[#6B7280] group-hover:text-[#312E81] dark:group-hover:text-indigo-400 transition-colors" />
+                <span>Add Custom Vertical</span>
+              </div>
+              <Icons.Plus className="w-3.5 h-3.5 text-[#9CA3AF]" />
             </button>
           </div>
         </div>
