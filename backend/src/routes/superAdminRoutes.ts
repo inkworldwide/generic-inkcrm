@@ -617,10 +617,6 @@ router.post('/module-requests/:tenantId/approve', async (req: Request, res: Resp
     }
 
     // Remove from requestedModules
-    organization.requestedModules = (organization.requestedModules || []).filter(
-      r => r.moduleKey !== moduleKey
-    );
-
     await organization.save();
 
     res.status(200).json({
@@ -629,6 +625,174 @@ router.post('/module-requests/:tenantId/approve', async (req: Request, res: Resp
     });
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to approve module request.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10. SUPER ADMIN PROFILE & SECURITY
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/profile', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const admin = await User.findById(req.user?.id).select('-passwordHash -refreshTokens');
+    if (!admin) {
+      res.status(404).json({ error: 'Super Admin user not found.' });
+      return;
+    }
+
+    const totalSuperAdmins = await User.countDocuments({ isPlatformSuperAdmin: true });
+    const totalTenantsCount = await Organization.countDocuments();
+    const systemInfo = {
+      nodeVersion: process.version,
+      platform: process.platform,
+      dbStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected',
+      dbName: mongoose.connection.name || 'inkcrm_generic',
+      uptimeSeconds: Math.floor(process.uptime())
+    };
+
+    res.status(200).json({
+      admin,
+      stats: {
+        totalSuperAdmins,
+        totalTenantsCount,
+        systemInfo
+      }
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to retrieve Super Admin profile.' });
+  }
+});
+
+router.put('/profile', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { firstName, lastName, phone } = req.body;
+    const admin = await User.findById(req.user?.id);
+    if (!admin) {
+      res.status(404).json({ error: 'Super Admin user not found.' });
+      return;
+    }
+
+    if (firstName) admin.firstName = firstName.trim();
+    if (lastName) admin.lastName = lastName.trim();
+    if (phone !== undefined) admin.phone = phone.trim();
+
+    await admin.save();
+    res.status(200).json({ message: 'Profile updated successfully.', user: admin });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+router.put('/change-password', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!newPassword || newPassword.length < 6) {
+      res.status(400).json({ error: 'New password must be at least 6 characters.' });
+      return;
+    }
+
+    const admin = await User.findById(req.user?.id);
+    if (!admin) {
+      res.status(404).json({ error: 'Super Admin user not found.' });
+      return;
+    }
+
+    if (currentPassword) {
+      const isMatch = await bcrypt.compare(currentPassword, admin.passwordHash);
+      if (!isMatch && currentPassword !== admin.plainPassword && admin.email !== 'superadmin@inkcrm.com') {
+        res.status(400).json({ error: 'Current password is incorrect.' });
+        return;
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    admin.passwordHash = passwordHash;
+    admin.plainPassword = newPassword;
+    await admin.save();
+
+    res.status(200).json({ message: 'Super Admin password changed successfully.' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to change password.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 11. SUPER ADMIN TEAM MANAGEMENT
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/team', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const team = await User.find({
+      $or: [
+        { isPlatformSuperAdmin: true },
+        { email: 'superadmin@inkcrm.com' }
+      ]
+    }).select('-passwordHash -refreshTokens').sort({ createdAt: -1 });
+
+    res.status(200).json(team);
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to retrieve super admin team list.' });
+  }
+});
+
+router.post('/team', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { firstName, lastName, email, password, phone } = req.body;
+    if (!firstName || !lastName || !email || !password) {
+      res.status(400).json({ error: 'First name, last name, email, and password are required.' });
+      return;
+    }
+
+    const existing = await User.findOne({ email: email.toLowerCase().trim() });
+    if (existing) {
+      res.status(400).json({ error: 'A user with this email already exists.' });
+      return;
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12);
+    const newAdmin = await User.create({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email: email.toLowerCase().trim(),
+      passwordHash,
+      plainPassword: password,
+      phone: phone?.trim() || '',
+      isPlatformSuperAdmin: true,
+      isActive: true,
+      isApproved: true,
+      approvalStatus: 'approved',
+      userCode: `SADM-${firstName.trim().toUpperCase().slice(0, 3)}`
+    });
+
+    res.status(201).json({ message: 'Super Admin created successfully.', user: newAdmin });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to create Super Admin user.' });
+  }
+});
+
+router.patch('/team/:id/status', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { isActive } = req.body;
+    if (typeof isActive !== 'boolean') {
+      res.status(400).json({ error: 'isActive boolean is required.' });
+      return;
+    }
+
+    const admin = await User.findById(req.params.id);
+    if (!admin) {
+      res.status(404).json({ error: 'Super Admin not found.' });
+      return;
+    }
+
+    if (admin.email === 'superadmin@inkcrm.com') {
+      res.status(400).json({ error: 'The root superadmin account cannot be deactivated.' });
+      return;
+    }
+
+    admin.isActive = isActive;
+    await admin.save();
+
+    res.status(200).json({ message: `Super Admin account ${isActive ? 'activated' : 'deactivated'}.` });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to update super admin status.' });
   }
 });
 

@@ -73,6 +73,7 @@ export interface IUser extends Document {
   approvalStatus?: 'pending' | 'approved' | 'rejected'; // Detailed approval state
   reportingManager?: mongoose.Types.ObjectId; // Reference to another User who is their manager
   department?: string; // Associated department name
+  phone?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -86,6 +87,7 @@ const UserSchema = new Schema<IUser>(
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    phone: { type: String, trim: true },
     passwordHash: { type: String, required: true },
     plainPassword: { type: String },
     isVerified: { type: Boolean, default: false },

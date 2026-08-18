@@ -66,6 +66,16 @@ interface PlatformStats {
   pendingModuleRequestsCount: number;
 }
 
+interface SuperAdminProfile {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  userCode?: string;
+  createdAt: string;
+}
+
 const ALL_SYSTEM_MODULES = [
   { key: 'dashboard', label: 'Dashboard & KPI Metrics', category: 'Core' },
   { key: 'leads', label: 'Leads Process & Pipeline', category: 'Sales & CRM' },
@@ -96,6 +106,10 @@ export default function SuperAdminDashboard() {
   const { user, logout, loginAsTenant } = useAuthStore();
   const { showToast } = useToastStore();
 
+  // Navigation tab: 'dashboard' | 'settings'
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'settings'>('dashboard');
+  const [settingsSubTab, setSettingsSubTab] = useState<'profile' | 'security' | 'team' | 'system'>('profile');
+
   // Theme state (Persisted)
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('theme');
@@ -120,6 +134,31 @@ export default function SuperAdminDashboard() {
   const [tenants, setTenants] = useState<TenantItem[]>([]);
   const [verticals, setVerticals] = useState<VerticalTemplate[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
+
+  // Super Admin Profile & Settings state
+  const [adminProfile, setAdminProfile] = useState<SuperAdminProfile | null>(null);
+  const [systemDiag, setSystemDiag] = useState<any>(null);
+  const [profileFirstName, setProfileFirstName] = useState('');
+  const [profileLastName, setProfileLastName] = useState('');
+  const [profilePhone, setProfilePhone] = useState('');
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  // Change Password state
+  const [currentPassword, setCurrentPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [savingPassword, setSavingPassword] = useState(false);
+
+  // Super Admin Team state
+  const [adminTeam, setAdminTeam] = useState<any[]>([]);
+  const [loadingTeam, setLoadingTeam] = useState(false);
+  const [showAddAdminModal, setShowAddAdminModal] = useState(false);
+  const [newTeamFirst, setNewTeamFirst] = useState('');
+  const [newTeamLast, setNewTeamLast] = useState('');
+  const [newTeamEmail, setNewTeamEmail] = useState('');
+  const [newTeamPassword, setNewTeamPassword] = useState('SuperAdmin@2026!');
+  const [newTeamPhone, setNewTeamPhone] = useState('');
+  const [creatingTeamUser, setCreatingTeamUser] = useState(false);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -162,6 +201,7 @@ export default function SuperAdminDashboard() {
 
   useEffect(() => {
     loadDashboardData();
+    loadSuperAdminProfile();
   }, []);
 
   const loadDashboardData = async () => {
@@ -183,6 +223,35 @@ export default function SuperAdminDashboard() {
       showToast('Failed to load platform data.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSuperAdminProfile = async () => {
+    try {
+      const res = await api.get('/super-admin/profile');
+      if (res.data?.admin) {
+        setAdminProfile(res.data.admin);
+        setProfileFirstName(res.data.admin.firstName || '');
+        setProfileLastName(res.data.admin.lastName || '');
+        setProfilePhone(res.data.admin.phone || '');
+      }
+      if (res.data?.stats?.systemInfo) {
+        setSystemDiag(res.data.stats.systemInfo);
+      }
+    } catch (err: any) {
+      console.warn('Could not load super admin profile:', err);
+    }
+  };
+
+  const loadAdminTeam = async () => {
+    try {
+      setLoadingTeam(true);
+      const res = await api.get('/super-admin/team');
+      setAdminTeam(res.data || []);
+    } catch (err: any) {
+      showToast('Failed to load super admin team.', 'error');
+    } finally {
+      setLoadingTeam(false);
     }
   };
 
@@ -290,6 +359,96 @@ export default function SuperAdminDashboard() {
     }
   };
 
+  // Update Super Admin Profile
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setSavingProfile(true);
+      await api.put('/super-admin/profile', {
+        firstName: profileFirstName,
+        lastName: profileLastName,
+        phone: profilePhone
+      });
+      showToast('Super Admin profile updated successfully!', 'success');
+      loadSuperAdminProfile();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update profile.', 'error');
+    } finally {
+      setSavingProfile(false);
+    }
+  };
+
+  // Change Password
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      showToast('New passwords do not match.', 'error');
+      return;
+    }
+    if (newPassword.length < 6) {
+      showToast('Password must be at least 6 characters.', 'error');
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+      await api.put('/super-admin/change-password', {
+        currentPassword,
+        newPassword
+      });
+      showToast('Password changed successfully!', 'success');
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to change password.', 'error');
+    } finally {
+      setSavingPassword(false);
+    }
+  };
+
+  // Add Super Admin User
+  const handleCreateTeamAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTeamFirst || !newTeamLast || !newTeamEmail || !newTeamPassword) {
+      showToast('Please fill all required fields.', 'error');
+      return;
+    }
+
+    try {
+      setCreatingTeamUser(true);
+      await api.post('/super-admin/team', {
+        firstName: newTeamFirst.trim(),
+        lastName: newTeamLast.trim(),
+        email: newTeamEmail.trim(),
+        password: newTeamPassword,
+        phone: newTeamPhone.trim()
+      });
+      showToast(`Super Admin "${newTeamFirst}" created successfully!`, 'success');
+      setShowAddAdminModal(false);
+      setNewTeamFirst('');
+      setNewTeamLast('');
+      setNewTeamEmail('');
+      setNewTeamPhone('');
+      loadAdminTeam();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to create super admin user.', 'error');
+    } finally {
+      setCreatingTeamUser(false);
+    }
+  };
+
+  const handleToggleAdminStatus = async (adminUser: any) => {
+    const newStatus = !adminUser.isActive;
+    try {
+      await api.patch(`/super-admin/team/${adminUser._id}/status`, { isActive: newStatus });
+      showToast(`Super Admin account ${newStatus ? 'activated' : 'deactivated'}.`, 'success');
+      loadAdminTeam();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update super admin status.', 'error');
+    }
+  };
+
   // Toggle Tenant Active / Suspended
   const handleToggleStatus = async (tenant: TenantItem) => {
     const newStatus = tenant.status === 'active' ? 'disabled' : 'active';
@@ -389,533 +548,1007 @@ export default function SuperAdminDashboard() {
   }, [tenants, searchQuery, selectedVertical, selectedStatus]);
 
   return (
-    <div className="h-screen w-full overflow-y-auto bg-[#F8F8FA] dark:bg-[#0B0F17] text-[#111827] dark:text-slate-100 flex flex-col font-sans transition-colors duration-150">
+    <div className="h-screen w-full overflow-hidden bg-[#F8F8FA] dark:bg-[#0B0F17] text-[#111827] dark:text-slate-100 flex font-sans transition-colors duration-150">
       
-      {/* ── TOP PLATFORM NAVIGATION BAR (CLEAN & MINIMAL) ──────────────────── */}
-      <header className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 bg-[#FFFFFF] dark:bg-[#111827] px-8 sm:px-10 flex items-center justify-between sticky top-0 z-40 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex-shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-[#312E81] flex items-center justify-center text-white shadow-xs">
-            <Icons.ShieldCheck className="w-4 h-4 stroke-[2.2]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm sm:text-base font-bold text-[#111827] dark:text-white tracking-tight">
-                inkCRM <span className="text-[#312E81] dark:text-indigo-400">Platform Control</span>
-              </h1>
-              <span className="px-2 py-0.5 text-[10px] font-semibold tracking-wider bg-[#F1F5F9] dark:bg-slate-800 text-[#4B5563] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700 rounded-md">
-                Multi-Tenant Engine
-              </span>
+      {/* ── LEFT SUPER ADMIN SIDEBAR ────────────────────────────────────────── */}
+      <aside className="w-64 flex-shrink-0 bg-[#FFFFFF] dark:bg-[#111827] border-r border-[#E5E7EB] dark:border-slate-800 flex flex-col justify-between h-screen sticky top-0 z-30 select-none shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
+        
+        {/* Top Branding Section */}
+        <div>
+          <div className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 px-5 flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-[#312E81] flex items-center justify-center text-white shadow-xs flex-shrink-0">
+              <Icons.ShieldCheck className="w-4 h-4 stroke-[2.2]" />
             </div>
-            <p className="text-[11px] text-[#6B7280] dark:text-slate-400">Master tenant management, vertical presets & RBAC scoping</p>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-bold text-[#111827] dark:text-white tracking-tight truncate">
+                inkCRM <span className="text-[#312E81] dark:text-indigo-400">Platform</span>
+              </div>
+              <div className="text-[10px] text-[#6B7280] dark:text-slate-400 truncate">
+                Super Admin Engine
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <div className="p-3 space-y-1">
+            <div className="px-3 py-1.5 text-[10px] font-semibold tracking-wider text-[#9CA3AF] uppercase">
+              Platform Menu
+            </div>
+
+            {/* Tab 1: Dashboard */}
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                activeTab === 'dashboard'
+                  ? 'bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-white font-semibold'
+                  : 'text-[#4B5563] dark:text-slate-400 hover:bg-[#F9FAFB] dark:hover:bg-slate-800/60 hover:text-[#111827]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Icons.LayoutDashboard className={`w-4 h-4 ${activeTab === 'dashboard' ? 'text-[#312E81] dark:text-indigo-400' : 'text-[#6B7280]'}`} />
+                <span>Dashboard</span>
+              </div>
+              <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-[#6B7280]">
+                {tenants.length}
+              </span>
+            </button>
+
+            {/* Tab 2: Settings */}
+            <button
+              onClick={() => {
+                setActiveTab('settings');
+                if (settingsSubTab === 'team') loadAdminTeam();
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                activeTab === 'settings'
+                  ? 'bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-white font-semibold'
+                  : 'text-[#4B5563] dark:text-slate-400 hover:bg-[#F9FAFB] dark:hover:bg-slate-800/60 hover:text-[#111827]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Icons.Settings className={`w-4 h-4 ${activeTab === 'settings' ? 'text-[#312E81] dark:text-indigo-400' : 'text-[#6B7280]'}`} />
+                <span>Settings</span>
+              </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/40 text-[#312E81] dark:text-indigo-300 font-semibold">
+                Super Admin
+              </span>
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5">
-          {/* Pending Requests Alert */}
-          {pendingRequests.length > 0 && (
-            <button
-              onClick={() => setShowRequestsModal(true)}
-              className="px-3 py-1.5 bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#B45309] border border-[#FDE68A] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]" />
-              <span>{pendingRequests.length} Requests</span>
-            </button>
-          )}
-
-          {/* Theme Toggle Button */}
-          <button
-            onClick={toggleTheme}
-            title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="p-2 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#6B7280] dark:text-slate-300 border border-[#E5E7EB] dark:border-slate-700 rounded-lg transition-colors cursor-pointer"
-          >
-            {isDark ? (
-              <Icons.Sun className="w-4 h-4 text-amber-400" />
-            ) : (
-              <Icons.Moon className="w-4 h-4 text-[#4B5563]" />
-            )}
-          </button>
-
-          {/* + Add Custom Vertical */}
-          <button
-            onClick={() => setShowAddVerticalModal(true)}
-            className="px-3.5 py-2 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <Icons.Plus className="w-3.5 h-3.5 text-[#312E81] dark:text-indigo-400" />
-            <span>Add Custom Vertical</span>
-          </button>
-
-          {/* + Create Admin-CRM */}
-          <button
-            onClick={handleOpenCreateModal}
-            className="px-4 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-          >
-            <Icons.UserPlus className="w-3.5 h-3.5" />
-            <span>Create Admin-CRM</span>
-          </button>
-
-          <div className="h-4 w-px bg-[#E5E7EB] dark:bg-slate-800 mx-1" />
-
-          {/* Profile & Logout */}
-          <div className="flex items-center gap-2 pl-1">
-            <div className="text-right hidden sm:block">
-              <div className="text-xs font-semibold text-[#111827] dark:text-slate-200">{user?.firstName} {user?.lastName}</div>
-              <div className="text-[10px] text-[#6B7280] dark:text-slate-400 font-mono">{user?.email}</div>
+        {/* Bottom Sidebar User Section */}
+        <div className="p-3 border-t border-[#E5E7EB] dark:border-slate-800 space-y-2">
+          
+          {/* Super Admin User Info */}
+          <div className="p-2.5 rounded-lg bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-[#312E81] text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+              {user?.firstName?.[0]?.toUpperCase() || 'S'}
             </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-xs font-semibold text-[#111827] dark:text-white truncate">
+                {user?.firstName} {user?.lastName}
+              </div>
+              <div className="text-[10px] text-[#6B7280] dark:text-slate-400 truncate font-mono">
+                {user?.email}
+              </div>
+            </div>
+          </div>
+
+          {/* Theme & Logout Buttons */}
+          <div className="flex items-center justify-between pt-1">
+            <button
+              onClick={toggleTheme}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-xs font-medium text-[#6B7280] dark:text-slate-400 transition-colors cursor-pointer"
+              title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {isDark ? <Icons.Sun className="w-3.5 h-3.5 text-amber-400" /> : <Icons.Moon className="w-3.5 h-3.5 text-[#6B7280]" />}
+              <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+            </button>
+
             <button
               onClick={() => logout().then(() => navigate('/login'))}
+              className="p-1.5 hover:bg-[#FEF2F2] dark:hover:bg-rose-500/10 text-[#6B7280] hover:text-[#DC2626] rounded-md transition-colors cursor-pointer"
               title="Sign Out"
-              className="p-2 hover:bg-[#F3F4F6] dark:hover:bg-slate-800 text-[#6B7280] hover:text-[#DC2626] rounded-lg transition-colors cursor-pointer"
             >
               <Icons.LogOut className="w-4 h-4" />
             </button>
           </div>
         </div>
-      </header>
 
-      {/* ── MAIN CONTENT CONTAINER (32-40px GUTTERS, 24px GAPS) ─────────────── */}
-      <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 sm:px-10 py-7 pb-32 space-y-6">
+      </aside>
 
-        {/* ── STAT CARDS (WHITE CARDS ON NEUTRAL GRAY WITH NAVY ACCENTS) ──── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          
-          {/* Card 1: Total Tenants */}
-          <div
-            onClick={() => {
-              setSelectedStatus('all');
-              setSelectedVertical('all');
-            }}
-            className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
-              selectedStatus === 'all' && selectedVertical === 'all'
-                ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
-                : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Total tenants</p>
-                <div className="flex items-baseline gap-2 mt-1.5">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                    {stats?.totalTenants ?? '—'}
-                  </h3>
-                  <span className="text-xs text-[#6B7280] font-normal">organizations</span>
-                </div>
-              </div>
-
-              <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
-                <Icons.Building2 className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
-              <span className="inline-flex items-center gap-1.5 text-[#15803D] dark:text-emerald-400 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
-                <span>{stats?.activeTenants ?? 0} active</span>
-              </span>
-              <span className="text-[#6B7280] dark:text-slate-400">
-                {stats?.archivedTenants ?? 0} archived
-              </span>
-            </div>
+      {/* ── RIGHT MAIN CONTENT VIEWPORT ────────────────────────────────────── */}
+      <div className="flex-1 h-screen overflow-y-auto flex flex-col">
+        
+        {/* ── TOP ACTION HEADER BAR ────────────────────────────────────────── */}
+        <header className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 bg-[#FFFFFF] dark:bg-[#111827] px-8 flex items-center justify-between sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex-shrink-0">
+          <div>
+            <h2 className="text-sm sm:text-base font-bold text-[#111827] dark:text-white tracking-tight">
+              {activeTab === 'dashboard' ? 'Platform Control Center' : 'Super Admin Settings & Security'}
+            </h2>
+            <p className="text-[11px] text-[#6B7280] dark:text-slate-400">
+              {activeTab === 'dashboard' ? 'Manage multi-tenant workspaces, vertical templates & RBAC' : 'Super Admin profile, password security, platform admins & diagnostics'}
+            </p>
           </div>
 
-          {/* Card 2: Active Workspaces */}
-          <div
-            onClick={() => setSelectedStatus('active')}
-            className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
-              selectedStatus === 'active'
-                ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
-                : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Active workspaces</p>
-                <div className="flex items-baseline gap-2 mt-1.5">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                    {stats?.activeTenants ?? '—'}
-                  </h3>
-                  <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">operational</span>
-                </div>
-              </div>
+          <div className="flex items-center gap-2.5">
+            {activeTab === 'dashboard' ? (
+              <>
+                {/* Pending Requests Alert */}
+                {pendingRequests.length > 0 && (
+                  <button
+                    onClick={() => setShowRequestsModal(true)}
+                    className="px-3 py-1.5 bg-[#FEF3C7] hover:bg-[#FDE68A] text-[#B45309] border border-[#FDE68A] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  >
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#D97706]" />
+                    <span>{pendingRequests.length} Requests</span>
+                  </button>
+                )}
 
-              <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] dark:bg-emerald-950/40 text-[#15803D] dark:text-emerald-400 border border-[#A7F3D0] dark:border-emerald-800/60 flex items-center justify-center">
-                <Icons.CheckCircle2 className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
-                <span>Ready for logins</span>
-              </span>
-              <span className="font-medium text-[#15803D] dark:text-emerald-400">Live</span>
-            </div>
-          </div>
-
-          {/* Card 3: Suspended / Inactive */}
-          <div
-            onClick={() => setSelectedStatus('disabled')}
-            className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
-              selectedStatus === 'disabled'
-                ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
-                : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
-            }`}
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Suspended / inactive</p>
-                <div className="flex items-baseline gap-2 mt-1.5">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                    {stats?.disabledTenants ?? 0}
-                  </h3>
-                  <span className="text-xs text-[#6B7280] font-normal">blocked</span>
-                </div>
-              </div>
-
-              <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] dark:bg-amber-950/40 text-[#B45309] dark:text-amber-400 border border-[#FDE68A] dark:border-amber-800/60 flex items-center justify-center">
-                <Icons.PauseCircle className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-              <span>Auth middleware kill-switch</span>
-              <span className="font-medium text-[#111827] dark:text-slate-300">Protected</span>
-            </div>
-          </div>
-
-          {/* Card 4: Vertical Templates */}
-          <div
-            onClick={() => setShowAddVerticalModal(true)}
-            className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Vertical templates</p>
-                <div className="flex items-baseline gap-2 mt-1.5">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                    {verticals.length}
-                  </h3>
-                  <span className="text-xs text-[#6B7280] font-normal">presets</span>
-                </div>
-              </div>
-
-              <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
-                <Icons.Boxes className="w-4 h-4" />
-              </div>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex flex-wrap gap-1.5 items-center">
-              {stats?.verticalBreakdown && stats.verticalBreakdown.length > 0 ? (
-                stats.verticalBreakdown.slice(0, 3).map((v, i) => (
-                  <span key={i} className="text-[11px] font-medium px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
-                    {v.verticalType}: {v.count}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-[#6B7280]">+ Click to create preset</span>
-              )}
-            </div>
-          </div>
-
-        </div>
-
-        {/* ── SEARCH & FILTER BAR ───────────────────────────────────────────── */}
-        <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 p-3.5 sm:p-4 rounded-[14px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
-          
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-            {/* Search Input */}
-            <div className="relative w-full sm:w-96">
-              <Icons.Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Search Admin, Org Name or Subdomain..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-slate-100 placeholder-[#9CA3AF] focus:outline-none focus:border-[#312E81] transition-colors"
-              />
-              {searchQuery && (
+                {/* + Add Custom Vertical */}
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#111827] dark:hover:text-slate-200 cursor-pointer"
+                  onClick={() => setShowAddVerticalModal(true)}
+                  className="px-3.5 py-2 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Icons.X className="w-3.5 h-3.5" />
+                  <Icons.Plus className="w-3.5 h-3.5 text-[#312E81] dark:text-indigo-400" />
+                  <span>Add Custom Vertical</span>
                 </button>
-              )}
-            </div>
 
-            {/* Filter Controls */}
-            <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
-              {/* Vertical Filter Dropdown */}
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-medium text-[#6B7280] dark:text-slate-400 hidden sm:inline">Vertical:</span>
-                <select
-                  value={selectedVertical}
-                  onChange={(e) => setSelectedVertical(e.target.value)}
-                  className="bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 text-xs font-medium text-[#111827] dark:text-slate-200 px-3 py-2 rounded-lg focus:outline-none focus:border-[#312E81] cursor-pointer"
-                >
-                  <option value="all">All Verticals ({verticals.length})</option>
-                  {verticals.map(v => (
-                    <option key={v.key} value={v.key}>{v.label}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Reset Filters */}
-              {(selectedStatus !== 'all' || selectedVertical !== 'all' || searchQuery) && (
+                {/* + Create Admin-CRM */}
                 <button
-                  onClick={() => {
-                    setSelectedStatus('all');
-                    setSelectedVertical('all');
-                    setSearchQuery('');
-                  }}
-                  className="px-3 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-slate-800 text-[#111827] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-                  title="Clear all active filters"
+                  onClick={handleOpenCreateModal}
+                  className="px-4 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
                 >
-                  <Icons.FilterX className="w-3.5 h-3.5 text-[#6B7280]" />
-                  <span>Reset</span>
+                  <Icons.UserPlus className="w-3.5 h-3.5" />
+                  <span>Create Admin-CRM</span>
                 </button>
-              )}
-
-              {/* Refresh Button */}
+              </>
+            ) : (
               <button
-                onClick={loadDashboardData}
-                title="Refresh Tenants"
-                className="p-2 bg-[#F9FAFB] hover:bg-[#F3F4F6] dark:bg-slate-900 dark:hover:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
+                onClick={() => setActiveTab('dashboard')}
+                className="px-3.5 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-slate-800 text-[#111827] dark:text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               >
-                <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                <Icons.ArrowLeft className="w-3.5 h-3.5" />
+                <span>Back to Dashboard</span>
               </button>
-            </div>
+            )}
           </div>
+        </header>
 
-          {/* Active Filter Chips / Status summary */}
-          <div className="flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400 pt-2 border-t border-[#F1F5F9] dark:border-slate-800">
-            <div className="flex items-center gap-2">
-              <span className="font-medium text-[#111827] dark:text-slate-300">
-                Showing {filteredTenants.length} of {tenants.length} Organizations
-              </span>
-              {selectedStatus !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#F1F5F9] dark:bg-slate-800 text-[#111827] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
-                  <span>Status: {selectedStatus}</span>
-                  <button onClick={() => setSelectedStatus('all')} className="hover:text-black cursor-pointer">×</button>
-                </span>
-              )}
-              {selectedVertical !== 'all' && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#F1F5F9] dark:bg-slate-800 text-[#111827] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
-                  <span>Vertical: {selectedVertical}</span>
-                  <button onClick={() => setSelectedVertical('all')} className="hover:text-black cursor-pointer">×</button>
-                </span>
-              )}
+        {/* ── TAB 1: DASHBOARD VIEW ─────────────────────────────────────────── */}
+        {activeTab === 'dashboard' && (
+          <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 py-7 pb-32 space-y-6">
+
+            {/* ── STAT CARDS (WHITE CARDS ON NEUTRAL GRAY WITH NAVY ACCENTS) ──── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              
+              {/* Card 1: Total Tenants */}
+              <div
+                onClick={() => {
+                  setSelectedStatus('all');
+                  setSelectedVertical('all');
+                }}
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                  selectedStatus === 'all' && selectedVertical === 'all'
+                    ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Total tenants</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
+                        {stats?.totalTenants ?? '—'}
+                      </h3>
+                      <span className="text-xs text-[#6B7280] font-normal">organizations</span>
+                    </div>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
+                    <Icons.Building2 className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
+                  <span className="inline-flex items-center gap-1.5 text-[#15803D] dark:text-emerald-400 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
+                    <span>{stats?.activeTenants ?? 0} active</span>
+                  </span>
+                  <span className="text-[#6B7280] dark:text-slate-400">
+                    {stats?.archivedTenants ?? 0} archived
+                  </span>
+                </div>
+              </div>
+
+              {/* Card 2: Active Workspaces */}
+              <div
+                onClick={() => setSelectedStatus('active')}
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                  selectedStatus === 'active'
+                    ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Active workspaces</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
+                        {stats?.activeTenants ?? '—'}
+                      </h3>
+                      <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">operational</span>
+                    </div>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] dark:bg-emerald-950/40 text-[#15803D] dark:text-emerald-400 border border-[#A7F3D0] dark:border-emerald-800/60 flex items-center justify-center">
+                    <Icons.CheckCircle2 className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
+                    <span>Ready for logins</span>
+                  </span>
+                  <span className="font-medium text-[#15803D] dark:text-emerald-400">Live</span>
+                </div>
+              </div>
+
+              {/* Card 3: Suspended / Inactive */}
+              <div
+                onClick={() => setSelectedStatus('disabled')}
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                  selectedStatus === 'disabled'
+                    ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
+                }`}
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Suspended / inactive</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
+                        {stats?.disabledTenants ?? 0}
+                      </h3>
+                      <span className="text-xs text-[#6B7280] font-normal">blocked</span>
+                    </div>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] dark:bg-amber-950/40 text-[#B45309] dark:text-amber-400 border border-[#FDE68A] dark:border-amber-800/60 flex items-center justify-center">
+                    <Icons.PauseCircle className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span>Auth middleware kill-switch</span>
+                  <span className="font-medium text-[#111827] dark:text-slate-300">Protected</span>
+                </div>
+              </div>
+
+              {/* Card 4: Vertical Templates */}
+              <div
+                onClick={() => setShowAddVerticalModal(true)}
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Vertical templates</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
+                        {verticals.length}
+                      </h3>
+                      <span className="text-xs text-[#6B7280] font-normal">presets</span>
+                    </div>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
+                    <Icons.Boxes className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex flex-wrap gap-1.5 items-center">
+                  {stats?.verticalBreakdown && stats.verticalBreakdown.length > 0 ? (
+                    stats.verticalBreakdown.slice(0, 3).map((v, i) => (
+                      <span key={i} className="text-[11px] font-medium px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
+                        {v.verticalType}: {v.count}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-[#6B7280]">+ Click to create preset</span>
+                  )}
+                </div>
+              </div>
+
             </div>
-          </div>
-        </div>
 
-        {/* ── ADMIN TABLE (HAIRLINE DIVIDERS, CLEAN SINGLE BADGE STYLE) ─────── */}
-        <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
-          <div className="overflow-x-auto overflow-y-auto max-h-[620px]">
-            <table className="w-full text-left text-xs border-collapse">
-              <thead className="sticky top-0 z-20 bg-[#F9FAFB] dark:bg-slate-900 border-b border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] dark:text-slate-400 uppercase tracking-wider font-semibold text-[11px]">
-                <tr>
-                  <th className="py-3 px-4 sm:px-6">Admin (Email / Contact)</th>
-                  <th className="py-3 px-4">Vertical Assigned</th>
-                  <th className="py-3 px-4">Org Name & Subdomain</th>
-                  <th className="py-3 px-4">Status</th>
-                  <th className="py-3 px-4">Enabled Modules</th>
-                  <th className="py-3 px-4">Permissions</th>
-                  <th className="py-3 px-4 sm:px-6 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800">
-                {loading ? (
-                  <tr>
-                    <td colSpan={7} className="py-16 text-center text-[#6B7280]">
-                      <Icons.Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-[#312E81]" />
-                      <span className="font-medium text-xs">Loading platform tenants...</span>
-                    </td>
-                  </tr>
-                ) : filteredTenants.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-14 text-center">
-                      <div className="max-w-sm mx-auto flex flex-col items-center justify-center">
-                        <div className="w-12 h-12 rounded-xl bg-[#F1F5F9] dark:bg-slate-800 flex items-center justify-center text-[#6B7280] mb-3">
-                          <Icons.FolderSearch className="w-6 h-6" />
-                        </div>
-                        <h4 className="font-semibold text-sm text-[#111827] dark:text-white">
-                          No matching tenant workspaces
-                        </h4>
-                        <p className="text-xs text-[#6B7280] dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
-                          Try adjusting your search criteria or switch filters to view all workspaces.
-                        </p>
-                        <div className="flex gap-2 mt-4">
-                          <button
-                            onClick={() => {
-                              setSelectedStatus('all');
-                              setSelectedVertical('all');
-                              setSearchQuery('');
-                            }}
-                            className="px-3.5 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
-                          >
-                            Show All Tenants
-                          </button>
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredTenants.map((tenant) => {
-                    const vert = verticals.find(v => v.key === tenant.verticalType);
-                    const vLabel = vert?.label || tenant.verticalType.toUpperCase() + ' CRM';
-                    const vIcon = vert?.icon || 'Layers';
+            {/* ── SEARCH & FILTER BAR ───────────────────────────────────────── */}
+            <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 p-3.5 sm:p-4 rounded-[14px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
+              
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                {/* Search Input */}
+                <div className="relative w-full sm:w-96">
+                  <Icons.Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search Admin, Org Name or Subdomain..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-slate-100 placeholder-[#9CA3AF] focus:outline-none focus:border-[#312E81] transition-colors"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#111827] dark:hover:text-slate-200 cursor-pointer"
+                    >
+                      <Icons.X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
 
-                    return (
-                      <tr key={tenant.id} className="hover:bg-[#F9FAFB] dark:hover:bg-slate-800/40 transition-colors">
-                        
-                        {/* Admin column */}
-                        <td className="py-3.5 px-4 sm:px-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-7 h-7 rounded-full bg-[#F1F5F9] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center font-bold text-[#312E81] dark:text-slate-300 text-xs flex-shrink-0">
-                              {tenant.adminUser?.firstName?.[0]?.toUpperCase() || 'A'}
+                {/* Filter Controls */}
+                <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+                  {/* Vertical Filter Dropdown */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-[#6B7280] dark:text-slate-400 hidden sm:inline">Vertical:</span>
+                    <select
+                      value={selectedVertical}
+                      onChange={(e) => setSelectedVertical(e.target.value)}
+                      className="bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 text-xs font-medium text-[#111827] dark:text-slate-200 px-3 py-2 rounded-lg focus:outline-none focus:border-[#312E81] cursor-pointer"
+                    >
+                      <option value="all">All Verticals ({verticals.length})</option>
+                      {verticals.map(v => (
+                        <option key={v.key} value={v.key}>{v.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Reset Filters */}
+                  {(selectedStatus !== 'all' || selectedVertical !== 'all' || searchQuery) && (
+                    <button
+                      onClick={() => {
+                        setSelectedStatus('all');
+                        setSelectedVertical('all');
+                        setSearchQuery('');
+                      }}
+                      className="px-3 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-slate-800 text-[#111827] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                      title="Clear all active filters"
+                    >
+                      <Icons.FilterX className="w-3.5 h-3.5 text-[#6B7280]" />
+                      <span>Reset</span>
+                    </button>
+                  )}
+
+                  {/* Refresh Button */}
+                  <button
+                    onClick={loadDashboardData}
+                    title="Refresh Tenants"
+                    className="p-2 bg-[#F9FAFB] hover:bg-[#F3F4F6] dark:bg-slate-900 dark:hover:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Icons.RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Active Filter Chips / Status summary */}
+              <div className="flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400 pt-2 border-t border-[#F1F5F9] dark:border-slate-800">
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-[#111827] dark:text-slate-300">
+                    Showing {filteredTenants.length} of {tenants.length} Organizations
+                  </span>
+                  {selectedStatus !== 'all' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#F1F5F9] dark:bg-slate-800 text-[#111827] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
+                      <span>Status: {selectedStatus}</span>
+                      <button onClick={() => setSelectedStatus('all')} className="hover:text-black cursor-pointer">×</button>
+                    </span>
+                  )}
+                  {selectedVertical !== 'all' && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-[#F1F5F9] dark:bg-slate-800 text-[#111827] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
+                      <span>Vertical: {selectedVertical}</span>
+                      <button onClick={() => setSelectedVertical('all')} className="hover:text-black cursor-pointer">×</button>
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* ── ADMIN TABLE (HAIRLINE DIVIDERS, CLEAN SINGLE BADGE STYLE) ─────── */}
+            <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
+              <div className="overflow-x-auto overflow-y-auto max-h-[620px]">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="sticky top-0 z-20 bg-[#F9FAFB] dark:bg-slate-900 border-b border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] dark:text-slate-400 uppercase tracking-wider font-semibold text-[11px]">
+                    <tr>
+                      <th className="py-3 px-4 sm:px-6">Admin (Email / Contact)</th>
+                      <th className="py-3 px-4">Vertical Assigned</th>
+                      <th className="py-3 px-4">Org Name & Subdomain</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4">Enabled Modules</th>
+                      <th className="py-3 px-4">Permissions</th>
+                      <th className="py-3 px-4 sm:px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={7} className="py-16 text-center text-[#6B7280]">
+                          <Icons.Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-[#312E81]" />
+                          <span className="font-medium text-xs">Loading platform tenants...</span>
+                        </td>
+                      </tr>
+                    ) : filteredTenants.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-14 text-center">
+                          <div className="max-w-sm mx-auto flex flex-col items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-[#F1F5F9] dark:bg-slate-800 flex items-center justify-center text-[#6B7280] mb-3">
+                              <Icons.FolderSearch className="w-6 h-6" />
                             </div>
-                            <div>
-                              <div className="font-semibold text-[#111827] dark:text-white text-xs">
-                                {tenant.adminUser ? `${tenant.adminUser.firstName} ${tenant.adminUser.lastName}` : 'No Admin Assigned'}
-                              </div>
-                              <div className="text-[11px] text-[#6B7280] dark:text-slate-400 font-mono">
-                                {tenant.adminUser?.email || '—'}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Vertical Assigned (ONE SINGLE CLEAN NEUTRAL BADGE STYLE) */}
-                        <td className="py-3.5 px-4">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[#F1F5F9] dark:bg-slate-800 text-[#1E293B] dark:text-slate-200 border border-[#E2E8F0] dark:border-slate-700">
-                            <DynamicIcon name={vIcon} className="w-3.5 h-3.5 text-[#312E81] dark:text-indigo-400" />
-                            <span>{vLabel}</span>
-                          </span>
-                        </td>
-
-                        {/* Org Name & Subdomain */}
-                        <td className="py-3.5 px-4">
-                          <div>
-                            <span className="font-semibold text-[#111827] dark:text-slate-100 text-xs">{tenant.name}</span>
-                            <div className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-slate-400 mt-0.5">
-                              <Icons.Globe className="w-3 h-3 text-[#9CA3AF]" />
-                              <span className="font-mono">{tenant.subdomain}.inkcrm</span>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* Status (SINGLE MUTED PALETTE) */}
-                        <td className="py-3.5 px-4">
-                          {tenant.status === 'archived' ? (
-                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB]">
-                              Archived
-                            </span>
-                          ) : (
-                            <button
-                              onClick={() => handleToggleStatus(tenant)}
-                              title={tenant.status === 'active' ? 'Click to Suspend' : 'Click to Activate'}
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer ${
-                                tenant.status === 'active'
-                                  ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0] hover:bg-[#D1FAE5]'
-                                  : 'bg-[#FEF3C7] text-[#B45309] border-[#FDE68A] hover:bg-[#FDE68A]'
-                              }`}
-                            >
-                              <span className={`w-1.5 h-1.5 rounded-full ${tenant.status === 'active' ? 'bg-[#15803D]' : 'bg-[#D97706]'}`} />
-                              <span>{tenant.status === 'active' ? 'Active' : 'Suspended'}</span>
-                            </button>
-                          )}
-                        </td>
-
-                        {/* Enabled Modules */}
-                        <td className="py-3.5 px-4">
-                          <button
-                            onClick={() => handleOpenModulesEditor(tenant)}
-                            className="px-2.5 py-1 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 rounded-md text-xs font-medium border border-[#E5E7EB] dark:border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <Icons.Sliders className="w-3 h-3 text-[#6B7280]" />
-                            <span>{tenant.enabledModulesCount} modules</span>
-                          </button>
-                        </td>
-
-                        {/* Permissions (RBAC) */}
-                        <td className="py-3.5 px-4">
-                          <button
-                            onClick={() => navigate(`/access-privilege?orgId=${tenant.id}`)}
-                            className="px-2.5 py-1 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 border border-[#E5E7EB] dark:border-slate-700 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-                          >
-                            <Icons.KeyRound className="w-3 h-3 text-[#6B7280]" />
-                            <span>Edit Roles & RBAC</span>
-                          </button>
-                        </td>
-
-                        {/* Actions */}
-                        <td className="py-3.5 px-4 sm:px-6 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {/* 🔑 Login As */}
-                            {tenant.status !== 'archived' && (
-                              <button
-                                onClick={() => handleImpersonate(tenant)}
-                                className="px-3.5 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-                                title="Directly Preview Tenant CRM"
-                              >
-                                <Icons.LogIn className="w-3.5 h-3.5" />
-                                <span>Login As</span>
-                              </button>
-                            )}
-
-                            {/* Quick Suspend / Activate (Ghost Button) */}
-                            {tenant.status !== 'archived' && (
-                              <button
-                                onClick={() => handleToggleStatus(tenant)}
-                                className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-[#6B7280] hover:text-[#312E81] rounded-md transition-colors cursor-pointer"
-                                title={tenant.status === 'active' ? 'Suspend Tenant' : 'Activate Tenant'}
-                              >
-                                {tenant.status === 'active' ? (
-                                  <Icons.PauseCircle className="w-4 h-4" />
-                                ) : (
-                                  <Icons.PlayCircle className="w-4 h-4 text-[#15803D]" />
-                                )}
-                              </button>
-                            )}
-
-                            {/* Safe Soft Delete (Archive Ghost Button) */}
-                            {tenant.status !== 'archived' && (
+                            <h4 className="font-semibold text-sm text-[#111827] dark:text-white">
+                              No matching tenant workspaces
+                            </h4>
+                            <p className="text-xs text-[#6B7280] dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
+                              Try adjusting your search criteria or switch filters to view all workspaces.
+                            </p>
+                            <div className="flex gap-2 mt-4">
                               <button
                                 onClick={() => {
-                                  setArchiveModalTenant(tenant);
-                                  setArchiveConfirmName('');
+                                  setSelectedStatus('all');
+                                  setSelectedVertical('all');
+                                  setSearchQuery('');
                                 }}
-                                className="p-1.5 hover:bg-[#FEF2F2] dark:hover:bg-rose-500/10 text-[#9CA3AF] hover:text-[#DC2626] rounded-md transition-colors cursor-pointer"
-                                title="Safe Archive Tenant"
+                                className="px-3.5 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
                               >
-                                <Icons.Archive className="w-4 h-4" />
+                                Show All Tenants
                               </button>
-                            )}
+                            </div>
                           </div>
                         </td>
-
                       </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                    ) : (
+                      filteredTenants.map((tenant) => {
+                        const vert = verticals.find(v => v.key === tenant.verticalType);
+                        const vLabel = vert?.label || tenant.verticalType.toUpperCase() + ' CRM';
+                        const vIcon = vert?.icon || 'Layers';
+
+                        return (
+                          <tr key={tenant.id} className="hover:bg-[#F9FAFB] dark:hover:bg-slate-800/40 transition-colors">
+                            
+                            {/* Admin column */}
+                            <td className="py-3.5 px-4 sm:px-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-7 h-7 rounded-full bg-[#F1F5F9] dark:bg-slate-800 border border-[#E2E8F0] dark:border-slate-700 flex items-center justify-center font-bold text-[#312E81] dark:text-slate-300 text-xs flex-shrink-0">
+                                  {tenant.adminUser?.firstName?.[0]?.toUpperCase() || 'A'}
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-[#111827] dark:text-white text-xs">
+                                    {tenant.adminUser ? `${tenant.adminUser.firstName} ${tenant.adminUser.lastName}` : 'No Admin Assigned'}
+                                  </div>
+                                  <div className="text-[11px] text-[#6B7280] dark:text-slate-400 font-mono">
+                                    {tenant.adminUser?.email || '—'}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Vertical Assigned */}
+                            <td className="py-3.5 px-4">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium bg-[#F1F5F9] dark:bg-slate-800 text-[#1E293B] dark:text-slate-200 border border-[#E2E8F0] dark:border-slate-700">
+                                <DynamicIcon name={vIcon} className="w-3.5 h-3.5 text-[#312E81] dark:text-indigo-400" />
+                                <span>{vLabel}</span>
+                              </span>
+                            </td>
+
+                            {/* Org Name & Subdomain */}
+                            <td className="py-3.5 px-4">
+                              <div>
+                                <span className="font-semibold text-[#111827] dark:text-slate-100 text-xs">{tenant.name}</span>
+                                <div className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-slate-400 mt-0.5">
+                                  <Icons.Globe className="w-3 h-3 text-[#9CA3AF]" />
+                                  <span className="font-mono">{tenant.subdomain}.inkcrm</span>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Status */}
+                            <td className="py-3.5 px-4">
+                              {tenant.status === 'archived' ? (
+                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB]">
+                                  Archived
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => handleToggleStatus(tenant)}
+                                  title={tenant.status === 'active' ? 'Click to Suspend' : 'Click to Activate'}
+                                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer ${
+                                    tenant.status === 'active'
+                                      ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0] hover:bg-[#D1FAE5]'
+                                      : 'bg-[#FEF3C7] text-[#B45309] border-[#FDE68A] hover:bg-[#FDE68A]'
+                                  }`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${tenant.status === 'active' ? 'bg-[#15803D]' : 'bg-[#D97706]'}`} />
+                                  <span>{tenant.status === 'active' ? 'Active' : 'Suspended'}</span>
+                                </button>
+                              )}
+                            </td>
+
+                            {/* Enabled Modules */}
+                            <td className="py-3.5 px-4">
+                              <button
+                                onClick={() => handleOpenModulesEditor(tenant)}
+                                className="px-2.5 py-1 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 rounded-md text-xs font-medium border border-[#E5E7EB] dark:border-slate-700 flex items-center gap-1.5 transition-colors cursor-pointer"
+                              >
+                                <Icons.Sliders className="w-3 h-3 text-[#6B7280]" />
+                                <span>{tenant.enabledModulesCount} modules</span>
+                              </button>
+                            </td>
+
+                            {/* Permissions (RBAC) */}
+                            <td className="py-3.5 px-4">
+                              <button
+                                onClick={() => navigate(`/access-privilege?orgId=${tenant.id}`)}
+                                className="px-2.5 py-1 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 border border-[#E5E7EB] dark:border-slate-700 rounded-md text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                              >
+                                <Icons.KeyRound className="w-3 h-3 text-[#6B7280]" />
+                                <span>Edit Roles & RBAC</span>
+                              </button>
+                            </td>
+
+                            {/* Actions */}
+                            <td className="py-3.5 px-4 sm:px-6 text-right">
+                              <div className="flex items-center justify-end gap-1.5">
+                                {/* 🔑 Login As */}
+                                {tenant.status !== 'archived' && (
+                                  <button
+                                    onClick={() => handleImpersonate(tenant)}
+                                    className="px-3.5 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
+                                    title="Directly Preview Tenant CRM"
+                                  >
+                                    <Icons.LogIn className="w-3.5 h-3.5" />
+                                    <span>Login As</span>
+                                  </button>
+                                )}
+
+                                {/* Quick Suspend / Activate */}
+                                {tenant.status !== 'archived' && (
+                                  <button
+                                    onClick={() => handleToggleStatus(tenant)}
+                                    className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-[#6B7280] hover:text-[#312E81] rounded-md transition-colors cursor-pointer"
+                                    title={tenant.status === 'active' ? 'Suspend Tenant' : 'Activate Tenant'}
+                                  >
+                                    {tenant.status === 'active' ? (
+                                      <Icons.PauseCircle className="w-4 h-4" />
+                                    ) : (
+                                      <Icons.PlayCircle className="w-4 h-4 text-[#15803D]" />
+                                    )}
+                                  </button>
+                                )}
+
+                                {/* Safe Soft Delete (Archive) */}
+                                {tenant.status !== 'archived' && (
+                                  <button
+                                    onClick={() => {
+                                      setArchiveModalTenant(tenant);
+                                      setArchiveConfirmName('');
+                                    }}
+                                    className="p-1.5 hover:bg-[#FEF2F2] dark:hover:bg-rose-500/10 text-[#9CA3AF] hover:text-[#DC2626] rounded-md transition-colors cursor-pointer"
+                                    title="Safe Archive Tenant"
+                                  >
+                                    <Icons.Archive className="w-4 h-4" />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* ── TABLE FOOTER BAR ────────────────────────────────────────── */}
+              <div className="px-6 py-3 bg-[#F9FAFB] dark:bg-slate-900 border-t border-[#E5E7EB] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400 flex-shrink-0">
+                <span className="font-medium">
+                  Showing {filteredTenants.length} of {tenants.length} Organizations
+                </span>
+                <span className="text-[11px] font-mono text-[#9CA3AF]">
+                  inkCRM Multi-Tenant Platform
+                </span>
+              </div>
+            </div>
+
+          </main>
+        )}
+
+        {/* ── TAB 2: SETTINGS & SUPER ADMIN MANAGEMENT VIEW ─────────────────── */}
+        {activeTab === 'settings' && (
+          <main className="flex-1 w-full max-w-5xl mx-auto px-8 py-7 pb-32 space-y-6">
+            
+            {/* Settings Sub-navigation Chips */}
+            <div className="flex flex-wrap items-center gap-2 border-b border-[#E5E7EB] dark:border-slate-800 pb-3">
+              {[
+                { key: 'profile', label: 'Super Admin Profile', icon: Icons.UserCheck },
+                { key: 'security', label: 'Password & Security', icon: Icons.KeyRound },
+                { key: 'team', label: 'Super Admin Team', icon: Icons.ShieldCheck },
+                { key: 'system', label: 'System & Database Health', icon: Icons.Activity }
+              ].map(sub => {
+                const isCurrent = settingsSubTab === sub.key;
+                const SubIcon = sub.icon;
+                return (
+                  <button
+                    key={sub.key}
+                    onClick={() => {
+                      setSettingsSubTab(sub.key as any);
+                      if (sub.key === 'team') loadAdminTeam();
+                      if (sub.key === 'profile' || sub.key === 'system') loadSuperAdminProfile();
+                    }}
+                    className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                      isCurrent
+                        ? 'bg-[#312E81] text-white shadow-xs'
+                        : 'bg-[#FFFFFF] dark:bg-slate-800 text-[#4B5563] dark:text-slate-300 border border-[#E5E7EB] dark:border-slate-700 hover:bg-[#F9FAFB]'
+                    }`}
+                  >
+                    <SubIcon className="w-3.5 h-3.5" />
+                    <span>{sub.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* SUBTAB 1: SUPER ADMIN PROFILE */}
+            {settingsSubTab === 'profile' && (
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-[#111827] dark:text-white">Super Admin User Profile</h3>
+                  <p className="text-xs text-[#6B7280]">Primary administrative account credentials and contact details</p>
+                </div>
+
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">First Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={profileFirstName}
+                        onChange={(e) => setProfileFirstName(e.target.value)}
+                        className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Last Name</label>
+                      <input
+                        type="text"
+                        required
+                        value={profileLastName}
+                        onChange={(e) => setProfileLastName(e.target.value)}
+                        className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Email Address</label>
+                      <input
+                        type="email"
+                        disabled
+                        value={adminProfile?.email || user?.email || 'superadmin@inkcrm.com'}
+                        className="w-full px-3.5 py-2 bg-[#F3F4F6] dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#6B7280] font-mono cursor-not-allowed"
+                      />
+                      <span className="text-[10px] text-[#9CA3AF] mt-0.5 block">Master account identifier cannot be altered</span>
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Contact Phone</label>
+                      <input
+                        type="text"
+                        placeholder="+1 (555) 019-2834"
+                        value={profilePhone}
+                        onChange={(e) => setProfilePhone(e.target.value)}
+                        className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex justify-end border-t border-[#F1F5F9] dark:border-slate-800">
+                    <button
+                      type="submit"
+                      disabled={savingProfile}
+                      className="px-5 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                    >
+                      {savingProfile ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Check className="w-3.5 h-3.5" />}
+                      <span>Save Profile Changes</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* SUBTAB 2: PASSWORD & SECURITY */}
+            {settingsSubTab === 'security' && (
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-[#111827] dark:text-white">Security & Password Management</h3>
+                  <p className="text-xs text-[#6B7280]">Update credentials and review authentication controls</p>
+                </div>
+
+                <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Current Password</label>
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">New Password</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="At least 6 characters"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Confirm New Password</label>
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                    />
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      disabled={savingPassword || !newPassword}
+                      className="px-5 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                    >
+                      {savingPassword ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Lock className="w-3.5 h-3.5" />}
+                      <span>Update Password</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* SUBTAB 3: SUPER ADMIN TEAM */}
+            {settingsSubTab === 'team' && (
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#111827] dark:text-white">Platform Super Admin Team</h3>
+                    <p className="text-xs text-[#6B7280]">Staff with elevated master platform control and tenant provisioning privileges</p>
+                  </div>
+                  <button
+                    onClick={() => setShowAddAdminModal(true)}
+                    className="px-3.5 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 cursor-pointer shadow-xs"
+                  >
+                    <Icons.UserPlus className="w-3.5 h-3.5" />
+                    <span>Add Super Admin</span>
+                  </button>
+                </div>
+
+                <div className="border border-[#E5E7EB] dark:border-slate-800 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-[#F9FAFB] dark:bg-slate-900 border-b border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] font-semibold">
+                      <tr>
+                        <th className="py-3 px-4">User</th>
+                        <th className="py-3 px-4">Role</th>
+                        <th className="py-3 px-4">User Code</th>
+                        <th className="py-3 px-4">Status</th>
+                        <th className="py-3 px-4 text-right">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800">
+                      {loadingTeam ? (
+                        <tr>
+                          <td colSpan={5} className="py-8 text-center text-[#6B7280]">
+                            <Icons.Loader2 className="w-4 h-4 animate-spin mx-auto mb-1 text-[#312E81]" />
+                            <span>Loading super admin team...</span>
+                          </td>
+                        </tr>
+                      ) : adminTeam.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="py-6 text-center text-[#6B7280]">
+                            No secondary super admins found.
+                          </td>
+                        </tr>
+                      ) : (
+                        adminTeam.map((member) => (
+                          <tr key={member._id} className="hover:bg-[#F9FAFB] dark:hover:bg-slate-800/40">
+                            <td className="py-3 px-4">
+                              <div className="font-semibold text-[#111827] dark:text-white">
+                                {member.firstName} {member.lastName}
+                              </div>
+                              <div className="text-[11px] text-[#6B7280] font-mono">{member.email}</div>
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className="px-2 py-0.5 rounded text-[10.5px] font-semibold bg-[#F1F5F9] text-[#312E81] border border-[#E2E8F0]">
+                                Super Admin
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 font-mono text-slate-500">
+                              {member.userCode || 'SADM-ROOT'}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium border ${
+                                member.isActive
+                                  ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0]'
+                                  : 'bg-[#FEF2F2] text-[#DC2626] border-[#FEE2E2]'
+                              }`}>
+                                <span className={`w-1.5 h-1.5 rounded-full ${member.isActive ? 'bg-[#15803D]' : 'bg-[#DC2626]'}`} />
+                                <span>{member.isActive ? 'Active' : 'Disabled'}</span>
+                              </span>
+                            </td>
+                            <td className="py-3 px-4 text-right">
+                              {member.email !== 'superadmin@inkcrm.com' && (
+                                <button
+                                  onClick={() => handleToggleAdminStatus(member)}
+                                  className="text-xs font-medium text-[#312E81] hover:underline cursor-pointer"
+                                >
+                                  {member.isActive ? 'Deactivate' : 'Activate'}
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* SUBTAB 4: PLATFORM & SYSTEM HEALTH */}
+            {settingsSubTab === 'system' && (
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-[#111827] dark:text-white">Platform Diagnostics & Database Health</h3>
+                  <p className="text-xs text-[#6B7280]">Live runtime environment and MongoDB persistence metrics</p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="p-4 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#111827] dark:text-white">
+                      <Icons.Database className="w-4 h-4 text-[#312E81]" />
+                      <span>MongoDB Connection</span>
+                    </div>
+                    <div className="text-xs text-[#6B7280] space-y-1">
+                      <div>Status: <strong className="text-[#15803D]">{systemDiag?.dbStatus || 'Connected'}</strong></div>
+                      <div>Target Database: <strong className="font-mono text-[#111827] dark:text-slate-200">{systemDiag?.dbName || 'inkcrm_generic'}</strong></div>
+                      <div>Total Organizations: <strong>{tenants.length}</strong></div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-800 rounded-xl space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-semibold text-[#111827] dark:text-white">
+                      <Icons.Server className="w-4 h-4 text-[#312E81]" />
+                      <span>Server Runtime</span>
+                    </div>
+                    <div className="text-xs text-[#6B7280] space-y-1">
+                      <div>Node.js Version: <strong className="font-mono">{systemDiag?.nodeVersion || 'v20.16.0'}</strong></div>
+                      <div>Platform Architecture: <strong className="font-mono">{systemDiag?.platform || 'win32 (x64)'}</strong></div>
+                      <div>API Endpoint: <strong className="font-mono">http://localhost:5000</strong></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </main>
+        )}
+
+      </div>
+
+      {/* ── MODAL: CREATE SUPER ADMIN TEAM USER ────────────────────────────── */}
+      <AnimatePresence>
+        {showAddAdminModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowAddAdminModal(false)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="relative z-10 bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] w-full max-w-md overflow-hidden shadow-2xl p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-[#E5E7EB] dark:border-slate-800 pb-3">
+                <div>
+                  <h3 className="text-base font-bold text-[#111827] dark:text-white">Add Super Admin User</h3>
+                  <p className="text-xs text-[#6B7280]">Grant platform master authority</p>
+                </div>
+                <button onClick={() => setShowAddAdminModal(false)} className="text-[#9CA3AF] hover:text-[#111827] cursor-pointer">
+                  <Icons.X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateTeamAdmin} className="space-y-3.5">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">First Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newTeamFirst}
+                      onChange={(e) => setNewTeamFirst(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:border-[#312E81]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Last Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={newTeamLast}
+                      onChange={(e) => setNewTeamLast(e.target.value)}
+                      className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:border-[#312E81]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Email Address *</label>
+                  <input
+                    type="email"
+                    required
+                    value={newTeamEmail}
+                    onChange={(e) => setNewTeamEmail(e.target.value)}
+                    placeholder="admin2@inkcrm.com"
+                    className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:border-[#312E81]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Password *</label>
+                  <input
+                    type="text"
+                    required
+                    value={newTeamPassword}
+                    onChange={(e) => setNewTeamPassword(e.target.value)}
+                    className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs font-mono focus:outline-none focus:border-[#312E81]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={newTeamPhone}
+                    onChange={(e) => setNewTeamPhone(e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                    className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs focus:outline-none focus:border-[#312E81]"
+                  />
+                </div>
+
+                <div className="pt-3 flex justify-end gap-2 border-t border-[#E5E7EB] dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setShowAddAdminModal(false)}
+                    className="px-3.5 py-1.5 bg-[#F1F5F9] text-[#111827] rounded-lg text-xs font-medium cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={creatingTeamUser}
+                    className="px-4 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {creatingTeamUser ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Check className="w-3.5 h-3.5" />}
+                    <span>Create Admin</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
           </div>
+        )}
+      </AnimatePresence>
 
-          {/* ── TABLE FOOTER BAR ────────────────────────────────────────── */}
-          <div className="px-6 py-3 bg-[#F9FAFB] dark:bg-slate-900 border-t border-[#E5E7EB] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400 flex-shrink-0">
-            <span className="font-medium">
-              Showing {filteredTenants.length} of {tenants.length} Organizations
-            </span>
-            <span className="text-[11px] font-mono text-[#9CA3AF]">
-              inkCRM Multi-Tenant Platform
-            </span>
-          </div>
-        </div>
-
-      </main>
-
-      {/* ── MODAL 1: CREATE ADMIN-CRM & TENANT WIZARD ──────────────────────── */}
+      {/* ── MODAL: CREATE ADMIN-CRM & TENANT WIZARD ────────────────────────── */}
       <AnimatePresence>
         {showCreateModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -926,11 +1559,10 @@ export default function SuperAdminDashboard() {
               exit={{ opacity: 0, scale: 0.98 }}
               className="relative z-10 bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]"
             >
-              {/* Header */}
               <div className="p-5 border-b border-[#E5E7EB] dark:border-slate-800 flex items-center justify-between bg-[#F9FAFB] dark:bg-slate-900/50">
                 <div>
                   <h3 className="text-base font-bold text-[#111827] dark:text-white">Create Admin-CRM & Tenant Instance</h3>
-                  <p className="text-xs text-[#6B7280] dark:text-slate-400">Set up a new scoped workspace with pre-configured vertical template</p>
+                  <p className="text-xs text-[#6B7280]">Set up a new scoped workspace with pre-configured vertical template</p>
                 </div>
                 <button
                   onClick={() => setShowCreateModal(false)}
@@ -940,7 +1572,6 @@ export default function SuperAdminDashboard() {
                 </button>
               </div>
 
-              {/* Progress Steps */}
               <div className="grid grid-cols-4 border-b border-[#E5E7EB] dark:border-slate-800 text-xs font-medium text-center bg-[#F9FAFB]/50">
                 {[
                   { step: 1, title: '1. Admin' },
@@ -962,12 +1593,9 @@ export default function SuperAdminDashboard() {
                 ))}
               </div>
 
-              {/* Form Content */}
               <form onSubmit={handleCreateTenant} className="p-6 overflow-y-auto space-y-6">
-                
-                {/* STEP 1: Admin Credentials */}
                 {createStep === 1 && (
-                  <div className="space-y-4 animate-in fade-in duration-100">
+                  <div className="space-y-4">
                     <div className="border-b border-[#F1F5F9] dark:border-slate-800 pb-2">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-[#111827] dark:text-slate-300">
                         Primary Admin Account
@@ -1024,9 +1652,8 @@ export default function SuperAdminDashboard() {
                   </div>
                 )}
 
-                {/* STEP 2: Organization Details */}
                 {createStep === 2 && (
-                  <div className="space-y-4 animate-in fade-in duration-100">
+                  <div className="space-y-4">
                     <div className="border-b border-[#F1F5F9] dark:border-slate-800 pb-2">
                       <h4 className="text-xs font-bold uppercase tracking-wider text-[#111827] dark:text-slate-300">
                         Organization & Subdomain
@@ -1067,9 +1694,8 @@ export default function SuperAdminDashboard() {
                   </div>
                 )}
 
-                {/* STEP 3: Assign Vertical Preset */}
                 {createStep === 3 && (
-                  <div className="space-y-4 animate-in fade-in duration-100">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between border-b border-[#F1F5F9] dark:border-slate-800 pb-2">
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[#111827] dark:text-slate-300">
@@ -1111,9 +1737,8 @@ export default function SuperAdminDashboard() {
                   </div>
                 )}
 
-                {/* STEP 4: Modules Checklist */}
                 {createStep === 4 && (
-                  <div className="space-y-4 animate-in fade-in duration-100">
+                  <div className="space-y-4">
                     <div className="flex items-center justify-between border-b border-[#F1F5F9] dark:border-slate-800 pb-2">
                       <div>
                         <h4 className="text-xs font-bold uppercase tracking-wider text-[#111827] dark:text-slate-300">
@@ -1165,13 +1790,12 @@ export default function SuperAdminDashboard() {
                   </div>
                 )}
 
-                {/* Footer Controls */}
                 <div className="pt-4 flex justify-between items-center border-t border-[#E5E7EB] dark:border-slate-800">
                   {createStep > 1 ? (
                     <button
                       type="button"
                       onClick={() => setCreateStep((prev) => (prev - 1) as any)}
-                      className="px-3.5 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-slate-800 text-[#111827] dark:text-slate-300 rounded-lg text-xs font-medium transition-colors cursor-pointer"
+                      className="px-3.5 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#111827] rounded-lg text-xs font-medium cursor-pointer"
                     >
                       Back
                     </button>
@@ -1200,14 +1824,13 @@ export default function SuperAdminDashboard() {
                     )}
                   </div>
                 </div>
-
               </form>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* ── MODAL 2: ADD CUSTOM VERTICAL ──────────────────────────────────── */}
+      {/* ── MODAL: ADD CUSTOM VERTICAL ────────────────────────────────────── */}
       <AnimatePresence>
         {showAddVerticalModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -1312,7 +1935,7 @@ export default function SuperAdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* ── MODAL 3: SAFE ARCHIVE CONFIRMATION ────────────────────────────── */}
+      {/* ── MODAL: SAFE ARCHIVE CONFIRMATION ──────────────────────────────── */}
       <AnimatePresence>
         {archiveModalTenant && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -1373,11 +1996,11 @@ export default function SuperAdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* ── MODAL 4: EDIT ENABLED MODULES (KILL-SWITCH) ───────────────────── */}
+      {/* ── MODAL: EDIT ENABLED MODULES (KILL-SWITCH) ─────────────────────── */}
       <AnimatePresence>
         {modulesModalTenant && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setModulesModalTenant(null)} />
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowRequestsModal(false)} />
             <motion.div
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -1394,7 +2017,6 @@ export default function SuperAdminDashboard() {
                 </button>
               </div>
 
-              {/* Search & Bulk Select */}
               <div className="flex items-center justify-between gap-3">
                 <div className="relative flex-1">
                   <Icons.Search className="w-3.5 h-3.5 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
@@ -1425,7 +2047,6 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
-              {/* Modules List */}
               <div className="space-y-2 overflow-y-auto p-1 max-h-96">
                 {ALL_SYSTEM_MODULES.filter(m => !modulesSearch || m.label.toLowerCase().includes(modulesSearch.toLowerCase()) || m.key.toLowerCase().includes(modulesSearch.toLowerCase())).map((mod) => {
                   const checked = tempEnabledModules.includes(mod.key);
@@ -1485,7 +2106,7 @@ export default function SuperAdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* ── MODAL 5: MODULE REQUESTS QUEUE ─────────────────────────────────── */}
+      {/* ── MODAL: MODULE REQUESTS QUEUE ───────────────────────────────────── */}
       <AnimatePresence>
         {showRequestsModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
