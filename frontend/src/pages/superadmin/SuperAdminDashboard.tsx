@@ -199,6 +199,58 @@ export default function SuperAdminDashboard() {
   const [customColor, setCustomColor] = useState('#312E81');
   const [creatingVertical, setCreatingVertical] = useState(false);
 
+  // State for Editing Tenant
+  const [editModalTenant, setEditModalTenant] = useState<TenantItem | null>(null);
+  const [editOrgName, setEditOrgName] = useState('');
+  const [editOrgSubdomain, setEditOrgSubdomain] = useState('');
+  const [editVerticalType, setEditVerticalType] = useState('bank');
+  const [editAdminFirstName, setEditAdminFirstName] = useState('');
+  const [editAdminLastName, setEditAdminLastName] = useState('');
+  const [editAdminEmail, setEditAdminEmail] = useState('');
+  const [editAdminPhone, setEditAdminPhone] = useState('');
+  const [editAdminPassword, setEditAdminPassword] = useState('');
+  const [editStatus, setEditStatus] = useState<'active' | 'disabled'>('active');
+  const [savingEditTenant, setSavingEditTenant] = useState(false);
+
+  const handleOpenEditModal = (tenant: TenantItem) => {
+    setEditModalTenant(tenant);
+    setEditOrgName(tenant.name || '');
+    setEditOrgSubdomain(tenant.subdomain || '');
+    setEditVerticalType(tenant.verticalType || 'bank');
+    setEditAdminFirstName(tenant.adminUser?.firstName || '');
+    setEditAdminLastName(tenant.adminUser?.lastName || '');
+    setEditAdminEmail(tenant.adminUser?.email || '');
+    setEditAdminPhone(tenant.adminUser?.phone || '');
+    setEditAdminPassword('');
+    setEditStatus(tenant.status === 'disabled' ? 'disabled' : 'active');
+  };
+
+  const handleSaveEditTenant = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editModalTenant) return;
+    try {
+      setSavingEditTenant(true);
+      await api.put(`/super-admin/tenants/${editModalTenant.id}`, {
+        name: editOrgName.trim(),
+        subdomain: editOrgSubdomain.trim(),
+        verticalType: editVerticalType,
+        status: editStatus,
+        adminFirstName: editAdminFirstName.trim(),
+        adminLastName: editAdminLastName.trim(),
+        adminEmail: editAdminEmail.trim(),
+        adminPhone: editAdminPhone.trim(),
+        ...(editAdminPassword ? { adminPassword: editAdminPassword } : {})
+      });
+      showToast(`Tenant "${editOrgName}" updated successfully!`, 'success');
+      setEditModalTenant(null);
+      loadDashboardData();
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update tenant.', 'error');
+    } finally {
+      setSavingEditTenant(false);
+    }
+  };
+
   useEffect(() => {
     loadDashboardData();
     loadSuperAdminProfile();
@@ -1117,18 +1169,14 @@ export default function SuperAdminDashboard() {
                                   </button>
                                 )}
 
-                                {/* Quick Suspend / Activate */}
+                                {/* ✏️ Edit Tenant */}
                                 {tenant.status !== 'archived' && (
                                   <button
-                                    onClick={() => handleToggleStatus(tenant)}
-                                    className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-[#6B7280] hover:text-[#312E81] rounded-md transition-colors cursor-pointer"
-                                    title={tenant.status === 'active' ? 'Suspend Tenant' : 'Activate Tenant'}
+                                    onClick={() => handleOpenEditModal(tenant)}
+                                    className="p-1.5 hover:bg-[#F1F5F9] dark:hover:bg-slate-800 text-[#6B7280] hover:text-[#312E81] dark:hover:text-indigo-400 rounded-md transition-colors cursor-pointer"
+                                    title="Edit Tenant & Admin Details"
                                   >
-                                    {tenant.status === 'active' ? (
-                                      <Icons.PauseCircle className="w-4 h-4" />
-                                    ) : (
-                                      <Icons.PlayCircle className="w-4 h-4 text-[#15803D]" />
-                                    )}
+                                    <Icons.Edit2 className="w-4 h-4" />
                                   </button>
                                 )}
 
@@ -2161,6 +2209,183 @@ export default function SuperAdminDashboard() {
                   ))
                 )}
               </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── MODAL: EDIT TENANT & ADMIN DETAILS ────────────────────────────── */}
+      <AnimatePresence>
+        {editModalTenant && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setEditModalTenant(null)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="relative z-10 bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] w-full max-w-lg overflow-hidden shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+            >
+              <div className="flex items-center justify-between border-b border-[#E5E7EB] dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-indigo-400 flex items-center justify-center">
+                    <Icons.Edit2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#111827] dark:text-white">Edit Tenant & Admin</h3>
+                    <p className="text-xs text-[#6B7280]">Update organization info and primary admin credentials</p>
+                  </div>
+                </div>
+                <button onClick={() => setEditModalTenant(null)} className="text-[#9CA3AF] hover:text-[#111827] cursor-pointer">
+                  <Icons.X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveEditTenant} className="space-y-4">
+                <div className="space-y-3">
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Company / Organization Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editOrgName}
+                      onChange={(e) => setEditOrgName(e.target.value)}
+                      className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Subdomain *</label>
+                      <div className="flex items-center">
+                        <input
+                          type="text"
+                          required
+                          value={editOrgSubdomain}
+                          onChange={(e) => setEditOrgSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                          className="w-full px-3 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-l-lg text-xs text-[#111827] dark:text-white font-mono focus:outline-none focus:border-[#312E81]"
+                        />
+                        <span className="px-2 py-2 bg-[#F1F5F9] dark:bg-slate-800 border border-l-0 border-[#E5E7EB] dark:border-slate-700 text-[11px] font-mono text-[#6B7280] rounded-r-lg">
+                          .inkcrm
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Industry Vertical</label>
+                      <select
+                        value={editVerticalType}
+                        onChange={(e) => setEditVerticalType(e.target.value)}
+                        className="w-full px-3 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                      >
+                        {verticals.map(v => (
+                          <option key={v.key} value={v.key}>{v.label}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Status</label>
+                    <div className="flex gap-3">
+                      <label className="flex items-center gap-2 text-xs text-[#111827] dark:text-slate-300 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="editStatus"
+                          value="active"
+                          checked={editStatus === 'active'}
+                          onChange={() => setEditStatus('active')}
+                          className="text-[#15803D] focus:ring-0"
+                        />
+                        <span className="text-[#15803D] font-medium">Active (Operational)</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs text-[#111827] dark:text-slate-300 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="editStatus"
+                          value="disabled"
+                          checked={editStatus === 'disabled'}
+                          onChange={() => setEditStatus('disabled')}
+                          className="text-[#B45309] focus:ring-0"
+                        />
+                        <span className="text-[#B45309] font-medium">Suspended (Blocked)</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#F1F5F9] dark:border-slate-800">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-[#111827] dark:text-slate-300 mb-2">
+                      Primary Admin Contact
+                    </h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-[#6B7280] mb-1">First Name</label>
+                        <input
+                          type="text"
+                          value={editAdminFirstName}
+                          onChange={(e) => setEditAdminFirstName(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#6B7280] mb-1">Last Name</label>
+                        <input
+                          type="text"
+                          value={editAdminLastName}
+                          onChange={(e) => setEditAdminLastName(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#6B7280] mb-1">Email</label>
+                        <input
+                          type="email"
+                          value={editAdminEmail}
+                          onChange={(e) => setEditAdminEmail(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-[#6B7280] mb-1">Phone</label>
+                        <input
+                          type="text"
+                          value={editAdminPhone}
+                          onChange={(e) => setEditAdminPhone(e.target.value)}
+                          className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="mt-3">
+                      <label className="block text-xs font-medium text-[#6B7280] mb-1">Reset Password (Optional)</label>
+                      <input
+                        type="text"
+                        placeholder="Leave blank to keep unchanged"
+                        value={editAdminPassword}
+                        onChange={(e) => setEditAdminPassword(e.target.value)}
+                        className="w-full px-3 py-1.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs font-mono text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 pt-3 border-t border-[#E5E7EB] dark:border-slate-800">
+                  <button
+                    type="button"
+                    onClick={() => setEditModalTenant(null)}
+                    className="px-3.5 py-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] text-[#111827] rounded-lg text-xs font-medium cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingEditTenant}
+                    className="px-4 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                  >
+                    {savingEditTenant ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Check className="w-3.5 h-3.5" />}
+                    <span>Save Changes</span>
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}

@@ -401,6 +401,96 @@ router.patch('/tenants/:id/modules', async (req: Request, res: Response): Promis
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 6b. EDIT TENANT & ADMIN DETAILS
+// ─────────────────────────────────────────────────────────────────────────────
+router.put('/tenants/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const {
+      name,
+      subdomain,
+      verticalType,
+      status,
+      adminFirstName,
+      adminLastName,
+      adminPhone,
+      adminEmail,
+      adminPassword
+    } = req.body;
+
+    const organization = await Organization.findById(req.params.id);
+    if (!organization) {
+      res.status(404).json({ error: 'Organization not found.' });
+      return;
+    }
+
+    if (name) organization.name = name.trim();
+    if (subdomain) {
+      const cleanSub = subdomain.toLowerCase().trim().replace(/[^a-z0-9-]/g, '');
+      const existing = await Organization.findOne({ subdomain: cleanSub, _id: { $ne: organization._id } });
+      if (existing) {
+        res.status(400).json({ error: `Subdomain "${cleanSub}" is already in use by another tenant.` });
+        return;
+      }
+      organization.subdomain = cleanSub;
+    }
+
+    if (verticalType) {
+      organization.verticalType = verticalType;
+      const vert = await Vertical.findOne({ key: verticalType });
+      if (vert) organization.verticalId = vert._id as any;
+    }
+
+    if (status && ['active', 'disabled', 'archived'].includes(status)) {
+      organization.status = status;
+      if (status === 'disabled' || status === 'archived') {
+        await User.updateMany({ organizationId: organization._id }, { isActive: false });
+      } else if (status === 'active') {
+        await User.updateMany({ organizationId: organization._id }, { isActive: true });
+      }
+    }
+
+    if (adminPhone !== undefined) {
+      organization.phoneNumber = adminPhone;
+    }
+
+    await organization.save();
+
+    // Update the tenant's primary admin user
+    const adminUser = await User.findOne({
+      organizationId: organization._id
+    }).sort({ createdAt: 1 });
+
+    if (adminUser) {
+      if (adminFirstName) adminUser.firstName = adminFirstName.trim();
+      if (adminLastName) adminUser.lastName = adminLastName.trim();
+      if (adminPhone !== undefined) adminUser.phone = adminPhone.trim();
+      if (adminEmail) {
+        const cleanEmail = adminEmail.toLowerCase().trim();
+        const existingEmail = await User.findOne({ email: cleanEmail, _id: { $ne: adminUser._id } });
+        if (existingEmail) {
+          res.status(400).json({ error: `Email "${cleanEmail}" is already registered to another user.` });
+          return;
+        }
+        adminUser.email = cleanEmail;
+      }
+      if (adminPassword && adminPassword.trim().length >= 6) {
+        adminUser.passwordHash = await bcrypt.hash(adminPassword.trim(), 12);
+        adminUser.plainPassword = adminPassword.trim();
+      }
+      await adminUser.save();
+    }
+
+    res.status(200).json({
+      message: `Tenant "${organization.name}" updated successfully.`,
+      organization
+    });
+  } catch (error: any) {
+    console.error('[SUPER_ADMIN_EDIT_TENANT_ERROR]', error);
+    res.status(500).json({ error: error.message || 'Failed to update tenant details.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
 // 7. VERTICALS TEMPLATES CRUD
 // ─────────────────────────────────────────────────────────────────────────────
 router.get('/verticals', async (req: Request, res: Response): Promise<void> => {
