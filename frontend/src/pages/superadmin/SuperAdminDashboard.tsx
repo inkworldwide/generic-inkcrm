@@ -712,24 +712,6 @@ export default function SuperAdminDashboard() {
                     <span>{pendingRequests.length} Requests</span>
                   </button>
                 )}
-
-                {/* + Add Custom Vertical */}
-                <button
-                  onClick={() => setShowAddVerticalModal(true)}
-                  className="px-3.5 py-2 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] dark:hover:bg-slate-700 text-[#111827] dark:text-slate-200 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
-                >
-                  <Icons.Plus className="w-3.5 h-3.5 text-[#312E81] dark:text-indigo-400" />
-                  <span>Add Custom Vertical</span>
-                </button>
-
-                {/* + Create Admin-CRM */}
-                <button
-                  onClick={handleOpenCreateModal}
-                  className="px-4 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                >
-                  <Icons.UserPlus className="w-3.5 h-3.5" />
-                  <span>Create Admin-CRM</span>
-                </button>
               </>
             ) : (
               <button
