@@ -87,11 +87,7 @@ function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menu
 }
 
 function DashboardGuard() {
-  const { canAccessMenu, isPlatformSuperAdmin, impersonation } = useAuthStore();
-
-  if (isPlatformSuperAdmin && !impersonation.isImpersonating) {
-    return <Navigate to="/super-admin/dashboard" replace />;
-  }
+  const { canAccessMenu } = useAuthStore();
 
   if (!canAccessMenu('dashboard')) {
     if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
@@ -101,6 +97,7 @@ function DashboardGuard() {
     if (canAccessMenu('access_privilege')) return <Navigate to="/access-privilege" replace />;
     return <Navigate to="/my-campaign" replace />;
   }
+
   return <Dashboard />;
 }
 

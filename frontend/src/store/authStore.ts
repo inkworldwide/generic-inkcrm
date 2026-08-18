@@ -60,6 +60,8 @@ interface AuthState {
   impersonation: ImpersonationState;
   isAuthenticated: boolean;
   isInitializing: boolean;
+  previewRole: UserRole | null;
+  setPreviewRole: (role: UserRole | null) => void;
   setAuth: (user: User, token: string, refreshToken?: string, organization?: any) => void;
   setRole: (role: UserRole) => void;
   loginAsTenant: (tenantToken: string, tenantUser: any, tenantOrg: any, logId?: string) => void;
@@ -74,6 +76,7 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   role: null,
+  previewRole: null,
   organization: null,
   token: null,
   isPlatformSuperAdmin: false,
@@ -82,6 +85,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
   isAuthenticated: false,
   isInitializing: true,
+
+  setPreviewRole: (previewRole: UserRole | null) => {
+    set({ previewRole });
+  },
 
   setAuth: (user, token, refreshToken, organization) => {
     localStorage.setItem('token', token);
@@ -309,54 +316,43 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     }
 
-    // If pure platform super admin not impersonating and has no role restrictions, allow all
-    if (state.isPlatformSuperAdmin && !state.impersonation.isImpersonating && !state.role) {
+    // Active role (either from live preview or from session)
+    const activeRole = state.previewRole || state.role;
+
+    if (activeRole) {
+      const allowedMenus = activeRole.permissions?.menus;
+      if (Array.isArray(allowedMenus)) {
+        return allowedMenus.some((m: string) => {
+          const norm = (m || '').toLowerCase().replace(/[-_\s]/g, '');
+          if (norm === normalizedKey) return true;
+          if (norm === 'reports' && (normalizedKey.includes('report') || normalizedKey.includes('telecaller'))) return true;
+          if (norm === 'funnel' && normalizedKey.includes('funnel')) return true;
+          if (norm === 'security' && (normalizedKey.includes('accessprivilege') || normalizedKey.includes('leadtransfer'))) return true;
+          if (norm === 'campaigns' && (normalizedKey.includes('campaign') || normalizedKey.includes('campaignassignment'))) return true;
+          if (norm === 'leads' && (normalizedKey.includes('lead') || normalizedKey.includes('leadsprocess'))) return true;
+          return false;
+        });
+      }
+    }
+
+    // If pure platform super admin not impersonating and has no role/preview restrictions, allow all
+    if (state.isPlatformSuperAdmin && !state.impersonation.isImpersonating && !state.role && !state.previewRole) {
       return true;
     }
 
-    const role = state.role;
-    if (!role) {
-      // If superadmin without role, allow
-      if (state.isPlatformSuperAdmin) return true;
-      return true;
-    }
-
-    const roleName = (role.name || '').toLowerCase();
-    const isSuperAdminRole = roleName.includes('super admin') || roleName === 'admin';
-
-    if (isSuperAdminRole && (
-      normalizedKey === 'accessprivilege' ||
-      normalizedKey === 'access_privilege' ||
-      normalizedKey === 'settings'
-    )) {
-      return true;
-    }
-
-    const allowedMenus = role.permissions?.menus;
-    if (!Array.isArray(allowedMenus)) return true;
-
-    return allowedMenus.some((m: string) => {
-      const norm = (m || '').toLowerCase().replace(/[-_\s]/g, '');
-      if (norm === normalizedKey) return true;
-      if (norm === 'reports' && (normalizedKey.includes('report') || normalizedKey.includes('telecaller'))) return true;
-      if (norm === 'funnel' && normalizedKey.includes('funnel')) return true;
-      if (norm === 'security' && (normalizedKey.includes('accessprivilege') || normalizedKey.includes('leadtransfer'))) return true;
-      if (norm === 'campaigns' && (normalizedKey.includes('campaign') || normalizedKey.includes('campaignassignment'))) return true;
-      if (norm === 'leads' && (normalizedKey.includes('lead') || normalizedKey.includes('leadsprocess'))) return true;
-      return false;
-    });
+    return true;
   },
 
   canAccessModule: (moduleName: string, action: 'create' | 'read' | 'update' | 'delete' = 'read') => {
     const state = get();
-    if (state.isPlatformSuperAdmin && !state.impersonation.isImpersonating && !state.role) {
+    const activeRole = state.previewRole || state.role;
+
+    if (!activeRole) {
+      if (state.isPlatformSuperAdmin && !state.impersonation.isImpersonating) return true;
       return true;
     }
 
-    const role = state.role;
-    if (!role) return true;
-
-    const modules = role.permissions?.modules;
+    const modules = activeRole.permissions?.modules;
     if (!Array.isArray(modules) || modules.length === 0) return true;
 
     const mod = modules.find(

@@ -164,7 +164,7 @@ export default function AccessPrivilege() {
 
   const { modules } = useModuleStore();
   const { showToast, showAlertModal } = useToastStore();
-  const { fetchProfile, setRole, role, user, isPlatformSuperAdmin } = useAuthStore();
+  const { fetchProfile, setRole, setPreviewRole, role, user, isPlatformSuperAdmin } = useAuthStore();
 
   const [tenantsList, setTenantsList] = useState<any[]>([]);
   const [selectedOrgId, setSelectedOrgId] = useState<string>(orgIdFromUrl);
@@ -179,6 +179,26 @@ export default function AccessPrivilege() {
   // Working state for currently selected role
   const [allowedMenus, setAllowedMenus] = useState<string[]>([]);
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
+  const [isDirty, setIsDirty] = useState(false);
+
+  const selectedRole = roles.find(r => r._id === selectedRoleId);
+
+  // Sync live sidebar preview whenever editing a role
+  useEffect(() => {
+    if (selectedRole) {
+      setPreviewRole({
+        _id: selectedRole._id,
+        name: selectedRole.name,
+        permissions: {
+          menus: allowedMenus,
+          modules: modulePermissions
+        }
+      });
+    }
+    return () => {
+      setPreviewRole(null);
+    };
+  }, [selectedRoleId, selectedRole?.name, allowedMenus, modulePermissions]);
 
   useEffect(() => {
     if (isPlatformSuperAdmin || orgIdFromUrl) {
@@ -235,8 +255,6 @@ export default function AccessPrivilege() {
       setLoading(false);
     }
   };
-
-  const [isDirty, setIsDirty] = useState(false);
 
   const loadRoleData = (roleId: string, rolesList: Role[] = roles) => {
     const r = rolesList.find((role) => role._id === roleId);
@@ -445,7 +463,6 @@ export default function AccessPrivilege() {
     }
   };
 
-  const selectedRole = roles.find(r => r._id === selectedRoleId);
   const selectedTenant = tenantsList.find(t => t.id === selectedOrgId);
   const categories = ['All', 'Main Menu', 'Reports & Analytics', 'Funnel', 'Administration', 'Modules'];
 
