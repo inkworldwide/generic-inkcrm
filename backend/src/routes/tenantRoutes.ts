@@ -148,15 +148,39 @@ router.put('/branding', authenticate, requireTenant, async (req: Request, res: R
   }
 });
 
-// 3. Re-seed database (Public - for easy testing/resetting in demo)
-router.post('/seed-demo', async (req: Request, res: Response): Promise<void> => {
+// 4. Request a module activation from Platform Super Admin (Authenticated - Tenant Admin)
+router.post('/request-module', authenticate, requireTenant, async (req: Request, res: Response): Promise<void> => {
   try {
-    console.log('User requested manual database re-seeding...');
-    await seedDatabase(false);
-    res.status(200).json({ message: 'Database successfully seeded with demo organizations, modules, and records.' });
-  } catch (error: any) {
-    console.error('Failed to seed database:', error);
-    res.status(500).json({ error: 'Failed to seed database: ' + error.message });
+    const { moduleKey, note } = req.body;
+    if (!moduleKey) {
+      res.status(400).json({ error: 'moduleKey is required.' });
+      return;
+    }
+
+    const organization = await Organization.findById(req.organizationId);
+    if (!organization) {
+      res.status(404).json({ error: 'Organization not found.' });
+      return;
+    }
+
+    if (!organization.requestedModules) {
+      organization.requestedModules = [];
+    }
+
+    const exists = organization.requestedModules.some(r => r.moduleKey === moduleKey);
+    if (!exists) {
+      organization.requestedModules.push({
+        moduleKey,
+        requestedAt: new Date(),
+        requestedBy: req.user?.id as any,
+        note: note || ''
+      });
+      await organization.save();
+    }
+
+    res.status(200).json({ message: 'Module activation request submitted to Super Admin.' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to submit module request.' });
   }
 });
 

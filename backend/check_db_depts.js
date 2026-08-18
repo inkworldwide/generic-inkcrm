@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://127.0.0.1:27017/inkcrm').then(async () => {
+mongoose.connect('mongodb://127.0.0.1:27017/inkcrm_generic').then(async () => {
   const db = mongoose.connection.db;
 
   // 1. List all organizations

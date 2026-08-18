@@ -20,6 +20,7 @@ import auditRoutes from './routes/auditRoutes';
 import statusRoutes from './routes/statusRoutes';
 import notificationRoutes from './routes/notificationRoutes';
 import searchRoutes from './routes/searchRoutes';
+import superAdminRoutes from './routes/superAdminRoutes';
 
 const app = express();
 
@@ -123,6 +124,7 @@ app.use('/api/v1/audit', auditRoutes);
 app.use('/api/v1/statuses', statusRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/search', searchRoutes);
+app.use('/api/v1/super-admin', superAdminRoutes);
 
 // Base route
 app.get('/', (req, res) => {

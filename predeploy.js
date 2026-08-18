@@ -83,7 +83,7 @@ if (!mongoUri && fs.existsSync(envPath)) {
   });
 }
 if (!mongoUri) {
-  mongoUri = 'mongodb://127.0.0.1:27017/inkcrm';
+  mongoUri = 'mongodb://127.0.0.1:27017/inkcrm_generic';
 }
 
 if (!mongoUri) {

@@ -8,7 +8,7 @@ const rolesList = [
   { name: 'TELI CALLER', description: 'Telecaller calling team role', isSystem: false }
 ];
 
-mongoose.connect('mongodb://127.0.0.1:27017/inkcrm').then(async () => {
+mongoose.connect('mongodb://127.0.0.1:27017/inkcrm_generic').then(async () => {
   const db = mongoose.connection.db;
 
   // 1. Get the organization

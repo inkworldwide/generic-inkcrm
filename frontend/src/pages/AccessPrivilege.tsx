@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import * as Icons from 'lucide-react';
 import api from '../services/api';
 import { useModuleStore } from '../store/moduleStore';
@@ -157,9 +158,16 @@ interface Role {
 }
 
 export default function AccessPrivilege() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const orgIdFromUrl = searchParams.get('orgId') || '';
+
   const { modules } = useModuleStore();
   const { showToast, showAlertModal } = useToastStore();
-  const { fetchProfile, setRole, role, user } = useAuthStore();
+  const { fetchProfile, setRole, role, user, isPlatformSuperAdmin } = useAuthStore();
+
+  const [tenantsList, setTenantsList] = useState<any[]>([]);
+  const [selectedOrgId, setSelectedOrgId] = useState<string>(orgIdFromUrl);
 
   const [roles, setRoles] = useState<Role[]>([]);
   const [selectedRoleId, setSelectedRoleId] = useState('');
@@ -173,13 +181,36 @@ export default function AccessPrivilege() {
   const [modulePermissions, setModulePermissions] = useState<ModulePermission[]>([]);
 
   useEffect(() => {
-    fetchRoles();
-  }, []);
+    if (isPlatformSuperAdmin || orgIdFromUrl) {
+      fetchTenants();
+    }
+  }, [isPlatformSuperAdmin, orgIdFromUrl]);
 
-  const fetchRoles = async () => {
+  useEffect(() => {
+    fetchRoles(selectedOrgId);
+  }, [selectedOrgId]);
+
+  const fetchTenants = async () => {
+    try {
+      const res = await api.get('/super-admin/tenants');
+      const list = res.data || [];
+      setTenantsList(list);
+      if (!selectedOrgId && list.length > 0) {
+        setSelectedOrgId(list[0].id);
+      }
+    } catch (e) {
+      console.warn('Could not load tenants list:', e);
+    }
+  };
+
+  const fetchRoles = async (orgId?: string) => {
     try {
       setLoading(true);
-      const res = await api.get('/auth/roles');
+      const targetOrg = orgId || selectedOrgId;
+      const params: any = {};
+      if (targetOrg) params.organizationId = targetOrg;
+
+      const res = await api.get('/auth/roles', { params });
       const fetchedRoles: Role[] = res.data || [];
       setRoles(fetchedRoles);
       if (fetchedRoles.length > 0) {
@@ -192,6 +223,10 @@ export default function AccessPrivilege() {
         
         setSelectedRoleId(initialRoleId);
         loadRoleData(initialRoleId, fetchedRoles);
+      } else {
+        setSelectedRoleId('');
+        setAllowedMenus([]);
+        setModulePermissions([]);
       }
     } catch (err) {
       console.error('Failed to load roles:', err);
@@ -200,6 +235,8 @@ export default function AccessPrivilege() {
       setLoading(false);
     }
   };
+
+  const [isDirty, setIsDirty] = useState(false);
 
   const loadRoleData = (roleId: string, rolesList: Role[] = roles) => {
     const r = rolesList.find((role) => role._id === roleId);
@@ -229,6 +266,7 @@ export default function AccessPrivilege() {
       });
 
       setModulePermissions(mergedPerms);
+      setIsDirty(false);
     }
   };
 
@@ -283,6 +321,7 @@ export default function AccessPrivilege() {
 
   // Toggle single menu access
   const handleToggleMenu = (menuKey: string, allowed: boolean) => {
+    setIsDirty(true);
     if (allowed) {
       if (!allowedMenus.includes(menuKey)) {
         setAllowedMenus([...allowedMenus, menuKey]);
@@ -294,6 +333,7 @@ export default function AccessPrivilege() {
 
   // Grant / Revoke all in current view or all menus
   const handleSetAllCurrentView = (allowed: boolean) => {
+    setIsDirty(true);
     const currentKeys = filteredMenus.map(m => m.key);
     if (allowed) {
       const newAllowed = Array.from(new Set([...allowedMenus, ...currentKeys]));
@@ -304,17 +344,20 @@ export default function AccessPrivilege() {
   };
 
   const handleGrantAll = () => {
+    setIsDirty(true);
     setAllowedMenus(fullMenuItems.map(m => m.key));
     showToast('Granted access to all menus.', 'success');
   };
 
   const handleRevokeAll = () => {
+    setIsDirty(true);
     setAllowedMenus([]);
     showToast('Restricted all menus for this role.', 'info');
   };
 
   // Module CRUD handlers
   const handleModulePermissionChange = (moduleName: string, field: keyof ModulePermission, val: any) => {
+    setIsDirty(true);
     const updated = [...modulePermissions];
     const idx = updated.findIndex(p => p.moduleName.toLowerCase() === moduleName.toLowerCase());
     if (idx >= 0) {
@@ -349,6 +392,7 @@ export default function AccessPrivilege() {
     try {
       setSaving(true);
       await api.put(`/auth/roles/${selectedRoleId}`, {
+        organizationId: selectedOrgId || undefined,
         permissions: {
           menus: allowedMenus,
           modules: modulePermissions
@@ -360,6 +404,8 @@ export default function AccessPrivilege() {
         message: 'Access privileges and role permissions have been saved successfully.',
         type: 'success'
       });
+
+      setIsDirty(false);
 
       // Update local state list
       const updatedRoles = roles.map(r => {
@@ -400,6 +446,7 @@ export default function AccessPrivilege() {
   };
 
   const selectedRole = roles.find(r => r._id === selectedRoleId);
+  const selectedTenant = tenantsList.find(t => t.id === selectedOrgId);
   const categories = ['All', 'Main Menu', 'Reports & Analytics', 'Funnel', 'Administration', 'Modules'];
 
   const allowedCount = fullMenuItems.filter(m => allowedMenus.includes(m.key)).length;
@@ -420,22 +467,34 @@ export default function AccessPrivilege() {
               <span className="text-[10px] font-black uppercase tracking-wider font-mono px-2.5 py-0.5 rounded-full border bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border-indigo-200/80 dark:border-indigo-800/60">
                 Security & RBAC
               </span>
+              {isPlatformSuperAdmin && (
+                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded-full">
+                  Super Admin Scope
+                </span>
+              )}
               <span className="text-xs font-semibold text-slate-400">
                 Role Permissions
               </span>
             </div>
             <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight mt-0.5 uppercase">
-              Access Privilege
+              Access Privilege {selectedTenant ? `— ${selectedTenant.name}` : ''}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">
-              Configure role-based navigation menu access and data visibility across the CRM.
-            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
+          {isPlatformSuperAdmin && (
+            <button
+              onClick={() => navigate('/super-admin/dashboard')}
+              className="flex items-center gap-1.5 px-3.5 h-10 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 shadow-3xs transition-all cursor-pointer"
+            >
+              <Icons.ArrowLeft className="w-3.5 h-3.5" />
+              Super Admin Panel
+            </button>
+          )}
+
           <button
-            onClick={fetchRoles}
+            onClick={() => fetchRoles(selectedOrgId)}
             disabled={loading}
             className="flex items-center gap-1.5 px-4 h-10 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/60 shadow-3xs transition-all cursor-pointer"
           >
@@ -445,7 +504,7 @@ export default function AccessPrivilege() {
 
           <button
             onClick={handleSavePermissions}
-            disabled={saving || loading}
+            disabled={saving || loading || !selectedRoleId}
             className="flex items-center gap-2 px-6 h-10 bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-700 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md shadow-indigo-500/20 transition-all cursor-pointer disabled:opacity-50"
           >
             {saving ? (
@@ -462,6 +521,35 @@ export default function AccessPrivilege() {
       {/* Role Selection & Statistics Card */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 rounded-2xl p-6 shadow-xs space-y-6 relative overflow-hidden">
         <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500/60 to-purple-500/60" />
+        
+        {/* Tenant Scope Selector (Visible if Platform Super Admin or Tenants List populated) */}
+        {tenantsList.length > 0 && (
+          <div className="p-4 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-900/40 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Icons.Building2 className="w-4 h-4 text-indigo-500" />
+              <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
+                Tenant Workspace Scope:
+              </span>
+            </div>
+            <div className="w-full sm:w-80">
+              <select
+                value={selectedOrgId}
+                onChange={(e) => {
+                  setSelectedOrgId(e.target.value);
+                  setSearchParams({ orgId: e.target.value });
+                }}
+                className="w-full h-9 px-3 text-xs font-bold text-indigo-900 dark:text-indigo-200 bg-white dark:bg-slate-800 border border-indigo-200 dark:border-indigo-800 rounded-lg focus:outline-none focus:border-indigo-500 cursor-pointer shadow-xs"
+              >
+                {tenantsList.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.name} ({t.verticalType} • {t.subdomain}.inkcrm)
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
           {/* Role Dropdown */}
           <div className="space-y-1.5">
@@ -777,7 +865,7 @@ export default function AccessPrivilege() {
             <button
               onClick={handleSavePermissions}
               disabled={saving || loading}
-              className="flex items-center gap-2 px-8 h-11 bg-[#17223B] hover:bg-[#1E2E4F] dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
+              className="flex items-center gap-2 px-8 h-11 bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all cursor-pointer disabled:opacity-50"
             >
               {saving ? (
                 <Icons.Loader2 className="w-4 h-4 animate-spin" />
@@ -789,6 +877,32 @@ export default function AccessPrivilege() {
           </div>
         </div>
       </div>
+
+      {/* Floating Unsaved Changes Warning Bar */}
+      {isDirty && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-slate-900/95 dark:bg-white/95 text-white dark:text-slate-900 px-6 py-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700 dark:border-slate-200 flex items-center gap-4 animate-in slide-in-from-bottom-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="text-xs font-bold">Unsaved permission changes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => loadRoleData(selectedRoleId)}
+              className="px-3 py-1.5 bg-slate-800 dark:bg-slate-200 hover:bg-slate-700 dark:hover:bg-slate-300 text-xs font-bold rounded-lg cursor-pointer transition-colors"
+            >
+              Discard
+            </button>
+            <button
+              onClick={handleSavePermissions}
+              disabled={saving}
+              className="px-4 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-extrabold rounded-lg shadow-md flex items-center gap-1.5 cursor-pointer"
+            >
+              {saving ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Check className="w-3.5 h-3.5" />}
+              Save Changes
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

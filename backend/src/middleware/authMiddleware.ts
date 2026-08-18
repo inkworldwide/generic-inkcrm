@@ -1,11 +1,16 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 
-interface DecodedToken {
+export interface DecodedToken {
   id: string;
   email: string;
-  roleId: string;
-  organizationId: string;
+  roleId?: string;
+  organizationId?: string;
+  isPlatformSuperAdmin?: boolean;
+  isImpersonated?: boolean;
+  impersonatedBy?: string;
+  impersonationLogId?: string;
 }
 
 export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
@@ -39,15 +44,17 @@ export const authenticate = (req: Request, res: Response, next: NextFunction): v
 
     req.user = decoded;
     
-    // Also enforce that the user's tenant matches the request tenant context if specified
-    if (req.organizationId && req.organizationId.toString() !== decoded.organizationId) {
-      res.status(403).json({ error: 'Cross-tenant access forbidden. Access denied.' });
-      return;
+    // Platform Super Admin bypasses cross-tenant restrictions
+    if (!decoded.isPlatformSuperAdmin) {
+      // Enforce that the user's tenant matches the request tenant context if specified
+      if (req.organizationId && decoded.organizationId && req.organizationId.toString() !== decoded.organizationId) {
+        res.status(403).json({ error: 'Cross-tenant access forbidden. Access denied.' });
+        return;
+      }
     }
 
-    // Automatically bind organizationId from user if not resolved yet
-    if (!req.organizationId) {
-      const mongoose = require('mongoose');
+    // Automatically bind organizationId from user if not resolved yet and present in token
+    if (!req.organizationId && decoded.organizationId && mongoose.Types.ObjectId.isValid(decoded.organizationId)) {
       req.organizationId = new mongoose.Types.ObjectId(decoded.organizationId);
     }
 

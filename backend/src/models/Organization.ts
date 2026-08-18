@@ -1,8 +1,19 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IModuleRequest {
+  moduleKey: string;
+  requestedAt: Date;
+  requestedBy?: mongoose.Types.ObjectId;
+  note?: string;
+}
+
 export interface IOrganization extends Document {
   name: string;
   subdomain: string;
+  verticalType: string; // 'bank' | 'school' | 'medical' | 'fmcg' | 'developer' | 'vehicle' | custom
+  verticalId?: mongoose.Types.ObjectId;
+  status: 'active' | 'disabled' | 'archived' | 'pending_setup';
+  createdBy?: mongoose.Types.ObjectId;
   logoUrl?: string;
   faviconUrl?: string;
   loginBgUrl?: string;
@@ -14,6 +25,7 @@ export interface IOrganization extends Document {
     mode: 'light' | 'dark' | 'system';
   };
   enabledModules: string[];
+  requestedModules?: IModuleRequest[];
 
   // Company Details
   companyCode?: string;
@@ -58,6 +70,15 @@ const OrganizationSchema = new Schema<IOrganization>(
   {
     name: { type: String, required: true, trim: true },
     subdomain: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    verticalType: { type: String, default: 'custom', index: true },
+    verticalId: { type: Schema.Types.ObjectId, ref: 'Vertical' },
+    status: { 
+      type: String, 
+      enum: ['active', 'disabled', 'archived', 'pending_setup'], 
+      default: 'active',
+      index: true 
+    },
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User' },
     logoUrl: { type: String },
     faviconUrl: { type: String },
     loginBgUrl: { type: String },
@@ -69,6 +90,14 @@ const OrganizationSchema = new Schema<IOrganization>(
       mode: { type: String, enum: ['light', 'dark', 'system'], default: 'light' }
     },
     enabledModules: [{ type: String }],
+    requestedModules: [
+      {
+        moduleKey: { type: String, required: true },
+        requestedAt: { type: Date, default: Date.now },
+        requestedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+        note: { type: String }
+      }
+    ],
     
     // Company Details
     companyCode: { type: String },
@@ -101,15 +130,12 @@ const OrganizationSchema = new Schema<IOrganization>(
     },
 
     subscription: {
-      plan: { type: String, enum: ['free', 'growth', 'enterprise'], default: 'free' },
-      status: { type: String, enum: ['active', 'suspended', 'trial'], default: 'trial' },
-      expiresAt: { type: Date, default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) }
+      plan: { type: String, enum: ['free', 'growth', 'enterprise'], default: 'enterprise' },
+      status: { type: String, enum: ['active', 'suspended', 'trial'], default: 'active' },
+      expiresAt: { type: Date, default: () => new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) }
     }
   },
   { timestamps: true }
 );
-
-// Indexes
-OrganizationSchema.index({ subdomain: 1 });
 
 export default mongoose.model<IOrganization>('Organization', OrganizationSchema);

@@ -180,12 +180,16 @@ export default function Login() {
         setLoginStep('face');
       } else if (res.data.token) {
         // Successful password verification and no MFA/location required
-        setAuth(res.data.user, res.data.token, res.data.refreshToken);
+        setAuth(res.data.user, res.data.token, res.data.refreshToken, res.data.organization);
         localStorage.setItem('user', JSON.stringify(res.data.user));
         if (res.data.user.subdomain) {
           localStorage.setItem('tenantSubdomain', res.data.user.subdomain);
         }
-        navigate('/');
+        if (res.data.isPlatformSuperAdmin || res.data.redirectTo === '/super-admin/dashboard' || res.data.user?.isPlatformSuperAdmin) {
+          navigate('/super-admin/dashboard');
+        } else {
+          navigate('/');
+        }
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Authentication failed. Please verify credentials.');
@@ -196,12 +200,16 @@ export default function Login() {
   /** Step 2 → 3: LocationVerificationStep calls /auth/login and returns tempToken */
   const handleLocationSuccess = (token: string, finalData?: any) => {
     if (finalData?.token) {
-      setAuth(finalData.user, finalData.token, finalData.refreshToken);
+      setAuth(finalData.user, finalData.token, finalData.refreshToken, finalData.organization);
       localStorage.setItem('user', JSON.stringify(finalData.user));
       if (finalData.user.subdomain) {
         localStorage.setItem('tenantSubdomain', finalData.user.subdomain);
       }
-      navigate('/');
+      if (finalData.isPlatformSuperAdmin || finalData.user?.isPlatformSuperAdmin) {
+        navigate('/super-admin/dashboard');
+      } else {
+        navigate('/');
+      }
     } else {
       setTempToken(token);
       setLoginStep('face');
@@ -220,7 +228,11 @@ export default function Login() {
     if (user.subdomain) {
       localStorage.setItem('tenantSubdomain', user.subdomain);
     }
-    navigate('/');
+    if (user.isPlatformSuperAdmin) {
+      navigate('/super-admin/dashboard');
+    } else {
+      navigate('/');
+    }
   };
   const resetLoginFlow = () => {
     setLoginStep('credentials');
@@ -367,10 +379,10 @@ export default function Login() {
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#fdfbf7] px-4 py-12 relative overflow-hidden font-sans">
+    <div className="min-h-screen flex items-center justify-center bg-[#fdfbf7] dark:bg-[#0B0F19] px-4 py-12 relative overflow-hidden font-sans">
 
       {/* Background grid & blobs */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:3rem_3rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-30 pointer-events-none" />
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[55%] rounded-full bg-indigo-200/40 blur-[130px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[55%] rounded-full bg-emerald-100/40 blur-[130px] pointer-events-none" />
 
@@ -420,9 +432,12 @@ export default function Login() {
       {/* Main Card */}
       <div className="w-full max-w-md bg-white border border-slate-200/80 p-8 rounded-2xl shadow-xl shadow-slate-200/50 relative z-10 text-slate-800 transition-all duration-300">
 
-        {/* Logo */}
-        <div className="flex items-center justify-center mb-8">
-          <img src={loginLogo} alt="Ink Worldwide" className="h-20 w-auto object-contain" />
+        {/* Logo & Project Tag */}
+        <div className="flex flex-col items-center justify-center mb-6 gap-2">
+          <img src={loginLogo} alt="Ink Worldwide" className="h-16 w-auto object-contain" />
+          <span className="px-3 py-1 bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-bold text-xs uppercase tracking-wider rounded-full border border-indigo-200 dark:border-indigo-800 shadow-sm">
+            inkCRM Generic
+          </span>
         </div>
 
         {/* Alert banners */}

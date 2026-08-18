@@ -6,12 +6,12 @@ import fs from 'fs';
 let localDbProcess: any = null;
 
 export const connectDB = async (): Promise<void> => {
-  let connUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inkcrm';
+  let connUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inkcrm_generic';
 
   // Safety check: block any cloud Atlas connection strings
   if (connUri.includes('mongodb.net') || connUri.includes('mongodb+srv://') || connUri.includes('atlas')) {
     console.log('Warning: Cloud database connection string detected. Forcing fallback to local database.');
-    connUri = 'mongodb://127.0.0.1:27017/inkcrm';
+    connUri = 'mongodb://127.0.0.1:27017/inkcrm_generic';
   }
 
   mongoose.set('strictQuery', true);
@@ -65,7 +65,7 @@ export const connectDB = async (): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, 2000));
 
     try {
-      await mongoose.connect('mongodb://127.0.0.1:27017/inkcrm');
+      await mongoose.connect('mongodb://127.0.0.1:27017/inkcrm_generic');
       console.log(`MongoDB Connected (Project Folder): ${mongoose.connection.host}`);
     } catch (connectErr) {
       console.error('Failed to connect to the automatically started local database process:', connectErr);

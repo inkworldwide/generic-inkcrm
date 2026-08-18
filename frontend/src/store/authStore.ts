@@ -21,23 +21,49 @@ export interface UserRole {
   };
 }
 
+export interface OrganizationInfo {
+  id: string;
+  name: string;
+  subdomain: string;
+  verticalType?: string;
+  enabledModules?: string[];
+  themeSettings?: any;
+}
+
 export interface User {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
   roleId: string | UserRole;
-  organizationId: string;
+  organizationId?: string;
+  isPlatformSuperAdmin?: boolean;
+  mustResetPassword?: boolean;
+  subdomain?: string;
+  isImpersonated?: boolean;
+}
+
+export interface ImpersonationState {
+  isImpersonating: boolean;
+  originalToken?: string;
+  originalUser?: User;
+  impersonationLogId?: string;
+  tenantOrganization?: OrganizationInfo;
 }
 
 interface AuthState {
   user: User | null;
   role: UserRole | null;
+  organization: OrganizationInfo | null;
   token: string | null;
+  isPlatformSuperAdmin: boolean;
+  impersonation: ImpersonationState;
   isAuthenticated: boolean;
   isInitializing: boolean;
-  setAuth: (user: User, token: string, refreshToken?: string) => void;
+  setAuth: (user: User, token: string, refreshToken?: string, organization?: any) => void;
   setRole: (role: UserRole) => void;
+  loginAsTenant: (tenantToken: string, tenantUser: any, tenantOrg: any, logId?: string) => void;
+  returnToSuperAdmin: () => Promise<void>;
   fetchProfile: () => Promise<void>;
   logout: () => Promise<void>;
   initialize: () => void;
@@ -48,20 +74,110 @@ interface AuthState {
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   role: null,
+  organization: null,
   token: null,
+  isPlatformSuperAdmin: false,
+  impersonation: {
+    isImpersonating: false
+  },
   isAuthenticated: false,
   isInitializing: true,
 
-  setAuth: (user, token, refreshToken) => {
+  setAuth: (user, token, refreshToken, organization) => {
     localStorage.setItem('token', token);
     if (refreshToken) {
       localStorage.setItem('refreshToken', refreshToken);
     }
-    localStorage.setItem('tenantId', user.organizationId);
+    if (user.organizationId) {
+      localStorage.setItem('tenantId', user.organizationId);
+    } else {
+      localStorage.removeItem('tenantId');
+    }
     localStorage.setItem('user', JSON.stringify(user));
-    set({ user, token, isAuthenticated: true, isInitializing: false });
-    // Fetch full role details in background
+    
+    const isPlatformSuperAdmin = !!user.isPlatformSuperAdmin || user.email === 'superadmin@inkcrm.com';
+
+    set({ 
+      user, 
+      token, 
+      organization: organization || null,
+      isPlatformSuperAdmin,
+      isAuthenticated: true, 
+      isInitializing: false 
+    });
+
+    if (user.organizationId) {
+      get().fetchProfile();
+    }
+  },
+
+  loginAsTenant: (tenantToken, tenantUser, tenantOrg, logId) => {
+    const currentToken = get().token;
+    const currentUser = get().user;
+
+    localStorage.setItem('originalSuperAdminToken', currentToken || '');
+    localStorage.setItem('originalSuperAdminUser', JSON.stringify(currentUser || {}));
+    if (logId) localStorage.setItem('impersonationLogId', logId);
+
+    localStorage.setItem('token', tenantToken);
+    if (tenantUser.organizationId) {
+      localStorage.setItem('tenantId', tenantUser.organizationId);
+    }
+    localStorage.setItem('user', JSON.stringify(tenantUser));
+
+    set({
+      token: tenantToken,
+      user: { ...tenantUser, isImpersonated: true },
+      organization: tenantOrg,
+      isPlatformSuperAdmin: false,
+      impersonation: {
+        isImpersonating: true,
+        originalToken: currentToken || undefined,
+        originalUser: currentUser || undefined,
+        impersonationLogId: logId,
+        tenantOrganization: tenantOrg
+      }
+    });
+
     get().fetchProfile();
+  },
+
+  returnToSuperAdmin: async () => {
+    const originalToken = localStorage.getItem('originalSuperAdminToken') || get().impersonation.originalToken;
+    const originalUserStr = localStorage.getItem('originalSuperAdminUser');
+    const logId = localStorage.getItem('impersonationLogId') || get().impersonation.impersonationLogId;
+
+    // Call backend to record end of impersonation log
+    if (logId) {
+      try {
+        await api.post('/super-admin/end-impersonation', { logId }, {
+          headers: { Authorization: `Bearer ${originalToken}` }
+        });
+      } catch (e) {}
+    }
+
+    if (originalToken && originalUserStr) {
+      try {
+        const originalUser = JSON.parse(originalUserStr);
+        localStorage.setItem('token', originalToken);
+        localStorage.removeItem('tenantId');
+        localStorage.setItem('user', JSON.stringify(originalUser));
+        localStorage.removeItem('originalSuperAdminToken');
+        localStorage.removeItem('originalSuperAdminUser');
+        localStorage.removeItem('impersonationLogId');
+
+        set({
+          token: originalToken,
+          user: originalUser,
+          role: null,
+          organization: null,
+          isPlatformSuperAdmin: true,
+          impersonation: { isImpersonating: false }
+        });
+      } catch (e) {
+        console.error('Failed restoring superadmin session:', e);
+      }
+    }
   },
 
   setRole: (role) => {
@@ -73,18 +189,26 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!token) return;
     try {
       const res = await api.get('/auth/me');
+      const isPlatformSuperAdmin = res.data?.isPlatformSuperAdmin || res.data?.user?.email === 'superadmin@inkcrm.com';
       if (res.data?.role) {
         set({ role: res.data.role });
       }
+      if (res.data?.organization) {
+        set({ organization: res.data.organization });
+      }
       if (res.data?.user) {
         set({
+          isPlatformSuperAdmin,
           user: {
             id: res.data.user._id || res.data.user.id,
             firstName: res.data.user.firstName,
             lastName: res.data.user.lastName,
             email: res.data.user.email,
             roleId: res.data.user.roleId,
-            organizationId: res.data.user.organizationId
+            organizationId: res.data.user.organizationId,
+            isPlatformSuperAdmin,
+            mustResetPassword: res.data.user.mustResetPassword,
+            subdomain: res.data.user.subdomain
           }
         });
       }
@@ -102,19 +226,51 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       localStorage.removeItem('token');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
-      set({ user: null, role: null, token: null, isAuthenticated: false });
+      localStorage.removeItem('tenantId');
+      localStorage.removeItem('originalSuperAdminToken');
+      localStorage.removeItem('originalSuperAdminUser');
+      localStorage.removeItem('impersonationLogId');
+      set({ 
+        user: null, 
+        role: null, 
+        organization: null, 
+        token: null, 
+        isPlatformSuperAdmin: false,
+        impersonation: { isImpersonating: false },
+        isAuthenticated: false 
+      });
     }
   },
 
   initialize: async () => {
     const token = localStorage.getItem('token');
-    const tenantId = localStorage.getItem('tenantId');
     const userStr = localStorage.getItem('user');
+    const origToken = localStorage.getItem('originalSuperAdminToken');
+    const origUserStr = localStorage.getItem('originalSuperAdminUser');
 
-    if (token && tenantId && userStr) {
+    if (token && userStr) {
       try {
         const user = JSON.parse(userStr);
-        set({ user, token, isAuthenticated: true, isInitializing: false });
+        const isPlatformSuperAdmin = !!user.isPlatformSuperAdmin || user.email === 'superadmin@inkcrm.com';
+        
+        let impersonationState: ImpersonationState = { isImpersonating: false };
+        if (origToken && origUserStr) {
+          impersonationState = {
+            isImpersonating: true,
+            originalToken: origToken,
+            originalUser: JSON.parse(origUserStr),
+            impersonationLogId: localStorage.getItem('impersonationLogId') || undefined
+          };
+        }
+
+        set({ 
+          user, 
+          token, 
+          isPlatformSuperAdmin: isPlatformSuperAdmin && !impersonationState.isImpersonating,
+          impersonation: impersonationState,
+          isAuthenticated: true, 
+          isInitializing: false 
+        });
         get().fetchProfile();
       } catch (e) {
         set({ isInitializing: false });
@@ -126,8 +282,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   canAccessMenu: (menuKey: string) => {
     const state = get();
-    // 1. Quick Actions are always accessible as explicitly required
     const normalizedKey = (menuKey || '').toLowerCase().replace(/[-_\s]/g, '');
+
+    // Core quick actions always accessible
     if (
       normalizedKey === 'createlead' ||
       normalizedKey === 'mycampaign' ||
@@ -137,35 +294,50 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       return true;
     }
 
+    // Check organization-level enabled modules (Platform kill-switch)
+    const org = state.organization;
+    if (org && Array.isArray(org.enabledModules) && org.enabledModules.length > 0) {
+      const isOrgAllowed = org.enabledModules.some((m: string) => {
+        const norm = (m || '').toLowerCase().replace(/[-_\s]/g, '');
+        return norm === normalizedKey ||
+          (norm === 'reports' && (normalizedKey.includes('report') || normalizedKey.includes('telecaller'))) ||
+          (norm === 'funnel' && normalizedKey.includes('funnel')) ||
+          (norm === 'leads' && (normalizedKey.includes('lead') || normalizedKey.includes('leadsprocess')));
+      });
+      if (!isOrgAllowed && normalizedKey !== 'dashboard' && normalizedKey !== 'settings') {
+        return false;
+      }
+    }
+
+    // If pure platform super admin not impersonating and has no role restrictions, allow all
+    if (state.isPlatformSuperAdmin && !state.impersonation.isImpersonating && !state.role) {
+      return true;
+    }
+
     const role = state.role;
     if (!role) {
-      // If role not yet loaded, allow during initial render
+      // If superadmin without role, allow
+      if (state.isPlatformSuperAdmin) return true;
       return true;
     }
 
     const roleName = (role.name || '').toLowerCase();
-    const isSuperAdmin = roleName.includes('super admin');
+    const isSuperAdminRole = roleName.includes('super admin') || roleName === 'admin';
 
-    // 2. Only Super Admin has permanent non-removable access to Access Privilege configuration
-    if (isSuperAdmin && (
+    if (isSuperAdminRole && (
       normalizedKey === 'accessprivilege' ||
-      normalizedKey === 'access_privilege'
+      normalizedKey === 'access_privilege' ||
+      normalizedKey === 'settings'
     )) {
       return true;
     }
 
     const allowedMenus = role.permissions?.menus;
-    // If no explicit menu list is defined on role (undefined/null), default to true
-    if (!Array.isArray(allowedMenus)) {
-      return true;
-    }
+    if (!Array.isArray(allowedMenus)) return true;
 
-    // Strictly check if the menu key or its alias is present in the role's allowedMenus list
     return allowedMenus.some((m: string) => {
       const norm = (m || '').toLowerCase().replace(/[-_\s]/g, '');
       if (norm === normalizedKey) return true;
-
-      // Group / Parent Aliases
       if (norm === 'reports' && (normalizedKey.includes('report') || normalizedKey.includes('telecaller'))) return true;
       if (norm === 'funnel' && normalizedKey.includes('funnel')) return true;
       if (norm === 'security' && (normalizedKey.includes('accessprivilege') || normalizedKey.includes('leadtransfer'))) return true;
@@ -177,6 +349,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   canAccessModule: (moduleName: string, action: 'create' | 'read' | 'update' | 'delete' = 'read') => {
     const state = get();
+    if (state.isPlatformSuperAdmin && !state.impersonation.isImpersonating && !state.role) {
+      return true;
+    }
+
     const role = state.role;
     if (!role) return true;
 

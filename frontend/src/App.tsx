@@ -28,6 +28,34 @@ import CampaignReportPage from './pages/CampaignReportPage';
 import Status from './pages/Status';
 import MyCampaign from './pages/MyCampaign';
 
+import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
+
+// Route Guard for Super Admin Control Panel
+function SuperAdminRoute({ children }: { children: React.ReactNode }) {
+  const { isAuthenticated, isInitializing, isPlatformSuperAdmin, impersonation } = useAuthStore();
+
+  if (isInitializing) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-950 text-white">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+          <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">Loading Super Admin Control Panel...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!isPlatformSuperAdmin && !impersonation.isImpersonating) {
+    return <Navigate to="/" replace />;
+  }
+
+  return <>{children}</>;
+}
+
 // Route Guard for authenticated workspaces
 function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menuKey?: string }) {
   const { isAuthenticated, isInitializing, canAccessMenu } = useAuthStore();
@@ -59,7 +87,12 @@ function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menu
 }
 
 function DashboardGuard() {
-  const { canAccessMenu } = useAuthStore();
+  const { canAccessMenu, isPlatformSuperAdmin, impersonation } = useAuthStore();
+
+  if (isPlatformSuperAdmin && !impersonation.isImpersonating) {
+    return <Navigate to="/super-admin/dashboard" replace />;
+  }
+
   if (!canAccessMenu('dashboard')) {
     if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
     if (canAccessMenu('campaigns')) return <Navigate to="/modules/campaigns" replace />;
@@ -240,6 +273,17 @@ export default function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* Super Admin Control Panel */}
+        <Route
+          path="/super-admin/dashboard"
+          element={
+            <SuperAdminRoute>
+              <SuperAdminDashboard />
+            </SuperAdminRoute>
+          }
+        />
+        <Route path="/super-admin" element={<Navigate to="/super-admin/dashboard" replace />} />
 
         {/* Catch-all Redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -18,7 +18,7 @@ import Activity from '../models/Activity';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inkcrm';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inkcrm_generic';
 const dumpDir = path.resolve(__dirname, '../../../database-dump');
 
 async function exportDb() {

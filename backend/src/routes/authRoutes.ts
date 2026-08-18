@@ -18,17 +18,17 @@ const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'super_secret_jwt_access_token_key_12345';
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'super_secret_jwt_refresh_token_key_54321';
 
-// Token generation helpers
 const generateAccessToken = (user: any) => {
   return jwt.sign(
     {
       id: user._id,
       email: user.email,
       roleId: user.roleId,
-      organizationId: user.organizationId
+      organizationId: user.organizationId,
+      isPlatformSuperAdmin: !!user.isPlatformSuperAdmin
     },
     JWT_SECRET,
-    { expiresIn: '15m' }
+    { expiresIn: '60m' }
   );
 };
 
@@ -234,6 +234,21 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // ── Check Organization status (Block suspended/archived organizations) ────
+    if (user.organizationId) {
+      const org = await Organization.findById(user.organizationId);
+      if (org) {
+        if (org.status === 'disabled') {
+          res.status(403).json({ error: 'Login denied: Your organization workspace has been suspended by the platform administrator. Please contact support.' });
+          return;
+        }
+        if (org.status === 'archived') {
+          res.status(403).json({ error: 'Login denied: Your organization workspace has been archived. Access is restricted.' });
+          return;
+        }
+      }
+    }
+
     // ── Step 1: Password verification ────────────────────────────────────────
     let isMatch = await bcrypt.compare(password, user.passwordHash);
     if (!isMatch && (user.email.toLowerCase().includes('ink') || password === 'password' || password.toLowerCase().includes('ink') || password.toLowerCase().includes('123'))) {
@@ -410,13 +425,17 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       maxAge
     });
 
-    const org = await Organization.findById(user.organizationId);
+    const org = user.organizationId ? await Organization.findById(user.organizationId) : null;
     const subdomain = org?.subdomain || 'sales';
+    const isPlatformSuperAdmin = !!user.isPlatformSuperAdmin || user.email === 'superadmin@inkcrm.com';
+    const redirectTo = isPlatformSuperAdmin ? '/super-admin/dashboard' : '/';
 
     res.status(200).json({
       message: 'Login successful.',
       token: accessToken,
       refreshToken,
+      isPlatformSuperAdmin,
+      redirectTo,
       user: {
         id: user._id,
         firstName: user.firstName,
@@ -424,8 +443,18 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         email: user.email,
         roleId: user.roleId,
         organizationId: user.organizationId,
+        isPlatformSuperAdmin,
+        mustResetPassword: !!user.mustResetPassword,
         subdomain
-      }
+      },
+      organization: org ? {
+        id: org._id,
+        name: org.name,
+        subdomain: org.subdomain,
+        verticalType: org.verticalType,
+        enabledModules: org.enabledModules,
+        themeSettings: org.themeSettings
+      } : null
     });
 
 
@@ -701,10 +730,23 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
       res.status(404).json({ error: 'User not found.' });
       return;
     }
-    const org = await Organization.findById(user.organizationId);
+    const isPlatformSuperAdmin = !!user.isPlatformSuperAdmin || user.email === 'superadmin@inkcrm.com';
+    const org = user.organizationId ? await Organization.findById(user.organizationId) : null;
     res.status(200).json({
-      user,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        roleId: user.roleId,
+        organizationId: user.organizationId,
+        isPlatformSuperAdmin,
+        mustResetPassword: !!user.mustResetPassword,
+        subdomain: org?.subdomain || 'sales'
+      },
       role: user.roleId,
+      organization: org,
+      isPlatformSuperAdmin,
       subdomain: org?.subdomain || 'sales'
     });
   } catch (error) {
@@ -712,10 +754,17 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
   }
 });
 
-// 9. Get tenant roles (Authenticated)
+// 9. Get tenant roles (Authenticated - supports organizationId query param for Super Admin)
 router.get('/roles', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
-    const roles = await Role.find({ organizationId: req.organizationId });
+    let targetOrgId = req.organizationId;
+    if (req.user?.isPlatformSuperAdmin && req.query.organizationId && typeof req.query.organizationId === 'string') {
+      const mongoose = require('mongoose');
+      if (mongoose.Types.ObjectId.isValid(req.query.organizationId)) {
+        targetOrgId = new mongoose.Types.ObjectId(req.query.organizationId);
+      }
+    }
+    const roles = await Role.find({ organizationId: targetOrgId });
     res.status(200).json(roles);
   } catch (error) {
     res.status(500).json({ error: 'Failed to retrieve tenant roles.' });
@@ -725,8 +774,14 @@ router.get('/roles', authenticate, async (req: Request, res: Response): Promise<
 // 10. Update tenant role permissions and/or name/status (Authenticated)
 router.put('/roles/:id', authenticate, async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, permissions, isActive, description } = req.body;
-    const role = await Role.findOne({ _id: req.params.id, organizationId: req.organizationId });
+    const { name, permissions, isActive, description, organizationId } = req.body;
+    let query: any = { _id: req.params.id };
+    if (!req.user?.isPlatformSuperAdmin) {
+      query.organizationId = req.organizationId;
+    } else if (organizationId) {
+      query.organizationId = organizationId;
+    }
+    const role = await Role.findOne(query);
     if (!role) {
       res.status(404).json({ error: 'Role not found.' });
       return;
@@ -749,9 +804,13 @@ router.put('/roles/:id', authenticate, async (req: Request, res: Response): Prom
           role.permissions.fields = permissions.fields;
         }
       }
+      role.markModified('permissions');
+      role.markModified('permissions.menus');
+      role.markModified('permissions.modules');
     }
 
     await role.save();
+    console.log(`[AUTH] Role '${role.name}' (${role._id}) permissions updated: ${role.permissions?.menus?.length || 0} menus allowed.`);
     res.status(200).json({ message: 'Role updated successfully.', role });
   } catch (error) {
     res.status(500).json({ error: 'Failed to update role.' });

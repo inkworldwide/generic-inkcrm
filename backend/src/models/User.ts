@@ -34,8 +34,10 @@ export interface ILoginHistoryEntry {
 }
 
 export interface IUser extends Document {
-  organizationId: mongoose.Types.ObjectId;
-  roleId: mongoose.Types.ObjectId;
+  organizationId?: mongoose.Types.ObjectId;
+  roleId?: mongoose.Types.ObjectId;
+  isPlatformSuperAdmin?: boolean;
+  mustResetPassword?: boolean;
   firstName: string;
   lastName: string;
   email: string;
@@ -77,8 +79,10 @@ export interface IUser extends Document {
 
 const UserSchema = new Schema<IUser>(
   {
-    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: true },
-    roleId: { type: Schema.Types.ObjectId, ref: 'Role', required: true },
+    organizationId: { type: Schema.Types.ObjectId, ref: 'Organization', required: false },
+    roleId: { type: Schema.Types.ObjectId, ref: 'Role', required: false },
+    isPlatformSuperAdmin: { type: Boolean, default: false, index: true },
+    mustResetPassword: { type: Boolean, default: false },
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
     email: { type: String, required: true, unique: true, lowercase: true, trim: true },

@@ -13,10 +13,12 @@ import CustomRecord from '../models/CustomRecord';
 import DashboardLayout from '../models/DashboardLayout';
 import Workflow from '../models/Workflow';
 import Status from '../models/Status';
+import Vertical from '../models/Vertical';
+import ImpersonationLog from '../models/ImpersonationLog';
 
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inkcrm';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/inkcrm_generic';
 
 async function seed() {
   if (mongoose.connection.readyState === 0) {
@@ -37,13 +39,131 @@ async function seed() {
   await DashboardLayout.deleteMany({});
   await Workflow.deleteMany({});
   await Status.deleteMany({});
+  await Vertical.deleteMany({});
+  await ImpersonationLog.deleteMany({});
   console.log('Database cleared.');
 
-  // 1. Create Organizations
+  // 1. Seed Standard Verticals
+  console.log('Seeding Vertical Templates...');
+  const bankVertical = await Vertical.create({
+    key: 'bank',
+    label: 'Banking & Finance CRM',
+    description: 'Loans, banking partners, PSM tracking, credit processing, lead pipeline, KYC, and conversion funnels.',
+    icon: 'Landmark',
+    defaultModules: [
+      'dashboard', 'leads', 'deals', 'companies', 'campaigns', 'campaignassignments',
+      'lead_reports', 'telecaller_reports', 'telecaller_monthly', 'funnel_daily',
+      'funnel_monthly', 'reports', 'settings', 'access_privilege', 'users_management'
+    ],
+    themeSettings: {
+      primaryColor: '#4F46E5',
+      sidebarBg: '#0F172A',
+      headerBg: '#FFFFFF',
+      fontFamily: 'Inter',
+      mode: 'dark'
+    },
+    isCustom: false
+  });
+
+  const schoolVertical = await Vertical.create({
+    key: 'school',
+    label: 'Academics & School CRM',
+    description: 'Student admissions, course enrollments, grade tracking, faculty management, and parent communication.',
+    icon: 'GraduationCap',
+    defaultModules: [
+      'dashboard', 'students', 'courses', 'lead_reports', 'reports', 'settings', 'access_privilege', 'users_management'
+    ],
+    themeSettings: {
+      primaryColor: '#10B981',
+      sidebarBg: '#064E3B',
+      headerBg: '#F0FDF4',
+      fontFamily: 'Outfit',
+      mode: 'light'
+    },
+    isCustom: false
+  });
+
+  const medicalVertical = await Vertical.create({
+    key: 'medical',
+    label: 'Healthcare & Medical CRM',
+    description: 'Patient registrations, doctor appointments, medical history, consultations, and clinic operations.',
+    icon: 'Stethoscope',
+    defaultModules: [
+      'dashboard', 'patients', 'appointments', 'reports', 'settings', 'access_privilege', 'users_management'
+    ],
+    themeSettings: {
+      primaryColor: '#0D9488',
+      sidebarBg: '#115E59',
+      headerBg: '#F0FDFA',
+      fontFamily: 'Roboto',
+      mode: 'light'
+    },
+    isCustom: false
+  });
+
+  const fmcgVertical = await Vertical.create({
+    key: 'fmcg',
+    label: 'FMCG Distribution CRM',
+    description: 'Fast-moving consumer goods distribution, stockists, retailers, order fulfillment, and route tracking.',
+    icon: 'ShoppingBag',
+    defaultModules: [
+      'dashboard', 'leads', 'deals', 'companies', 'campaigns', 'lead_reports', 'funnel_daily', 'reports', 'settings', 'access_privilege', 'users_management'
+    ],
+    themeSettings: {
+      primaryColor: '#EA580C',
+      sidebarBg: '#1E1B4B',
+      headerBg: '#FFFFFF',
+      fontFamily: 'Inter',
+      mode: 'light'
+    },
+    isCustom: false
+  });
+
+  const developerVertical = await Vertical.create({
+    key: 'developer',
+    label: 'Real Estate & Developer CRM',
+    description: 'Property listings, site visits, buyer inquiries, unit allocations, broker management, and sales closings.',
+    icon: 'Building2',
+    defaultModules: [
+      'dashboard', 'leads', 'deals', 'companies', 'campaigns', 'lead_reports', 'funnel_daily', 'reports', 'settings', 'access_privilege', 'users_management'
+    ],
+    themeSettings: {
+      primaryColor: '#D97706',
+      sidebarBg: '#1C1917',
+      headerBg: '#FFFFFF',
+      fontFamily: 'Outfit',
+      mode: 'light'
+    },
+    isCustom: false
+  });
+
+  const vehicleVertical = await Vertical.create({
+    key: 'vehicle',
+    label: 'Automotive & Vehicle CRM',
+    description: 'Dealership leads, test drives, vehicle inventory, financing options, service follow-ups, and bookings.',
+    icon: 'Car',
+    defaultModules: [
+      'dashboard', 'leads', 'deals', 'companies', 'campaigns', 'lead_reports', 'funnel_daily', 'reports', 'settings', 'access_privilege', 'users_management'
+    ],
+    themeSettings: {
+      primaryColor: '#DC2626',
+      sidebarBg: '#0F172A',
+      headerBg: '#FFFFFF',
+      fontFamily: 'Inter',
+      mode: 'light'
+    },
+    isCustom: false
+  });
+  console.log('Vertical Templates seeded.');
+
+  // 2. Create Organizations
   console.log('Seeding Organizations...');
   const salesOrg = await Organization.create({
-    name: 'inkSales Enterprises',
+    name: 'inkCRM Bank & Loan Enterprises',
     subdomain: 'sales',
+    verticalType: 'bank',
+    verticalId: bankVertical._id,
+    status: 'active',
     logoUrl: '/logo.png',
     faviconUrl: '/favicon.ico',
     themeSettings: {
@@ -53,13 +173,16 @@ async function seed() {
       fontFamily: 'Inter',
       mode: 'dark'
     },
-    enabledModules: ['dashboard', 'leads', 'deals', 'companies', 'tasks', 'settings', 'reports', 'workflows'],
+    enabledModules: ['dashboard', 'leads', 'deals', 'companies', 'tasks', 'settings', 'reports', 'workflows', 'campaigns', 'campaignassignments', 'lead_reports', 'telecaller_reports', 'telecaller_monthly', 'funnel_daily', 'funnel_monthly', 'access_privilege', 'users_management'],
     subscription: { plan: 'enterprise', status: 'active', expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) }
   });
 
   const schoolOrg = await Organization.create({
     name: 'Acme International School',
     subdomain: 'school',
+    verticalType: 'school',
+    verticalId: schoolVertical._id,
+    status: 'active',
     logoUrl: '/logo.png',
     faviconUrl: '/favicon.ico',
     themeSettings: {
@@ -69,13 +192,16 @@ async function seed() {
       fontFamily: 'Outfit',
       mode: 'light'
     },
-    enabledModules: ['dashboard', 'students', 'courses', 'tasks', 'settings', 'reports'],
+    enabledModules: ['dashboard', 'students', 'courses', 'tasks', 'settings', 'reports', 'lead_reports', 'access_privilege', 'users_management'],
     subscription: { plan: 'growth', status: 'active', expiresAt: new Date(Date.now() + 180 * 24 * 60 * 60 * 1000) }
   });
 
   const hospitalOrg = await Organization.create({
     name: 'Metro Care Hospital',
     subdomain: 'hospital',
+    verticalType: 'medical',
+    verticalId: medicalVertical._id,
+    status: 'active',
     logoUrl: '/logo.png',
     faviconUrl: '/favicon.ico',
     themeSettings: {
@@ -85,7 +211,7 @@ async function seed() {
       fontFamily: 'Roboto',
       mode: 'light'
     },
-    enabledModules: ['dashboard', 'patients', 'appointments', 'tasks', 'settings', 'reports'],
+    enabledModules: ['dashboard', 'patients', 'appointments', 'tasks', 'settings', 'reports', 'access_privilege', 'users_management'],
     subscription: { plan: 'enterprise', status: 'active', expiresAt: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) }
   });
 
@@ -177,7 +303,26 @@ async function seed() {
   console.log('Roles seeded.');
 
   // 3. Create Users
-  console.log('Seeding Admin Users...');
+  console.log('Seeding Platform Super Admin...');
+  const superAdminPassword = process.env.SUPERADMIN_PASSWORD || 'SuperAdmin@2026!';
+  const superAdminHash = await bcrypt.hash(superAdminPassword, 12);
+  await User.create({
+    firstName: 'Platform',
+    lastName: 'Super Admin',
+    email: 'superadmin@inkcrm.com',
+    passwordHash: superAdminHash,
+    isPlatformSuperAdmin: true,
+    isVerified: true,
+    isApproved: true,
+    approvalStatus: 'approved',
+    skipFace: true,
+    skipLocation: true,
+    isActive: true,
+    mustResetPassword: false
+  });
+  console.log(`Platform Super Admin seeded: superadmin@inkcrm.com / ${superAdminPassword}`);
+
+  console.log('Seeding Tenant Admin Users...');
   const passwordHash = await bcrypt.hash('password', 10);
 
   const mockEmbedding = Array(128).fill(0.1);

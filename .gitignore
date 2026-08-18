@@ -43,6 +43,7 @@ Thumbs.db
 db/
 backup/
 uploads/
+scratch/
 
 # Local MongoDB data
 mongodb-data/

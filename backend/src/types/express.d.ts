@@ -7,8 +7,12 @@ declare global {
       user?: {
         id: string;
         email: string;
-        roleId: string;
-        organizationId: string;
+        roleId?: string;
+        organizationId?: string;
+        isPlatformSuperAdmin?: boolean;
+        isImpersonated?: boolean;
+        impersonatedBy?: string;
+        impersonationLogId?: string;
       };
     }
   }
