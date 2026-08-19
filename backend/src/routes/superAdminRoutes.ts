@@ -8,6 +8,7 @@ import User from '../models/User';
 import Role from '../models/Role';
 import ModuleDefinition from '../models/ModuleDefinition';
 import ImpersonationLog from '../models/ImpersonationLog';
+import PlatformSetting from '../models/PlatformSetting';
 import { authenticate } from '../middleware/authMiddleware';
 
 const router = Router();
@@ -769,6 +770,56 @@ router.put('/profile', async (req: Request, res: Response): Promise<void> => {
     res.status(200).json({ message: 'Profile updated successfully.', user: admin });
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 10.1 PLATFORM BRANDING & LOGO SETTINGS
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/branding', async (req: Request, res: Response): Promise<void> => {
+  try {
+    let setting = await PlatformSetting.findOne();
+    if (!setting) {
+      setting = await PlatformSetting.create({
+        platformName: 'inkCRM Platform',
+        platformTagline: 'Super Admin Engine',
+        logoUrl: '/logo.png',
+        companyCode: 'COMP01',
+        phone: '+1 (555) 019-2834',
+        email: 'superadmin@inkcrm.com'
+      });
+    }
+    res.status(200).json(setting);
+  } catch (error: any) {
+    console.error('[SUPER_ADMIN_GET_BRANDING_ERROR]', error);
+    res.status(500).json({ error: 'Failed to retrieve branding settings.' });
+  }
+});
+
+router.patch('/branding', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { platformName, platformTagline, logoUrl, companyCode, phone, email } = req.body;
+    let setting = await PlatformSetting.findOne();
+    if (!setting) {
+      setting = new PlatformSetting();
+    }
+
+    if (platformName !== undefined) setting.platformName = platformName.trim();
+    if (platformTagline !== undefined) setting.platformTagline = platformTagline.trim();
+    if (logoUrl !== undefined) setting.logoUrl = logoUrl;
+    if (companyCode !== undefined) setting.companyCode = companyCode.trim();
+    if (phone !== undefined) setting.phone = phone.trim();
+    if (email !== undefined) setting.email = email.trim();
+
+    await setting.save();
+
+    res.status(200).json({
+      message: 'Platform branding updated successfully.',
+      branding: setting
+    });
+  } catch (error: any) {
+    console.error('[SUPER_ADMIN_PATCH_BRANDING_ERROR]', error);
+    res.status(500).json({ error: 'Failed to update branding settings.' });
   }
 });
 

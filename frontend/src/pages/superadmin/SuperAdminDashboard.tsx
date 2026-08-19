@@ -108,7 +108,14 @@ export default function SuperAdminDashboard() {
 
   // Navigation tab: 'dashboard' | 'users' | 'settings'
   const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'settings'>('dashboard');
-  const [settingsSubTab, setSettingsSubTab] = useState<'profile' | 'security' | 'team' | 'system'>('profile');
+  const [settingsSubTab, setSettingsSubTab] = useState<'branding' | 'profile' | 'security' | 'team' | 'system'>('branding');
+
+  // Platform Branding State (Persisted)
+  const [platformBrandName, setPlatformBrandName] = useState<string>(() => localStorage.getItem('superadmin_brand_name') || 'inkCRM Platform');
+  const [platformBrandTagline, setPlatformBrandTagline] = useState<string>(() => localStorage.getItem('superadmin_brand_tagline') || 'Super Admin Engine');
+  const [platformLogoUrl, setPlatformLogoUrl] = useState<string>(() => localStorage.getItem('superadmin_logo_url') || '/logo.png');
+  const [platformCompanyCode, setPlatformCompanyCode] = useState<string>(() => localStorage.getItem('superadmin_company_code') || 'COMP01');
+  const [savingBranding, setSavingBranding] = useState(false);
 
   // Theme state (Persisted)
   const [isDark, setIsDark] = useState(() => {
@@ -268,7 +275,76 @@ export default function SuperAdminDashboard() {
     loadDashboardData();
     loadSuperAdminProfile();
     loadAllUsers();
+    loadPlatformBranding();
   }, []);
+
+  const loadPlatformBranding = async () => {
+    try {
+      const res = await api.get('/super-admin/branding');
+      if (res.data) {
+        if (res.data.platformName) {
+          setPlatformBrandName(res.data.platformName);
+          localStorage.setItem('superadmin_brand_name', res.data.platformName);
+        }
+        if (res.data.platformTagline) {
+          setPlatformBrandTagline(res.data.platformTagline);
+          localStorage.setItem('superadmin_brand_tagline', res.data.platformTagline);
+        }
+        if (res.data.logoUrl) {
+          setPlatformLogoUrl(res.data.logoUrl);
+          localStorage.setItem('superadmin_logo_url', res.data.logoUrl);
+        }
+        if (res.data.companyCode) {
+          setPlatformCompanyCode(res.data.companyCode);
+          localStorage.setItem('superadmin_company_code', res.data.companyCode);
+        }
+      }
+    } catch (err) {
+      console.warn('Could not load platform branding:', err);
+    }
+  };
+
+  const handleSaveBranding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingBranding(true);
+    try {
+      await api.patch('/super-admin/branding', {
+        platformName: platformBrandName,
+        platformTagline: platformBrandTagline,
+        logoUrl: platformLogoUrl,
+        companyCode: platformCompanyCode,
+        phone: profilePhone
+      });
+      localStorage.setItem('superadmin_brand_name', platformBrandName);
+      localStorage.setItem('superadmin_brand_tagline', platformBrandTagline);
+      localStorage.setItem('superadmin_logo_url', platformLogoUrl);
+      localStorage.setItem('superadmin_company_code', platformCompanyCode);
+      showToast('Platform branding & logo updated successfully!', 'success');
+    } catch (err) {
+      showToast('Failed to update platform branding.', 'error');
+    } finally {
+      setSavingBranding(false);
+    }
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 3 * 1024 * 1024) {
+      showToast('Logo file size must be under 3MB.', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setPlatformLogoUrl(base64String);
+      localStorage.setItem('superadmin_logo_url', base64String);
+      showToast('Logo updated! Click "Save Branding Changes" to persist.', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
 
   const loadDashboardData = async () => {
     try {
@@ -705,16 +781,29 @@ export default function SuperAdminDashboard() {
         
         {/* Top Branding Section */}
         <div>
-          <div className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 px-5 flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#312E81] flex items-center justify-center text-white shadow-xs flex-shrink-0">
-              <Icons.ShieldCheck className="w-4 h-4 stroke-[2.2]" />
-            </div>
+          <div className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 px-4 flex items-center gap-3">
+            {platformLogoUrl ? (
+              <div className="w-9 h-9 rounded-lg bg-[#312E81]/5 dark:bg-white/5 border border-slate-200 dark:border-slate-800 flex items-center justify-center overflow-hidden flex-shrink-0 p-1">
+                <img
+                  src={platformLogoUrl}
+                  alt="Platform Logo"
+                  className="w-full h-full object-contain rounded"
+                  onError={(e) => {
+                    (e.target as any).style.display = 'none';
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-9 h-9 rounded-lg bg-[#312E81] flex items-center justify-center text-white shadow-xs flex-shrink-0">
+                <Icons.ShieldCheck className="w-4.5 h-4.5 stroke-[2.2]" />
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <div className="text-xs font-bold text-[#111827] dark:text-white tracking-tight truncate">
-                inkCRM <span className="text-[#312E81] dark:text-indigo-400">Platform</span>
+                {platformBrandName}
               </div>
-              <div className="text-[10px] text-[#6B7280] dark:text-slate-400 truncate">
-                Super Admin Engine
+              <div className="text-[10px] text-[#6B7280] dark:text-slate-400 truncate font-medium">
+                {platformBrandTagline}
               </div>
             </div>
           </div>
@@ -1833,6 +1922,7 @@ export default function SuperAdminDashboard() {
             {/* Settings Sub-navigation Chips */}
             <div className="flex flex-wrap items-center gap-2 border-b border-[#E5E7EB] dark:border-slate-800 pb-3">
               {[
+                { key: 'branding', label: 'Company & Branding', icon: Icons.Image },
                 { key: 'profile', label: 'Super Admin Profile', icon: Icons.UserCheck },
                 { key: 'security', label: 'Password & Security', icon: Icons.KeyRound },
                 { key: 'team', label: 'Super Admin Team', icon: Icons.ShieldCheck },
@@ -1847,6 +1937,7 @@ export default function SuperAdminDashboard() {
                       setSettingsSubTab(sub.key as any);
                       if (sub.key === 'team') loadAdminTeam();
                       if (sub.key === 'profile' || sub.key === 'system') loadSuperAdminProfile();
+                      if (sub.key === 'branding') loadPlatformBranding();
                     }}
                     className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
                       isCurrent
@@ -1860,6 +1951,139 @@ export default function SuperAdminDashboard() {
                 );
               })}
             </div>
+
+            {/* SUBTAB 0: COMPANY & BRANDING SETTING (Matching Image 2) */}
+            {settingsSubTab === 'branding' && (
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-[#111827] dark:text-white">Platform Logo & Company Details</h3>
+                    <p className="text-xs text-[#6B7280]">Update the platform logo thumbnail and company name to sync the sidebar and header branding dynamically in real-time</p>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300 rounded-md border border-emerald-200 dark:border-emerald-800 text-[11px] font-semibold">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    <span>Live Sidebar Sync</span>
+                  </div>
+                </div>
+
+                <form onSubmit={handleSaveBranding} className="space-y-6">
+                  <div className="flex flex-col md:flex-row gap-6 items-start">
+                    
+                    {/* ── LEFT: LOGO THUMBNAIL (Exact Match to Image 2) ─────────────── */}
+                    <div className="w-full md:w-56 flex-shrink-0 flex flex-col items-center p-5 rounded-xl border border-[#E5E7EB] dark:border-slate-800 bg-[#F9FAFB] dark:bg-slate-900/50 text-center">
+                      <div className="w-28 h-28 rounded-xl bg-black flex items-center justify-center overflow-hidden border border-slate-700 shadow-inner p-2 mb-3">
+                        {platformLogoUrl ? (
+                          <img
+                            src={platformLogoUrl}
+                            alt="Logo Thumbnail"
+                            className="w-full h-full object-contain"
+                          />
+                        ) : (
+                          <Icons.Image className="w-10 h-10 text-slate-500" />
+                        )}
+                      </div>
+
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#6B7280] dark:text-slate-400 mb-3">
+                        LOGO THUMBNAIL
+                      </span>
+
+                      <label className="px-4 py-2 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-xs cursor-pointer transition-colors">
+                        <span>Choose file</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleLogoUpload}
+                          className="hidden"
+                        />
+                      </label>
+                      <span className="text-[10px] text-[#9CA3AF] mt-2">PNG, JPG, SVG, WebP</span>
+                    </div>
+
+                    {/* ── RIGHT: COMPANY & BRANDING INPUTS (Matching Image 2) ────────── */}
+                    <div className="flex-1 w-full grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">
+                          COMPANY CODE *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. COMP01"
+                          value={platformCompanyCode}
+                          onChange={(e) => setPlatformCompanyCode(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">
+                          COMPANY NAME *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. inkCRM Platform"
+                          value={platformBrandName}
+                          onChange={(e) => setPlatformBrandName(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81] font-semibold"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">
+                          PLATFORM TAGLINE / SUBTITLE
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Super Admin Engine"
+                          value={platformBrandTagline}
+                          onChange={(e) => setPlatformBrandTagline(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">
+                          PHONE NUMBER *
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="+1 (555) 019-2834"
+                          value={profilePhone}
+                          onChange={(e) => setProfilePhone(e.target.value)}
+                          className="w-full px-3.5 py-2.5 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
+                        />
+                      </div>
+
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">
+                          OFFICIAL SYSTEM EMAIL
+                        </label>
+                        <input
+                          type="email"
+                          disabled
+                          value={adminProfile?.email || user?.email || 'superadmin@inkcrm.com'}
+                          className="w-full px-3.5 py-2 bg-[#F3F4F6] dark:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#6B7280] font-mono cursor-not-allowed"
+                        />
+                        <span className="text-[11px] text-[#6B7280] dark:text-slate-400 mt-1 block">
+                          Any changes made to the Logo Thumbnail or Company Name will automatically sync and update the top-left sidebar in real-time.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 flex justify-end border-t border-[#F1F5F9] dark:border-slate-800">
+                    <button
+                      type="submit"
+                      disabled={savingBranding}
+                      className="px-5 py-2 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 transition-colors disabled:opacity-50 cursor-pointer shadow-xs"
+                    >
+                      {savingBranding ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Check className="w-3.5 h-3.5" />}
+                      <span>Save Branding Changes</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
 
             {/* SUBTAB 1: SUPER ADMIN PROFILE */}
             {settingsSubTab === 'profile' && (
