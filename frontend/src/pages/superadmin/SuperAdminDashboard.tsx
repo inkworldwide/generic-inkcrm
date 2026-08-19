@@ -1552,15 +1552,19 @@ export default function SuperAdminDashboard() {
                             {/* User Column */}
                             <td className="py-3.5 px-4 sm:px-6">
                               <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-full bg-[#312E81] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
-                                  {usr.firstName?.[0]?.toUpperCase() || 'U'}
+                                <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs flex-shrink-0 ${
+                                  usr.isPlatformSuperAdmin
+                                    ? 'bg-[#312E81] text-white ring-2 ring-indigo-300 dark:ring-indigo-700'
+                                    : 'bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-200 border border-[#E2E8F0] dark:border-slate-700'
+                                }`}>
+                                  {usr.isPlatformSuperAdmin ? '👑' : (usr.firstName?.[0]?.toUpperCase() || 'U')}
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-[#111827] dark:text-white text-xs flex items-center gap-1.5">
+                                  <div className="font-semibold text-[#111827] dark:text-white text-xs flex items-center gap-1.5 flex-wrap">
                                     <span>{usr.firstName} {usr.lastName}</span>
                                     {usr.isPlatformSuperAdmin && (
-                                      <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-indigo-50 text-[#312E81] border border-indigo-200">
-                                        SUPER
+                                      <span className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-[#312E81] text-white tracking-wide shadow-2xs">
+                                        SUPER ADMIN
                                       </span>
                                     )}
                                   </div>
@@ -1574,21 +1578,39 @@ export default function SuperAdminDashboard() {
 
                             {/* Organization Column */}
                             <td className="py-3.5 px-4">
-                              <div className="font-medium text-[#111827] dark:text-slate-200 text-xs">
-                                {orgName}
-                              </div>
-                              {orgSubdomain && (
-                                <div className="text-[11px] text-[#6B7280] font-mono">
-                                  {orgSubdomain}.inkcrm
+                              {usr.isPlatformSuperAdmin ? (
+                                <div>
+                                  <div className="font-bold text-[#312E81] dark:text-indigo-400 text-xs flex items-center gap-1">
+                                    <Icons.ShieldCheck className="w-3.5 h-3.5" />
+                                    <span>Master Platform</span>
+                                  </div>
+                                  <div className="text-[10px] text-[#6B7280] font-medium">All Tenants Control</div>
+                                </div>
+                              ) : (
+                                <div>
+                                  <div className="font-medium text-[#111827] dark:text-slate-200 text-xs">
+                                    {orgName}
+                                  </div>
+                                  {orgSubdomain && (
+                                    <div className="text-[11px] text-[#6B7280] font-mono">
+                                      {orgSubdomain}.inkcrm
+                                    </div>
+                                  )}
                                 </div>
                               )}
                             </td>
 
                             {/* Role & Dept Column */}
                             <td className="py-3.5 px-4">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
-                                {roleName}
-                              </span>
+                              {usr.isPlatformSuperAdmin ? (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-[#312E81] dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800">
+                                  Platform Super Admin
+                                </span>
+                              ) : (
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
+                                  {roleName}
+                                </span>
+                              )}
                               {usr.department && (
                                 <div className="text-[11px] text-[#6B7280] mt-0.5">{usr.department}</div>
                               )}
