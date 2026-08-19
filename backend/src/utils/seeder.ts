@@ -160,7 +160,7 @@ async function seed() {
   console.log('Seeding Organizations...');
   const salesOrg = await Organization.create({
     name: 'inkCRM Bank & Loan Enterprises',
-    subdomain: 'sales',
+    subdomain: 'bank',
     verticalType: 'bank',
     verticalId: bankVertical._id,
     status: 'active',
@@ -331,14 +331,18 @@ async function seed() {
   const salesAdmin = await User.create({
     organizationId: salesOrg._id,
     roleId: salesAdminRole._id,
-    firstName: 'Ink',
-    lastName: 'CRM',
+    firstName: 'Bank',
+    lastName: 'Admin',
     email: 'ink@crm.com',
     passwordHash,
     isVerified: true,
+    isApproved: true,
+    approvalStatus: 'approved',
+    userCode: 'ADM-BANK-01',
     department: 'Management',
-    skipFace: true,
-    skipLocation: true,
+    skipFace: false,
+    skipLocation: false,
+    isActive: true,
     twoFactor: { enabled: false },
     faceRecognition: {
       enabled: true,
@@ -347,219 +351,43 @@ async function seed() {
     }
   });
 
-  // Create Rajabaksh Ilyala (Super Admin, Reporting Manager: Ink CRM)
-  const rajabakshaUser = await User.create({
-    organizationId: salesOrg._id,
-    roleId: salesAdminRole._id,
-    firstName: 'Rajabaksh',
-    lastName: 'Ilyala',
-    email: 'ink@rajabaksha.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-RAJA',
-    department: 'SALES MANAGER',
-    reportingManager: salesAdmin._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  // Create Ink Naushad (Reporting Manager: Rajabaksh Ilyala)
-  const naushadUser = await User.create({
-    organizationId: salesOrg._id,
-    roleId: adminRole._id,
-    firstName: 'Ink',
-    lastName: 'Naushad',
-    email: 'ink@naushad.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-NAUSHAD',
-    department: 'SALES MANAGER',
-    reportingManager: rajabakshaUser._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  // Create Ink Sharfu (Reporting Manager: Ink Naushad)
-  const sharfuUser = await User.create({
-    organizationId: salesOrg._id,
-    roleId: adminRole._id,
-    firstName: 'Ink',
-    lastName: 'Sharfu',
-    email: 'ink@sharfu',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-SHARFU',
-    department: 'SALES MANAGER',
-    reportingManager: naushadUser._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  // Create Mohammed Hashmat (Reporting Manager: Ink Sharfu)
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: adminRole._id,
-    firstName: 'Mohammed',
-    lastName: 'Hashmat',
-    email: 'ink@hashmat',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-HASHMAT',
-    department: 'SALES MANAGER',
-    reportingManager: sharfuUser._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  // Seed sample Sales Agents reporting to Ink CRM
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: teliCallerRole._id,
-    firstName: 'Suma',
-    lastName: 'Dhar',
-    email: 'agent.suma@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-SUMA',
-    department: 'Telemarketing',
-    reportingManager: salesAdmin._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: teliCallerRole._id,
-    firstName: 'Priya',
-    lastName: 'Sharma',
-    email: 'agent.priya@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-PRIYA',
-    department: 'Telemarketing',
-    reportingManager: salesAdmin._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: ariaManagerRole._id,
-    firstName: 'Sunita',
-    lastName: 'Devi',
-    email: 'agent.sunita@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-SUNITA',
-    department: 'AREA SALES MANAGER',
-    reportingManager: salesAdmin._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: salesOrg._id,
-    roleId: partnerRole._id,
-    firstName: 'Ankit',
-    lastName: 'Verma',
-    email: 'agent.ankit@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'AGE-ANKIT',
-    department: 'PARTNER',
-    reportingManager: salesAdmin._id,
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
   const schoolAdmin = await User.create({
     organizationId: schoolOrg._id,
     roleId: schoolAdminRole._id,
-    firstName: 'Albus',
-    lastName: 'Dumbledore',
-    email: 'admin@school.com',
+    firstName: 'School',
+    lastName: 'Admin',
+    email: 'school@crm.com',
     passwordHash,
     isVerified: true,
+    isApproved: true,
+    approvalStatus: 'approved',
+    userCode: 'ADM-SCHL-01',
+    department: 'Academic Administration',
+    skipFace: false,
+    skipLocation: false,
+    isActive: true,
     twoFactor: { enabled: false }
-  });
-
-  // Seed standard Teachers matching user screenshot
-  await User.create({
-    organizationId: schoolOrg._id,
-    roleId: teacherRole._id,
-    firstName: 'Teacher',
-    lastName: 'Suma',
-    email: 'suma@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'TCH-SUMA',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: schoolOrg._id,
-    roleId: teacherRole._id,
-    firstName: 'Priya',
-    lastName: 'Sharma',
-    email: 'priya@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'TCH-PRIYA',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: schoolOrg._id,
-    roleId: teacherRole._id,
-    firstName: 'Sunita',
-    lastName: 'Devi',
-    email: 'sunita@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'TCH-SUNITA',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
-  });
-
-  await User.create({
-    organizationId: schoolOrg._id,
-    roleId: teacherRole._id,
-    firstName: 'Ankit',
-    lastName: 'Verma',
-    email: 'ankit@gmail.com',
-    passwordHash,
-    isVerified: true,
-    userCode: 'TCH-ANKIT',
-    skipFace: true,
-    skipLocation: true,
-    isActive: true
   });
 
   const hospitalAdmin = await User.create({
     organizationId: hospitalOrg._id,
     roleId: hospitalAdminRole._id,
-    firstName: 'Gregory',
-    lastName: 'House',
-    email: 'admin@hospital.com',
+    firstName: 'Doctor',
+    lastName: 'Admin',
+    email: 'doctor@crm.com',
     passwordHash,
     isVerified: true,
+    isApproved: true,
+    approvalStatus: 'approved',
+    userCode: 'ADM-MED-01',
+    department: 'Clinical Administration',
+    skipFace: false,
+    skipLocation: false,
+    isActive: true,
     twoFactor: { enabled: false }
   });
 
-  console.log('Admin Users seeded.');
+  console.log('Admin Users seeded (4 Admins Total).');
 
   // 4. Create Module Definitions
   console.log('Seeding Module Definitions...');
