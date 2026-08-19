@@ -264,7 +264,7 @@ export default function Layout({ children }: LayoutProps) {
         >
           
           {/* Clean Enterprise Logo Area */}
-          <div className="min-h-[68px] py-2 px-3.5 border-b border-black/[0.08] dark:border-slate-800 bg-white dark:bg-slate-900 rounded-t-xl flex items-center gap-3 min-w-0 select-none flex-shrink-0">
+          <div className="min-h-[68px] py-2.5 px-3.5 border-b border-black/[0.08] dark:border-slate-800 bg-white dark:bg-slate-900 rounded-t-xl flex items-center gap-3 min-w-0 select-none flex-shrink-0">
             <div className="w-10 h-10 min-w-[40px] max-w-[40px] min-h-[40px] max-h-[40px] rounded-xl bg-white dark:bg-slate-800 p-1 flex items-center justify-center shadow-xs flex-shrink-0 border border-black/[0.08] dark:border-slate-700 overflow-hidden">
               <img 
                 src={branding?.logoUrl || loginLogo} 
@@ -273,9 +273,17 @@ export default function Layout({ children }: LayoutProps) {
               />
             </div>
             {!isCollapsed && (
-              <span className="text-[14px] font-extrabold text-[#B45309] dark:text-amber-400 tracking-tight break-words line-clamp-2 leading-tight font-sans flex-1 min-w-0">
-                {branding?.name || 'inkworldwide'}
-              </span>
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-[13.5px] font-extrabold text-[#111827] dark:text-white tracking-tight break-words line-clamp-1 leading-tight font-sans">
+                  {branding?.name || 'inkCRM Workspace'}
+                </span>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-[#312E81] dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60 uppercase tracking-wider">
+                    <Icons.ShieldCheck className="w-3 h-3 stroke-[2.5]" />
+                    <span>Workspace Admin</span>
+                  </span>
+                </div>
+              </div>
             )}
           </div>
 
@@ -797,7 +805,12 @@ export default function Layout({ children }: LayoutProps) {
                   {user ? `${user.firstName?.charAt(0) || ''}${user.lastName?.charAt(0) || ''}`.toUpperCase() || 'IC' : 'IC'}
                 </div>
                 <div className="hidden sm:block text-left">
-                  <p className="text-xs font-bold text-[#111111] dark:text-slate-200 leading-none">{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Admin User' : 'Admin User'}</p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs font-bold text-[#111111] dark:text-slate-200 leading-none">{user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'School Admin' : 'School Admin'}</p>
+                    <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-indigo-50 dark:bg-indigo-950/60 text-[#312E81] dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/60">
+                      ADMIN
+                    </span>
+                  </div>
                   <p className="text-[10px] text-[#78716C] dark:text-stone-400 font-medium mt-0.5">{user?.email || 'ink@crm.com'}</p>
                 </div>
                 <Icons.ChevronDown className="w-3.5 h-3.5 text-[#78716C] ml-1" />
