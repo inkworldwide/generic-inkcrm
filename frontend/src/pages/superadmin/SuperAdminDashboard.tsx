@@ -908,8 +908,8 @@ export default function SuperAdminDashboard() {
         {activeTab === 'dashboard' && (
           <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 py-7 pb-32 space-y-6">
 
-            {/* ── STAT CARDS ────────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            {/* ── STAT CARDS DECK (4 Clean Cards) ─────────────────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5">
               
               {/* Card 1: Total Tenants */}
               <div
@@ -917,34 +917,34 @@ export default function SuperAdminDashboard() {
                   setSelectedStatus('all');
                   setSelectedVertical('all');
                 }}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer relative ${
                   selectedStatus === 'all' && selectedVertical === 'all'
-                    ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
-                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
+                    ? 'border-[#312E81] dark:border-indigo-500 ring-2 ring-indigo-500/10'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Total tenants</p>
-                    <div className="flex items-baseline gap-1.5 mt-1.5">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                        {stats?.totalTenants ?? '—'}
-                      </h3>
-                      <span className="text-xs text-[#6B7280] font-normal">orgs</span>
-                    </div>
-                  </div>
-
-                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
+                    Total Tenants
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-[#312E81] dark:text-indigo-400 flex items-center justify-center">
                     <Icons.Building2 className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
-                  <span className="inline-flex items-center gap-1 text-[#15803D] dark:text-emerald-400 font-medium">
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                    {stats?.totalTenants ?? 0}
+                  </span>
+                  <span className="text-xs text-[#6B7280] dark:text-slate-400">organizations</span>
+                </div>
+
+                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
+                  <span className="inline-flex items-center gap-1.5 text-[#15803D] dark:text-emerald-400 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
                     <span>{stats?.activeTenants ?? 0} active</span>
                   </span>
-                  <span className="text-[#6B7280] dark:text-slate-400">
+                  <span className="text-[#9CA3AF] text-[11px]">
                     {stats?.archivedTenants ?? 0} archived
                   </span>
                 </div>
@@ -953,65 +953,65 @@ export default function SuperAdminDashboard() {
               {/* Card 2: Active Workspaces */}
               <div
                 onClick={() => setSelectedStatus('active')}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer relative ${
                   selectedStatus === 'active'
-                    ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
-                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
+                    ? 'border-[#15803D] dark:border-emerald-500 ring-2 ring-emerald-500/10'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                 }`}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Active workspaces</p>
-                    <div className="flex items-baseline gap-1.5 mt-1.5">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                        {stats?.activeTenants ?? '—'}
-                      </h3>
-                      <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">live</span>
-                    </div>
-                  </div>
-
-                  <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] dark:bg-emerald-950/40 text-[#15803D] dark:text-emerald-400 border border-[#A7F3D0] dark:border-emerald-800/60 flex items-center justify-center">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
+                    Active Workspaces
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-[#15803D] dark:text-emerald-400 flex items-center justify-center">
                     <Icons.CheckCircle2 className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
-                    <span>Logins active</span>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                    {stats?.activeTenants ?? 0}
                   </span>
-                  <span className="font-medium text-[#15803D] dark:text-emerald-400">Operational</span>
+                  <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">operational</span>
+                </div>
+
+                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
+                    <span>Ready for logins</span>
+                  </span>
+                  <span className="text-[11px] font-semibold text-[#15803D] dark:text-emerald-400">Live</span>
                 </div>
               </div>
 
-              {/* Card 3: Approval Pending Users */}
+              {/* Card 3: Approval Pending */}
               <div
                 onClick={() => {
                   setUserStatusFilter('pending');
                   setActiveTab('users');
                   loadAllUsers();
                 }}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D97706] rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden group"
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-amber-400 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer group"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Approval pending</p>
-                    <div className="flex items-baseline gap-1.5 mt-1.5">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#B45309] dark:text-amber-400 tracking-tight">
-                        {allUsers.filter(u => u.approvalStatus === 'pending').length}
-                      </h3>
-                      <span className="text-xs text-[#B45309] font-medium">users</span>
-                    </div>
-                  </div>
-
-                  <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] dark:bg-amber-950/40 text-[#B45309] dark:text-amber-400 border border-[#FDE68A] dark:border-amber-800/60 flex items-center justify-center">
-                    <Icons.UserCheck className="w-4 h-4" />
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
+                    Approval Pending
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-[#D97706] dark:text-amber-400 flex items-center justify-center">
+                    <Icons.Clock className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span>Awaiting approval</span>
-                  <span className="font-medium text-[#B45309] dark:text-amber-400 group-hover:underline">Review →</span>
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                    {allUsers.filter(u => u.approvalStatus === 'pending').length}
+                  </span>
+                  <span className="text-xs text-[#6B7280] dark:text-slate-400">users awaiting</span>
+                </div>
+
+                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span>Requires verification</span>
+                  <span className="text-[11px] font-semibold text-[#D97706] dark:text-amber-400 group-hover:underline">Review →</span>
                 </div>
               </div>
 
@@ -1022,54 +1022,27 @@ export default function SuperAdminDashboard() {
                   setActiveTab('users');
                   loadAllUsers();
                 }}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#DC2626] rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden group"
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-rose-400 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer group"
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Suspended users</p>
-                    <div className="flex items-baseline gap-1.5 mt-1.5">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#DC2626] dark:text-rose-400 tracking-tight">
-                        {allUsers.filter(u => u.isActive === false).length}
-                      </h3>
-                      <span className="text-xs text-[#DC2626] font-medium">disabled</span>
-                    </div>
-                  </div>
-
-                  <div className="w-8 h-8 rounded-lg bg-[#FEF2F2] dark:bg-rose-950/40 text-[#DC2626] dark:text-rose-400 border border-[#FEE2E2] dark:border-rose-800/60 flex items-center justify-center">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
+                    Suspended Users
+                  </span>
+                  <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-[#DC2626] dark:text-rose-400 flex items-center justify-center">
                     <Icons.UserX className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                <div className="mt-2 flex items-baseline gap-2">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                    {allUsers.filter(u => u.isActive === false).length}
+                  </span>
+                  <span className="text-xs text-[#6B7280] dark:text-slate-400">accounts disabled</span>
+                </div>
+
+                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
                   <span>Blocked from CRM</span>
-                  <span className="font-medium text-[#DC2626] dark:text-rose-400 group-hover:underline">View →</span>
-                </div>
-              </div>
-
-              {/* Card 5: Vertical Templates */}
-              <div
-                onClick={() => setShowAddVerticalModal(true)}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Vertical templates</p>
-                    <div className="flex items-baseline gap-1.5 mt-1.5">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                        {verticals.length}
-                      </h3>
-                      <span className="text-xs text-[#6B7280] font-normal">presets</span>
-                    </div>
-                  </div>
-
-                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
-                    <Icons.Boxes className="w-4 h-4" />
-                  </div>
-                </div>
-
-                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span>{stats?.verticalBreakdown?.length || 0} active in use</span>
-                  <span className="font-medium text-[#312E81] dark:text-indigo-400">+ Add</span>
+                  <span className="text-[11px] font-semibold text-[#DC2626] dark:text-rose-400 group-hover:underline">Manage →</span>
                 </div>
               </div>
 
