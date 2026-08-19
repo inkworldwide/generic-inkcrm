@@ -908,8 +908,8 @@ export default function SuperAdminDashboard() {
         {activeTab === 'dashboard' && (
           <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 py-7 pb-32 space-y-6">
 
-            {/* ── STAT CARDS DECK (4 Clean Cards) ─────────────────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4.5">
+            {/* ── STAT CARDS DECK (5 Premium Stylish Cards) ─────────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
               
               {/* Card 1: Total Tenants */}
               <div
@@ -917,34 +917,34 @@ export default function SuperAdminDashboard() {
                   setSelectedStatus('all');
                   setSelectedVertical('all');
                 }}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer relative ${
+                className={`relative overflow-hidden rounded-2xl bg-[#FFFFFF] dark:bg-[#111827] border shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200 p-4 sm:p-4.5 cursor-pointer before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:rounded-t-2xl before:bg-gradient-to-r before:from-indigo-500 before:to-violet-600 ${
                   selectedStatus === 'all' && selectedVertical === 'all'
-                    ? 'border-[#312E81] dark:border-indigo-500 ring-2 ring-indigo-500/10'
-                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    ? 'border-[#312E81] dark:border-indigo-500 ring-2 ring-indigo-500/20'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-800'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#6B7280] dark:text-slate-400 uppercase tracking-wider truncate">
                     Total Tenants
                   </span>
-                  <div className="w-8 h-8 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-[#312E81] dark:text-indigo-400 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#312E81] to-[#4F46E5] text-white shadow-md shadow-indigo-500/25 flex items-center justify-center flex-shrink-0">
                     <Icons.Building2 className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#111827] dark:text-white tracking-tight">
                     {stats?.totalTenants ?? 0}
                   </span>
-                  <span className="text-xs text-[#6B7280] dark:text-slate-400">organizations</span>
+                  <span className="text-xs text-[#6B7280] dark:text-slate-400 font-medium">orgs</span>
                 </div>
 
-                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
-                  <span className="inline-flex items-center gap-1.5 text-[#15803D] dark:text-emerald-400 font-medium">
+                <div className="mt-3 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800/80 flex items-center justify-between text-[11px]">
+                  <span className="inline-flex items-center gap-1 text-[#15803D] dark:text-emerald-400 font-semibold">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
                     <span>{stats?.activeTenants ?? 0} active</span>
                   </span>
-                  <span className="text-[#9CA3AF] text-[11px]">
+                  <span className="text-[#9CA3AF] font-medium">
                     {stats?.archivedTenants ?? 0} archived
                   </span>
                 </div>
@@ -953,34 +953,34 @@ export default function SuperAdminDashboard() {
               {/* Card 2: Active Workspaces */}
               <div
                 onClick={() => setSelectedStatus('active')}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer relative ${
+                className={`relative overflow-hidden rounded-2xl bg-[#FFFFFF] dark:bg-[#111827] border shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 transition-all duration-200 p-4 sm:p-4.5 cursor-pointer before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:rounded-t-2xl before:bg-gradient-to-r before:from-emerald-400 before:to-teal-600 ${
                   selectedStatus === 'active'
-                    ? 'border-[#15803D] dark:border-emerald-500 ring-2 ring-emerald-500/10'
-                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                    ? 'border-[#059669] dark:border-emerald-500 ring-2 ring-emerald-500/20'
+                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-emerald-300 dark:hover:border-emerald-800'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
-                    Active Workspaces
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#6B7280] dark:text-slate-400 uppercase tracking-wider truncate">
+                    Active Live
                   </span>
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/50 text-[#15803D] dark:text-emerald-400 flex items-center justify-center">
-                    <Icons.CheckCircle2 className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#059669] to-[#10B981] text-white shadow-md shadow-emerald-500/25 flex items-center justify-center flex-shrink-0">
+                    <Icons.Zap className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#111827] dark:text-white tracking-tight">
                     {stats?.activeTenants ?? 0}
                   </span>
-                  <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">operational</span>
+                  <span className="text-xs text-[#059669] dark:text-emerald-400 font-semibold">operational</span>
                 </div>
 
-                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span className="inline-flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
-                    <span>Ready for logins</span>
+                <div className="mt-3 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#6B7280] dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1 font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]" />
+                    <span>Ready</span>
                   </span>
-                  <span className="text-[11px] font-semibold text-[#15803D] dark:text-emerald-400">Live</span>
+                  <span className="text-[11px] font-bold text-[#059669] dark:text-emerald-400">Live</span>
                 </div>
               </div>
 
@@ -991,27 +991,27 @@ export default function SuperAdminDashboard() {
                   setActiveTab('users');
                   loadAllUsers();
                 }}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-amber-400 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer group"
+                className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:border-amber-400 dark:hover:border-amber-700 transition-all duration-200 p-4 sm:p-4.5 cursor-pointer group before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:rounded-t-2xl before:bg-gradient-to-r before:from-amber-400 before:to-orange-500"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
-                    Approval Pending
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#6B7280] dark:text-slate-400 uppercase tracking-wider truncate">
+                    Pending Review
                   </span>
-                  <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-[#D97706] dark:text-amber-400 flex items-center justify-center">
-                    <Icons.Clock className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#D97706] to-[#F59E0B] text-white shadow-md shadow-amber-500/25 flex items-center justify-center flex-shrink-0">
+                    <Icons.UserCheck className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#111827] dark:text-white tracking-tight">
                     {allUsers.filter(u => u.approvalStatus === 'pending').length}
                   </span>
-                  <span className="text-xs text-[#6B7280] dark:text-slate-400">users awaiting</span>
+                  <span className="text-xs text-[#D97706] dark:text-amber-400 font-semibold">awaiting</span>
                 </div>
 
-                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span>Requires verification</span>
-                  <span className="text-[11px] font-semibold text-[#D97706] dark:text-amber-400 group-hover:underline">Review →</span>
+                <div className="mt-3 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#6B7280] dark:text-slate-400">
+                  <span className="truncate">Requires approval</span>
+                  <span className="text-[11px] font-bold text-[#D97706] dark:text-amber-400 group-hover:underline flex-shrink-0">Review →</span>
                 </div>
               </div>
 
@@ -1022,27 +1022,54 @@ export default function SuperAdminDashboard() {
                   setActiveTab('users');
                   loadAllUsers();
                 }}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-rose-400 rounded-xl p-5 shadow-xs hover:shadow-md transition-all duration-150 cursor-pointer group"
+                className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:border-rose-400 dark:hover:border-rose-700 transition-all duration-200 p-4 sm:p-4.5 cursor-pointer group before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:rounded-t-2xl before:bg-gradient-to-r before:from-rose-500 before:to-red-600"
               >
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-semibold tracking-wider text-[#6B7280] dark:text-slate-400 uppercase">
-                    Suspended Users
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#6B7280] dark:text-slate-400 uppercase tracking-wider truncate">
+                    Suspended
                   </span>
-                  <div className="w-8 h-8 rounded-lg bg-rose-50 dark:bg-rose-950/50 text-[#DC2626] dark:text-rose-400 flex items-center justify-center">
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#DC2626] to-[#EF4444] text-white shadow-md shadow-rose-500/25 flex items-center justify-center flex-shrink-0">
                     <Icons.UserX className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-[#111827] dark:text-white tracking-tight">
+                <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#111827] dark:text-white tracking-tight">
                     {allUsers.filter(u => u.isActive === false).length}
                   </span>
-                  <span className="text-xs text-[#6B7280] dark:text-slate-400">accounts disabled</span>
+                  <span className="text-xs text-[#DC2626] dark:text-rose-400 font-semibold">disabled</span>
                 </div>
 
-                <div className="mt-3.5 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span>Blocked from CRM</span>
-                  <span className="text-[11px] font-semibold text-[#DC2626] dark:text-rose-400 group-hover:underline">Manage →</span>
+                <div className="mt-3 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#6B7280] dark:text-slate-400">
+                  <span className="truncate">Blocked logins</span>
+                  <span className="text-[11px] font-bold text-[#DC2626] dark:text-rose-400 group-hover:underline flex-shrink-0">Manage →</span>
+                </div>
+              </div>
+
+              {/* Card 5: Vertical Templates */}
+              <div
+                onClick={() => setShowAddVerticalModal(true)}
+                className="relative overflow-hidden rounded-2xl bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 hover:border-purple-400 dark:hover:border-purple-700 transition-all duration-200 p-4 sm:p-4.5 cursor-pointer group before:absolute before:inset-x-0 before:top-0 before:h-[3px] before:rounded-t-2xl before:bg-gradient-to-r before:from-purple-500 before:to-pink-600"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[11px] font-bold text-[#6B7280] dark:text-slate-400 uppercase tracking-wider truncate">
+                    Templates
+                  </span>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#7C3AED] to-[#A855F7] text-white shadow-md shadow-purple-500/25 flex items-center justify-center flex-shrink-0">
+                    <Icons.Boxes className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="mt-1.5 flex items-baseline gap-1.5">
+                  <span className="text-2xl sm:text-3xl font-black text-[#111827] dark:text-white tracking-tight">
+                    {verticals.length}
+                  </span>
+                  <span className="text-xs text-[#7C3AED] dark:text-purple-400 font-semibold">presets</span>
+                </div>
+
+                <div className="mt-3 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800/80 flex items-center justify-between text-[11px] text-[#6B7280] dark:text-slate-400">
+                  <span className="truncate">{stats?.verticalBreakdown?.length || 0} active in use</span>
+                  <span className="text-[11px] font-bold text-[#7C3AED] dark:text-purple-400 group-hover:underline flex-shrink-0">+ Add</span>
                 </div>
               </div>
 
