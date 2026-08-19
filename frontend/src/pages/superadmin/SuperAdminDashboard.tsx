@@ -106,8 +106,8 @@ export default function SuperAdminDashboard() {
   const { user, logout, loginAsTenant } = useAuthStore();
   const { showToast } = useToastStore();
 
-  // Navigation tab: 'dashboard' | 'settings'
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'settings'>('dashboard');
+  // Navigation tab: 'dashboard' | 'users' | 'settings'
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'users' | 'settings'>('dashboard');
   const [settingsSubTab, setSettingsSubTab] = useState<'profile' | 'security' | 'team' | 'system'>('profile');
 
   // Theme state (Persisted)
@@ -135,6 +135,14 @@ export default function SuperAdminDashboard() {
   const [verticals, setVerticals] = useState<VerticalTemplate[]>([]);
   const [pendingRequests, setPendingRequests] = useState<any[]>([]);
 
+  // ── USER MANAGEMENT STATE ──────────────────────────────────────────────────
+  const [allUsers, setAllUsers] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [userSearch, setUserSearch] = useState('');
+  const [userOrgFilter, setUserOrgFilter] = useState('all');
+  const [userStatusFilter, setUserStatusFilter] = useState<'all' | 'active' | 'disabled' | 'pending'>('all');
+  const [togglingUserSecurity, setTogglingUserSecurity] = useState<string | null>(null);
+
   // Super Admin Profile & Settings state
   const [adminProfile, setAdminProfile] = useState<SuperAdminProfile | null>(null);
   const [systemDiag, setSystemDiag] = useState<any>(null);
@@ -160,7 +168,7 @@ export default function SuperAdminDashboard() {
   const [newTeamPhone, setNewTeamPhone] = useState('');
   const [creatingTeamUser, setCreatingTeamUser] = useState(false);
 
-  // Search & Filter state
+  // Search & Filter state for Tenants Dashboard
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedVertical, setSelectedVertical] = useState('all');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -212,6 +220,11 @@ export default function SuperAdminDashboard() {
   const [editStatus, setEditStatus] = useState<'active' | 'disabled'>('active');
   const [savingEditTenant, setSavingEditTenant] = useState(false);
 
+  // State for Resetting Single User Password
+  const [resetPassUser, setResetPassUser] = useState<any | null>(null);
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [savingUserPassword, setSavingUserPassword] = useState(false);
+
   const handleOpenEditModal = (tenant: TenantItem) => {
     setEditModalTenant(tenant);
     setEditOrgName(tenant.name || '');
@@ -254,6 +267,7 @@ export default function SuperAdminDashboard() {
   useEffect(() => {
     loadDashboardData();
     loadSuperAdminProfile();
+    loadAllUsers();
   }, []);
 
   const loadDashboardData = async () => {
@@ -275,6 +289,76 @@ export default function SuperAdminDashboard() {
       showToast('Failed to load platform data.', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadAllUsers = async () => {
+    try {
+      setLoadingUsers(true);
+      const res = await api.get('/super-admin/users');
+      setAllUsers(res.data || []);
+    } catch (err: any) {
+      console.error('Failed to load platform users:', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleToggleUserSecurity = async (userId: string, field: 'skipFace' | 'skipLocation' | 'isActive', currentValue: boolean) => {
+    try {
+      setTogglingUserSecurity(userId + field);
+      await api.patch(`/super-admin/users/${userId}/security-override`, {
+        [field]: !currentValue
+      });
+      
+      const label = field === 'skipFace' 
+        ? `Face verification ${!currentValue ? 'Bypassed (Skip)' : 'Enforced'}`
+        : field === 'skipLocation'
+          ? `GPS Location check ${!currentValue ? 'Bypassed (Skip)' : 'Enforced'}`
+          : `User account ${!currentValue ? 'Activated' : 'Suspended'}`;
+
+      showToast(label, 'success');
+      setAllUsers(prev => prev.map(u => u._id === userId ? { ...u, [field]: !currentValue } : u));
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to update security setting.', 'error');
+    } finally {
+      setTogglingUserSecurity(null);
+    }
+  };
+
+  const handleApprovePlatformUser = async (userId: string, approve: boolean) => {
+    try {
+      await api.patch(`/super-admin/users/${userId}/security-override`, {
+        isApproved: approve,
+        approvalStatus: approve ? 'approved' : 'rejected',
+        isActive: approve
+      });
+      showToast(approve ? 'User approved successfully!' : 'User registration rejected.', approve ? 'success' : 'warning');
+      setAllUsers(prev => prev.map(u => u._id === userId ? { ...u, isApproved: approve, approvalStatus: approve ? 'approved' : 'rejected', isActive: approve } : u));
+    } catch (err: any) {
+      showToast('Failed to update approval status.', 'error');
+    }
+  };
+
+  const handleSaveUserPasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resetPassUser || !newUserPassword || newUserPassword.length < 6) {
+      showToast('Password must be at least 6 characters.', 'error');
+      return;
+    }
+
+    try {
+      setSavingUserPassword(true);
+      await api.patch(`/super-admin/users/${resetPassUser._id}/security-override`, {
+        password: newUserPassword
+      });
+      showToast(`Password for ${resetPassUser.firstName} reset successfully!`, 'success');
+      setResetPassUser(null);
+      setNewUserPassword('');
+    } catch (err: any) {
+      showToast(err.response?.data?.error || 'Failed to reset password.', 'error');
+    } finally {
+      setSavingUserPassword(false);
     }
   };
 
@@ -367,6 +451,7 @@ export default function SuperAdminDashboard() {
       showToast(`Tenant "${newOrgName}" created successfully!`, 'success');
       setShowCreateModal(false);
       loadDashboardData();
+      loadAllUsers();
     } catch (err: any) {
       showToast(err.response?.data?.error || 'Failed to create tenant organization.', 'error');
     } finally {
@@ -501,19 +586,6 @@ export default function SuperAdminDashboard() {
     }
   };
 
-  // Toggle Tenant Active / Suspended
-  const handleToggleStatus = async (tenant: TenantItem) => {
-    const newStatus = tenant.status === 'active' ? 'disabled' : 'active';
-    try {
-      await api.patch(`/super-admin/tenants/${tenant.id}/status`, { status: newStatus });
-      showToast(`Tenant "${tenant.name}" is now ${newStatus === 'active' ? 'Active' : 'Suspended'}.`, 'success');
-      setTenants(prev => prev.map(t => t.id === tenant.id ? { ...t, status: newStatus } : t));
-      loadDashboardData();
-    } catch (err: any) {
-      showToast('Failed to update tenant status.', 'error');
-    }
-  };
-
   // Confirm Soft Delete (Archive)
   const handleArchiveConfirm = async () => {
     if (!archiveModalTenant) return;
@@ -599,6 +671,32 @@ export default function SuperAdminDashboard() {
     });
   }, [tenants, searchQuery, selectedVertical, selectedStatus]);
 
+  // Filtered users for User Management
+  const filteredUsers = useMemo(() => {
+    return allUsers.filter(u => {
+      const q = userSearch.toLowerCase().trim();
+      const fullName = `${u.firstName || ''} ${u.lastName || ''}`.toLowerCase();
+      const matchesSearch = !q ||
+        fullName.includes(q) ||
+        (u.email && u.email.toLowerCase().includes(q)) ||
+        (u.userCode && u.userCode.toLowerCase().includes(q)) ||
+        (u.organizationId?.name && u.organizationId.name.toLowerCase().includes(q));
+
+      const orgId = typeof u.organizationId === 'object' ? u.organizationId?._id : u.organizationId;
+      const matchesOrg = userOrgFilter === 'all' || orgId === userOrgFilter;
+
+      const matchesStatus = userStatusFilter === 'all'
+        ? true
+        : userStatusFilter === 'active'
+          ? u.isActive === true
+          : userStatusFilter === 'disabled'
+            ? u.isActive === false
+            : u.approvalStatus === 'pending';
+
+      return matchesSearch && matchesOrg && matchesStatus;
+    });
+  }, [allUsers, userSearch, userOrgFilter, userStatusFilter]);
+
   return (
     <div className="h-screen w-full overflow-hidden bg-[#F8F8FA] dark:bg-[#0B0F17] text-[#111827] dark:text-slate-100 flex font-sans transition-colors duration-150">
       
@@ -645,7 +743,28 @@ export default function SuperAdminDashboard() {
               </span>
             </button>
 
-            {/* Tab 2: Settings */}
+            {/* Tab 2: User Management (Face / Location Bypass) */}
+            <button
+              onClick={() => {
+                setActiveTab('users');
+                loadAllUsers();
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer ${
+                activeTab === 'users'
+                  ? 'bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-white font-semibold'
+                  : 'text-[#4B5563] dark:text-slate-400 hover:bg-[#F9FAFB] dark:hover:bg-slate-800/60 hover:text-[#111827]'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <Icons.Users className={`w-4 h-4 ${activeTab === 'users' ? 'text-[#312E81] dark:text-indigo-400' : 'text-[#6B7280]'}`} />
+                <span>User Management</span>
+              </div>
+              <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-700 text-[#6B7280]">
+                {allUsers.length}
+              </span>
+            </button>
+
+            {/* Tab 3: Settings */}
             <button
               onClick={() => {
                 setActiveTab('settings');
@@ -744,10 +863,18 @@ export default function SuperAdminDashboard() {
         <header className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 bg-[#FFFFFF] dark:bg-[#111827] px-8 flex items-center justify-between sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex-shrink-0">
           <div>
             <h2 className="text-sm sm:text-base font-bold text-[#111827] dark:text-white tracking-tight">
-              {activeTab === 'dashboard' ? 'Platform Control Center' : 'Super Admin Settings & Security'}
+              {activeTab === 'dashboard'
+                ? 'Platform Control Center'
+                : activeTab === 'users'
+                  ? 'User Management & Security Overrides'
+                  : 'Super Admin Settings & Security'}
             </h2>
             <p className="text-[11px] text-[#6B7280] dark:text-slate-400">
-              {activeTab === 'dashboard' ? 'Manage multi-tenant workspaces, vertical templates & RBAC' : 'Super Admin profile, password security, platform admins & diagnostics'}
+              {activeTab === 'dashboard'
+                ? 'Manage multi-tenant workspaces, vertical templates & RBAC'
+                : activeTab === 'users'
+                  ? 'Manage all platform staff, bypass biometric Face & GPS Location verification checks'
+                  : 'Super Admin profile, password security, platform admins & diagnostics'}
             </p>
           </div>
 
@@ -781,7 +908,7 @@ export default function SuperAdminDashboard() {
         {activeTab === 'dashboard' && (
           <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 py-7 pb-32 space-y-6">
 
-            {/* ── STAT CARDS (WHITE CARDS ON NEUTRAL GRAY WITH NAVY ACCENTS) ──── */}
+            {/* ── STAT CARDS ────────────────────────────────────────────────── */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               
               {/* Card 1: Total Tenants */}
@@ -857,34 +984,33 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
-              {/* Card 3: Suspended / Inactive */}
+              {/* Card 3: Total Platform Users */}
               <div
-                onClick={() => setSelectedStatus('disabled')}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
-                  selectedStatus === 'disabled'
-                    ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
-                    : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
-                }`}
+                onClick={() => {
+                  setActiveTab('users');
+                  loadAllUsers();
+                }}
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Suspended / inactive</p>
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Platform Users</p>
                     <div className="flex items-baseline gap-2 mt-1.5">
                       <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                        {stats?.disabledTenants ?? 0}
+                        {allUsers.length}
                       </h3>
-                      <span className="text-xs text-[#6B7280] font-normal">blocked</span>
+                      <span className="text-xs text-[#312E81] dark:text-indigo-400 font-semibold">managed</span>
                     </div>
                   </div>
 
-                  <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] dark:bg-amber-950/40 text-[#B45309] dark:text-amber-400 border border-[#FDE68A] dark:border-amber-800/60 flex items-center justify-center">
-                    <Icons.PauseCircle className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
+                    <Icons.Users className="w-4 h-4" />
                   </div>
                 </div>
 
                 <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span>Auth middleware kill-switch</span>
-                  <span className="font-medium text-[#111827] dark:text-slate-300">Protected</span>
+                  <span>Face & Location Bypasses</span>
+                  <span className="font-medium text-[#312E81] dark:text-indigo-400">Manage →</span>
                 </div>
               </div>
 
@@ -992,7 +1118,7 @@ export default function SuperAdminDashboard() {
                 </div>
               </div>
 
-              {/* Active Filter Chips / Status summary */}
+              {/* Active Filter summary */}
               <div className="flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400 pt-2 border-t border-[#F1F5F9] dark:border-slate-800">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-[#111827] dark:text-slate-300">
@@ -1014,7 +1140,7 @@ export default function SuperAdminDashboard() {
               </div>
             </div>
 
-            {/* ── ADMIN TABLE (HAIRLINE DIVIDERS, CLEAN SINGLE BADGE STYLE) ─────── */}
+            {/* ── ADMIN TABLE ───────────────────────────────────────────────── */}
             <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
               <div className="overflow-x-auto overflow-y-auto max-h-[620px]">
                 <table className="w-full text-left text-xs border-collapse">
@@ -1050,18 +1176,6 @@ export default function SuperAdminDashboard() {
                             <p className="text-xs text-[#6B7280] dark:text-slate-400 mt-1 max-w-xs leading-relaxed">
                               Try adjusting your search criteria or switch filters to view all workspaces.
                             </p>
-                            <div className="flex gap-2 mt-4">
-                              <button
-                                onClick={() => {
-                                  setSelectedStatus('all');
-                                  setSelectedVertical('all');
-                                  setSearchQuery('');
-                                }}
-                                className="px-3.5 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white rounded-lg text-xs font-medium transition-colors cursor-pointer"
-                              >
-                                Show All Tenants
-                              </button>
-                            </div>
                           </div>
                         </td>
                       </tr>
@@ -1117,18 +1231,14 @@ export default function SuperAdminDashboard() {
                                   Archived
                                 </span>
                               ) : (
-                                <button
-                                  onClick={() => handleToggleStatus(tenant)}
-                                  title={tenant.status === 'active' ? 'Click to Suspend' : 'Click to Activate'}
-                                  className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border transition-colors cursor-pointer ${
-                                    tenant.status === 'active'
-                                      ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0] hover:bg-[#D1FAE5]'
-                                      : 'bg-[#FEF3C7] text-[#B45309] border-[#FDE68A] hover:bg-[#FDE68A]'
-                                  }`}
-                                >
+                                <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${
+                                  tenant.status === 'active'
+                                    ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0]'
+                                    : 'bg-[#FEF3C7] text-[#B45309] border-[#FDE68A]'
+                                }`}>
                                   <span className={`w-1.5 h-1.5 rounded-full ${tenant.status === 'active' ? 'bg-[#15803D]' : 'bg-[#D97706]'}`} />
                                   <span>{tenant.status === 'active' ? 'Active' : 'Suspended'}</span>
-                                </button>
+                                </span>
                               )}
                             </td>
 
@@ -1218,7 +1328,383 @@ export default function SuperAdminDashboard() {
           </main>
         )}
 
-        {/* ── TAB 2: SETTINGS & SUPER ADMIN MANAGEMENT VIEW ─────────────────── */}
+        {/* ── TAB 2: USER MANAGEMENT & SECURITY OVERRIDES (FACE / LOCATION BYPASS) ── */}
+        {activeTab === 'users' && (
+          <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 py-7 pb-32 space-y-6">
+
+            {/* ── USER STATS OVERVIEW ────────────────────────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              
+              {/* Card 1: Total Platform Users */}
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280]">Total Staff / Users</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white">
+                        {allUsers.length}
+                      </h3>
+                      <span className="text-xs text-[#6B7280]">registered</span>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
+                    <Icons.Users className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-xs text-[#6B7280]">
+                  <span>Across {tenants.length} tenant organizations</span>
+                </div>
+              </div>
+
+              {/* Card 2: Face Bypass Enabled */}
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280]">Face Bypass (Skip)</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#15803D] dark:text-emerald-400">
+                        {allUsers.filter(u => u.skipFace).length}
+                      </h3>
+                      <span className="text-xs text-[#15803D] font-medium">exempted</span>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] text-[#15803D] border border-[#A7F3D0] flex items-center justify-center">
+                    <Icons.ScanFace className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-xs text-[#6B7280]">
+                  <span>Biometric check bypassed</span>
+                </div>
+              </div>
+
+              {/* Card 3: Location Bypass Enabled */}
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280]">Location Bypass (Skip)</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#15803D] dark:text-emerald-400">
+                        {allUsers.filter(u => u.skipLocation).length}
+                      </h3>
+                      <span className="text-xs text-[#15803D] font-medium">exempted</span>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#ECFDF5] text-[#15803D] border border-[#A7F3D0] flex items-center justify-center">
+                    <Icons.MapPinOff className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-xs text-[#6B7280]">
+                  <span>GPS radius check bypassed</span>
+                </div>
+              </div>
+
+              {/* Card 4: Pending Approvals */}
+              <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280]">Pending Approvals</p>
+                    <div className="flex items-baseline gap-2 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#B45309] dark:text-amber-400">
+                        {allUsers.filter(u => u.approvalStatus === 'pending').length}
+                      </h3>
+                      <span className="text-xs text-[#B45309] font-medium">awaiting</span>
+                    </div>
+                  </div>
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] text-[#B45309] border border-[#FDE68A] flex items-center justify-center">
+                    <Icons.UserCheck className="w-4 h-4" />
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 text-xs text-[#6B7280]">
+                  <span>Requires admin verification</span>
+                </div>
+              </div>
+
+            </div>
+
+            {/* ── SEARCH & FILTER BAR FOR USERS ─────────────────────────────── */}
+            <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 p-3.5 sm:p-4 rounded-[14px] shadow-[0_1px_3px_rgba(0,0,0,0.06)] space-y-3">
+              
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                {/* Search Input */}
+                <div className="relative w-full sm:w-96">
+                  <Icons.Search className="w-4 h-4 text-[#9CA3AF] absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search User Name, Email, Code or Tenant..."
+                    value={userSearch}
+                    onChange={(e) => setUserSearch(e.target.value)}
+                    className="w-full pl-9 pr-8 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-slate-100 placeholder-[#9CA3AF] focus:outline-none focus:border-[#312E81]"
+                  />
+                  {userSearch && (
+                    <button
+                      onClick={() => setUserSearch('')}
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#111827] cursor-pointer"
+                    >
+                      <Icons.X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Filters */}
+                <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
+                  
+                  {/* Org Filter */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-[#6B7280]">Tenant:</span>
+                    <select
+                      value={userOrgFilter}
+                      onChange={(e) => setUserOrgFilter(e.target.value)}
+                      className="bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 text-xs font-medium text-[#111827] dark:text-slate-200 px-3 py-2 rounded-lg focus:outline-none focus:border-[#312E81] cursor-pointer"
+                    >
+                      <option value="all">All Organizations ({tenants.length})</option>
+                      {tenants.map(t => (
+                        <option key={t.id} value={t.id}>{t.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Status Filter */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-medium text-[#6B7280]">Status:</span>
+                    <select
+                      value={userStatusFilter}
+                      onChange={(e) => setUserStatusFilter(e.target.value as any)}
+                      className="bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 text-xs font-medium text-[#111827] dark:text-slate-200 px-3 py-2 rounded-lg focus:outline-none focus:border-[#312E81] cursor-pointer"
+                    >
+                      <option value="all">All Status</option>
+                      <option value="active">Active Only</option>
+                      <option value="disabled">Disabled Only</option>
+                      <option value="pending">Pending Approval</option>
+                    </select>
+                  </div>
+
+                  {/* Refresh Button */}
+                  <button
+                    onClick={loadAllUsers}
+                    title="Refresh Users"
+                    className="p-2 bg-[#F9FAFB] hover:bg-[#F3F4F6] dark:bg-slate-900 dark:hover:bg-slate-800 border border-[#E5E7EB] dark:border-slate-700 text-[#6B7280] dark:text-slate-300 rounded-lg transition-colors cursor-pointer"
+                  >
+                    <Icons.RefreshCw className={`w-3.5 h-3.5 ${loadingUsers ? 'animate-spin' : ''}`} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs text-[#6B7280] pt-2 border-t border-[#F1F5F9] dark:border-slate-800">
+                <span className="font-medium">
+                  Showing {filteredUsers.length} of {allUsers.length} Users
+                </span>
+                <span className="text-[11px] text-[#312E81] dark:text-indigo-400 font-medium">
+                  Click on Face or Location badge to toggle bypass in real-time
+                </span>
+              </div>
+            </div>
+
+            {/* ── USERS TABLE WITH FACE & LOCATION BYPASS TOGGLES ───────────── */}
+            <div className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)] flex flex-col">
+              <div className="overflow-x-auto overflow-y-auto max-h-[620px]">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="sticky top-0 z-20 bg-[#F9FAFB] dark:bg-slate-900 border-b border-[#E5E7EB] dark:border-slate-800 text-[#6B7280] dark:text-slate-400 uppercase tracking-wider font-semibold text-[11px]">
+                    <tr>
+                      <th className="py-3 px-4 sm:px-6">User / Staff</th>
+                      <th className="py-3 px-4">Organization / Tenant</th>
+                      <th className="py-3 px-4">Role & Dept</th>
+                      <th className="py-3 px-4 text-center">Face Recognition (Skip)</th>
+                      <th className="py-3 px-4 text-center">GPS Location (Skip)</th>
+                      <th className="py-3 px-4">Status</th>
+                      <th className="py-3 px-4 sm:px-6 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#F1F5F9] dark:divide-slate-800">
+                    {loadingUsers ? (
+                      <tr>
+                        <td colSpan={7} className="py-16 text-center text-[#6B7280]">
+                          <Icons.Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-[#312E81]" />
+                          <span className="font-medium text-xs">Loading platform users...</span>
+                        </td>
+                      </tr>
+                    ) : filteredUsers.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="py-14 text-center">
+                          <div className="max-w-sm mx-auto flex flex-col items-center justify-center">
+                            <div className="w-12 h-12 rounded-xl bg-[#F1F5F9] dark:bg-slate-800 flex items-center justify-center text-[#6B7280] mb-3">
+                              <Icons.UserX className="w-6 h-6" />
+                            </div>
+                            <h4 className="font-semibold text-sm text-[#111827] dark:text-white">
+                              No matching users found
+                            </h4>
+                            <p className="text-xs text-[#6B7280] mt-1">
+                              Try clearing filters or search query.
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredUsers.map((usr) => {
+                        const orgName = usr.organizationId?.name || 'Platform Admin';
+                        const orgSubdomain = usr.organizationId?.subdomain;
+                        const roleName = usr.roleId?.name || (usr.isPlatformSuperAdmin ? 'Super Admin' : 'Admin');
+                        const isTogglingFace = togglingUserSecurity === usr._id + 'skipFace';
+                        const isTogglingLoc = togglingUserSecurity === usr._id + 'skipLocation';
+
+                        return (
+                          <tr key={usr._id} className="hover:bg-[#F9FAFB] dark:hover:bg-slate-800/40 transition-colors">
+                            
+                            {/* User Column */}
+                            <td className="py-3.5 px-4 sm:px-6">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-full bg-[#312E81] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+                                  {usr.firstName?.[0]?.toUpperCase() || 'U'}
+                                </div>
+                                <div>
+                                  <div className="font-semibold text-[#111827] dark:text-white text-xs flex items-center gap-1.5">
+                                    <span>{usr.firstName} {usr.lastName}</span>
+                                    {usr.isPlatformSuperAdmin && (
+                                      <span className="px-1.5 py-0.2 rounded text-[9.5px] font-bold bg-indigo-50 text-[#312E81] border border-indigo-200">
+                                        SUPER
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="text-[11px] text-[#6B7280] font-mono">{usr.email}</div>
+                                  {usr.userCode && (
+                                    <div className="text-[10px] text-[#9CA3AF] font-mono">{usr.userCode}</div>
+                                  )}
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Organization Column */}
+                            <td className="py-3.5 px-4">
+                              <div className="font-medium text-[#111827] dark:text-slate-200 text-xs">
+                                {orgName}
+                              </div>
+                              {orgSubdomain && (
+                                <div className="text-[11px] text-[#6B7280] font-mono">
+                                  {orgSubdomain}.inkcrm
+                                </div>
+                              )}
+                            </td>
+
+                            {/* Role & Dept Column */}
+                            <td className="py-3.5 px-4">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
+                                {roleName}
+                              </span>
+                              {usr.department && (
+                                <div className="text-[11px] text-[#6B7280] mt-0.5">{usr.department}</div>
+                              )}
+                            </td>
+
+                            {/* 👤 FACE RECOGNITION BYPASS TOGGLE */}
+                            <td className="py-3.5 px-4 text-center">
+                              <button
+                                onClick={() => handleToggleUserSecurity(usr._id, 'skipFace', !!usr.skipFace)}
+                                disabled={isTogglingFace}
+                                title={usr.skipFace ? 'Click to ENFORCE Face Recognition' : 'Click to BYPASS (Skip) Face Recognition'}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                                  usr.skipFace
+                                    ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0] hover:bg-[#D1FAE5]'
+                                    : 'bg-[#F9FAFB] text-[#4B5563] border-[#E5E7EB] hover:bg-[#F3F4F6]'
+                                }`}
+                              >
+                                {isTogglingFace ? (
+                                  <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : usr.skipFace ? (
+                                  <Icons.CheckCircle2 className="w-3.5 h-3.5 text-[#15803D]" />
+                                ) : (
+                                  <Icons.ScanFace className="w-3.5 h-3.5 text-[#6B7280]" />
+                                )}
+                                <span>{usr.skipFace ? 'Bypassed (Skip)' : 'Enforced (Check)'}</span>
+                              </button>
+                            </td>
+
+                            {/* 📍 GPS LOCATION BYPASS TOGGLE */}
+                            <td className="py-3.5 px-4 text-center">
+                              <button
+                                onClick={() => handleToggleUserSecurity(usr._id, 'skipLocation', !!usr.skipLocation)}
+                                disabled={isTogglingLoc}
+                                title={usr.skipLocation ? 'Click to ENFORCE GPS Location check' : 'Click to BYPASS (Skip) GPS Location check'}
+                                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all cursor-pointer shadow-2xs ${
+                                  usr.skipLocation
+                                    ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0] hover:bg-[#D1FAE5]'
+                                    : 'bg-[#F9FAFB] text-[#4B5563] border-[#E5E7EB] hover:bg-[#F3F4F6]'
+                                }`}
+                              >
+                                {isTogglingLoc ? (
+                                  <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : usr.skipLocation ? (
+                                  <Icons.CheckCircle2 className="w-3.5 h-3.5 text-[#15803D]" />
+                                ) : (
+                                  <Icons.MapPin className="w-3.5 h-3.5 text-[#6B7280]" />
+                                )}
+                                <span>{usr.skipLocation ? 'Bypassed (Skip)' : 'Enforced (Check)'}</span>
+                              </button>
+                            </td>
+
+                            {/* Status Column */}
+                            <td className="py-3.5 px-4">
+                              {usr.approvalStatus === 'pending' ? (
+                                <div className="flex items-center gap-1.5">
+                                  <button
+                                    onClick={() => handleApprovePlatformUser(usr._id, true)}
+                                    className="px-2 py-0.5 bg-[#15803D] hover:bg-[#166534] text-white rounded text-[11px] font-semibold cursor-pointer"
+                                  >
+                                    Approve
+                                  </button>
+                                  <button
+                                    onClick={() => handleApprovePlatformUser(usr._id, false)}
+                                    className="px-2 py-0.5 bg-[#DC2626] hover:bg-[#B91C1C] text-white rounded text-[11px] font-semibold cursor-pointer"
+                                  >
+                                    Reject
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  onClick={() => handleToggleUserSecurity(usr._id, 'isActive', !!usr.isActive)}
+                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-medium border cursor-pointer ${
+                                    usr.isActive
+                                      ? 'bg-[#ECFDF5] text-[#15803D] border-[#A7F3D0]'
+                                      : 'bg-[#FEF2F2] text-[#DC2626] border-[#FEE2E2]'
+                                  }`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${usr.isActive ? 'bg-[#15803D]' : 'bg-[#DC2626]'}`} />
+                                  <span>{usr.isActive ? 'Active' : 'Disabled'}</span>
+                                </button>
+                              )}
+                            </td>
+
+                            {/* Actions Column */}
+                            <td className="py-3.5 px-4 sm:px-6 text-right">
+                              <button
+                                onClick={() => {
+                                  setResetPassUser(usr);
+                                  setNewUserPassword('');
+                                }}
+                                className="px-2.5 py-1 bg-[#FFFFFF] dark:bg-slate-800 hover:bg-[#F9FAFB] text-[#111827] dark:text-slate-200 border border-[#E5E7EB] dark:border-slate-700 rounded-md text-xs font-medium flex items-center gap-1 ml-auto cursor-pointer"
+                                title="Reset User Password"
+                              >
+                                <Icons.Key className="w-3 h-3 text-[#6B7280]" />
+                                <span>Reset Pass</span>
+                              </button>
+                            </td>
+
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="px-6 py-3 bg-[#F9FAFB] dark:bg-slate-900 border-t border-[#E5E7EB] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280]">
+                <span>Showing {filteredUsers.length} of {allUsers.length} Users</span>
+                <span className="font-mono text-[#9CA3AF]">inkCRM Security Control</span>
+              </div>
+            </div>
+
+          </main>
+        )}
+
+        {/* ── TAB 3: SETTINGS & SUPER ADMIN MANAGEMENT VIEW ─────────────────── */}
         {activeTab === 'settings' && (
           <main className="flex-1 w-full max-w-5xl mx-auto px-8 py-7 pb-32 space-y-6">
             
@@ -1503,6 +1989,67 @@ export default function SuperAdminDashboard() {
         )}
 
       </div>
+
+      {/* ── MODAL: RESET USER PASSWORD ────────────────────────────────────── */}
+      <AnimatePresence>
+        {resetPassUser && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setResetPassUser(null)} />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="relative z-10 bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 rounded-[14px] w-full max-w-sm overflow-hidden shadow-2xl p-6 space-y-4"
+            >
+              <div className="flex items-center justify-between border-b border-[#E5E7EB] dark:border-slate-800 pb-3">
+                <div className="flex items-center gap-2">
+                  <Icons.Key className="w-4 h-4 text-[#312E81]" />
+                  <h3 className="text-base font-bold text-[#111827] dark:text-white">Reset User Password</h3>
+                </div>
+                <button onClick={() => setResetPassUser(null)} className="text-[#9CA3AF] hover:text-[#111827] cursor-pointer">
+                  <Icons.X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <p className="text-xs text-[#6B7280]">
+                Set a new password for <strong>{resetPassUser.firstName} {resetPassUser.lastName}</strong> ({resetPassUser.email}).
+              </p>
+
+              <form onSubmit={handleSaveUserPasswordReset} className="space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">New Password *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="At least 6 characters"
+                    value={newUserPassword}
+                    onChange={(e) => setNewUserPassword(e.target.value)}
+                    className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs font-mono focus:outline-none focus:border-[#312E81]"
+                  />
+                </div>
+
+                <div className="flex justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setResetPassUser(null)}
+                    className="px-3.5 py-1.5 bg-[#F1F5F9] text-[#111827] rounded-lg text-xs font-medium cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={savingUserPassword || !newUserPassword}
+                    className="px-4 py-1.5 bg-[#312E81] hover:bg-[#282568] text-white font-medium text-xs rounded-lg flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-xs"
+                  >
+                    {savingUserPassword ? <Icons.Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Icons.Check className="w-3.5 h-3.5" />}
+                    <span>Set Password</span>
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* ── MODAL: CREATE SUPER ADMIN TEAM USER ────────────────────────────── */}
       <AnimatePresence>

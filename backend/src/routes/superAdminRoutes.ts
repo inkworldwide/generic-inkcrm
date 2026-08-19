@@ -886,4 +886,117 @@ router.patch('/team/:id/status', async (req: Request, res: Response): Promise<vo
   }
 });
 
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. PLATFORM-WIDE USER MANAGEMENT & SECURITY OVERRIDES (Face / Location Bypass)
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/users', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { organizationId, search, status, verticalType } = req.query;
+    const filter: any = {};
+
+    if (organizationId && organizationId !== 'all') {
+      filter.organizationId = organizationId;
+    }
+
+    if (status === 'active') {
+      filter.isActive = true;
+    } else if (status === 'disabled') {
+      filter.isActive = false;
+    } else if (status === 'pending') {
+      filter.approvalStatus = 'pending';
+    }
+
+    if (search && typeof search === 'string') {
+      const q = search.trim();
+      filter.$or = [
+        { firstName: { $regex: q, $options: 'i' } },
+        { lastName: { $regex: q, $options: 'i' } },
+        { email: { $regex: q, $options: 'i' } },
+        { userCode: { $regex: q, $options: 'i' } },
+        { phone: { $regex: q, $options: 'i' } }
+      ];
+    }
+
+    const users = await User.find(filter)
+      .populate('organizationId', 'name subdomain verticalType')
+      .populate('roleId', 'name')
+      .populate('reportingManager', 'firstName lastName email')
+      .select('-passwordHash -refreshTokens')
+      .sort({ createdAt: -1 })
+      .limit(300);
+
+    res.status(200).json(users);
+  } catch (error: any) {
+    console.error('[SUPER_ADMIN_GET_USERS_ERROR]', error);
+    res.status(500).json({ error: 'Failed to retrieve platform users list.' });
+  }
+});
+
+router.patch('/users/:id/security-override', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { skipFace, skipLocation, isActive, isApproved, approvalStatus, password } = req.body;
+    const userToUpdate = await User.findById(req.params.id);
+
+    if (!userToUpdate) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    if (typeof skipFace === 'boolean') {
+      userToUpdate.skipFace = skipFace;
+    }
+
+    if (typeof skipLocation === 'boolean') {
+      userToUpdate.skipLocation = skipLocation;
+    }
+
+    if (typeof isActive === 'boolean') {
+      userToUpdate.isActive = isActive;
+    }
+
+    if (typeof isApproved === 'boolean') {
+      userToUpdate.isApproved = isApproved;
+      userToUpdate.approvalStatus = isApproved ? 'approved' : 'rejected';
+    } else if (approvalStatus) {
+      userToUpdate.approvalStatus = approvalStatus;
+      userToUpdate.isApproved = approvalStatus === 'approved';
+    }
+
+    if (password && password.trim().length >= 6) {
+      userToUpdate.passwordHash = await bcrypt.hash(password.trim(), 12);
+      userToUpdate.plainPassword = password.trim();
+    }
+
+    await userToUpdate.save();
+
+    res.status(200).json({
+      message: `Security settings for ${userToUpdate.firstName} ${userToUpdate.lastName} updated successfully.`,
+      user: userToUpdate
+    });
+  } catch (error: any) {
+    console.error('[SUPER_ADMIN_SECURITY_OVERRIDE_ERROR]', error);
+    res.status(500).json({ error: 'Failed to update user security settings.' });
+  }
+});
+
+router.delete('/users/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userToDelete = await User.findById(req.params.id);
+    if (!userToDelete) {
+      res.status(404).json({ error: 'User not found.' });
+      return;
+    }
+
+    if (userToDelete.email === 'superadmin@inkcrm.com') {
+      res.status(400).json({ error: 'Root Super Admin account cannot be deleted.' });
+      return;
+    }
+
+    await User.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: 'User deleted successfully.' });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Failed to delete user.' });
+  }
+});
+
 export default router;
