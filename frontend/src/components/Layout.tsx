@@ -300,13 +300,6 @@ export default function Layout({ children }: LayoutProps) {
                 colorClass="text-[#EA580C]"
                 isCollapsed={isCollapsed}
               />
-              <SidebarItem 
-                to="/settings" 
-                label="ADMIN" 
-                icon={Icons.ShieldCheck} 
-                colorClass="text-[#312E81] dark:text-indigo-400"
-                isCollapsed={isCollapsed}
-              />
             </SidebarGroup>
 
             {/* Group 2: Main Menu */}
@@ -590,7 +583,7 @@ export default function Layout({ children }: LayoutProps) {
               >
                 <Icons.Menu className="w-5 h-5 dark:text-slate-300" />
               </button>
-              <div className="flex flex-col text-left min-w-0">
+              <div className="flex items-center gap-2.5 min-w-0">
                 <h2 className="text-sm sm:text-base md:text-[19px] font-[850] text-[#111111] dark:text-white tracking-tight leading-tight truncate">
                   {(() => {
                     const path = location.pathname;
@@ -630,6 +623,11 @@ export default function Layout({ children }: LayoutProps) {
                     return 'Dashboard Overview';
                   })()}
                 </h2>
+                {/* Non-clickable Admin Workspace badge */}
+                <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-bold bg-indigo-50 dark:bg-indigo-950/60 text-[#312E81] dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800/60 select-none flex-shrink-0">
+                  <Icons.ShieldCheck className="w-3 h-3 text-[#312E81] dark:text-indigo-400 stroke-[2.2]" />
+                  <span>Admin</span>
+                </span>
               </div>
             </div>
 
@@ -644,6 +642,14 @@ export default function Layout({ children }: LayoutProps) {
                   }}
                 />
               )}
+
+              {/* Non-clickable Admin Status Indicator */}
+              <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700/80 select-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-[#312E81] dark:text-indigo-300">
+                  Admin Panel
+                </span>
+              </div>
 
               {/* Theme & Notification Buttons */}
               <div className="flex items-center gap-1.5 sm:gap-2 z-40">
