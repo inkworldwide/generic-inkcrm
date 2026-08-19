@@ -860,25 +860,65 @@ export default function SuperAdminDashboard() {
       <div className="flex-1 h-screen overflow-y-auto flex flex-col">
         
         {/* ── TOP ACTION HEADER BAR ────────────────────────────────────────── */}
-        <header className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 bg-[#FFFFFF] dark:bg-[#111827] px-8 flex items-center justify-between sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex-shrink-0">
-          <div>
-            <h2 className="text-sm sm:text-base font-bold text-[#111827] dark:text-white tracking-tight">
-              {activeTab === 'dashboard'
-                ? 'Platform Control Center'
-                : activeTab === 'users'
-                  ? 'User Management & Security Overrides'
-                  : 'Super Admin Settings & Security'}
-            </h2>
-            <p className="text-[11px] text-[#6B7280] dark:text-slate-400">
-              {activeTab === 'dashboard'
-                ? 'Manage multi-tenant workspaces, vertical templates & RBAC'
-                : activeTab === 'users'
-                  ? 'Manage all platform staff, bypass biometric Face & GPS Location verification checks'
-                  : 'Super Admin profile, password security, platform admins & diagnostics'}
-            </p>
+        <header className="h-16 border-b border-[#E5E7EB] dark:border-slate-800 bg-[#FFFFFF] dark:bg-[#111827] px-6 sm:px-8 flex items-center justify-between sticky top-0 z-20 shadow-[0_1px_2px_rgba(0,0,0,0.03)] flex-shrink-0">
+          
+          {/* Active Page Indicator with Icon & Breadcrumb */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#312E81] to-[#4F46E5] text-white shadow-md shadow-indigo-500/20 flex items-center justify-center flex-shrink-0">
+              {activeTab === 'dashboard' ? (
+                <Icons.LayoutDashboard className="w-4.5 h-4.5" />
+              ) : activeTab === 'users' ? (
+                <Icons.Users className="w-4.5 h-4.5" />
+              ) : (
+                <Icons.Settings className="w-4.5 h-4.5" />
+              )}
+            </div>
+
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 text-[11px] leading-none mb-1">
+                <span className="font-semibold text-[#6B7280] dark:text-slate-400">
+                  Platform
+                </span>
+                <Icons.ChevronRight className="w-3 h-3 text-[#9CA3AF]" />
+                <span className="font-bold text-[#312E81] dark:text-indigo-400 uppercase tracking-wider text-[10.5px]">
+                  {activeTab === 'dashboard'
+                    ? 'Dashboard'
+                    : activeTab === 'users'
+                      ? 'User Management'
+                      : 'Settings'}
+                </span>
+              </div>
+              <h2 className="text-sm sm:text-base font-bold text-[#111827] dark:text-white tracking-tight truncate">
+                {activeTab === 'dashboard'
+                  ? 'Platform Control Center'
+                  : activeTab === 'users'
+                    ? 'User Management & Security Overrides'
+                    : 'Super Admin Settings & Security'}
+              </h2>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          {/* Right Controls: Super Admin Identity Badge & Action Buttons */}
+          <div className="flex items-center gap-3 flex-shrink-0">
+            
+            {/* 👑 Super Admin Status Pill */}
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/60 dark:to-purple-950/60 border border-indigo-200 dark:border-indigo-800 shadow-2xs select-none">
+              <div className="w-5 h-5 rounded-full bg-[#312E81] text-white flex items-center justify-center text-[10px] font-bold shadow-xs">
+                👑
+              </div>
+              <div className="flex flex-col text-left">
+                <div className="flex items-center gap-1">
+                  <span className="text-[10.5px] font-extrabold text-[#312E81] dark:text-indigo-300 tracking-wider">
+                    SUPER ADMIN
+                  </span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#15803D] animate-pulse" />
+                </div>
+                <span className="text-[9.5px] text-[#6B7280] dark:text-slate-400 font-medium">
+                  Master Platform Access
+                </span>
+              </div>
+            </div>
+
             {activeTab === 'dashboard' ? (
               <>
                 {/* Pending Requests Alert */}
@@ -895,7 +935,7 @@ export default function SuperAdminDashboard() {
             ) : (
               <button
                 onClick={() => setActiveTab('dashboard')}
-                className="px-3.5 py-2 bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-slate-800 text-[#111827] dark:text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+                className="px-3.5 py-1.5 bg-[#F1F5F9] hover:bg-[#E2E8F0] dark:bg-slate-800 text-[#111827] dark:text-slate-200 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
               >
                 <Icons.ArrowLeft className="w-3.5 h-3.5" />
                 <span>Back to Dashboard</span>
