@@ -909,7 +909,7 @@ export default function SuperAdminDashboard() {
           <main className="flex-1 w-full max-w-[1560px] mx-auto px-8 py-7 pb-32 space-y-6">
 
             {/* ── STAT CARDS ────────────────────────────────────────────────── */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
               
               {/* Card 1: Total Tenants */}
               <div
@@ -917,7 +917,7 @@ export default function SuperAdminDashboard() {
                   setSelectedStatus('all');
                   setSelectedVertical('all');
                 }}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
                   selectedStatus === 'all' && selectedVertical === 'all'
                     ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
                     : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
@@ -926,11 +926,11 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Total tenants</p>
-                    <div className="flex items-baseline gap-2 mt-1.5">
+                    <div className="flex items-baseline gap-1.5 mt-1.5">
                       <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
                         {stats?.totalTenants ?? '—'}
                       </h3>
-                      <span className="text-xs text-[#6B7280] font-normal">organizations</span>
+                      <span className="text-xs text-[#6B7280] font-normal">orgs</span>
                     </div>
                   </div>
 
@@ -939,8 +939,8 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
-                  <span className="inline-flex items-center gap-1.5 text-[#15803D] dark:text-emerald-400 font-medium">
+                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs">
+                  <span className="inline-flex items-center gap-1 text-[#15803D] dark:text-emerald-400 font-medium">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
                     <span>{stats?.activeTenants ?? 0} active</span>
                   </span>
@@ -953,7 +953,7 @@ export default function SuperAdminDashboard() {
               {/* Card 2: Active Workspaces */}
               <div
                 onClick={() => setSelectedStatus('active')}
-                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
+                className={`bg-[#FFFFFF] dark:bg-[#111827] border rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden ${
                   selectedStatus === 'active'
                     ? 'border-[#312E81] ring-1 ring-[#312E81] border-l-4 border-l-[#312E81]'
                     : 'border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB]'
@@ -962,11 +962,11 @@ export default function SuperAdminDashboard() {
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Active workspaces</p>
-                    <div className="flex items-baseline gap-2 mt-1.5">
+                    <div className="flex items-baseline gap-1.5 mt-1.5">
                       <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
                         {stats?.activeTenants ?? '—'}
                       </h3>
-                      <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">operational</span>
+                      <span className="text-xs text-[#15803D] dark:text-emerald-400 font-medium">live</span>
                     </div>
                   </div>
 
@@ -975,54 +975,86 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span className="inline-flex items-center gap-1.5">
+                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span className="inline-flex items-center gap-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-[#15803D]" />
-                    <span>Ready for logins</span>
+                    <span>Logins active</span>
                   </span>
-                  <span className="font-medium text-[#15803D] dark:text-emerald-400">Live</span>
+                  <span className="font-medium text-[#15803D] dark:text-emerald-400">Operational</span>
                 </div>
               </div>
 
-              {/* Card 3: Total Platform Users */}
+              {/* Card 3: Approval Pending Users */}
               <div
                 onClick={() => {
+                  setUserStatusFilter('pending');
                   setActiveTab('users');
                   loadAllUsers();
                 }}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D97706] rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden group"
               >
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Platform Users</p>
-                    <div className="flex items-baseline gap-2 mt-1.5">
-                      <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
-                        {allUsers.length}
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Approval pending</p>
+                    <div className="flex items-baseline gap-1.5 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#B45309] dark:text-amber-400 tracking-tight">
+                        {allUsers.filter(u => u.approvalStatus === 'pending').length}
                       </h3>
-                      <span className="text-xs text-[#312E81] dark:text-indigo-400 font-semibold">managed</span>
+                      <span className="text-xs text-[#B45309] font-medium">users</span>
                     </div>
                   </div>
 
-                  <div className="w-8 h-8 rounded-lg bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 flex items-center justify-center">
-                    <Icons.Users className="w-4 h-4" />
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF3C7] dark:bg-amber-950/40 text-[#B45309] dark:text-amber-400 border border-[#FDE68A] dark:border-amber-800/60 flex items-center justify-center">
+                    <Icons.UserCheck className="w-4 h-4" />
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
-                  <span>Face & Location Bypasses</span>
-                  <span className="font-medium text-[#312E81] dark:text-indigo-400">Manage →</span>
+                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span>Awaiting approval</span>
+                  <span className="font-medium text-[#B45309] dark:text-amber-400 group-hover:underline">Review →</span>
                 </div>
               </div>
 
-              {/* Card 4: Vertical Templates */}
+              {/* Card 4: Suspended Users */}
+              <div
+                onClick={() => {
+                  setUserStatusFilter('disabled');
+                  setActiveTab('users');
+                  loadAllUsers();
+                }}
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#DC2626] rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden group"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Suspended users</p>
+                    <div className="flex items-baseline gap-1.5 mt-1.5">
+                      <h3 className="text-2xl sm:text-3xl font-bold text-[#DC2626] dark:text-rose-400 tracking-tight">
+                        {allUsers.filter(u => u.isActive === false).length}
+                      </h3>
+                      <span className="text-xs text-[#DC2626] font-medium">disabled</span>
+                    </div>
+                  </div>
+
+                  <div className="w-8 h-8 rounded-lg bg-[#FEF2F2] dark:bg-rose-950/40 text-[#DC2626] dark:text-rose-400 border border-[#FEE2E2] dark:border-rose-800/60 flex items-center justify-center">
+                    <Icons.UserX className="w-4 h-4" />
+                  </div>
+                </div>
+
+                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span>Blocked from CRM</span>
+                  <span className="font-medium text-[#DC2626] dark:text-rose-400 group-hover:underline">View →</span>
+                </div>
+              </div>
+
+              {/* Card 5: Vertical Templates */}
               <div
                 onClick={() => setShowAddVerticalModal(true)}
-                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
+                className="bg-[#FFFFFF] dark:bg-[#111827] border border-[#E5E7EB] dark:border-slate-800 hover:border-[#D1D5DB] rounded-[14px] p-4.5 shadow-[0_1px_3px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)] transition-all duration-150 cursor-pointer relative overflow-hidden"
               >
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-xs font-medium text-[#6B7280] dark:text-slate-400">Vertical templates</p>
-                    <div className="flex items-baseline gap-2 mt-1.5">
+                    <div className="flex items-baseline gap-1.5 mt-1.5">
                       <h3 className="text-2xl sm:text-3xl font-bold text-[#111827] dark:text-white tracking-tight">
                         {verticals.length}
                       </h3>
@@ -1035,16 +1067,9 @@ export default function SuperAdminDashboard() {
                   </div>
                 </div>
 
-                <div className="mt-4 pt-3 border-t border-[#F1F5F9] dark:border-slate-800 flex flex-wrap gap-1.5 items-center">
-                  {stats?.verticalBreakdown && stats.verticalBreakdown.length > 0 ? (
-                    stats.verticalBreakdown.slice(0, 3).map((v, i) => (
-                      <span key={i} className="text-[11px] font-medium px-2 py-0.5 rounded bg-[#F1F5F9] dark:bg-slate-800 text-[#312E81] dark:text-slate-300 border border-[#E2E8F0] dark:border-slate-700">
-                        {v.verticalType}: {v.count}
-                      </span>
-                    ))
-                  ) : (
-                    <span className="text-xs text-[#6B7280]">+ Click to create preset</span>
-                  )}
+                <div className="mt-3.5 pt-2.5 border-t border-[#F1F5F9] dark:border-slate-800 flex items-center justify-between text-xs text-[#6B7280] dark:text-slate-400">
+                  <span>{stats?.verticalBreakdown?.length || 0} active in use</span>
+                  <span className="font-medium text-[#312E81] dark:text-indigo-400">+ Add</span>
                 </div>
               </div>
 
