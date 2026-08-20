@@ -199,6 +199,7 @@ export default function SuperAdminDashboard() {
   const [newAdminPhone, setNewAdminPhone] = useState('');
   const [newOrgName, setNewOrgName] = useState('');
   const [newOrgSubdomain, setNewOrgSubdomain] = useState('');
+  const [newOrgLogoUrl, setNewOrgLogoUrl] = useState('');
   const [newVerticalType, setNewVerticalType] = useState('bank');
   const [newSelectedModules, setNewSelectedModules] = useState<string[]>([]);
   const [creatingTenant, setCreatingTenant] = useState(false);
@@ -218,6 +219,7 @@ export default function SuperAdminDashboard() {
   const [editModalTenant, setEditModalTenant] = useState<TenantItem | null>(null);
   const [editOrgName, setEditOrgName] = useState('');
   const [editOrgSubdomain, setEditOrgSubdomain] = useState('');
+  const [editOrgLogoUrl, setEditOrgLogoUrl] = useState('');
   const [editVerticalType, setEditVerticalType] = useState('bank');
   const [editAdminFirstName, setEditAdminFirstName] = useState('');
   const [editAdminLastName, setEditAdminLastName] = useState('');
@@ -236,6 +238,7 @@ export default function SuperAdminDashboard() {
     setEditModalTenant(tenant);
     setEditOrgName(tenant.name || '');
     setEditOrgSubdomain(tenant.subdomain || '');
+    setEditOrgLogoUrl(tenant.logoUrl || '');
     setEditVerticalType(tenant.verticalType || 'bank');
     setEditAdminFirstName(tenant.adminUser?.firstName || '');
     setEditAdminLastName(tenant.adminUser?.lastName || '');
@@ -253,6 +256,7 @@ export default function SuperAdminDashboard() {
       await api.put(`/super-admin/tenants/${editModalTenant.id}`, {
         name: editOrgName.trim(),
         subdomain: editOrgSubdomain.trim(),
+        logoUrl: editOrgLogoUrl,
         verticalType: editVerticalType,
         status: editStatus,
         adminFirstName: editAdminFirstName.trim(),
@@ -269,6 +273,36 @@ export default function SuperAdminDashboard() {
     } finally {
       setSavingEditTenant(false);
     }
+  };
+
+  const handleNewLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      showToast('Logo file size must be under 3MB.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewOrgLogoUrl(reader.result as string);
+      showToast('New tenant logo loaded!', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleEditLogoFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      showToast('Logo file size must be under 3MB.', 'error');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditOrgLogoUrl(reader.result as string);
+      showToast('Tenant logo updated!', 'success');
+    };
+    reader.readAsDataURL(file);
   };
 
   useEffect(() => {
@@ -496,6 +530,7 @@ export default function SuperAdminDashboard() {
     setNewAdminPhone('');
     setNewOrgName('');
     setNewOrgSubdomain('');
+    setNewOrgLogoUrl('');
     setNewVerticalType(defaultVert);
     setNewSelectedModules(vert?.defaultModules || ['dashboard', 'leads', 'deals', 'companies', 'campaigns', 'lead_reports', 'settings']);
     setShowCreateModal(true);
@@ -513,6 +548,7 @@ export default function SuperAdminDashboard() {
       await api.post('/super-admin/tenants', {
         name: newOrgName.trim(),
         subdomain: newOrgSubdomain.trim(),
+        logoUrl: newOrgLogoUrl,
         verticalType: newVerticalType,
         admin: {
           firstName: newAdminFirstName.trim(),
@@ -1404,11 +1440,27 @@ export default function SuperAdminDashboard() {
 
                             {/* Org Name & Subdomain */}
                             <td className="py-3.5 px-4">
-                              <div>
-                                <span className="font-semibold text-[#111827] dark:text-slate-100 text-xs">{tenant.name}</span>
-                                <div className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-slate-400 mt-0.5">
-                                  <Icons.Globe className="w-3 h-3 text-[#9CA3AF]" />
-                                  <span className="font-mono">{tenant.subdomain}.inkcrm</span>
+                              <div className="flex items-center gap-2.5">
+                                <div className="w-8 h-8 rounded-lg bg-black/5 dark:bg-white/5 border border-slate-200 dark:border-slate-800 p-0.5 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                  {tenant.logoUrl ? (
+                                    <img
+                                      src={tenant.logoUrl}
+                                      alt={tenant.name}
+                                      className="w-full h-full object-contain rounded"
+                                      onError={(e) => {
+                                        (e.target as any).style.display = 'none';
+                                      }}
+                                    />
+                                  ) : (
+                                    <Icons.Building2 className="w-4 h-4 text-[#6B7280]" />
+                                  )}
+                                </div>
+                                <div>
+                                  <span className="font-semibold text-[#111827] dark:text-slate-100 text-xs">{tenant.name}</span>
+                                  <div className="flex items-center gap-1 text-[11px] text-[#6B7280] dark:text-slate-400 mt-0.5">
+                                    <Icons.Globe className="w-3 h-3 text-[#9CA3AF]" />
+                                    <span className="font-mono">{tenant.subdomain}.inkcrm</span>
+                                  </div>
                                 </div>
                               </div>
                             </td>
@@ -2626,19 +2678,24 @@ export default function SuperAdminDashboard() {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Workspace Subdomain *</label>
-                        <div className="flex items-center">
-                          <input
-                            type="text"
-                            required
-                            value={newOrgSubdomain}
-                            onChange={(e) => setNewOrgSubdomain(e.target.value.toLowerCase().replace(/[^a-z0-9]/g, ''))}
-                            placeholder="apexbank"
-                            className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-l-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81] font-mono"
-                          />
-                          <span className="px-3.5 py-2 bg-[#F1F5F9] dark:bg-slate-800 border border-l-0 border-[#E5E7EB] dark:border-slate-700 text-xs font-semibold text-[#6B7280] rounded-r-lg font-mono">
-                            .inkcrm
-                          </span>
+                        <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Organization Logo (Optional)</label>
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-lg bg-black flex items-center justify-center overflow-hidden border border-slate-700 p-1 flex-shrink-0">
+                            {newOrgLogoUrl ? (
+                              <img src={newOrgLogoUrl} alt="Logo Preview" className="w-full h-full object-contain" />
+                            ) : (
+                              <Icons.Image className="w-5 h-5 text-slate-500" />
+                            )}
+                          </div>
+                          <label className="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer hover:bg-slate-50">
+                            <span>Choose logo file</span>
+                            <input type="file" accept="image/*" onChange={handleNewLogoFile} className="hidden" />
+                          </label>
+                          {newOrgLogoUrl && (
+                            <button type="button" onClick={() => setNewOrgLogoUrl('')} className="text-xs text-rose-500 hover:underline">
+                              Remove
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -3144,6 +3201,28 @@ export default function SuperAdminDashboard() {
                       onChange={(e) => setEditOrgName(e.target.value)}
                       className="w-full px-3.5 py-2 bg-[#F9FAFB] dark:bg-slate-900 border border-[#E5E7EB] dark:border-slate-700 rounded-lg text-xs text-[#111827] dark:text-white focus:outline-none focus:border-[#312E81]"
                     />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium text-[#111827] dark:text-slate-300 mb-1">Organization Logo</label>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-lg bg-black flex items-center justify-center overflow-hidden border border-slate-700 p-1 flex-shrink-0">
+                        {editOrgLogoUrl ? (
+                          <img src={editOrgLogoUrl} alt="Logo Preview" className="w-full h-full object-contain" />
+                        ) : (
+                          <Icons.Image className="w-5 h-5 text-slate-500" />
+                        )}
+                      </div>
+                      <label className="px-3.5 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 cursor-pointer hover:bg-slate-50">
+                        <span>Choose logo file</span>
+                        <input type="file" accept="image/*" onChange={handleEditLogoFile} className="hidden" />
+                      </label>
+                      {editOrgLogoUrl && (
+                        <button type="button" onClick={() => setEditOrgLogoUrl('')} className="text-xs text-rose-500 hover:underline">
+                          Remove
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">

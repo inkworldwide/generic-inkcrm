@@ -226,6 +226,7 @@ router.post('/tenants', async (req: Request, res: Response): Promise<void> => {
       verticalId: vertical?._id,
       status: 'active',
       createdBy: req.user?.id,
+      logoUrl: req.body.logoUrl || '/logo.png',
       themeSettings: finalTheme,
       enabledModules: finalModules,
       phoneNumber: admin.phone || '',
@@ -452,6 +453,10 @@ router.put('/tenants/:id', async (req: Request, res: Response): Promise<void> =>
 
     if (adminPhone !== undefined) {
       organization.phoneNumber = adminPhone;
+    }
+
+    if (req.body.logoUrl !== undefined) {
+      organization.logoUrl = req.body.logoUrl;
     }
 
     await organization.save();

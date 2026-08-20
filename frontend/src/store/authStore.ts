@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import api from '../services/api';
+import { useThemeStore } from './themeStore';
 
 export interface ModulePermission {
   moduleName: string;
@@ -146,6 +147,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     });
 
+    if (tenantOrg?.subdomain || tenantOrg?.id) {
+      useThemeStore.getState().fetchBranding(tenantOrg.subdomain, tenantOrg.id);
+    }
     get().fetchProfile();
   },
 
@@ -202,6 +206,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
       if (res.data?.organization) {
         set({ organization: res.data.organization });
+        if (res.data.organization.subdomain || res.data.organization.id) {
+          useThemeStore.getState().fetchBranding(res.data.organization.subdomain, res.data.organization.id);
+        }
       }
       if (res.data?.user) {
         set({
