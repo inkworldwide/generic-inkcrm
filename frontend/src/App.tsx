@@ -79,11 +79,8 @@ function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menu
 
   const isSuperAdmin = (isPlatformSuperAdmin || user?.isPlatformSuperAdmin || user?.email === 'superadmin@inkcrm.com') && !impersonation?.isImpersonating;
 
-  if (isSuperAdmin) {
-    return <Navigate to="/super-admin/dashboard" replace />;
-  }
-
-  if (menuKey && !canAccessMenu(menuKey)) {
+  // Super Admin bypasses menuKey checks and can access all pages.
+  if (!isSuperAdmin && menuKey && !canAccessMenu(menuKey)) {
     if (canAccessMenu('dashboard')) return <Navigate to="/" replace />;
     if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
     if (canAccessMenu('campaigns')) return <Navigate to="/modules/campaigns" replace />;
