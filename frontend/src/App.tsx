@@ -32,7 +32,7 @@ import SuperAdminDashboard from './pages/superadmin/SuperAdminDashboard';
 
 // Route Guard for Super Admin Control Panel
 function SuperAdminRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isInitializing, isPlatformSuperAdmin, impersonation } = useAuthStore();
+  const { isAuthenticated, isInitializing, isPlatformSuperAdmin, user, impersonation } = useAuthStore();
 
   if (isInitializing) {
     return (
@@ -49,7 +49,9 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" replace />;
   }
 
-  if (!isPlatformSuperAdmin && !impersonation.isImpersonating) {
+  const isSuperAdmin = isPlatformSuperAdmin || user?.isPlatformSuperAdmin || user?.email === 'superadmin@inkcrm.com';
+
+  if (!isSuperAdmin && !impersonation?.isImpersonating) {
     return <Navigate to="/" replace />;
   }
 
@@ -58,7 +60,7 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
 
 // Route Guard for authenticated workspaces
 function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menuKey?: string }) {
-  const { isAuthenticated, isInitializing, canAccessMenu } = useAuthStore();
+  const { isAuthenticated, isInitializing, isPlatformSuperAdmin, user, impersonation, canAccessMenu } = useAuthStore();
 
   if (isInitializing) {
     return (
@@ -75,6 +77,12 @@ function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menu
     return <Navigate to="/login" replace />;
   }
 
+  const isSuperAdmin = (isPlatformSuperAdmin || user?.isPlatformSuperAdmin || user?.email === 'superadmin@inkcrm.com') && !impersonation?.isImpersonating;
+
+  if (isSuperAdmin) {
+    return <Navigate to="/super-admin/dashboard" replace />;
+  }
+
   if (menuKey && !canAccessMenu(menuKey)) {
     if (canAccessMenu('dashboard')) return <Navigate to="/" replace />;
     if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
@@ -87,7 +95,13 @@ function ProtectedRoute({ children, menuKey }: { children: React.ReactNode; menu
 }
 
 function DashboardGuard() {
-  const { canAccessMenu } = useAuthStore();
+  const { user, isPlatformSuperAdmin, impersonation, canAccessMenu } = useAuthStore();
+
+  const isSuperAdmin = (isPlatformSuperAdmin || user?.isPlatformSuperAdmin || user?.email === 'superadmin@inkcrm.com') && !impersonation?.isImpersonating;
+
+  if (isSuperAdmin) {
+    return <Navigate to="/super-admin/dashboard" replace />;
+  }
 
   if (!canAccessMenu('dashboard')) {
     if (canAccessMenu('leads')) return <Navigate to="/modules/leads" replace />;
