@@ -51,7 +51,7 @@ function SuperAdminRoute({ children }: { children: React.ReactNode }) {
 
   const isSuperAdmin = isPlatformSuperAdmin || user?.isPlatformSuperAdmin || user?.email === 'superadmin@inkcrm.com';
 
-  if (!isSuperAdmin && !impersonation?.isImpersonating) {
+  if (!isSuperAdmin) {
     return <Navigate to="/" replace />;
   }
 
